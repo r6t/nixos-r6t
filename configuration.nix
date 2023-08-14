@@ -105,6 +105,7 @@
       pkgs.librewolf
       pkgs.ripgrep
       pkgs.signal-desktop
+      pkgs.ungoogled-chromium
       pkgs.virt-manager
       pkgs.vlc
     ];
@@ -113,15 +114,15 @@
       userName = "r6t";
       userEmail = "ryancast@gmail.com";
     };
-    # programs.vscode = {
-    #   enable = true;
-    #   package = pkgs.vscodium;
-    #   extensions = with pkgs.vscode-extensions; [
-    #     dracula-theme.theme-dracula
-    #     vscodevim.vim
-    #     yzhang.markdown-all-in-one
-    #   ];
-    # };
+    programs.vscode = {
+      enable = true;
+      package = pkgs.vscodium;
+      extensions = with pkgs.vscode-extensions; [
+        dracula-theme.theme-dracula
+        vscodevim.vim
+        yzhang.markdown-all-in-one
+      ];
+    };
     # programs.zsh = {
     #   enable = true;
     #   oh-my-zsh = {
