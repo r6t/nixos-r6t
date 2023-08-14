@@ -78,7 +78,8 @@
   # /etc/shells the nixos way
   environment.shells = with pkgs; [ zsh ];
 
-  # Define a user account. Don't forget to set a password with ‘passwd’.
+  ### USER + APPLICATIONS
+  # Probably should be managing the user itself via home-manager?
   users.users.user = { isNormalUser = true; description = "user"; extraGroups = [ "networkmanager" "wheel" ]; shell = pkgs.zsh;
   #packages = with pkgs; [
   #    ansible
@@ -123,12 +124,14 @@
         yzhang.markdown-all-in-one
       ];
     };
-    # programs.zsh = {
-    #   enable = true;
-    #   oh-my-zsh = {
-    #     enable = true;
-    #   }
-    # };
+    programs.zsh = {
+      enable = true;
+      oh-my-zsh = {
+        enable = true;
+	  plugins = [ "aws" "git" "python" "thefuck" ];
+          theme = "xiong-chiamiov-plus";
+      };
+    };
     home.stateVersion = "23.05";
   };
 
@@ -142,16 +145,11 @@
       wget
   ];
 
-#  nixpkgs.config.allowUnfreePredicate = pkg:
-#    builtins.elem (lib.getName pkg) [
-#      "obsidian"
-#    ];
   # Some programs need SUID wrappers, can be configured further or are started in user sessions. programs.mtr.enable = true; programs.gnupg.agent = {
   #   enable = true; enableSSHSupport = true;
   # };
 
-  # List services that you want to enable:
-
+  ### SERVICES:
   services.fwupd.enable = true;
   services.syncthing = {
     enable = true;
