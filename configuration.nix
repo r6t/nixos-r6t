@@ -1,5 +1,5 @@
-# Edit this configuration file to define what should be installed on your system.  Help is available in the configuration.nix(5) man page and in the 
-# NixOS manual (accessible by running ‘nixos-help’).
+# r6t's nixos configuration
+# Currently used to manage a single Framework laptop
 
 { config, pkgs, ... }:
 
@@ -152,7 +152,16 @@
   # List services that you want to enable:
 
   services.fwupd.enable = true;
-  services.mullvad-vpn.enable = true;
+  services.syncthing = {
+    enable = true;
+    dataDir = "/home/user"; # unused value
+    openDefaultPorts = true;
+    configDir = "/home/user/.config/syncthing";
+    user = "user";
+    group = "users";
+    guiAddress = "0.0.0.0:8384";
+  };
+  services.mullvad-vpn.enable = false;
 
   # Enable the OpenSSH daemon. services.openssh.enable = true;
 
