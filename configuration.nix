@@ -3,6 +3,9 @@
 
 { config, pkgs, ... }:
 
+let
+  user="user";
+in
 { imports =
     [ <home-manager/nixos>
       <nixos-hardware/framework>
@@ -11,7 +14,8 @@
       ./hardware-configuration.nix ];
 
   ### NIXOS CONFIGURATION
-  boot.loader.systemd-boot.enable = true; boot.loader.efi.canTouchEfiVariables = true;
+  boot.loader.systemd-boot.enable = true;
+  boot.loader.efi.canTouchEfiVariables = true;
   boot.initrd.secrets = { "/crypto_keyfile.bin" = null;
   };
   boot.initrd.luks.devices."luks-f26077b3-1094-45f1-8c6e-07f7fee52e72".device = "/dev/disk/by-uuid/f26077b3-1094-45f1-8c6e-07f7fee52e72"; 
@@ -20,7 +24,7 @@
   environment.shells = with pkgs; [ zsh ]; # /etc/shells
 
   hardware.bluetooth.enable = true;
-  hardware.pulseaudio.enable = false; # Just say no to pulseaudio
+  hardware.pulseaudio.enable = false; # disabled for pipewire
 
   networking.networkmanager.enable = true;
   networking.hostName = "mountainball";
@@ -31,11 +35,20 @@
     "en_US.UTF-8"; LC_NAME = "en_US.UTF-8"; LC_NUMERIC = "en_US.UTF-8"; LC_PAPER = "en_US.UTF-8"; LC_TELEPHONE = "en_US.UTF-8"; LC_TIME = 
     "en_US.UTF-8";
   };
+ 
+  nix = {
+    settings.auto-optimise-store = true;
+    gc = { # NixOS garbage collection
+      automatic = true;
+      dates = "monthly";
+      options = "--delete-older-than-60d";
+    };
+  };
 
   programs.hyprland.enable = false;
   programs.zsh.enable = true;
 
-  sound.enable = true; # Enable sound with pipewire
+  sound.enable = true; # see services.pipewire
 
   security.rtkit.enable = true;
 
@@ -46,29 +59,33 @@
 
   ### USER + APPLICATIONS
   # Probably should be managing the user itself via home-manager?
-  users.users.user = { isNormalUser = true; description = "user"; extraGroups = [ "networkmanager" "wheel" ]; shell = pkgs.zsh;
+  users.users.${user} = { isNormalUser = true; description = "user"; extraGroups = [ "networkmanager" "wheel" ]; shell = pkgs.zsh;
   # packages managed via home-manager
   };
-  #home.username = "user"
-  #home.homeDirectory = "/home/user"
 
-  home-manager.users.user = { pkgs, ...}: {
+  home-manager.users.${user} = { pkgs, ...}: {
+    # home.file.".config/alac
     home.packages = [
       pkgs.ansible
       pkgs.brave
       pkgs.firefox-wayland
       pkgs.freecad
       pkgs.freetube
+      pkgs.freerdp
       pkgs.kate
+      pkgs.krusader
       pkgs.mullvad-vpn
       pkgs.neofetch
       pkgs.librewolf
       pkgs.ripgrep
+      pkgs.remmina
       pkgs.signal-desktop
       pkgs.thefuck
+      pkgs.tmux
       pkgs.ungoogled-chromium
       pkgs.virt-manager
       pkgs.vlc
+      pkgs.webcamoid
       pkgs.youtube-dl
 
     ];
@@ -114,15 +131,18 @@
           theme = "xiong-chiamiov-plus";
       };
     };
+    home.homeDirectory = "/home/user";
     home.sessionVariables = {
         MOZ_ENABLE_WAYLAND = 1;
     };
+    home.username = "user";
     home.stateVersion = "23.05";
   };
 
   # List packages installed in system profile. To search, run: $ nix search wget
   environment.systemPackages = with pkgs; [
       curl
+      htop
       jq
       neovim
       tree
@@ -136,8 +156,9 @@
 
   ### SERVICES:
   services.flatpak.enable = true;
+  services.fprintd.enable = true;
   services.fwupd.enable = true; # Linux firmware updater
-  services.mullvad-vpn.enable = false; # Mullvad desktop app
+  services.mullvad-vpn.enable = true; # Mullvad desktop app
   services.pipewire = {
     enable = true;
     alsa.enable = true;
@@ -151,7 +172,7 @@
   services.printing.enable = true; # CUPS print support
   services.syncthing = {
     enable = true;
-    dataDir = "/home/user"; # unused value
+    dataDir = "/home/user/icloud";
     openDefaultPorts = true;
     configDir = "/home/user/.config/syncthing";
     user = "user";
