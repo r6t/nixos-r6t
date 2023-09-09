@@ -40,7 +40,10 @@
       dates = "monthly";
       options = "--delete-older-than-60d";
     };
-    settings.auto-optimise-store = true;
+    settings = {
+      auto-optimise-store = true;
+      experimental-features = [ "nix-command" "flakes"];
+    };
   };
 
   programs.hyprland.enable = false;
