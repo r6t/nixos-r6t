@@ -3,9 +3,6 @@
 
 { config, pkgs, ... }:
 
-let
-  user="user";
-in
 { imports =
     [ <home-manager/nixos>
       <nixos-hardware/framework>
@@ -35,14 +32,15 @@ in
     "en_US.UTF-8"; LC_NAME = "en_US.UTF-8"; LC_NUMERIC = "en_US.UTF-8"; LC_PAPER = "en_US.UTF-8"; LC_TELEPHONE = "en_US.UTF-8"; LC_TIME = 
     "en_US.UTF-8";
   };
- 
+
   nix = {
-    settings.auto-optimise-store = true;
-    gc = { # NixOS garbage collection
+    # NixOS garbage collection
+    gc = {
       automatic = true;
       dates = "monthly";
       options = "--delete-older-than-60d";
     };
+    settings.auto-optimise-store = true;
   };
 
   programs.hyprland.enable = false;
