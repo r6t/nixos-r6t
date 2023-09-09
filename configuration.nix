@@ -57,14 +57,17 @@
 
   ### USER + APPLICATIONS
   # Probably should be managing the user itself via home-manager?
-  users.users.${user} = { isNormalUser = true; description = "user"; extraGroups = [ "networkmanager" "wheel" ]; shell = pkgs.zsh;
-  # packages managed via home-manager
+  users.users.user = { isNormalUser = true; description = "user"; extraGroups = [ "networkmanager" "wheel" ]; shell = pkgs.zsh;
   };
 
-  home-manager.users.${user} = { pkgs, ...}: {
-    # home.file.".config/alac
+  home-manager.users.user = { pkgs, ...}: {
+    home.file.".config/electron13-flags.conf".text = ''
+      --enable-features=UseOzonePlatform
+      --ozone-platform=wayland
+    '';
     home.packages = [
       pkgs.ansible
+      pkgs.betaflight-configurator
       pkgs.brave
       pkgs.firefox-wayland
       pkgs.freecad
@@ -112,6 +115,25 @@
         "*.pyc"
       ];
     };
+
+    programs.neovim = {
+      enable = true;
+      defaultEditor = true;
+      viAlias = true;
+      vimAlias = true;
+      vimdiffAlias = true;
+      plugins = with pkgs.vimPlugins; [
+        nvim-lspconfig
+        nvim-treesitter.withAllGrammars
+        plenary-nvim
+	rose-pine
+	mini-nvim
+      ];
+      extraConfig = ''
+        set number relativenumber
+      '';
+    };
+
     programs.vscode = {
       enable = true;
       package = pkgs.vscodium;
@@ -142,7 +164,7 @@
       curl
       htop
       jq
-      neovim
+      libgccjit
       tree
       unzip
       wget
