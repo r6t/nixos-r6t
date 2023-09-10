@@ -3,19 +3,9 @@
 
 { config, pkgs, ... }:
 
-let
-  nixvim = import (builtins.fetchGit {
-    url = "https://github.com/nix-community/nixvim";
-    # If you are not running an unstable channel of nixpkgs, select the corresponding branch of nixvim.
-    ref = "nixos-23.05";
-  });
-in
-
 { imports =
     [ <home-manager/nixos>
       <nixos-hardware/framework>
-
-      inputs.nixvim.homeManagerModules.nixvim
 
       # Include the results of the hardware scan.
       ./hardware-configuration.nix ];
@@ -28,7 +18,7 @@ in
   boot.initrd.luks.devices."luks-f26077b3-1094-45f1-8c6e-07f7fee52e72".device = "/dev/disk/by-uuid/f26077b3-1094-45f1-8c6e-07f7fee52e72"; 
   boot.initrd.luks.devices."luks-f26077b3-1094-45f1-8c6e-07f7fee52e72".keyFile = "/crypto_keyfile.bin";
 
-  #environment.shells = with pkgs; [ zsh ]; # /etc/shells
+  environment.shells = with pkgs; [ zsh ]; # /etc/shells
 
   hardware.bluetooth.enable = true;
   hardware.pulseaudio.enable = false; # disabled for pipewire
@@ -77,12 +67,17 @@ in
       --enable-features=UseOzonePlatform
       --ozone-platform=wayland
     '';
+    home.file.".config/nvim/lua/r6t/init.lua".text = ''
+      print("hello from r6t via nix")
+    '';
+    home.file.".config/nvim/lua/r6t/remap.lua".text = ''
+      vim.g.mapleader = " "
+      vim.keymap.set("n", "<leader>pv", vim.cmd.Ex)
+    '';
     home.packages = [
       pkgs.ansible
       pkgs.betaflight-configurator
       pkgs.brave
-      #pkgs.cinny-desktop
-      #pkgs.element-desktop
       pkgs.firefox-wayland
       pkgs.freecad
       pkgs.freetube
@@ -131,10 +126,29 @@ in
     };
     programs.neovim = {
       enable = true;
+      defaultEditor = true;
+      viAlias = true;
+      vimAlias = true;
+      vimdiffAlias = true;
+      plugins = with pkgs.vimPlugins; [
+	plenary-nvim
+	telescope-nvim
+	fzf-vim
+	nvim-lspconfig
+	nvim-treesitter.withAllGrammars
+	plenary-nvim
+	rose-pine
+	mini-nvim
+      ];
+      extraConfig = ''
+        colorscheme rose-pine
+        set number relativenumber
+      '';
+      extraLuaConfig = ''
+        require("r6t")
+        require("r6t.remap")
+      '';
     };
-   # programs.nixvim = {
-   #   enable = true;
-   # };
     programs.vscode = {
       enable = true;
       package = pkgs.vscodium;
