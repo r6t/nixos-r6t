@@ -15,7 +15,7 @@ in
     [ <home-manager/nixos>
       <nixos-hardware/framework>
 
-      nixvim.nixosModules.nixvim
+      inputs.nixvim.homeManagerModules.nixvim
 
       # Include the results of the hardware scan.
       ./hardware-configuration.nix ];
@@ -57,52 +57,6 @@ in
 
   programs.hyprland.enable = false;
   programs.zsh.enable = true;
-  programs.nixvim = {
-	  enable = true;
-	  options = {
-		  relativenumber = true;
-		  incsearch = true;
-	  };
-
-	  maps = {
-		  normal = {
-			  "<C-s>" = ":w<CR>";
-			  "<esc>" = { action = ":noh<CR>"; silent = true; };
-		  };
-	  };
-
-	  plugins = {
-		  telescope.enable = true; 
-		  lsp = {
-			  keymaps = {
-				  silent = true;
-				  diagnostic = {
-					  "<leader>k" = "goto_prev";
-					  "<leader>j" = "goto_next";
-				  };
-
-				  lspBuf = {
-					  gd = "definition";
-					  K = "hover";
-				  };
-			  };
-			  servers = {
-				  bashls.enable = true;
-				  clangd.enable = true;
-				  nil_ls.enable = true;
-			  };
-		  };
-	  };
-	  highlight.ExtraWhitespace.bg = "red";
-	  match.ExtraWhitespace = "\\s\\+$";
-	  autoCmd = [
-	  {
-		  event = "FileType";
-		  pattern = "nix";
-		  command = "setlocal tabstop=2 shiftwidth=2";
-	  }
-	  ];
-  };
 
   sound.enable = true; # see services.pipewire
 
@@ -127,6 +81,8 @@ in
       pkgs.ansible
       pkgs.betaflight-configurator
       pkgs.brave
+      #pkgs.cinny-desktop
+      #pkgs.element-desktop
       pkgs.firefox-wayland
       pkgs.freecad
       pkgs.freetube
@@ -151,12 +107,12 @@ in
     programs.alacritty = {
       enable = true;
       settings = {
-        font = {
-	  size = 14.0;
-	};
-        selection = {
-	  save_to_clipboard = true;
-	};
+      font = {
+	size = 14.0;
+      };
+      selection = {
+	save_to_clipboard = true;
+      };
       };
     };
     programs.git = {
@@ -176,6 +132,9 @@ in
     programs.neovim = {
       enable = true;
     };
+   # programs.nixvim = {
+   #   enable = true;
+   # };
     programs.vscode = {
       enable = true;
       package = pkgs.vscodium;
@@ -189,8 +148,8 @@ in
       enable = true;
       oh-my-zsh = {
         enable = true;
-	  plugins = [ "aws" "git" "python" "thefuck" ];
-          theme = "xiong-chiamiov-plus";
+	plugins = [ "aws" "git" "python" "thefuck" ];
+        theme = "xiong-chiamiov-plus";
       };
     };
     home.homeDirectory = "/home/user";
