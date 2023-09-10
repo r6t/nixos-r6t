@@ -3,9 +3,19 @@
 
 { config, pkgs, ... }:
 
+let
+  nixvim = import (builtins.fetchGit {
+    url = "https://github.com/nix-community/nixvim";
+    # If you are not running an unstable channel of nixpkgs, select the corresponding branch of nixvim.
+    ref = "nixos-23.05";
+  });
+in
+
 { imports =
     [ <home-manager/nixos>
       <nixos-hardware/framework>
+
+      nixvim.nixosModules.nixvim
 
       # Include the results of the hardware scan.
       ./hardware-configuration.nix ];
@@ -18,7 +28,7 @@
   boot.initrd.luks.devices."luks-f26077b3-1094-45f1-8c6e-07f7fee52e72".device = "/dev/disk/by-uuid/f26077b3-1094-45f1-8c6e-07f7fee52e72"; 
   boot.initrd.luks.devices."luks-f26077b3-1094-45f1-8c6e-07f7fee52e72".keyFile = "/crypto_keyfile.bin";
 
-  environment.shells = with pkgs; [ zsh ]; # /etc/shells
+  #environment.shells = with pkgs; [ zsh ]; # /etc/shells
 
   hardware.bluetooth.enable = true;
   hardware.pulseaudio.enable = false; # disabled for pipewire
@@ -47,6 +57,52 @@
 
   programs.hyprland.enable = false;
   programs.zsh.enable = true;
+  programs.nixvim = {
+	  enable = true;
+	  options = {
+		  relativenumber = true;
+		  incsearch = true;
+	  };
+
+	  maps = {
+		  normal = {
+			  "<C-s>" = ":w<CR>";
+			  "<esc>" = { action = ":noh<CR>"; silent = true; };
+		  };
+	  };
+
+	  plugins = {
+		  telescope.enable = true; 
+		  lsp = {
+			  keymaps = {
+				  silent = true;
+				  diagnostic = {
+					  "<leader>k" = "goto_prev";
+					  "<leader>j" = "goto_next";
+				  };
+
+				  lspBuf = {
+					  gd = "definition";
+					  K = "hover";
+				  };
+			  };
+			  servers = {
+				  bashls.enable = true;
+				  clangd.enable = true;
+				  nil_ls.enable = true;
+			  };
+		  };
+	  };
+	  highlight.ExtraWhitespace.bg = "red";
+	  match.ExtraWhitespace = "\\s\\+$";
+	  autoCmd = [
+	  {
+		  event = "FileType";
+		  pattern = "nix";
+		  command = "setlocal tabstop=2 shiftwidth=2";
+	  }
+	  ];
+  };
 
   sound.enable = true; # see services.pipewire
 
@@ -117,25 +173,9 @@
         "*.pyc"
       ];
     };
-
     programs.neovim = {
       enable = true;
-      defaultEditor = true;
-      viAlias = true;
-      vimAlias = true;
-      vimdiffAlias = true;
-      plugins = with pkgs.vimPlugins; [
-        nvim-lspconfig
-        nvim-treesitter.withAllGrammars
-        plenary-nvim
-	rose-pine
-	mini-nvim
-      ];
-      extraConfig = ''
-        set number relativenumber
-      '';
     };
-
     programs.vscode = {
       enable = true;
       package = pkgs.vscodium;
