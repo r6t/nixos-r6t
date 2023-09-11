@@ -67,17 +67,21 @@
       --enable-features=UseOzonePlatform
       --ozone-platform=wayland
     '';
-#    home.file.".config/nvim/after/plugin/colors.lua".text = ''
-#      funtion ColorMyPencils(color)
-#        color = color or "rose-pine"
-#	vim.cmd.colorscheme(color)
-#
-#	vim.api.neovim_set_hl(0, "Normal", { bg = "none" })
-#	vim.api.neovim_set_hl(0, "NormalFloat", { bg = "none" })
-#      end
-#
-#      ColorMyPencils()
-#    '';
+    home.file.".config/nvim/after/plugin/fugitive.lua".text = ''
+      vim.keymap.set("n", "<leader>gs", vim.cmd.Git)
+    '';
+    home.file.".config/nvim/after/plugin/harpoon.lua".text = ''
+      local mark = require("harpoon.mark")
+      local ui = require("harpoon.ui")
+      
+      vim.keymap.set("n", "<leader>a", mark.add_file)
+      vim.keymap.set("n", "<C-e>", ui.toggle_quick_menu)
+      
+      vim.keymap.set("n", "<C-h>", function() ui.nav_file(1) end)
+      vim.keymap.set("n", "<C-t>", function() ui.nav_file(2) end)
+      vim.keymap.set("n", "<C-n>", function() ui.nav_file(3) end)
+      vim.keymap.set("n", "<C-s>", function() ui.nav_file(4) end)
+    '';
     home.file.".config/nvim/after/plugin/telescope.lua".text = ''
       local builtin = require('telescope.builtin')
       vim.keymap.set('n', '<leader>pf', builtin.find_files, {})
@@ -86,59 +90,38 @@
         builtin.grep_string({ search = vim.fn.input("Grep > ") });
       end)
     '';
-#    home.file.".config/nvim/after/plugin/treesitter.lua".text = ''
-#      require'nvim-treesitter.configs'.setup {
-#        -- A list of parser names, or "all" (the five listed parsers should always be installed)
-#        ensure_installed = { "c", "lua", "vim", "vimdoc", "query" },
-#      
-#        -- Install parsers synchronously (only applied to `ensure_installed`)
-#        sync_install = false,
-#      
-#        -- Automatically install missing parsers when entering buffer
-#        -- Recommendation: set to false if you don't have `tree-sitter` CLI installed locally
-#        auto_install = false,
-#      
-#        highlight = {
-#          enable = true,
-#      
-#          -- Setting this to true will run `:h syntax` and tree-sitter at the same time.
-#          -- Set this to `true` if you depend on 'syntax' being enabled (like for indentation).
-#          -- Using this option may slow down your editor, and you may see some duplicate highlights.
-#          -- Instead of true it can also be a list of languages
-#          additional_vim_regex_highlighting = false,
-#        },
-#      } 
-#    '';
+    home.file.".config/nvim/after/plugin/undotree.lua".text = ''
+      vim.keymap.set("n", "<leader>u", vim.cmd.UndotreeToggle)
+    '';
     home.file.".config/nvim/lua/r6t/init.lua".text = ''
-      print("hello from r6t via nix")
     '';
     home.file.".config/nvim/lua/r6t/remap.lua".text = ''
       vim.g.mapleader = " "
       vim.keymap.set("n", "<leader>pv", vim.cmd.Ex)
     '';
-    home.packages = [
-      pkgs.ansible
-      pkgs.betaflight-configurator
-      pkgs.brave
-      pkgs.firefox-wayland
-      pkgs.freecad
-      pkgs.freetube
-      pkgs.freerdp
-      pkgs.kate
-      pkgs.krusader
-      pkgs.mullvad-vpn
-      pkgs.neofetch
-      pkgs.librewolf
-      pkgs.ripgrep
-      pkgs.remmina
-      pkgs.signal-desktop
-      pkgs.thefuck
-      pkgs.tmux
-      pkgs.ungoogled-chromium
-      pkgs.virt-manager
-      pkgs.vlc
-      pkgs.webcamoid
-      pkgs.youtube-dl
+    home.packages = with pkgs; [
+      ansible
+      betaflight-configurator
+      brave
+      firefox-wayland
+      freecad
+      freetube
+      freerdp
+      kate
+      krusader
+      mullvad-vpn
+      neofetch
+      librewolf
+      ripgrep
+      remmina
+      signal-desktop
+      thefuck
+      tmux
+      ungoogled-chromium
+      virt-manager
+      vlc
+      webcamoid
+      youtube-dl
 
     ];
     programs.alacritty = {
@@ -174,11 +157,11 @@
       vimdiffAlias = true;
       plugins = with pkgs.vimPlugins; [
         harpoon
-	mini-nvim
+	# mini-nvim
+        lsp-zero-nvim
 	nvim-lspconfig
 	nvim-treesitter.withAllGrammars
 	nvim-treesitter-context
-	playground
 	plenary-nvim
 	rose-pine
 	telescope-nvim
