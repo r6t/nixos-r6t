@@ -67,16 +67,17 @@
       --enable-features=UseOzonePlatform
       --ozone-platform=wayland
     '';
-    home.file.".config/nvim/after/plugin/colors.lua".text = ''
-      funtion ColorMyPencils(color)
-        color = color or "rose-pine"
-	vim.cmd.colorscheme(color)
-	vim.api.neovim_set_hl(0, "Normal", { bg = "none" })
-	vim.api.neovim_set_hl(0, "NormalFloat", { bg = "none" })
-      end
-
-      ColorMyPencils()
-    '';
+#    home.file.".config/nvim/after/plugin/colors.lua".text = ''
+#      funtion ColorMyPencils(color)
+#        color = color or "rose-pine"
+#	vim.cmd.colorscheme(color)
+#
+#	vim.api.neovim_set_hl(0, "Normal", { bg = "none" })
+#	vim.api.neovim_set_hl(0, "NormalFloat", { bg = "none" })
+#      end
+#
+#      ColorMyPencils()
+#    '';
     home.file.".config/nvim/after/plugin/telescope.lua".text = ''
       local builtin = require('telescope.builtin')
       vim.keymap.set('n', '<leader>pf', builtin.find_files, {})
@@ -85,29 +86,29 @@
         builtin.grep_string({ search = vim.fn.input("Grep > ") });
       end)
     '';
-    home.file.".config/nvim/after/plugin/treesitter.lua".text = ''
-      require'nvim-treesitter.configs'.setup {
-        -- A list of parser names, or "all" (the five listed parsers should always be installed)
-        ensure_installed = { "c", "lua", "vim", "vimdoc", "query" },
-      
-        -- Install parsers synchronously (only applied to `ensure_installed`)
-        sync_install = false,
-      
-        -- Automatically install missing parsers when entering buffer
-        -- Recommendation: set to false if you don't have `tree-sitter` CLI installed locally
-        auto_install = false,
-      
-        highlight = {
-          enable = true,
-      
-          -- Setting this to true will run `:h syntax` and tree-sitter at the same time.
-          -- Set this to `true` if you depend on 'syntax' being enabled (like for indentation).
-          -- Using this option may slow down your editor, and you may see some duplicate highlights.
-          -- Instead of true it can also be a list of languages
-          additional_vim_regex_highlighting = false,
-        },
-      } 
-    '';
+#    home.file.".config/nvim/after/plugin/treesitter.lua".text = ''
+#      require'nvim-treesitter.configs'.setup {
+#        -- A list of parser names, or "all" (the five listed parsers should always be installed)
+#        ensure_installed = { "c", "lua", "vim", "vimdoc", "query" },
+#      
+#        -- Install parsers synchronously (only applied to `ensure_installed`)
+#        sync_install = false,
+#      
+#        -- Automatically install missing parsers when entering buffer
+#        -- Recommendation: set to false if you don't have `tree-sitter` CLI installed locally
+#        auto_install = false,
+#      
+#        highlight = {
+#          enable = true,
+#      
+#          -- Setting this to true will run `:h syntax` and tree-sitter at the same time.
+#          -- Set this to `true` if you depend on 'syntax' being enabled (like for indentation).
+#          -- Using this option may slow down your editor, and you may see some duplicate highlights.
+#          -- Instead of true it can also be a list of languages
+#          additional_vim_regex_highlighting = false,
+#        },
+#      } 
+#    '';
     home.file.".config/nvim/lua/r6t/init.lua".text = ''
       print("hello from r6t via nix")
     '';
@@ -172,14 +173,17 @@
       vimAlias = true;
       vimdiffAlias = true;
       plugins = with pkgs.vimPlugins; [
-	plenary-nvim
-	telescope-nvim
-	#fzf-vim
+        harpoon
+	mini-nvim
 	nvim-lspconfig
 	nvim-treesitter.withAllGrammars
+	nvim-treesitter-context
+	playground
 	plenary-nvim
 	rose-pine
-	mini-nvim
+	telescope-nvim
+	undotree
+	vim-fugitive
       ];
       extraConfig = ''
         colorscheme rose-pine
