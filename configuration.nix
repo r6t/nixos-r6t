@@ -82,6 +82,17 @@
       vim.keymap.set("n", "<C-n>", function() ui.nav_file(3) end)
       vim.keymap.set("n", "<C-s>", function() ui.nav_file(4) end)
     '';
+    home.file.".config/nvim/after/plugin/lsp.lua".text = ''
+      local lsp = require('lsp-zero').preset({})
+
+      lsp.on_attach(function(client, bufnr)
+        -- see :help lsp-zero-keybindings
+        -- to learn the available actions
+        lsp.default_keymaps({buffer = bufnr})
+      end)
+      
+      lsp.setup()
+    '';
     home.file.".config/nvim/after/plugin/telescope.lua".text = ''
       local builtin = require('telescope.builtin')
       vim.keymap.set('n', '<leader>pf', builtin.find_files, {})
@@ -156,10 +167,19 @@
       vimAlias = true;
       vimdiffAlias = true;
       plugins = with pkgs.vimPlugins; [
+        cmp-buffer
+        cmp-nvim-lsp
+        cmp-nvim-lua
+        cmp-path
+	cmp_luasnip
+	friendly-snippets
         harpoon
+        indentLine
 	# mini-nvim
+	nvim-lspconfig # lsp-zero
         lsp-zero-nvim
-	nvim-lspconfig
+        luasnip
+	nvim-cmp
 	nvim-treesitter.withAllGrammars
 	nvim-treesitter-context
 	plenary-nvim
@@ -173,9 +193,15 @@
         set number relativenumber
       '';
       extraLuaConfig = ''
-        require("r6t")
+	require("r6t")
         require("r6t.remap")
       '';
+      extraPackages = [
+        pkgs.nodePackages.bash-language-server
+	pkgs.nodePackages.pyright
+        pkgs.nodePackages.vim-language-server
+        pkgs.nodePackages.yaml-language-server
+      ];
     };
     programs.vscode = {
       enable = true;
@@ -241,6 +267,23 @@
     user = "user";
     group = "users";
     guiAddress = "0.0.0.0:8384";
+    folders = {
+      "GoPro" = {        # Name of folder in Syncthing, also the folder ID
+        path = "/home/user/GoPro";    # Which folder to add to Syncthing
+      };
+      "Music" = {        # Name of folder in Syncthing, also the folder ID
+        path = "/home/user/Music/sync";    # Which folder to add to Syncthing
+      };
+      "Obsidian" = {        # Name of folder in Syncthing, also the folder ID
+        path = "/home/user/Obsidian";    # Which folder to add to Syncthing
+      };
+      "scans" = {        # Name of folder in Syncthing, also the folder ID
+        path = "/home/user/scan";    # Which folder to add to Syncthing
+      };
+      "Sync" = {        # Name of folder in Syncthing, also the folder ID
+        path = "/home/user/Sync";    # Which folder to add to Syncthing
+      };
+    };
   };
   services.xserver.enable = true;
   services.xserver = { layout = "us"; xkbVariant = ""; }; # X11 keymap
