@@ -66,54 +66,14 @@
   users.users.r6t = { isNormalUser = true; description = "r6t"; extraGroups = [ "networkmanager" "wheel" ]; shell = pkgs.zsh;
   };
 
-  home-manager.users.r6t = { pkgs, ...}: {
-    home.file.".config/electron13-flags.conf".text = ''
-      --enable-features=UseOzonePlatform
-      --ozone-platform=wayland
-    '';
-    home.file.".config/nvim/after/plugin/fugitive.lua".text = ''
-      vim.keymap.set("n", "<leader>gs", vim.cmd.Git)
-    '';
-    home.file.".config/nvim/after/plugin/harpoon.lua".text = ''
-      local mark = require("harpoon.mark")
-      local ui = require("harpoon.ui")
-
-      vim.keymap.set("n", "<leader>a", mark.add_file)
-      vim.keymap.set("n", "<C-e>", ui.toggle_quick_menu)
-
-      vim.keymap.set("n", "<C-h>", function() ui.nav_file(1) end)
-      vim.keymap.set("n", "<C-t>", function() ui.nav_file(2) end)
-      vim.keymap.set("n", "<C-n>", function() ui.nav_file(3) end)
-      vim.keymap.set("n", "<C-s>", function() ui.nav_file(4) end)
-    '';
-    home.file.".config/nvim/after/plugin/lsp.lua".text = ''
-      local lsp = require('lsp-zero').preset({})
-
-      lsp.on_attach(function(client, bufnr)
-        -- see :help lsp-zero-keybindings
-        -- to learn the available actions
-        lsp.default_keymaps({buffer = bufnr})
-      end)
-
-      lsp.setup()
-    '';
-    home.file.".config/nvim/after/plugin/telescope.lua".text = ''
-      local builtin = require('telescope.builtin')
-      vim.keymap.set('n', '<leader>pf', builtin.find_files, {})
-      vim.keymap.set('n', 'C-p', builtin.git_files, {})
-      vim.keymap.set('n', '<leader>ps', function()
-        builtin.grep_string({ search = vim.fn.input("Grep > ") });
-      end)
-    '';
-    home.file.".config/nvim/after/plugin/undotree.lua".text = ''
-      vim.keymap.set("n", "<leader>u", vim.cmd.UndotreeToggle)
-    '';
-    home.file.".config/nvim/lua/r6t/init.lua".text = ''
-    '';
-    home.file.".config/nvim/lua/r6t/remap.lua".text = ''
-      vim.g.mapleader = " "
-      vim.keymap.set("n", "<leader>pv", vim.cmd.Ex)
-    '';
+    home.file.".config/electron13-flags.conf".text = import ./home-templates/.config/electron13-flags.conf.nix;
+    home.file.".config/nvim/after/plugin/fugitive.lua".text = import ./home-templates/.config/nvim/after/plugin/fugitive.lua.nix;
+    home.file.".config/nvim/after/plugin/harpoon.lua".text = import ./home-templates/.config/nvim/after/plugin/harpoon.lua.nix;
+    home.file.".config/nvim/after/plugin/lsp.lua".text = import ./home-templates/.config/nvim/after/plugin/lsp.lua.nix;
+    home.file.".config/nvim/after/plugin/telescope.lua".text = import ./home-templates/.config/nvim/after/plugin/telescope.lua.nix;
+    home.file.".config/nvim/after/plugin/undotree.lua".text = import ./home-templates/.config/nvim/after/plugin/undotree.lua.nix;
+    home.file.".config/nvim/lua/r6t/init.lua".text = import ./home-templates/.config/nvim/lua/r6t/init.lua.nix;
+    home.file.".config/nvim/lua/r6t/remap.lua".text = import ./home-templates/.config/nvim/lua/r6t/remap.lua.nix;
     home.packages = with pkgs; [
       ansible
       betaflight-configurator
