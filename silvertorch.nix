@@ -5,13 +5,24 @@
 
 { imports =
     [ <home-manager/nixos>
-      <nixos-hardware/framework/13-inch/11th-gen-intel>
+      <nixos-hardware/framework/13-inch/7040-amd>
 
       # Include the results of the hardware scan.
       ./hardware-configuration.nix ];
 
   ### NIXOS CONFIGURATION
-  # Removed computer-specific boot/luks config
+  # Bootloader.
+  boot.loader.systemd-boot.enable = true;
+  boot.loader.efi.canTouchEfiVariables = true;
+
+  # Setup keyfile
+  boot.initrd.secrets = {
+    "/crypto_keyfile.bin" = null;
+  };
+
+  # Enable swap on luks
+  boot.initrd.luks.devices."luks-a4e64260-7e45-4603-851d-0b6f01baa889".device = "/dev/disk/by-uuid/a4e64260-7e45-4603-851d-0b6f01baa889";
+  boot.initrd.luks.devices."luks-a4e64260-7e45-4603-851d-0b6f01baa889".keyFile = "/crypto_keyfile.bin";
 
   environment.shells = with pkgs; [ zsh ]; # /etc/shells
 
@@ -23,8 +34,8 @@
   # networking.wireless.enable = true; # wpa_supplicant
 
   i18n.defaultLocale = "en_US.UTF-8";
-  i18n.extraLocaleSettings = { LC_ADDRESS = "en_US.UTF-8"; LC_IDENTIFICATION = "en_US.UTF-8"; LC_MEASUREMENT = "en_US.UTF-8"; LC_MONETARY = 
-    "en_US.UTF-8"; LC_NAME = "en_US.UTF-8"; LC_NUMERIC = "en_US.UTF-8"; LC_PAPER = "en_US.UTF-8"; LC_TELEPHONE = "en_US.UTF-8"; LC_TIME = 
+  i18n.extraLocaleSettings = { LC_ADDRESS = "en_US.UTF-8"; LC_IDENTIFICATION = "en_US.UTF-8"; LC_MEASUREMENT = "en_US.UTF-8"; LC_MONETARY =
+    "en_US.UTF-8"; LC_NAME = "en_US.UTF-8"; LC_NUMERIC = "en_US.UTF-8"; LC_PAPER = "en_US.UTF-8"; LC_TELEPHONE = "en_US.UTF-8"; LC_TIME =
     "en_US.UTF-8";
   };
 
@@ -66,10 +77,10 @@
     home.file.".config/nvim/after/plugin/harpoon.lua".text = ''
       local mark = require("harpoon.mark")
       local ui = require("harpoon.ui")
-      
+
       vim.keymap.set("n", "<leader>a", mark.add_file)
       vim.keymap.set("n", "<C-e>", ui.toggle_quick_menu)
-      
+
       vim.keymap.set("n", "<C-h>", function() ui.nav_file(1) end)
       vim.keymap.set("n", "<C-t>", function() ui.nav_file(2) end)
       vim.keymap.set("n", "<C-n>", function() ui.nav_file(3) end)
@@ -83,7 +94,7 @@
         -- to learn the available actions
         lsp.default_keymaps({buffer = bufnr})
       end)
-      
+
       lsp.setup()
     '';
     home.file.".config/nvim/after/plugin/telescope.lua".text = ''
@@ -119,7 +130,6 @@
       librewolf
       ripgrep
       remmina
-      signal-desktop
       thefuck
       tmux
       ungoogled-chromium
@@ -274,6 +284,7 @@
     group = "users";
     guiAddress = "127.0.0.1:8384";
   };
+  services.tailscale.enable = true;
   services.xserver.enable = true;
   services.xserver = { layout = "us"; xkbVariant = ""; }; # X11 keymap
   services.xserver.displayManager.sddm.enable = true; # KDE Plasma
@@ -288,7 +299,7 @@
 
   # Enable the OpenSSH daemon. services.openssh.enable = true;
 
-  # Open ports in the firewall. networking.firewall.allowedTCPPorts = [ ... ]; networking.firewall.allowedUDPPorts = [ ... ]; Or disable the firewall 
+  # Open ports in the firewall. networking.firewall.allowedTCPPorts = [ ... ]; networking.firewall.allowedUDPPorts = [ ... ]; Or disable the firewall
   # altogether. networking.firewall.enable = false;
 
   # Before changing this value read the documentation for this option (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
