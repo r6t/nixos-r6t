@@ -8,7 +8,7 @@
       <nixos-hardware/framework/13-inch/7040-amd>
 
       # Include the results of the hardware scan.
-      ./hardware-configuration.nix ];
+      ./hardware-configuration-silvertorch.nix ];
 
   ### NIXOS CONFIGURATION
   # Bootloader.
@@ -66,24 +66,27 @@
   users.users.r6t = { isNormalUser = true; description = "r6t"; extraGroups = [ "networkmanager" "wheel" ]; shell = pkgs.zsh;
   };
 
-    home.file.".config/electron13-flags.conf".text = import ./home-templates/.config/electron13-flags.conf.nix;
-    home.file.".config/nvim/after/plugin/fugitive.lua".text = import ./home-templates/.config/nvim/after/plugin/fugitive.lua.nix;
-    home.file.".config/nvim/after/plugin/harpoon.lua".text = import ./home-templates/.config/nvim/after/plugin/harpoon.lua.nix;
-    home.file.".config/nvim/after/plugin/lsp.lua".text = import ./home-templates/.config/nvim/after/plugin/lsp.lua.nix;
-    home.file.".config/nvim/after/plugin/telescope.lua".text = import ./home-templates/.config/nvim/after/plugin/telescope.lua.nix;
-    home.file.".config/nvim/after/plugin/undotree.lua".text = import ./home-templates/.config/nvim/after/plugin/undotree.lua.nix;
-    home.file.".config/nvim/lua/r6t/init.lua".text = import ./home-templates/.config/nvim/lua/r6t/init.lua.nix;
-    home.file.".config/nvim/lua/r6t/remap.lua".text = import ./home-templates/.config/nvim/lua/r6t/remap.lua.nix;
+  home-manager.users.r6t = { pkgs, ...}: {
+    home.file.".config/electron13-flags.conf".source = ./dotfiles/electron13-flags.conf.nix;
+    home.file.".config/nvim/after/plugin/fugitive.lua".source = ./dotfiles/nvim/after/plugin/fugitive.lua.nix;
+    home.file.".config/nvim/after/plugin/harpoon.lua".source = ./dotfiles/nvim/after/plugin/harpoon.lua.nix;
+    home.file.".config/nvim/after/plugin/lsp.lua".source = ./dotfiles/nvim/after/plugin/lsp.lua.nix;
+    home.file.".config/nvim/after/plugin/telescope.lua".source = ./dotfiles/nvim/after/plugin/telescope.lua.nix;
+    home.file.".config/nvim/after/plugin/undotree.lua".source = ./dotfiles/nvim/after/plugin/undotree.lua.nix;
+    home.file.".config/nvim/lua/r6t/init.lua".source = ./dotfiles/nvim/lua/r6t/init.lua.nix;
+    home.file.".config/nvim/lua/r6t/remap.lua".source = ./dotfiles/nvim/lua/r6t/remap.lua.nix;
     home.packages = with pkgs; [
       ansible
       betaflight-configurator
       brave
       firefox-wayland
       freecad
-      # freetube # using flatpak instead, not compatible with latest electron
       freerdp
       kate
+      kdiff3
+      krename
       krusader
+      libsForQt5.elisa
       mullvad-vpn
       neofetch
       nmap
@@ -156,7 +159,9 @@
         colorscheme rose-pine
         set number relativenumber
       '';
+      # extraLuaConfig goes to .config/nvim/init.lua, which cannot be managed as an individual file when using this
       extraLuaConfig = ''
+        print("hello")
 	require("r6t")
         require("r6t.remap")
       '';
@@ -211,6 +216,7 @@
       tree
       unzip
       wget
+      zip
   ];
 
   # Some programs need SUID wrappers, can be configured further or are started in user sessions. programs.mtr.enable = true; programs.gnupg.agent = {
