@@ -1,5 +1,3 @@
-# .config/nvim/after/plugin/lsp.lua.nix
-''
     local lsp = require('lsp-zero').preset({})
 
     lsp.on_attach(function(client, bufnr)
@@ -9,4 +7,3 @@
     end)
 
     lsp.setup()
-''

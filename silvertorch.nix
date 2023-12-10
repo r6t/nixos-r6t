@@ -60,7 +60,7 @@
   time.timeZone = "America/Los_Angeles";
 
   xdg.portal.enable = true;
-  xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-wlr pkgs.xdg-desktop-portal-gtk ];
+  xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-wlr pkgs.xdg-desktop-portal-gtk ]; # Add to list if not using GNOME: pkgs.xdg-desktop-portal-gtk
 
   ### USER + APPLICATIONS
   users.users.r6t = { isNormalUser = true; description = "r6t"; extraGroups = [ "networkmanager" "wheel" ]; shell = pkgs.zsh;
@@ -79,6 +79,7 @@
       ansible
       betaflight-configurator
       brave
+      fd
       firefox-wayland
       freecad
       freerdp
@@ -87,19 +88,24 @@
       krename
       krusader
       libsForQt5.elisa
+      lshw
       mullvad-vpn
       neofetch
       nmap
+      nodejs # neovim
       librewolf
+      pciutils
       ripgrep
       remmina
       thefuck
       tmux
+      tree-sitter # neovim
       ungoogled-chromium
       virt-manager
       vlc
       webcamoid
       youtube-dl
+      xclip
 
     ];
     programs.alacritty = {
@@ -164,6 +170,7 @@
         print("hello")
 	require("r6t")
         require("r6t.remap")
+	vim.cmd('set clipboard=unnamedplus')
       '';
       extraPackages = [
         pkgs.luajitPackages.lua-lsp
@@ -171,6 +178,7 @@
 	pkgs.nodePackages.pyright
         pkgs.nodePackages.vim-language-server
         pkgs.nodePackages.yaml-language-server
+        pkgs.python311Packages.pynvim
 	pkgs.rnix-lsp
       ];
     };
@@ -256,6 +264,9 @@
   services.xserver.displayManager.sddm.enable = true; # KDE Plasma
   services.xserver.desktopManager.plasma5.enable = true; # KDE Plasma
   services.xserver.displayManager.defaultSession = "plasmawayland"; # KDE Plasma
+  # services.xserver.desktopManager.gnome3.enable = true; # GNOME
+  # services.xserver.displayManager.gdm.enable = true; # GNOME Display Manager
+
   # services.xserver.libinput.enable = true; # Enable touchpad support (enabled default in most desktopManager).
 #`  services.xrdp.enable = true;
 #`  # services.xrdp.defaultWindowManager = "startplasma-x11";
