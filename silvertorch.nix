@@ -75,6 +75,7 @@
     home.file.".config/nvim/after/plugin/undotree.lua".source = ./dotfiles/nvim/after/plugin/undotree.lua.nix;
     home.file.".config/nvim/lua/r6t/init.lua".source = ./dotfiles/nvim/lua/r6t/init.lua.nix;
     home.file.".config/nvim/lua/r6t/remap.lua".source = ./dotfiles/nvim/lua/r6t/remap.lua.nix;
+    home.file.".config/nvim/lua/r6t/treesitter.lua".source = ./dotfiles/nvim/lua/r6t/treesitter.lua.nix;
     home.packages = with pkgs; [
       ansible
       betaflight-configurator
@@ -160,16 +161,21 @@
 	telescope-nvim
 	undotree
 	vim-fugitive
+	vim-nix
       ];
       extraConfig = ''
         colorscheme rose-pine
         set number relativenumber
+	set nowrap
+	set nobackup
+	set nowritebackup
+	set noswapfile
       '';
       # extraLuaConfig goes to .config/nvim/init.lua, which cannot be managed as an individual file when using this
       extraLuaConfig = ''
-        print("hello")
 	require("r6t")
         require("r6t.remap")
+        require("r6t.treesitter")
 	vim.cmd('set clipboard=unnamedplus')
       '';
       extraPackages = [
