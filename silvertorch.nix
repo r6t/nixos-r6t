@@ -78,6 +78,7 @@
     home.file.".config/nvim/lua/r6t/treesitter.lua".source = ./dotfiles/nvim/lua/r6t/treesitter.lua.nix;
     home.packages = with pkgs; [
       ansible
+      awscli2
       betaflight-configurator
       brave
       fd
@@ -94,6 +95,7 @@
       neofetch
       nmap
       nodejs # neovim
+      #ollama needs 23.11+
       librewolf
       pciutils
       ripgrep
@@ -184,7 +186,6 @@
 	pkgs.nodePackages.pyright
         pkgs.nodePackages.vim-language-server
         pkgs.nodePackages.yaml-language-server
-        pkgs.python311Packages.pynvim
 	pkgs.rnix-lsp
       ];
     };

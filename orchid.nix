@@ -4,7 +4,8 @@
 
 {
   imports =
-    [ # Include the results of the hardware scan.
+    [ <home-manager/nixos>
+      # Include the results of the hardware scan.
       ./hardware-configuration.nix
     ];
 
@@ -13,7 +14,7 @@
   boot.loader.grub.device = "/dev/sda";
   boot.loader.grub.useOSProber = true;
 
-  networking.hostName = "nixos"; # Define your hostname.
+  networking.hostName = "orchid"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
   # Configure network proxy if necessary
@@ -41,10 +42,31 @@
     LC_TIME = "en_US.UTF-8";
   };
 
+  # garbage collection
+  nix = {
+    # NixOS garbage collection
+    gc = {
+      automatic = true;
+      dates = "monthly";
+      options = "--delete-older-than-60d";
+    };
+    settings = {
+      auto-optimise-store = true;
+    };
+  };
+
+  programs.zsh.enable = true;
+
   # Configure keymap in X11
   services.xserver = {
     layout = "us";
     xkbVariant = "";
+  };
+
+  virtualisation.docker.enable = true;
+  virtualisation.docker.rootless = {
+    enable = true;
+    setSocketVariable = true;
   };
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
@@ -53,22 +75,109 @@
     description = "r6t";
     extraGroups = [ "docker" "networkmanager" "wheel" ];
     packages = with pkgs; [
-      
-      neovim 
-      nmap
-      pciutils
-      ripgrep
-      tmux
-      git
+
     ];
 
   };
-
-  virtualisation.docker.enable = true;
-  virtualisation.docker.rootless = {
-    enable = true;
-    setSocketVariable = true;
+    ### USER + APPLICATIONS
+  users.users.r6t = { isNormalUser = true; description = "r6t"; extraGroups = [ "networkmanager" "wheel" ]; shell = pkgs.zsh;
   };
+
+  home-manager.users.r6t = { pkgs, ...}: {
+    home.packages = with pkgs; [
+      ansible
+      awscli2
+      fd
+      lshw
+      neofetch
+      nmap
+      nodejs # neovim
+      pciutils
+      ripgrep
+      thefuck
+      tmux
+      tree-sitter # neovim
+    ];
+    programs.git = {
+      enable = true;
+      userName = "r6t";
+      userEmail = "ryancast@gmail.com";
+      extraConfig = {
+        core = {
+          editor = "nvim";
+        };
+      };
+      ignores = [
+        ".DS_Store"
+        "*.pyc"
+      ];
+    };
+    programs.neovim = {
+      enable = true;
+      defaultEditor = true;
+      viAlias = true;
+      vimAlias = true;
+      vimdiffAlias = true;
+      plugins = with pkgs.vimPlugins; [
+        cmp-buffer
+        cmp-nvim-lsp
+        cmp-nvim-lua
+        cmp-path
+	      cmp_luasnip
+	      friendly-snippets
+        harpoon
+        indentLine
+      	# mini-nvim
+	      nvim-lspconfig # lsp-zero
+        lsp-zero-nvim
+        luasnip
+	      nvim-cmp
+	      nvim-treesitter.withAllGrammars
+      	nvim-treesitter-context
+	      plenary-nvim
+	      rose-pine
+	      telescope-nvim
+	      undotree
+      	vim-fugitive
+        vim-nix
+      ];
+      extraConfig = ''
+        colorscheme rose-pine
+        set number relativenumber
+	      set nowrap
+	      set nobackup
+      	set nowritebackup
+	      set noswapfile
+      '';
+      # extraLuaConfig goes to .config/nvim/init.lua, which cannot be managed as an individual file when using this
+      extraLuaConfig = ''
+      	require("r6t")
+        require("r6t.remap")
+        require("r6t.treesitter")
+      	vim.cmd('set clipboard=unnamedplus')
+      '';
+      extraPackages = [
+        pkgs.luajitPackages.lua-lsp
+        pkgs.nodePackages.bash-language-server
+      	pkgs.nodePackages.pyright
+        pkgs.nodePackages.vim-language-server
+        pkgs.nodePackages.yaml-language-server
+	      pkgs.rnix-lsp
+      ];
+    };
+    programs.zsh = {
+      enable = true;
+      oh-my-zsh = {
+        enable = true;
+      	plugins = [ "aws" "git" "python" "thefuck" ];
+        theme = "xiong-chiamiov-plus";
+      };
+    };
+    home.homeDirectory = "/home/r6t";
+    home.username = "r6t";
+    home.stateVersion = "23.05";
+  };
+
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
