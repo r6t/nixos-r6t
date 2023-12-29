@@ -108,6 +108,25 @@
     	allowUnfree = true;
     }
     '';
+    home.file."bin/pbcopy" = { 
+      text = ''
+          #!/bin/bash
+          
+          # Determine the session type (X11 or Wayland)
+          if [[ "$XDG_SESSION_TYPE" == "x11" ]]; then
+              # If X11, use xclip
+              xclip -selection clipboard
+          elif [[ "$XDG_SESSION_TYPE" == "wayland" ]]; then
+              # If Wayland, use wl-copy
+              wl-copy
+          else
+              echo "Unsupported session type: $XDG_SESSION_TYPE"
+              exit 1
+          fi
+      '';
+      executable = true;
+    };
+    
     home.file.".config/nvim/after/plugin/fugitive.lua".text = ''
       vim.keymap.set("n", "<leader>gs", vim.cmd.Git)
     '';
@@ -175,6 +194,7 @@
       virt-manager
       vlc
       youtube-dl
+      xclip # see bin/pbcopy
     ];
     programs.alacritty = {
       enable = true;
@@ -255,6 +275,9 @@
     };
     programs.zsh = {
       enable = true;
+      initExtra = ''
+      	export PATH="$HOME/bin:$PATH"	
+      '';
       oh-my-zsh = {
         enable = true;
 	plugins = [ "aws" "git" "python" "thefuck" ];
@@ -275,6 +298,7 @@
       jq
       libgccjit
       python311
+      python311Packages.glad
       #python311Packages.pip
       #python311Packages.slack-sdk
       pypy3
