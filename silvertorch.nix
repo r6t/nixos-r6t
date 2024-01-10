@@ -82,7 +82,7 @@
       betaflight-configurator
       brave
       fd
-      firefox-wayland
+      firefox-wayland # wayland
       freecad
       freerdp
       kate
@@ -90,6 +90,7 @@
       krename
       krusader
       libsForQt5.elisa
+      libsForQt5.kscreen
       lshw
       mullvad-vpn
       neofetch
@@ -104,9 +105,11 @@
       tmux
       tree-sitter # neovim
       ungoogled-chromium
+      usbutils
       virt-manager
       vlc
       webcamoid
+      # wlr-randr # wayland
       youtube-dl
       xclip
 
