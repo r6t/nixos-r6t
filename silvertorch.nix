@@ -22,6 +22,11 @@
   environment.shells = with pkgs; [ zsh ]; # /etc/shells
 
   hardware.bluetooth.enable = true;
+  hardware.bluetooth.settings = {
+	General = {
+		Experimental = true;
+	};
+  };
   # Enable networking
   networking.networkmanager.enable = true;
 
@@ -81,23 +86,35 @@
   };
  
   home-manager.users.r6t = { pkgs, ...}: {
-    home.file.".config/hypr/hyprland.conf".source = ./config/hypr/hyprland.conf;
-    home.file.".config/waybar/config".source = ./config/waybar/config;
-    home.file.".config/waybar/style.css".source = ./config/waybar/style.css;
+    home.file.".config/hypr/hyprland.conf".source = config/hypr/hyprland.conf;
+    home.file.".config/swaylock/config".source = config/swaylock/config;
+    home.file.".config/waybar/config".source = config/waybar/config;
+    home.file.".config/waybar/style.css".source = config/waybar/style.css;
+    home.file.".config/wlogout/layout".source = config/wlogout/layout;
+    home.file.".config/wlogout/style.css".source = config/wlogout/style.css;
+    home.file.".config/wal/templates/colors-hyprland.conf".source = config/wal/templates/colors-hyprland.conf;
+    home.file.".config/wal/templates/colors-rofi-pywal.rasi".source = config/wal/templates/colors-rofi-pywal.rasi;
+    # home.file.".config/wal/templates/colors-waybar.css".source = config/wal/templates/colors-waybar.css;
+    # home.file.".config/wal/templates/colors-wlogout.css".source = config/wal/templates/colors-hyprland.conf;
+    # home.file."bin/swayidle_manager.sh" = {
+    #   source = ./scripts/swayidle_manager.sh;
+    #   executable = true;
+    # };
     home.packages = with pkgs; [
       ansible
       awscli2
       betaflight-configurator
-      blueman # bluetooth
+      bitwarden
       brave
       fd
-      firefox-wayland # wayland
+      firefox-wayland
       freecad
       freerdp
+      gvfs # for thunar
       kate
       kdiff3
       krename
-      krusader
+      krusader # pro file manager
       libsForQt5.elisa
       lshw
       mullvad-vpn
@@ -124,6 +141,9 @@
       wlr-randr # wayland
       youtube-dl
       xclip
+      xfce.thunar # simple file manager
+      xfce.thunar-archive-plugin
+      xfce.thunar-media-tags-plugin
     ];
     programs.alacritty = {
       enable = true;
@@ -203,6 +223,7 @@
         pkgs.rnix-lsp
       ];
     };
+    programs.pywal.enable = true;
     programs.thunderbird = {
       enable = true;
       package = pkgs.thunderbird;
@@ -230,6 +251,13 @@
     home.homeDirectory = "/home/r6t";
     home.sessionVariables = {
         MOZ_ENABLE_WAYLAND = 1;
+        XDG_SESSION_TYPE = "wayland";
+        WAYLAND_DISPLAY="wayland-0";
+        GDK_BACKEND="wayland";
+        QT_QPA_PLATFORM="wayland";
+        #XDG_DATA_DIRS=/path/to/data_dirs:${XDG_DATA_DIRS};
+        #XDG_CONFIG_DIRS=/path/to/config_dirs:${XDG_CONFIG_DIRS};
+
     };
     home.username = "r6t";
     home.stateVersion = "23.11";
@@ -244,15 +272,15 @@
      curl
      unzip
      alacritty # gpu accelerated terminal
-  #   dbus   # make dbus-update-activation-environment available in the path
-  #   dbus-sway-environment
-  #   configure-gtk
+     dbus   # make dbus-update-activation-environment available in the path
+    # dbus-sway-environment
+    # configure-gtk
      waybar
      wayland
      xdg-utils # for opening default programs when clicking links
-  #   glib # gsettings
-  #   dracula-theme # gtk theme
-  #   gnome3.adwaita-icon-theme  # default gnome cursors
+     glib # gsettings
+     dracula-theme # gtk theme
+     gnome3.adwaita-icon-theme  # default gnome cursors
      swaybg
      swayidle
      swaylock-effects
@@ -274,7 +302,12 @@
   #   enableSSHSupport = true;
   # };
  
+  # Systemwide security settings:
+  security.pam.services.swaylock = {}; # required for swaylock-effects functionality
+  # security.pam.services.swaylock.fprintAuth = false; # disables fprintd for swaylock
+  
   # List services that you want to enable:
+  services.blueman.enable = true; # Bluetooth
   services.pipewire = {
     enable = true;
     alsa.enable = true;
@@ -286,17 +319,13 @@
   # (/org/freedesktop/portal/desktop).
   # The portal interfaces include APIs for file access, opening URIs,
   # printing and others.
-#  services.dbus.enable = true;
-#  xdg.portal = {
-#    enable = true;
-#    wlr.enable = true;
-#    # gtk portal needed to make gtk apps happy
-#    extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
-#  };
-#  programs.sway = {
-#    enable = true;
-#    wrapperFeatures.gtk = true;
-#  };
+  services.dbus.enable = true;
+  xdg.portal = {
+    enable = true;
+    wlr.enable = true;
+    # gtk portal needed to make gtk apps happy
+    extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
+  };
   services.flatpak.enable = true;
   services.fprintd.enable = true;
   services.fwupd.enable = true; # Linux firmware updater
