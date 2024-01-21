@@ -1,41 +1,59 @@
-# r6t's nixos configuration
-# Manages a single Framework laptop
+# r6t's NixOS configuration: manages a 13" Framework AMD laptop
 
 { config, pkgs, ... }:
- 
+
 {
   imports =
     [
-      <home-manager/nixos> 
+      <home-manager/nixos>
       <nixos-hardware/framework/13-inch/7040-amd>
       ./hardware-configuration.nix
     ];
- 
-  # Bootloader.
+
+  # Bootloader
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
-
-  boot.initrd.luks.devices."luks-049bd9e8-8c17-49ab-ac53-b01a796f8466".device = "/dev/disk/by-uuid/049bd9e8-8c17-49ab-ac53-b01a796f8466";
-  networking.hostName = "silvertorch"; # Define your hostname.
-  # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
+  boot.initrd.luks.devices."luks-c19f0d35-ae1c-4379-a5e9-ac0ea8665118".device = "/dev/disk/by-uuid/c19f0d35-ae1c-4379-a5e9-ac0ea8665118";
 
   environment.shells = with pkgs; [ zsh ]; # /etc/shells
+  # System packages
+  environment.systemPackages = with pkgs; [
+     alacritty
+     curl
+  #   dbus
+     git
+     lshw
+     neovim
+     wget
+     unzip
+  #   xdg-utils # for opening default programs when clicking links
+  #   glib # gsettings
+  #   dracula-theme # gtk theme
+  #   gnome3.adwaita-icon-theme  # default gnome cursors
+  #   swaybg
+  #   swayidle
+  #   swaylock-effects
+  #   grim # screenshot functionality
+  #   slurp # screenshot functionality
+  #   rofi
+  #   wl-clipboard # wl-copy and wl-paste for copy/paste from stdin / stdout
+  #   mako # notification system developed by swaywm maintainer
+  #   wdisplays # tool to configure displays
+     wlogout
+     tree
+     waybar
+     wayland
+  ];
 
-  hardware.bluetooth.enable = true;
-  hardware.bluetooth.settings = {
-	General = {
-		Experimental = true;
-	};
-  };
-  # Enable networking
-  networking.networkmanager.enable = true;
+ # hardware.bluetooth.enable = true;
+ # hardware.bluetooth.settings = {
+ #       General = {
+ #       	Experimental = true;
+ #       };
+ # };
 
-  # Set your time zone.
-  time.timeZone = "America/Los_Angeles";
-
-  # Select internationalisation properties.
+  # Internationalization
   i18n.defaultLocale = "en_US.UTF-8";
-
   i18n.extraLocaleSettings = {
     LC_ADDRESS = "en_US.UTF-8";
     LC_IDENTIFICATION = "en_US.UTF-8";
@@ -47,6 +65,12 @@
     LC_TELEPHONE = "en_US.UTF-8";
     LC_TIME = "en_US.UTF-8";
   };
+
+  networking.networkmanager.enable = true;
+  networking.hostName = "silvertorch"; # Define your hostname.
+  # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
+  networking.firewall.allowedTCPPorts = [ 22 ];
+  # networking.firewall.allowedUDPPorts = [ ... ];
 
   nix = {
     # NixOS garbage collection
@@ -60,23 +84,62 @@
     };
   };
 
-  programs.zsh.enable = true;
-
+  # System programs:
   programs.hyprland = {
     enable = true;
     xwayland.enable = true;
   };
+  programs.zsh.enable = true;
 
-  sound.enable = true; # see services.pipewire
+  # System security settings:
+  security.pam.services.swaylock = {}; # required for swaylock-effects functionality
+  # security.polkit.enable = true;
 
+  # System services:
+ # services.blueman.enable = true; # Bluetooth
+ # services.pipewire = {
+ #   enable = true;
+ #   alsa.enable = true;
+ #   pulse.enable = true;
+ # };
+  # xdg-desktop-portal works by exposing a series of D-Bus interfaces
+  # known as portals under a well-known name
+  # (org.freedesktop.portal.Desktop) and object path
+  # (/org/freedesktop/portal/desktop).
+  # The portal interfaces include APIs for file access, opening URIs,
+  # printing and others.
+ # services.dbus.enable = true;
+ # services.flatpak.enable = true;
+ # services.fprintd.enable = true;
+ # services.fwupd.enable = true; # Linux firmware updater
+ # services.mullvad-vpn.enable = true; # Mullvad desktop app
+ # services.printing.enable = true; # CUPS print support
+ # services.syncthing = {
+ #   enable = true;
+ #   dataDir = "/home/r6t/icloud";
+ #   openDefaultPorts = true;
+ #   overrideDevices = false;
+ #   overrideFolders = false;
+ #   configDir = "/home/r6t/.config/syncthing";
+ #   user = "r6t";
+ #   group = "users";
+ #   guiAddress = "127.0.0.1:8384";
+ # };
+ # services.tailscale.enable = true;
+  services.openssh.enable = true;
   # Configure keymap in X11
   services.xserver = {
     layout = "us";
     xkbVariant = "";
   };
 
+  sound.enable = true; # see services.pipewire
 
-  # Define a user account. Don't forget to set a password with ‘passwd’.
+  system.stateVersion = "23.11"; # Inital version on system. Do not edit,
+
+  time.timeZone = "America/Los_Angeles";
+
+  # Users:
   users.users.r6t = {
     isNormalUser = true;
     description = "r6t";
@@ -84,16 +147,15 @@
     packages = with pkgs; [];
     shell = pkgs.zsh;
   };
- 
   home-manager.users.r6t = { pkgs, ...}: {
-    home.file.".config/hypr/hyprland.conf".source = config/hypr/hyprland.conf;
-    home.file.".config/swaylock/config".source = config/swaylock/config;
-    home.file.".config/waybar/config".source = config/waybar/config;
-    home.file.".config/waybar/style.css".source = config/waybar/style.css;
-    home.file.".config/wlogout/layout".source = config/wlogout/layout;
-    home.file.".config/wlogout/style.css".source = config/wlogout/style.css;
-    home.file.".config/wal/templates/colors-hyprland.conf".source = config/wal/templates/colors-hyprland.conf;
-    home.file.".config/wal/templates/colors-rofi-pywal.rasi".source = config/wal/templates/colors-rofi-pywal.rasi;
+   # home.file.".config/hypr/hyprland.conf".source = config/hypr/hyprland.conf;
+   # home.file.".config/swaylock/config".source = config/swaylock/config;
+   # home.file.".config/waybar/config".source = config/waybar/config;
+    # home.file.".config/waybar/style.css".source = config/waybar/style.css;
+   # home.file.".config/wlogout/layout".source = config/wlogout/layout;
+    # home.file.".config/wlogout/style.css".source = config/wlogout/style.css;
+    # home.file.".config/wal/templates/colors-hyprland.conf".source = config/wal/templates/colors-hyprland.conf;
+    # home.file.".config/wal/templates/colors-rofi-pywal.rasi".source = config/wal/templates/colors-rofi-pywal.rasi;
     # home.file.".config/wal/templates/colors-waybar.css".source = config/wal/templates/colors-waybar.css;
     # home.file.".config/wal/templates/colors-wlogout.css".source = config/wal/templates/colors-hyprland.conf;
     # home.file."bin/swayidle_manager.sh" = {
@@ -110,14 +172,13 @@
       firefox-wayland
       freecad
       freerdp
-      gvfs # for thunar
+ #     gvfs # for thunar
       kate
       kdiff3
       krename
       krusader # pro file manager
       libsForQt5.elisa
-      lshw
-      mullvad-vpn
+  #    mullvad-vpn
       neofetch
       nerdfonts
       nmap
@@ -140,10 +201,10 @@
       webcamoid
       wlr-randr # wayland
       youtube-dl
-      xclip
-      xfce.thunar # simple file manager
-      xfce.thunar-archive-plugin
-      xfce.thunar-media-tags-plugin
+  #    xclip
+  #    xfce.thunar # simple file manager
+  #    xfce.thunar-archive-plugin
+  #    xfce.thunar-media-tags-plugin
     ];
     programs.alacritty = {
       enable = true;
@@ -223,7 +284,7 @@
         pkgs.rnix-lsp
       ];
     };
-    programs.pywal.enable = true;
+  #  programs.pywal.enable = false; # might be causing problems
     programs.thunderbird = {
       enable = true;
       package = pkgs.thunderbird;
@@ -261,103 +322,14 @@
     };
     home.username = "r6t";
     home.stateVersion = "23.11";
-    services.mpris-proxy.enable = false; # Bluetooth audio media button passthrough makes media keys lag
+    # services.mpris-proxy.enable = false; # Bluetooth audio media button passthrough makes media keys lag
   };
- 
-  # Base system packages
-  environment.systemPackages = with pkgs; [
-     neovim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
-     wget
-     git
-     curl
-     unzip
-     alacritty # gpu accelerated terminal
-     dbus   # make dbus-update-activation-environment available in the path
-    # dbus-sway-environment
-    # configure-gtk
-     waybar
-     wayland
-     xdg-utils # for opening default programs when clicking links
-     glib # gsettings
-     dracula-theme # gtk theme
-     gnome3.adwaita-icon-theme  # default gnome cursors
-     swaybg
-     swayidle
-     swaylock-effects
-     grim # screenshot functionality
-     slurp # screenshot functionality
-     rofi
-     wl-clipboard # wl-copy and wl-paste for copy/paste from stdin / stdout
-     mako # notification system developed by swaywm maintainer
-     wdisplays # tool to configure displays
-     wlogout
-     tree
-  ];
- 
-  # Some programs need SUID wrappers, can be configured further or are
-  # started in user sessions.
-  # programs.mtr.enable = true;
-  # programs.gnupg.agent = {
-  #   enable = true;
-  #   enableSSHSupport = true;
-  # };
- 
-  # Systemwide security settings:
-  security.pam.services.swaylock = {}; # required for swaylock-effects functionality
-  # security.pam.services.swaylock.fprintAuth = false; # disables fprintd for swaylock
-  
-  # List services that you want to enable:
-  services.blueman.enable = true; # Bluetooth
-  services.pipewire = {
-    enable = true;
-    alsa.enable = true;
-    pulse.enable = true;
-  };
-  # xdg-desktop-portal works by exposing a series of D-Bus interfaces
-  # known as portals under a well-known name
-  # (org.freedesktop.portal.Desktop) and object path
-  # (/org/freedesktop/portal/desktop).
-  # The portal interfaces include APIs for file access, opening URIs,
-  # printing and others.
-  services.dbus.enable = true;
+
+  # Desktop portal
   xdg.portal = {
     enable = true;
     wlr.enable = true;
     # gtk portal needed to make gtk apps happy
     extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
   };
-  services.flatpak.enable = true;
-  services.fprintd.enable = true;
-  services.fwupd.enable = true; # Linux firmware updater
-  services.mullvad-vpn.enable = true; # Mullvad desktop app
-  services.printing.enable = true; # CUPS print support
-  services.syncthing = {
-    enable = true;
-    dataDir = "/home/r6t/icloud";
-    openDefaultPorts = true;
-    overrideDevices = false;
-    overrideFolders = false;
-    configDir = "/home/r6t/.config/syncthing";
-    user = "r6t";
-    group = "users";
-    guiAddress = "127.0.0.1:8384";
-  };
-  services.tailscale.enable = true;
-  # Enable the OpenSSH daemon.
-  services.openssh.enable = true;
- 
-  # Open ports in the firewall.
-  networking.firewall.allowedTCPPorts = [ 22 ];
-  # networking.firewall.allowedUDPPorts = [ ... ];
-  # Or disable the firewall altogether.
-  # networking.firewall.enable = false;
- 
-  # This value determines the NixOS release from which the default
-  # settings for stateful data, like file locations and database versions
-  # on your system were taken. It‘s perfectly fine and recommended to leave
-  # this value at the release version of the first install of this system.
-  # Before changing this value read the documentation for this option
-  # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
-  system.stateVersion = "23.11"; # Did you read the comment?
- 
 }
