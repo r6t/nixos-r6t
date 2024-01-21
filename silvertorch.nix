@@ -43,9 +43,9 @@
      unzip
      thefuck
      tmux
-#     toybox
-#     tree-sitter # neovim
-#     usbutils
+#     toybox # confirmed toybox breaks reboot
+     tree-sitter # neovim
+     usbutils
 #  #   xdg-utils # for opening default programs when clicking links
 #  #   glib # gsettings
 #  #   dracula-theme # gtk theme
