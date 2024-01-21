@@ -13,36 +13,58 @@
   # Bootloader
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
-  boot.initrd.luks.devices."luks-c19f0d35-ae1c-4379-a5e9-ac0ea8665118".device = "/dev/disk/by-uuid/c19f0d35-ae1c-4379-a5e9-ac0ea8665118";
+  boot.initrd.luks.devices."luks-53ca6a2d-f815-4e56-bc29-ef2d329ac9b1".device = "/dev/disk/by-uuid/53ca6a2d-f815-4e56-bc29-ef2d329ac9b1";
 
+  environment.sessionVariables = {
+    # Electron hint
+    NIXOS_OZONE_WL = "1";
+  };
   environment.shells = with pkgs; [ zsh ]; # /etc/shells
   # System packages
   environment.systemPackages = with pkgs; [
      alacritty
+     ansible
+     awscli2
      curl
   #   dbus
+     fd
      git
      lshw
+     libnotify # reqd for mako
      neovim
+     neofetch
+     nerdfonts # font
+     nmap
+     networkmanagerapplet
+     nodejs # neovim
+     pciutils
+     ripgrep
      wget
+     source-sans-pro # font
      unzip
+     thefuck
+     tmux
+     toybox
+     tree-sitter # neovim
+     usbutils
   #   xdg-utils # for opening default programs when clicking links
   #   glib # gsettings
   #   dracula-theme # gtk theme
   #   gnome3.adwaita-icon-theme  # default gnome cursors
   #   swaybg
+     swww
   #   swayidle
   #   swaylock-effects
   #   grim # screenshot functionality
   #   slurp # screenshot functionality
-  #   rofi
+     rofi-wayland
   #   wl-clipboard # wl-copy and wl-paste for copy/paste from stdin / stdout
   #   mako # notification system developed by swaywm maintainer
   #   wdisplays # tool to configure displays
-     wlogout
+#     wlogout
      tree
      waybar
-     wayland
+#     wayland
   ];
 
  # hardware.bluetooth.enable = true;
@@ -92,17 +114,19 @@
   programs.zsh.enable = true;
 
   # System security settings:
-  security.pam.services.swaylock = {}; # required for swaylock-effects functionality
+  # security.pam.services.swaylock = {}; # required for swaylock-effects functionality
   # security.polkit.enable = true;
+  security.rtkit.enable = true; # sound
 
   # System services:
  # services.blueman.enable = true; # Bluetooth
- # services.pipewire = {
- #   enable = true;
- #   alsa.enable = true;
- #   pulse.enable = true;
- # };
-  # xdg-desktop-portal works by exposing a series of D-Bus interfaces
+  services.pipewire = {
+    enable = true;
+    alsa.enable = true;
+    pulse.enable = true;
+    jack.enable = true;
+  };
+ # xdg-desktop-portal works by exposing a series of D-Bus interfaces
   # known as portals under a well-known name
   # (org.freedesktop.portal.Desktop) and object path
   # (/org/freedesktop/portal/desktop).
@@ -163,12 +187,9 @@
     #   executable = true;
     # };
     home.packages = with pkgs; [
-      ansible
-      awscli2
-      betaflight-configurator
+#      betaflight-configurator
       bitwarden
       brave
-      fd
       firefox-wayland
       freecad
       freerdp
@@ -179,27 +200,14 @@
       krusader # pro file manager
       libsForQt5.elisa
   #    mullvad-vpn
-      neofetch
-      nerdfonts
-      nmap
-      networkmanagerapplet
-      nodejs # neovim
       ollama
       librewolf
-      pciutils
-      ripgrep
       remmina
-      source-sans-pro
-      thefuck
-      tmux
-      toybox
-      tree-sitter # neovim
       ungoogled-chromium
-      usbutils
       virt-manager
       vlc
       webcamoid
-      wlr-randr # wayland
+#      wlr-randr # wayland
       youtube-dl
   #    xclip
   #    xfce.thunar # simple file manager
@@ -237,53 +245,54 @@
       viAlias = true;
       vimAlias = true;
       vimdiffAlias = true;
-      plugins = with pkgs.vimPlugins; [
-        cmp-buffer
-        cmp-nvim-lsp
-        cmp-nvim-lua
-        cmp-path
-        cmp_luasnip
-        friendly-snippets
-        harpoon
-        indentLine
-        # mini-nvim
-        nvim-lspconfig # lsp-zero
-        lsp-zero-nvim
-        luasnip
-        nvim-cmp
-        nvim-treesitter.withAllGrammars
-        nvim-treesitter-context
-        plenary-nvim
-        rose-pine
-        telescope-nvim
-        undotree
-        vim-fugitive
-        vim-nix
-      ];
-      extraConfig = ''
-        colorscheme rose-pine
-        set number relativenumber
-        set nowrap
-        set nobackup
-        set nowritebackup
-        set noswapfile
-      '';
-      # extraLuaConfig goes to .config/nvim/init.lua, which cannot be managed as an individual file when using this
-      extraLuaConfig = ''
-        require("r6t")
-        require("r6t.remap")
-        require("r6t.treesitter")
-        vim.cmd('set clipboard=unnamedplus')
-      '';
-      extraPackages = [
-        pkgs.luajitPackages.lua-lsp
-        pkgs.nodePackages.bash-language-server
-        pkgs.nodePackages.pyright
-        pkgs.nodePackages.vim-language-server
-        pkgs.nodePackages.yaml-language-server
-        pkgs.rnix-lsp
-      ];
-    };
+      };
+#      plugins = with pkgs.vimPlugins; [
+#        cmp-buffer
+#        cmp-nvim-lsp
+#        cmp-nvim-lua
+#        cmp-path
+#        cmp_luasnip
+#        friendly-snippets
+#        harpoon
+#        indentLine
+#        # mini-nvim
+#        nvim-lspconfig # lsp-zero
+#        lsp-zero-nvim
+#        luasnip
+#        nvim-cmp
+#        nvim-treesitter.withAllGrammars
+#        nvim-treesitter-context
+#        plenary-nvim
+#        rose-pine
+#        telescope-nvim
+#        undotree
+#        vim-fugitive
+#        vim-nix
+#      ];
+#      extraConfig = ''
+#        colorscheme rose-pine
+#        set number relativenumber
+#        set nowrap
+#        set nobackup
+#        set nowritebackup
+#        set noswapfile
+#      '';
+#      # extraLuaConfig goes to .config/nvim/init.lua, which cannot be managed as an individual file when using this
+#      extraLuaConfig = ''
+#        require("r6t")
+#        require("r6t.remap")
+#        require("r6t.treesitter")
+#        vim.cmd('set clipboard=unnamedplus')
+#      '';
+#      extraPackages = [
+#        pkgs.luajitPackages.lua-lsp
+#        pkgs.nodePackages.bash-language-server
+#        pkgs.nodePackages.pyright
+#        pkgs.nodePackages.vim-language-server
+#        pkgs.nodePackages.yaml-language-server
+#        pkgs.rnix-lsp
+#      ];
+#    };
   #  programs.pywal.enable = false; # might be causing problems
     programs.thunderbird = {
       enable = true;
@@ -328,7 +337,7 @@
   # Desktop portal
   xdg.portal = {
     enable = true;
-    wlr.enable = true;
+    # wlr.enable = true; maybe problem?
     # gtk portal needed to make gtk apps happy
     extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
   };
