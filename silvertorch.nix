@@ -23,27 +23,26 @@
   # System packages
   environment.systemPackages = with pkgs; [
      alacritty
-#     ansible
-#     awscli2
+     ansible
+     awscli2
      curl
-#  #   dbus
-#     fd
+     fd
      git
-#     lshw
-#     libnotify # reqd for mako
+     lshw
+     libnotify # reqd for mako
      neovim
-#     neofetch
-#     nerdfonts # font
-#     nmap
-#     networkmanagerapplet
-#     nodejs # neovim
-#     pciutils
-#     ripgrep
+     neofetch
+     nerdfonts # font
+     nmap
+#     networkmanagerapplet # just use nmtui?
+     nodejs # neovim
+     pciutils
+     ripgrep
      wget
 #     source-sans-pro # font
-#     unzip
-#     thefuck
-#     tmux
+     unzip
+     thefuck
+     tmux
 #     toybox
 #     tree-sitter # neovim
 #     usbutils
@@ -58,7 +57,7 @@
 #  #   grim # screenshot functionality
 #  #   slurp # screenshot functionality
      rofi-wayland
-#  #   wl-clipboard # wl-copy and wl-paste for copy/paste from stdin / stdout
+#     wl-clipboard # wl-copy and wl-paste for copy/paste from stdin / stdout # looks like it breaks reboot!
 #  #   mako # notification system developed by swaywm maintainer
 #  #   wdisplays # tool to configure displays
 ##     wlogout
@@ -113,7 +112,6 @@
 
   # System security settings:
   # security.pam.services.swaylock = {}; # required for swaylock-effects functionality
-  # security.polkit.enable = true;
   security.rtkit.enable = true; # sound
 
   # System services:
@@ -126,9 +124,9 @@
   };
   services.flatpak.enable = true;
   services.fprintd.enable = true;
- # services.fwupd.enable = true; # Linux firmware updater
+  services.fwupd.enable = true; # Linux firmware updater
   services.mullvad-vpn.enable = true; # Mullvad desktop app
- # services.printing.enable = true; # CUPS print support
+  services.printing.enable = true; # CUPS print support
  # services.syncthing = {
  #   enable = true;
  #   dataDir = "/home/r6t/icloud";
@@ -179,11 +177,11 @@
 #    # };
     home.packages = with pkgs; [
 ##      betaflight-configurator
-#      bitwarden
-#      brave
+      bitwarden
+      brave
       firefox-wayland
-#      freecad
-#      freerdp
+      freecad
+      freerdp
 # #     gvfs # for thunar
       kate
       kdiff3
