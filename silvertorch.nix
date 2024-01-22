@@ -65,12 +65,14 @@
      waybar
   ];
 
- # hardware.bluetooth.enable = true;
- # hardware.bluetooth.settings = {
- #       General = {
- #       	Experimental = true;
- #       };
- # };
+  hardware.bluetooth.enable = true;
+  # Experimental settings allow the os to read bluetooth device battery level
+  # causes: Checking that all programs called by absolute paths in udev rules exist... grep: warning: stray \ before /
+  hardware.bluetooth.settings = {
+    General = {
+      Experimental = true;
+     };
+  };
 
   # Internationalization
   i18n.defaultLocale = "en_US.UTF-8";
