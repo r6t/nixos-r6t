@@ -34,12 +34,12 @@
      neofetch
      nerdfonts # font
      nmap
-#     networkmanagerapplet # just use nmtui?
+#     networkmanagerapplet # trying nmtui only
      nodejs # neovim
      pciutils
      ripgrep
      wget
-#     source-sans-pro # font
+     source-sans-pro # font
      unzip
      thefuck
      tmux
@@ -50,12 +50,11 @@
 #  #   glib # gsettings
 #  #   dracula-theme # gtk theme
 #  #   gnome3.adwaita-icon-theme  # default gnome cursors
-#  #   swaybg
      swww
 #  #   swayidle
 #  #   swaylock-effects
-#  #   grim # screenshot functionality
-#  #   slurp # screenshot functionality
+     grim # screenshot functionality
+     slurp # screenshot functionality
      rofi-wayland
 #     wl-clipboard # wl-copy and wl-paste for copy/paste from stdin / stdout # looks like it breaks reboot!
 #  #   mako # notification system developed by swaywm maintainer
@@ -117,7 +116,7 @@
   security.rtkit.enable = true; # sound
 
   # System services:
- # services.blueman.enable = true; # Bluetooth
+  services.blueman.enable = true; # Bluetooth
   services.pipewire = {
     enable = true;
     alsa.enable = true;
@@ -129,18 +128,18 @@
   services.fwupd.enable = true; # Linux firmware updater
   services.mullvad-vpn.enable = true; # Mullvad desktop app
   services.printing.enable = true; # CUPS print support
- # services.syncthing = {
- #   enable = true;
- #   dataDir = "/home/r6t/icloud";
- #   openDefaultPorts = true;
- #   overrideDevices = false;
- #   overrideFolders = false;
- #   configDir = "/home/r6t/.config/syncthing";
- #   user = "r6t";
- #   group = "users";
- #   guiAddress = "127.0.0.1:8384";
- # };
- # services.tailscale.enable = true;
+  services.syncthing = {
+    enable = true;
+    dataDir = "/home/r6t/icloud";
+    openDefaultPorts = true;
+    overrideDevices = false;
+    overrideFolders = false;
+    configDir = "/home/r6t/.config/syncthing";
+    user = "r6t";
+    group = "users";
+    guiAddress = "127.0.0.1:8384";
+  };
+  services.tailscale.enable = true;
   services.openssh.enable = true;
   # Configure keymap in X11
   services.xserver = {
@@ -165,7 +164,7 @@
   home-manager.users.r6t = { pkgs, ...}: {
     home.file.".config/hypr/hyprland.conf".source = config/hypr/hyprland.conf;
 #   # home.file.".config/swaylock/config".source = config/swaylock/config;
-#   # home.file.".config/waybar/config".source = config/waybar/config;
+    home.file.".config/waybar/config".source = config/waybar/config;
 #    # home.file.".config/waybar/style.css".source = config/waybar/style.css;
 #   # home.file.".config/wlogout/layout".source = config/wlogout/layout;
 #    # home.file.".config/wlogout/style.css".source = config/wlogout/style.css;
@@ -178,32 +177,29 @@
 #    #   executable = true;
 #    # };
     home.packages = with pkgs; [
-##      betaflight-configurator
+      betaflight-configurator
       bitwarden
       brave
+      brightnessctl # display brightness
       firefox-wayland
       freecad
       freerdp
-# #     gvfs # for thunar
       kate
       kdiff3
       krename
-      krusader # pro file manager
+      krusader # file manager
       libsForQt5.elisa
-#  #    mullvad-vpn
-#      ollama
-#      librewolf
-#      remmina
-#      ungoogled-chromium
-#      virt-manager
-#      vlc
-#      webcamoid
+      ollama
+      librewolf
+      pamixer # pulseaudio controls
+      playerctl # media keys
+      qt5ct # KDE app support
+      remmina
+      ungoogled-chromium
+      virt-manager
+      vlc
 ##      wlr-randr # wayland
-#      youtube-dl
-#  #    xclip
-#  #    xfce.thunar # simple file manager
-#  #    xfce.thunar-archive-plugin
-#  #    xfce.thunar-media-tags-plugin
+      youtube-dl
     ];
     programs.alacritty = {
       enable = true;
@@ -312,13 +308,15 @@
     home.homeDirectory = "/home/r6t";
     home.sessionVariables = {
         MOZ_ENABLE_WAYLAND = 1;
+	XDG_CURRENT_SESSION = "hyprland";
+        QT_QPA_PLATFORM="wayland-egl"; # maybe just "wayland"
+	QT_WAYLAND_DISABLE_WINDOWDECORATION = 1;
+
         #XDG_SESSION_TYPE = "wayland";
         #WAYLAND_DISPLAY="wayland-0";
         #GDK_BACKEND="wayland";
-        #QT_QPA_PLATFORM="wayland";
         #XDG_DATA_DIRS=/path/to/data_dirs:${XDG_DATA_DIRS};
         #XDG_CONFIG_DIRS=/path/to/config_dirs:${XDG_CONFIG_DIRS};
-
     };
     home.username = "r6t";
     home.stateVersion = "23.11";
