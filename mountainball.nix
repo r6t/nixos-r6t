@@ -1,39 +1,146 @@
-# r6t's nixos configuration
-# Currently used to manage a single Framework laptop
+# r6t's NixOS configuration: AMD CPU + Nvidia GPU desktop
 
-{ config, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 
-{ imports =
-    [ <home-manager/nixos>
-      <nixos-hardware/framework>
+{
+  imports =
+    [
+      <home-manager/nixos>
+      ./hardware-configuration.nix
+    ];
 
-      # Include the results of the hardware scan.
-      ./hardware-configuration.nix ];
 
-  ### NIXOS CONFIGURATION
+  # Bootloader
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
-  boot.initrd.secrets = { "/crypto_keyfile.bin" = null;
-  };
-  boot.initrd.luks.devices."luks-f26077b3-1094-45f1-8c6e-07f7fee52e72".device = "/dev/disk/by-uuid/f26077b3-1094-45f1-8c6e-07f7fee52e72"; 
-  boot.initrd.luks.devices."luks-f26077b3-1094-45f1-8c6e-07f7fee52e72".keyFile = "/crypto_keyfile.bin";
+  boot.initrd.luks.devices."luks-592f29d8-cde7-4065-b38a-f0cd025e03fd".device = "/dev/disk/by-uuid/592f29d8-cde7-4065-b38a-f0cd025e03fd";
+  boot.kernelParams = [ "nvidia.NVreg_PreserveVideoMemoryAllocations=1" ]; # sleep/wake
 
+
+  environment.sessionVariables = {
+    # Electron hint
+    NIXOS_OZONE_WL = "1";
+    # Wayland Nvidia disappearing cursor fix
+    WLR_NO_HARDWARE_CURSORS = "1";
+  };
   environment.shells = with pkgs; [ zsh ]; # /etc/shells
+  # System packages
+  environment.systemPackages = with pkgs; [
+     alacritty
+     ansible
+     awscli2
+     curl
+     dconf # hyprland support
+     fd
+     git
+     gnome.gnome-keyring
+     gnupg
+     jdk # at least wayland hidpi cursor support
+     libsecret
+     lshw
+     libnotify # mako support
+     neovim
+     neofetch
+     nmap
+     nodejs
+     pciutils
+     ripgrep
+     wget
+     unzip
+     thefuck
+     tmux
+     # tree-sitter # neovim
+     unzip
+     usbutils
+     xdg-utils # default apps for file types
+     swww
+     swayidle
+     swaylock-effects
+     grim # screenshots
+     slurp # screenshots
+     rofi-wayland # app launcher
+     wl-clipboard # wl-copy and wl-paste for copy/paste from stdin / stdout
+     mako # notifications
+     wdisplays # tool to configure displays
+     wlogout
+     tree
+     waybar
+     xwayland
+     zip
+  ];
+
+  fonts.packages = with pkgs; [
+     font-awesome
+     hack-font
+     nerdfonts
+     source-sans-pro
+  ];
 
   hardware.bluetooth.enable = true;
-  hardware.pulseaudio.enable = false; # disabled for pipewire
-
-  networking.networkmanager.enable = true;
-  networking.hostName = "mountainball";
-  # networking.wireless.enable = true; # wpa_supplicant
-
-  i18n.defaultLocale = "en_US.UTF-8";
-  i18n.extraLocaleSettings = { LC_ADDRESS = "en_US.UTF-8"; LC_IDENTIFICATION = "en_US.UTF-8"; LC_MEASUREMENT = "en_US.UTF-8"; LC_MONETARY = 
-    "en_US.UTF-8"; LC_NAME = "en_US.UTF-8"; LC_NUMERIC = "en_US.UTF-8"; LC_PAPER = "en_US.UTF-8"; LC_TELEPHONE = "en_US.UTF-8"; LC_TIME = 
-    "en_US.UTF-8";
+  # Experimental settings allow the os to read bluetooth device battery level
+  hardware.bluetooth.settings = {
+    General = {
+      Experimental = true;
+     };
   };
 
+
+ # Nvidia GPU (unfree)
+  hardware.opengl = {
+    enable = true;
+    driSupport = true;
+    driSupport32Bit = true;
+  };
+  hardware.nvidia = {
+ 
+    # Modesetting is required.
+    modesetting.enable = true;
+ 
+    # Nvidia power management. Experimental, and can cause sleep/suspend to fail.
+    powerManagement.enable = true; # changed from default false
+    # Fine-grained power management. Turns off GPU when not in use.
+    # Experimental and only works on modern Nvidia GPUs (Turing or newer).
+    powerManagement.finegrained = false;
+ 
+    # Use the NVidia open source kernel module (not to be confused with the
+    # independent third-party "nouveau" open source driver).
+    # Support is limited to the Turing and later architectures. Full list of 
+    # supported GPUs is at: 
+    # https://github.com/NVIDIA/open-gpu-kernel-modules#compatible-gpus 
+    # Only available from driver 515.43.04+
+    # Currently alpha-quality/buggy, so false is currently the recommended setting.
+    open = false;
+ 
+    # Enable the Nvidia settings menu,
+        # accessible via `nvidia-settings`.
+    nvidiaSettings = true;
+ 
+    # Optionally, you may need to select the appropriate driver version for your specific GPU.
+    package = config.boot.kernelPackages.nvidiaPackages.stable;
+   };
+
+  # Internationalization
+  i18n.defaultLocale = "en_US.UTF-8";
+  i18n.extraLocaleSettings = {
+    LC_ADDRESS = "en_US.UTF-8";
+    LC_IDENTIFICATION = "en_US.UTF-8";
+    LC_MEASUREMENT = "en_US.UTF-8";
+    LC_MONETARY = "en_US.UTF-8";
+    LC_NAME = "en_US.UTF-8";
+    LC_NUMERIC = "en_US.UTF-8";
+    LC_PAPER = "en_US.UTF-8";
+    LC_TELEPHONE = "en_US.UTF-8";
+    LC_TIME = "en_US.UTF-8";
+  };
+
+  networking.networkmanager.enable = true;
+  networking.hostName = "mountainball"; # Define your hostname.
+  networking.firewall.allowedTCPPorts = [ 22 ];
+  # networking.firewall.allowedUDPPorts = [ ... ];
+
   nix = {
+    # Required for Flakes
+    package = pkgs.nix;
     # NixOS garbage collection
     gc = {
       automatic = true;
@@ -42,107 +149,118 @@
     };
     settings = {
       auto-optimise-store = true;
+      experimental-features = [ "nix-command" "flakes" ];
     };
   };
 
-  programs.hyprland.enable = false;
+  nixpkgs.config.allowUnfree = true;
+
+
+  # System programs:
+  programs.hyprland = {
+    enable = true;
+    xwayland.enable = true;
+  };
   programs.zsh.enable = true;
+
+  # System security settings:
+  security.pam.services.swaylock = {}; # required for swaylock-effects functionality
+  security.polkit.enable = true; # hyprland support
+  security.rtkit.enable = true; # sound
+
+  # System services:
+  services.blueman.enable = true; # Bluetooth
+  services.pipewire = {
+    enable = true;
+    alsa.enable = true;
+    pulse.enable = true;
+    jack.enable = true;
+  };
+  services.flatpak.enable = true;
+  services.fprintd.enable = true;
+  services.fwupd.enable = true; # Linux firmware updater
+  services.mullvad-vpn.enable = true; # Mullvad desktop app
+  services.printing.enable = true; # CUPS print support
+  services.syncthing = {
+    enable = true;
+    dataDir = "/home/r6t/icloud";
+    openDefaultPorts = true;
+    overrideDevices = false;
+    overrideFolders = false;
+    configDir = "/home/r6t/.config/syncthing";
+    user = "r6t";
+    group = "users";
+    guiAddress = "127.0.0.1:8384";
+  };
+  services.tailscale.enable = true;
+  services.openssh.enable = true;
+  # Configure keymap in X11
+  services.xserver = {
+    # xkb.layout = "us";
+    # xkb.Variant = "";
+    videoDrivers = ["nvidia"];
+    xkb = {
+      layout = "us";
+      variant = "";
+    };
+  };
 
   sound.enable = true; # see services.pipewire
 
-  security.rtkit.enable = true;
+  system.stateVersion = "23.11"; # Inital version on system. Do not edit,
 
   time.timeZone = "America/Los_Angeles";
 
-  xdg.portal.enable = true;
-  xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-wlr pkgs.xdg-desktop-portal-gtk ];
-
-  ### USER + APPLICATIONS
-  # Probably should be managing the user itself via home-manager?
-  users.users.user = { isNormalUser = true; description = "user"; extraGroups = [ "networkmanager" "wheel" ]; shell = pkgs.zsh;
+  # Users:
+  users.users.r6t = {
+    isNormalUser = true;
+    description = "r6t";
+    extraGroups = [ "docker" "networkmanager" "wheel" ];
+    packages = with pkgs; [];
+    shell = pkgs.zsh;
   };
-
-  home-manager.users.user = { pkgs, ...}: {
-    home.file.".config/electron13-flags.conf".text = ''
-      --enable-features=UseOzonePlatform
-      --ozone-platform=wayland
-    '';
-    home.file.".config/nvim/after/plugin/fugitive.lua".text = ''
-      vim.keymap.set("n", "<leader>gs", vim.cmd.Git)
-    '';
-    home.file.".config/nvim/after/plugin/harpoon.lua".text = ''
-      local mark = require("harpoon.mark")
-      local ui = require("harpoon.ui")
-      
-      vim.keymap.set("n", "<leader>a", mark.add_file)
-      vim.keymap.set("n", "<C-e>", ui.toggle_quick_menu)
-      
-      vim.keymap.set("n", "<C-h>", function() ui.nav_file(1) end)
-      vim.keymap.set("n", "<C-t>", function() ui.nav_file(2) end)
-      vim.keymap.set("n", "<C-n>", function() ui.nav_file(3) end)
-      vim.keymap.set("n", "<C-s>", function() ui.nav_file(4) end)
-    '';
-    home.file.".config/nvim/after/plugin/lsp.lua".text = ''
-      local lsp = require('lsp-zero').preset({})
-
-      lsp.on_attach(function(client, bufnr)
-        -- see :help lsp-zero-keybindings
-        -- to learn the available actions
-        lsp.default_keymaps({buffer = bufnr})
-      end)
-      
-      lsp.setup()
-    '';
-    home.file.".config/nvim/after/plugin/telescope.lua".text = ''
-      local builtin = require('telescope.builtin')
-      vim.keymap.set('n', '<leader>pf', builtin.find_files, {})
-      vim.keymap.set('n', 'C-p', builtin.git_files, {})
-      vim.keymap.set('n', '<leader>ps', function()
-        builtin.grep_string({ search = vim.fn.input("Grep > ") });
-      end)
-    '';
-    home.file.".config/nvim/after/plugin/undotree.lua".text = ''
-      vim.keymap.set("n", "<leader>u", vim.cmd.UndotreeToggle)
-    '';
-    home.file.".config/nvim/lua/r6t/init.lua".text = ''
-    '';
-    home.file.".config/nvim/lua/r6t/remap.lua".text = ''
-      vim.g.mapleader = " "
-      vim.keymap.set("n", "<leader>pv", vim.cmd.Ex)
-    '';
+  home-manager.users.r6t = { pkgs, ...}: {
+    home.file.".config/hypr/hyprland.conf".source = config/hypr/hyprland.conf;
+    home.file.".config/waybar/config".source = config/waybar/config;
     home.packages = with pkgs; [
-      ansible
       betaflight-configurator
+      bitwarden
       brave
+      brightnessctl # display brightness
       firefox-wayland
       freecad
-      freetube
       freerdp
-      kate
-      krusader
-      mullvad-vpn
-      neofetch
+      kate # KDE text editor
+      kdiff3 # KDE utility
+      krename # KDE utility
+      krusader # KDE file manager
+      libva # https://wiki.hyprland.org/hyprland-wiki/pages/Nvidia/
+      libsForQt5.breeze-gtk # KDE Breeze theme
+      libsForQt5.breeze-icons # KDE app icons
+      libsForQt5.elisa # KDE music player
+      libsForQt5.polkit-kde-agent # KDE privlege escalation helper
+      libsForQt5.qtwayland # KDE app support + https://wiki.hyprland.org/hyprland-wiki/pages/Nvidia/
+      libsForQt5.qt5ct # KDE app support + https://wiki.hyprland.org/hyprland-wiki/pages/Nvidia/
+      protonmail-bridge
       librewolf
-      ripgrep
+      pamixer # pulseaudio controls
+      playerctl # media keys
       remmina
-      signal-desktop
-      thefuck
-      tmux
       ungoogled-chromium
       virt-manager
       vlc
-      webcamoid
+      webcord # Discord client
+      wlr-randr # wayland
       youtube-dl
-
     ];
     programs.alacritty = {
       enable = true;
       settings = {
       font = {
-	size = 14.0;
+        size = 14.0;
       };
       selection = {
-	save_to_clipboard = true;
+        save_to_clipboard = true;
       };
       };
     };
@@ -167,41 +285,28 @@
       vimAlias = true;
       vimdiffAlias = true;
       plugins = with pkgs.vimPlugins; [
-        cmp-buffer
-        cmp-nvim-lsp
-        cmp-nvim-lua
-        cmp-path
-	cmp_luasnip
-	friendly-snippets
-        harpoon
-        indentLine
-	# mini-nvim
-	nvim-lspconfig # lsp-zero
-        lsp-zero-nvim
-        luasnip
-	nvim-cmp
-	nvim-treesitter.withAllGrammars
-	nvim-treesitter-context
-	plenary-nvim
-	rose-pine
-	telescope-nvim
-	undotree
-	vim-fugitive
+        rose-pine
       ];
       extraConfig = ''
         colorscheme rose-pine
         set number relativenumber
+        set nowrap
+        set nobackup
+        set nowritebackup
+        set noswapfile
       '';
+      # extraLuaConfig goes to .config/nvim/init.lua, which cannot be managed as an individual file when using this
       extraLuaConfig = ''
-	require("r6t")
-        require("r6t.remap")
       '';
       extraPackages = [
-        pkgs.nodePackages.bash-language-server
-	pkgs.nodePackages.pyright
-        pkgs.nodePackages.vim-language-server
-        pkgs.nodePackages.yaml-language-server
       ];
+    };
+    programs.thunderbird = {
+      enable = true;
+      package = pkgs.thunderbird;
+      profiles.r6t = {
+        isDefault = true;
+      };
     };
     programs.vscode = {
       enable = true;
@@ -211,93 +316,55 @@
         vscodevim.vim
         yzhang.markdown-all-in-one
       ];
+      userSettings = {
+        "window.titleBarStyle" = "custom";
+      };
     };
     programs.zsh = {
       enable = true;
       oh-my-zsh = {
         enable = true;
-	plugins = [ "aws" "git" "python" "thefuck" ];
+        plugins = [ "aws" "git" "python" "thefuck" ];
         theme = "xiong-chiamiov-plus";
       };
     };
-    home.homeDirectory = "/home/user";
+    home.homeDirectory = "/home/r6t";
     home.sessionVariables = {
         MOZ_ENABLE_WAYLAND = 1;
+	XDG_CURRENT_SESSION = "hyprland";
+        QT_QPA_PLATFORM="wayland"; # maybe "wayland-egl"
+	QT_WAYLAND_DISABLE_WINDOWDECORATION = 1;
+
+        # XDG_SESSION_TYPE = "wayland";
+        # WAYLAND_DISPLAY="wayland-1";
+        # GDK_BACKEND="wayland";
+        # XDG_DATA_DIRS=/path/to/data_dirs:${XDG_DATA_DIRS};
+        # XDG_CONFIG_DIRS=/path/to/config_dirs:${XDG_CONFIG_DIRS};
     };
-    home.username = "user";
-    home.stateVersion = "23.05";
+    home.username = "r6t";
+    home.stateVersion = "23.11";
+#    services.mpris-proxy.enable = false; # Bluetooth audio media button passthrough makes media keys lag
   };
 
-  # List packages installed in system profile. To search, run: $ nix search wget
-  environment.systemPackages = with pkgs; [
-      curl
-      htop
-      jq
-      libgccjit
-      tree
-      unzip
-      wget
-  ];
-
-  # Some programs need SUID wrappers, can be configured further or are started in user sessions. programs.mtr.enable = true; programs.gnupg.agent = {
-  #   enable = true; enableSSHSupport = true;
-  # };
-
-  ### SERVICES:
-  services.flatpak.enable = true;
-  services.fprintd.enable = true;
-  services.fwupd.enable = true; # Linux firmware updater
-  services.mullvad-vpn.enable = true; # Mullvad desktop app
-  services.pipewire = {
+# Containers
+  virtualisation.docker = { 
+    daemon.settings = {
+      data-root = "/home/r6t/docker-root";
+    };
     enable = true;
-    alsa.enable = true;
-    alsa.support32Bit = true;
-    pulse.enable = true;
-    # If you want to use JACK applications, uncomment this jack.enable = true;
-
-    # use the example session manager (no others are packaged yet so this is enabled by default, no need to redefine it in your config for now)
-    #media-session.enable = true;
-  };
-  services.printing.enable = true; # CUPS print support
-  services.syncthing = {
-    enable = true;
-    dataDir = "/home/user/icloud";
-    openDefaultPorts = true;
-    configDir = "/home/user/.config/syncthing";
-    user = "user";
-    group = "users";
-    guiAddress = "0.0.0.0:8384";
-    folders = {
-      "GoPro" = {        # Name of folder in Syncthing, also the folder ID
-        path = "/home/user/GoPro";    # Which folder to add to Syncthing
-      };
-      "Music" = {        # Name of folder in Syncthing, also the folder ID
-        path = "/home/user/Music/sync";    # Which folder to add to Syncthing
-      };
-      "Obsidian" = {        # Name of folder in Syncthing, also the folder ID
-        path = "/home/user/Obsidian";    # Which folder to add to Syncthing
-      };
-      "scans" = {        # Name of folder in Syncthing, also the folder ID
-        path = "/home/user/scan";    # Which folder to add to Syncthing
-      };
-      "Sync" = {        # Name of folder in Syncthing, also the folder ID
-        path = "/home/user/Sync";    # Which folder to add to Syncthing
-      };
+    enableOnBoot = true;
+    enableNvidia = true;
+    rootless = {
+      enable = true;
+      setSocketVariable = true;
     };
   };
-  services.xserver.enable = true;
-  services.xserver = { layout = "us"; xkbVariant = ""; }; # X11 keymap
-  services.xserver.displayManager.sddm.enable = true; # KDE Plasma
-  services.xserver.desktopManager.plasma5.enable = true; # KDE Plasma
-  services.xserver.displayManager.defaultSession = "plasmawayland"; # KDE Plasma
-  # services.xserver.libinput.enable = true; # Enable touchpad support (enabled default in most desktopManager).
 
-  # Enable the OpenSSH daemon. services.openssh.enable = true;
-
-  # Open ports in the firewall. networking.firewall.allowedTCPPorts = [ ... ]; networking.firewall.allowedUDPPorts = [ ... ]; Or disable the firewall 
-  # altogether. networking.firewall.enable = false;
-
-  # Before changing this value read the documentation for this option (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
-  system.stateVersion = "23.05";
-
+  # Desktop portal
+  xdg.portal = {
+    enable = true;
+    wlr.enable = true;
+    # gtk portal needed to make gtk apps happy
+    extraPortals = [ pkgs.xdg-desktop-portal-gtk pkgs.xdg-desktop-portal-hyprland ];
+  };
 }
