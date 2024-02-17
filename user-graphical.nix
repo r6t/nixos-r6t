@@ -8,9 +8,11 @@
       bitwarden
       brave
       brightnessctl # display brightness
+      dconf # hyprland support
       firefox-wayland
       freecad
       freerdp
+      grim # screenshot functionality
       kate # KDE text editor
       kdiff3 # KDE utility
       krename # KDE utility
@@ -22,15 +24,24 @@
       libsForQt5.polkit-kde-agent # KDE privlege escalation helper
       libsForQt5.qtwayland # KDE app support + https://wiki.hyprland.org/hyprland-wiki/pages/Nvidia/
       libsForQt5.qt5ct # KDE app support + https://wiki.hyprland.org/hyprland-wiki/pages/Nvidia/
+      libnotify # reqd for mako
+      mako # notification system developed by swaywm maintainer
       protonmail-bridge
       librewolf
       pamixer # pulseaudio controls
       playerctl # media keys
       remmina
+      rofi-wayland
+      slurp # screenshot functionality
       ungoogled-chromium
       virt-manager
       vlc
       webcord # Discord client
+      xdg-utils # for opening default programs when clicking links
+      waybar
+      wl-clipboard # wl-copy and wl-paste for copy/paste from stdin / stdout
+      wdisplays # wayland display config
+      wlogout
       wlr-randr # wayland
       youtube-dl
     ];

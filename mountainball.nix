@@ -28,47 +28,24 @@
   environment.shells = with pkgs; [ zsh ]; # /etc/shells
   # System packages
   environment.systemPackages = with pkgs; [
-     alacritty
      ansible
      awscli2
      curl
-     dconf # hyprland support
      fd
      git
-     gnome.gnome-keyring
-     gnupg
-     jdk # at least wayland hidpi cursor support
-     libsecret
      lshw
-     libnotify # mako support
      neovim
      neofetch
      nmap
      nodejs
      pciutils
      ripgrep
-     wget
-     unzip
      thefuck
      tmux
-     # tree-sitter # neovim
      unzip
      usbutils
-     xdg-utils # default apps for file types
-     swww
-     swayidle
-     swaylock-effects
-     grim # screenshots
-     slurp # screenshots
-     rofi-wayland # app launcher
-     wl-clipboard # wl-copy and wl-paste for copy/paste from stdin / stdout
-     mako # notifications
-     wdisplays # tool to configure displays
-     wlogout
+     wget
      tree
-     waybar
-     xwayland
-     zip
   ];
 
   fonts.packages = with pkgs; [

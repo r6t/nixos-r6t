@@ -25,51 +25,35 @@
   environment.shells = with pkgs; [ zsh ]; # /etc/shells
   # System packages
   environment.systemPackages = with pkgs; [
-     alacritty
      ansible
      awscli2
      curl
      fd
      git
      lshw
-     libnotify # reqd for mako
      neovim
      neofetch
-     nerdfonts # font
      nmap
-#     networkmanagerapplet # trying nmtui only
-     nodejs # neovim
+     nodejs
      pciutils
      ripgrep
-     wget
-     source-sans-pro # font
-     unzip
      thefuck
      tmux
-#     toybox # confirmed toybox breaks reboot
-     tree-sitter # neovim
+     unzip
      usbutils
-#  #   xdg-utils # for opening default programs when clicking links
-#  #   glib # gsettings
-#  #   dracula-theme # gtk theme
-#  #   gnome3.adwaita-icon-theme  # default gnome cursors
-     swww
-#  #   swayidle
-#  #   swaylock-effects
-     grim # screenshot functionality
-     slurp # screenshot functionality
-     rofi-wayland
-#     wl-clipboard # wl-copy and wl-paste for copy/paste from stdin / stdout # looks like it breaks reboot!
-#  #   mako # notification system developed by swaywm maintainer
-     wdisplays # wayland display config
-##     wlogout
+     wget
      tree
-     waybar
+  ];
+
+  fonts.packages = with pkgs; [
+     font-awesome
+     hack-font
+     nerdfonts
+     source-sans-pro
   ];
 
   hardware.bluetooth.enable = true;
   # Experimental settings allow the os to read bluetooth device battery level
-  # causes: Checking that all programs called by absolute paths in udev rules exist... grep: warning: stray \ before /
   hardware.bluetooth.settings = {
     General = {
       Experimental = true;
@@ -155,6 +139,19 @@
   system.stateVersion = "23.11"; # Inital version on system. Do not edit,
 
   time.timeZone = "America/Los_Angeles";
+
+  # Containers
+  virtualisation.docker = { 
+    daemon.settings = {
+      data-root = "/home/r6t/docker-root";
+    };
+    enable = true;
+    enableOnBoot = true;
+    rootless = {
+      enable = true;
+      setSocketVariable = true;
+    };
+  };
 
   # Desktop portal
   xdg.portal = {
