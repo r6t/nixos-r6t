@@ -23,12 +23,14 @@
      curl
      fd
      git
+     libvirt
      lshw
      neovim
      neofetch
      nmap
      nodejs
      pciutils
+     qemu_kvm
      ripgrep
      thefuck
      tmux
