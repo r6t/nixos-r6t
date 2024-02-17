@@ -121,10 +121,10 @@
   time.timeZone = "America/Los_Angeles";
 
   virtualisation = {
-  libvirtd = {
-    enable = true;
-    qemu.ovmf.enable = true;
+    libvirtd = {
+      enable = true;
+      qemu.ovmf.enable = true;
+    };
   };
-};
 
 }
