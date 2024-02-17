@@ -30,6 +30,7 @@
      curl
      fd
      git
+     libva # https://wiki.hyprland.org/hyprland-wiki/pages/Nvidia/
      lshw
      neovim
      neofetch
