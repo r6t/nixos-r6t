@@ -1,13 +1,14 @@
-# r6t's NixOS configuration: manages a 13" Framework AMD laptop
+# r6t's NixOS configuration: 13" Framework AMD laptop
 
 { config, pkgs, ... }:
-
 {
   imports =
     [
       <home-manager/nixos>
       <nixos-hardware/framework/13-inch/7040-amd>
       ./hardware-configuration.nix
+      ./user.nix
+      ./user-graphical.nix
     ];
 
   # Bootloader
@@ -18,6 +19,8 @@
   environment.sessionVariables = {
     # Electron hint
     NIXOS_OZONE_WL = "1";
+    QT_STYLE_OVERRIDE = "Breeze-Dark"; # maybe not needed 
+
   };
   environment.shells = with pkgs; [ zsh ]; # /etc/shells
   # System packages
@@ -58,7 +61,7 @@
      rofi-wayland
 #     wl-clipboard # wl-copy and wl-paste for copy/paste from stdin / stdout # looks like it breaks reboot!
 #  #   mako # notification system developed by swaywm maintainer
-#  #   wdisplays # tool to configure displays
+     wdisplays # wayland display config
 ##     wlogout
      tree
      waybar
@@ -152,176 +155,6 @@
   system.stateVersion = "23.11"; # Inital version on system. Do not edit,
 
   time.timeZone = "America/Los_Angeles";
-
-  # Users:
-  users.users.r6t = {
-    isNormalUser = true;
-    description = "r6t";
-    extraGroups = [ "networkmanager" "wheel" ];
-    packages = with pkgs; [];
-    shell = pkgs.zsh;
-  };
-  home-manager.users.r6t = { pkgs, ...}: {
-    home.file.".config/hypr/hyprland.conf".source = config/hypr/hyprland.conf;
-#   # home.file.".config/swaylock/config".source = config/swaylock/config;
-    home.file.".config/waybar/config".source = config/waybar/config;
-#    # home.file.".config/waybar/style.css".source = config/waybar/style.css;
-#   # home.file.".config/wlogout/layout".source = config/wlogout/layout;
-#    # home.file.".config/wlogout/style.css".source = config/wlogout/style.css;
-#    # home.file.".config/wal/templates/colors-hyprland.conf".source = config/wal/templates/colors-hyprland.conf;
-#    # home.file.".config/wal/templates/colors-rofi-pywal.rasi".source = config/wal/templates/colors-rofi-pywal.rasi;
-#    # home.file.".config/wal/templates/colors-waybar.css".source = config/wal/templates/colors-waybar.css;
-#    # home.file.".config/wal/templates/colors-wlogout.css".source = config/wal/templates/colors-hyprland.conf;
-#    # home.file."bin/swayidle_manager.sh" = {
-#    #   source = ./scripts/swayidle_manager.sh;
-#    #   executable = true;
-#    # };
-    home.packages = with pkgs; [
-      betaflight-configurator
-      bitwarden
-      brave
-      brightnessctl # display brightness
-      firefox-wayland
-      freecad
-      freerdp
-      kate
-      kdiff3
-      krename
-      krusader # file manager
-      libsForQt5.elisa
-      ollama
-      librewolf
-      pamixer # pulseaudio controls
-      playerctl # media keys
-      qt5ct # KDE app support
-      remmina
-      ungoogled-chromium
-      virt-manager
-      vlc
-##      wlr-randr # wayland
-      youtube-dl
-    ];
-    programs.alacritty = {
-      enable = true;
-      settings = {
-      font = {
-        size = 14.0;
-      };
-      selection = {
-        save_to_clipboard = true;
-      };
-      };
-    };
-    programs.git = {
-      enable = true;
-      userName = "r6t";
-      userEmail = "ryancast@gmail.com";
-      extraConfig = {
-        core = {
-          editor = "nvim";
-        };
-      };
-      ignores = [
-        ".DS_Store"
-        "*.pyc"
-      ];
-    };
-#    programs.neovim = {
-#      enable = true;
-#      defaultEditor = true;
-#      viAlias = true;
-#      vimAlias = true;
-#      vimdiffAlias = true;
-#      };
-##      plugins = with pkgs.vimPlugins; [
-##        cmp-buffer
-##        cmp-nvim-lsp
-##        cmp-nvim-lua
-##        cmp-path
-##        cmp_luasnip
-##        friendly-snippets
-##        harpoon
-##        indentLine
-##        # mini-nvim
-##        nvim-lspconfig # lsp-zero
-##        lsp-zero-nvim
-##        luasnip
-##        nvim-cmp
-##        nvim-treesitter.withAllGrammars
-##        nvim-treesitter-context
-##        plenary-nvim
-##        rose-pine
-##        telescope-nvim
-##        undotree
-##        vim-fugitive
-##        vim-nix
-##      ];
-##      extraConfig = ''
-##        colorscheme rose-pine
-##        set number relativenumber
-##        set nowrap
-##        set nobackup
-##        set nowritebackup
-##        set noswapfile
-##      '';
-##      # extraLuaConfig goes to .config/nvim/init.lua, which cannot be managed as an individual file when using this
-##      extraLuaConfig = ''
-##        require("r6t")
-##        require("r6t.remap")
-##        require("r6t.treesitter")
-##        vim.cmd('set clipboard=unnamedplus')
-##      '';
-##      extraPackages = [
-##        pkgs.luajitPackages.lua-lsp
-##        pkgs.nodePackages.bash-language-server
-##        pkgs.nodePackages.pyright
-##        pkgs.nodePackages.vim-language-server
-##        pkgs.nodePackages.yaml-language-server
-##        pkgs.rnix-lsp
-##      ];
-##    };
-#  #  programs.pywal.enable = false; # might be causing problems
-#    programs.thunderbird = {
-#      enable = true;
-#      package = pkgs.thunderbird;
-#      profiles.r6t = {
-#        isDefault = true;
-#      };
-#    };
-    programs.vscode = {
-      enable = true;
-      package = pkgs.vscodium;
-      extensions = with pkgs.vscode-extensions; [
-        dracula-theme.theme-dracula
-        vscodevim.vim
-        yzhang.markdown-all-in-one
-      ];
-    };
-    programs.zsh = {
-      enable = true;
-      oh-my-zsh = {
-        enable = true;
-        plugins = [ "aws" "git" "python" "thefuck" ];
-        theme = "xiong-chiamiov-plus";
-      };
-    };
-    home.homeDirectory = "/home/r6t";
-    home.sessionVariables = {
-        MOZ_ENABLE_WAYLAND = 1;
-	XDG_CURRENT_SESSION = "hyprland";
-        QT_QPA_PLATFORM="wayland-egl"; # maybe just "wayland"
-	QT_WAYLAND_DISABLE_WINDOWDECORATION = 1;
-
-        #XDG_SESSION_TYPE = "wayland";
-        #WAYLAND_DISPLAY="wayland-0";
-        #GDK_BACKEND="wayland";
-        #XDG_DATA_DIRS=/path/to/data_dirs:${XDG_DATA_DIRS};
-        #XDG_CONFIG_DIRS=/path/to/config_dirs:${XDG_CONFIG_DIRS};
-    };
-    home.username = "r6t";
-    home.stateVersion = "23.11";
-#    # services.mpris-proxy.enable = false; # Bluetooth audio media button passthrough makes media keys lag
-  };
 
   # Desktop portal
   xdg.portal = {

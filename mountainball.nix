@@ -7,6 +7,8 @@
     [
       <home-manager/nixos>
       ./hardware-configuration.nix
+      ./user.nix
+      ./user-graphical.nix
     ];
 
 
@@ -211,140 +213,7 @@
 
   time.timeZone = "America/Los_Angeles";
 
-  # Users:
-  users.users.r6t = {
-    isNormalUser = true;
-    description = "r6t";
-    extraGroups = [ "docker" "networkmanager" "wheel" ];
-    packages = with pkgs; [];
-    shell = pkgs.zsh;
-  };
-  home-manager.users.r6t = { pkgs, ...}: {
-    home.file.".config/hypr/hyprland.conf".source = config/hypr/hyprland.conf;
-    home.file.".config/waybar/config".source = config/waybar/config;
-    home.packages = with pkgs; [
-      betaflight-configurator
-      bitwarden
-      brave
-      brightnessctl # display brightness
-      firefox-wayland
-      freecad
-      freerdp
-      kate # KDE text editor
-      kdiff3 # KDE utility
-      krename # KDE utility
-      krusader # KDE file manager
-      libva # https://wiki.hyprland.org/hyprland-wiki/pages/Nvidia/
-      libsForQt5.breeze-gtk # KDE Breeze theme
-      libsForQt5.breeze-icons # KDE app icons
-      libsForQt5.elisa # KDE music player
-      libsForQt5.polkit-kde-agent # KDE privlege escalation helper
-      libsForQt5.qtwayland # KDE app support + https://wiki.hyprland.org/hyprland-wiki/pages/Nvidia/
-      libsForQt5.qt5ct # KDE app support + https://wiki.hyprland.org/hyprland-wiki/pages/Nvidia/
-      protonmail-bridge
-      librewolf
-      pamixer # pulseaudio controls
-      playerctl # media keys
-      remmina
-      ungoogled-chromium
-      virt-manager
-      vlc
-      webcord # Discord client
-      wlr-randr # wayland
-      youtube-dl
-    ];
-    programs.alacritty = {
-      enable = true;
-      settings = {
-      font = {
-        size = 14.0;
-      };
-      selection = {
-        save_to_clipboard = true;
-      };
-      };
-    };
-    programs.git = {
-      enable = true;
-      userName = "r6t";
-      userEmail = "ryancast@gmail.com";
-      extraConfig = {
-        core = {
-          editor = "nvim";
-        };
-      };
-      ignores = [
-        ".DS_Store"
-        "*.pyc"
-      ];
-    };
-    programs.neovim = {
-      enable = true;
-      defaultEditor = true;
-      viAlias = true;
-      vimAlias = true;
-      vimdiffAlias = true;
-      plugins = with pkgs.vimPlugins; [
-        rose-pine
-      ];
-      extraConfig = ''
-        colorscheme rose-pine
-        set number relativenumber
-        set nowrap
-        set nobackup
-        set nowritebackup
-        set noswapfile
-      '';
-      # extraLuaConfig goes to .config/nvim/init.lua, which cannot be managed as an individual file when using this
-      extraLuaConfig = ''
-      '';
-      extraPackages = [
-      ];
-    };
-    programs.thunderbird = {
-      enable = true;
-      package = pkgs.thunderbird;
-      profiles.r6t = {
-        isDefault = true;
-      };
-    };
-    programs.vscode = {
-      enable = true;
-      package = pkgs.vscodium;
-      extensions = with pkgs.vscode-extensions; [
-        dracula-theme.theme-dracula
-        vscodevim.vim
-        yzhang.markdown-all-in-one
-      ];
-      userSettings = {
-        "window.titleBarStyle" = "custom";
-      };
-    };
-    programs.zsh = {
-      enable = true;
-      oh-my-zsh = {
-        enable = true;
-        plugins = [ "aws" "git" "python" "thefuck" ];
-        theme = "xiong-chiamiov-plus";
-      };
-    };
-    home.homeDirectory = "/home/r6t";
-    home.sessionVariables = {
-        MOZ_ENABLE_WAYLAND = 1;
-	XDG_CURRENT_SESSION = "hyprland";
-        QT_QPA_PLATFORM="wayland"; # maybe "wayland-egl"
-	QT_WAYLAND_DISABLE_WINDOWDECORATION = 1;
 
-        # XDG_SESSION_TYPE = "wayland";
-        # WAYLAND_DISPLAY="wayland-1";
-        # GDK_BACKEND="wayland";
-        # XDG_DATA_DIRS=/path/to/data_dirs:${XDG_DATA_DIRS};
-        # XDG_CONFIG_DIRS=/path/to/config_dirs:${XDG_CONFIG_DIRS};
-    };
-    home.username = "r6t";
-    home.stateVersion = "23.11";
-#    services.mpris-proxy.enable = false; # Bluetooth audio media button passthrough makes media keys lag
-  };
 
 # Containers
   virtualisation.docker = { 
