@@ -68,6 +68,7 @@
       package = pkgs.vscodium;
       extensions = with pkgs.vscode-extensions; [
         dracula-theme.theme-dracula
+        ms-python.python
         vscodevim.vim
         yzhang.markdown-all-in-one
       ];
