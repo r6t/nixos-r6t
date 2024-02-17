@@ -32,10 +32,12 @@
      ripgrep
      thefuck
      tmux
+     tree
      unzip
      usbutils
+     virt-manager
      wget
-     tree
+
   ];
 
   hardware.bluetooth.enable = false;
@@ -56,6 +58,10 @@
 
   networking.networkmanager.enable = true;
   networking.hostName = "beehive"; # Define your hostname.
+  networking.bridges.br0.interfaces = ["enp88s0"];
+  networking.interfaces.br0 = {
+    useDHCP = true;
+  };
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
   networking.firewall.allowedTCPPorts = [ 22 ];
   # networking.firewall.allowedUDPPorts = [ ... ];
@@ -103,4 +109,12 @@
   system.stateVersion = "23.11"; # Inital version on system. Do not edit,
 
   time.timeZone = "America/Los_Angeles";
+
+  virtualisation = {
+  libvirtd = {
+    enable = true;
+    qemuOvmf = true;
+  };
+};
+
 }

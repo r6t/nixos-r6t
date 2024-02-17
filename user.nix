@@ -5,7 +5,7 @@
   users.users.r6t = {
     isNormalUser = true;
     description = "r6t";
-    extraGroups = [ "docker" "networkmanager" "wheel" ];
+    extraGroups = [ "docker" "libvirtd" "networkmanager" "wheel" ];
     packages = with pkgs; [];
     shell = pkgs.zsh;
   };
