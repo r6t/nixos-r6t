@@ -23,6 +23,7 @@
      curl
      fd
      git
+     libvirt
      lshw
      neovim
      neofetch
@@ -122,7 +123,7 @@
   virtualisation = {
   libvirtd = {
     enable = true;
-    qemuOvmf = true;
+    qemu.ovmf.enable = true;
   };
 };
 
