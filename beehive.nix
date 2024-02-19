@@ -30,6 +30,7 @@
      nmap
      nodejs
      pciutils
+     qemu_kvm
      ripgrep
      thefuck
      tmux
@@ -86,15 +87,6 @@
 
   # System services:
   services.fwupd.enable = true; # Linux firmware updater
-  services.libvirtd = {
-    enable = true;
-    qemu = {
-      package = pkgs.qemu_kvm;
-      runAsRoot = true;
-      swtpm.enable = true;
-    };
-  };
-
   services.syncthing = {
     enable = true;
     dataDir = "/home/r6t/Sync";

@@ -67,11 +67,31 @@
       enable = true;
       package = pkgs.vscodium;
       extensions = with pkgs.vscode-extensions; [
+        bbenoist.nix
+        # continue.continue # https://github.com/NixOS/nixpkgs/pull/289289
         dracula-theme.theme-dracula
+	      ms-azuretools.vscode-docker
+        ms-python.isort
         ms-python.python
+	      ms-python.vscode-pylance # unfree
+	      redhat.vscode-yaml
         vscodevim.vim
         yzhang.markdown-all-in-one
-      ];
+      ] ++ pkgs.vscode-utils.extensionsFromVscodeMarketplace [
+              {
+                name = "boto3-ide";
+                publisher = "Boto3typed";
+                version = "0.5.4";
+                sha256 = "dXK/R3ynLBF/QWxXL88pg7h1TZHRsE/Wo/vfS6faHqA=";
+              }
+              {
+                name = "continue";
+                publisher = "Continue";
+                version = "0.9.65";
+                sha256 = "92zkLJpaMwAwPhczvgBgkLIVqN60vJ7K0wuYrtqrh5E=";
+                arch = "linux-x64";
+              }
+            ];
       userSettings = {
         "window.titleBarStyle" = "custom";
       };
