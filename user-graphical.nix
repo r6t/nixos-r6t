@@ -75,11 +75,11 @@
         bbenoist.nix
         # continue.continue # https://github.com/NixOS/nixpkgs/pull/289289
         dracula-theme.theme-dracula
-	      ms-azuretools.vscode-docker
+	ms-azuretools.vscode-docker
         ms-python.isort
         ms-python.python
-	      ms-python.vscode-pylance # unfree
-	      redhat.vscode-yaml
+	# ms-python.vscode-pylance # unfree
+	redhat.vscode-yaml
         vscodevim.vim
         yzhang.markdown-all-in-one
       ];
