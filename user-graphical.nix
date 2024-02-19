@@ -78,26 +78,7 @@
 	      redhat.vscode-yaml
         vscodevim.vim
         yzhang.markdown-all-in-one
-      ] ++ pkgs.vscode-utils.extensionsFromVscodeMarketplace [
-              {
-                name = "boto3-ide";
-                publisher = "Boto3typed";
-                version = "0.5.4";
-                sha256 = "dXK/R3ynLBF/QWxXL88pg7h1TZHRsE/Wo/vfS6faHqA=";
-              }
-            ] ++ (pkgs.vscode-utils.buildVscodeMarketplaceExtension {
-          mktplcRef = {
-            name = "continue";
-            publisher = "Continue";
-            version = "0.9.65";
-            sha256 = "92zkLJpaMwAwPhczvgBgkLIVqN60vJ7K0wuYrtqrh5E=";
-            arch = "linux-x64";
-          };
-          nativeBuildInputs = [
-            pkgs.autoPatchelfHook
-          ];
-          buildInputs = [ pkgs.stdenv.cc.cc.lib ];
-        })
+      ];
       userSettings = {
         "window.titleBarStyle" = "custom";
       };
