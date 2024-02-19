@@ -2,6 +2,7 @@
 {
   home-manager.users.r6t = { pkgs, ...}: {
     home.file.".config/hypr/hyprland.conf".source = config/hypr/hyprland.conf;
+    home.file.".config/hypr/hyprpaper.conf".source = config/hypr/hyprpaper.conf;
     home.file.".config/swaylock/config".source = config/swaylock/config;
     home.file.".config/waybar/config".source = config/waybar/config;
     home.packages = with pkgs; [
@@ -14,6 +15,7 @@
       freecad
       freerdp
       grim # screenshot functionality
+      hyprpaper # wallpaper
       kate # KDE text editor
       kdiff3 # KDE utility
       krename # KDE utility
@@ -88,14 +90,9 @@
     home.sessionVariables = {
         MOZ_ENABLE_WAYLAND = 1;
       	XDG_CURRENT_SESSION = "hyprland";
+        XDG_SESSION_TYPE = "wayland";
         QT_QPA_PLATFORM="wayland"; # maybe "wayland-egl"
 	      QT_WAYLAND_DISABLE_WINDOWDECORATION = 1;
-
-        # XDG_SESSION_TYPE = "wayland";
-        # WAYLAND_DISPLAY="wayland-1";
-        # GDK_BACKEND="wayland";
-        # XDG_DATA_DIRS=/path/to/data_dirs:${XDG_DATA_DIRS};
-        # XDG_CONFIG_DIRS=/path/to/config_dirs:${XDG_CONFIG_DIRS};
     };
   };
 }
