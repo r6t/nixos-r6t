@@ -35,6 +35,7 @@
       slurp # screenshot functionality
       ungoogled-chromium
       virt-manager
+      virt-viewer
       vlc
       webcord # Discord client
       xdg-utils # for opening default programs when clicking links
@@ -84,14 +85,14 @@
                 version = "0.5.4";
                 sha256 = "dXK/R3ynLBF/QWxXL88pg7h1TZHRsE/Wo/vfS6faHqA=";
               }
-              {
-                name = "continue";
-                publisher = "Continue";
-                version = "0.9.65";
-                sha256 = "92zkLJpaMwAwPhczvgBgkLIVqN60vJ7K0wuYrtqrh5E=";
-                arch = "linux-x64";
-              }
-            ];
+#              {
+#                name = "continue";
+#                publisher = "Continue";
+#                version = "0.9.65";
+#                sha256 = "92zkLJpaMwAwPhczvgBgkLIVqN60vJ7K0wuYrtqrh5E=";
+#                arch = "linux-x64";
+#              }
+#            ];
       userSettings = {
         "window.titleBarStyle" = "custom";
       };

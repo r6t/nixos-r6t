@@ -44,7 +44,6 @@
      tmux
      unzip
      usbutils
-     virt-viewer
      wget
      tree
   ];
