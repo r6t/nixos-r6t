@@ -1,6 +1,6 @@
 # r6t's NixOS configuration: 13" Framework AMD laptop
 
-{ config, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 {
   imports =
     [
@@ -93,6 +93,8 @@
     };
   };
 
+  nixpkgs.config.allowUnfree = true;
+  
   # System programs:
   programs.hyprland = {
     enable = true;
