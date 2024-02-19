@@ -64,6 +64,8 @@
   networking.firewall.allowedTCPPorts = [ 
     22
     3000 # ollama-web
+    8000 # paperless-ngx
+    8080 # stirling-pdf
     ];
   # networking.firewall.allowedUDPPorts = [ ... ];
 
@@ -115,6 +117,7 @@
     docker = {
       daemon.settings = {
         data-root = "/home/r6t/docker-root";
+	};
       enable = true;
       rootless = {
         enable = true;
@@ -123,5 +126,5 @@
       };
     };
 
-  };
 }
+
