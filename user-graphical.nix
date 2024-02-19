@@ -2,6 +2,7 @@
 {
   home-manager.users.r6t = { pkgs, ...}: {
     home.file.".config/hypr/hyprland.conf".source = config/hypr/hyprland.conf;
+    home.file.".config/swaylock/config".source = config/swaylock/config;
     home.file.".config/waybar/config".source = config/waybar/config;
     home.packages = with pkgs; [
       betaflight-configurator
@@ -33,6 +34,7 @@
       remmina
       rofi-wayland
       slurp # screenshot functionality
+      swaylock-effects # lock screen
       ungoogled-chromium
       virt-manager
       virt-viewer
@@ -42,7 +44,7 @@
       waybar
       wl-clipboard # wl-copy and wl-paste for copy/paste from stdin / stdout
       wdisplays # wayland display config
-      wlogout
+      wlogout # wayland logout shortcuts
       wlr-randr # wayland
       youtube-dl
     ];
