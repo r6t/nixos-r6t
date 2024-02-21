@@ -38,6 +38,7 @@
      unzip
      usbutils
      virt-manager
+     virt-viewer
      wget
 
   ];
@@ -65,7 +66,7 @@
     useDHCP = true;
   };
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
-  networking.firewall.allowedTCPPorts = [ 22 ];
+  networking.firewall.allowedTCPPorts = [ 22 5900 ];
   # networking.firewall.allowedUDPPorts = [ ... ];
 
   nix = {
