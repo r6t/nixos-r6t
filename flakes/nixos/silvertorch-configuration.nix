@@ -10,14 +10,13 @@
   imports = [
     inputs.home-manager.nixosModules.home-manager
     # If you want to use modules from other flakes (such as nixos-hardware):
-    # inputs.hardware.nixosModules.common-cpu-amd
-    # inputs.hardware.nixosModules.common-ssd
+    inputs.hardware.nixosModules.framework-13-7040-amd
 
     # You can also split up your configuration and import pieces of it here:
     # ./users.nix
 
     # Import your generated (nixos-generate-config) hardware configuration
-    ./mountainball-hardware-configuration.nix
+    ./silvertorch-hardware-configuration.nix
   ];
 
 
@@ -82,8 +81,7 @@
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
-  boot.initrd.luks.devices."luks-ca693f0d-4d0a-4eee-ba6a-fdc2db22dfb1".device = "/dev/disk/by-uuid/ca693f0d-4d0a-4eee-ba6a-fdc2db22dfb1";
-  boot.kernelParams = [ "nvidia.NVreg_PreserveVideoMemoryAllocations=1" ]; # sleep/wake
+  boot.initrd.luks.devices."luks-9fc9c182-0bad-474f-a9bb-ee2e6aa1be50".device = "/dev/disk/by-uuid/9fc9c182-0bad-474f-a9bb-ee2e6aa1be50";
 
   environment.sessionVariables = {
     # Electron hint
@@ -102,7 +100,6 @@
      fd
      git
      home-manager
-     libva # https://wiki.hyprland.org/hyprland-wiki/pages/Nvidia/
      lshw
      neovim
      neofetch
@@ -133,22 +130,7 @@
      };
   };
 
-  # Nvidia GPU (unfree)
-  hardware.opengl = {
-    enable = true;
-    driSupport = true;
-    driSupport32Bit = true;
-  };
-  hardware.nvidia = {
-    modesetting.enable = true;
-    powerManagement.enable = true; # changed from default false
-    powerManagement.finegrained = false;
-    open = false;
-    nvidiaSettings = true;
-    package = config.boot.kernelPackages.nvidiaPackages.stable;
-  };
-
-  networking.hostName = "mountainball";
+  networking.hostName = "silvertorch";
   networking.networkmanager.enable = true;
   networking.firewall.allowedTCPPorts = [ 22 ];
 
@@ -208,7 +190,6 @@
   services.xserver = {
     layout = "us";
     xkbVariant = "";
-    videoDrivers = ["nvidia"];
   };
 
   sound.enable = true; # see services.pipewire
