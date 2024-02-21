@@ -17,7 +17,7 @@
     # ./users.nix
 
     # Import your generated (nixos-generate-config) hardware configuration
-    ./mountainball-hardware-configuration.nix
+    ./beehive-hardware-configuration.nix
   ];
 
 
@@ -86,14 +86,6 @@
   boot.initrd.luks.devices."luks-ca693f0d-4d0a-4eee-ba6a-fdc2db22dfb1".device = "/dev/disk/by-uuid/ca693f0d-4d0a-4eee-ba6a-fdc2db22dfb1";
   boot.kernelParams = [ "nvidia.NVreg_PreserveVideoMemoryAllocations=1" ]; # sleep/wake
 
-  environment.sessionVariables = {
-    # Electron hint
-    NIXOS_OZONE_WL = "1";
-    QT_STYLE_OVERRIDE = "Breeze-Dark"; # maybe not needed 
-    # Wayland Nvidia disappearing cursor fix
-    WLR_NO_HARDWARE_CURSORS = "1";
-
-  };
   environment.shells = with pkgs; [ zsh ]; # /etc/shells
   # System packages
   environment.systemPackages = with pkgs; [
@@ -102,8 +94,6 @@
      curl
      fd
      git
-     home-manager
-     libva # https://wiki.hyprland.org/hyprland-wiki/pages/Nvidia/
      lshw
      neovim
      neofetch
@@ -119,49 +109,17 @@
      tree
   ];
 
-  fonts.packages = with pkgs; [
-     font-awesome
-     hack-font
-     nerdfonts
-     source-sans-pro
-  ];
+  hardware.bluetooth.enable = false;
 
-  hardware.bluetooth.enable = true;
-  # Experimental settings allow the os to read bluetooth device battery level
-  hardware.bluetooth.settings = {
-    General = {
-      Experimental = true;
-     };
+  networking.bridges.br0.interfaces = ["enp88s0"];
+  networking.firewall.allowedTCPPorts = [ 22 5900 ];
+  networking.hostName = "beehive";
+  networking.interfaces.br0 = {
+    useDHCP = true;
   };
-
-  # Nvidia GPU (unfree)
-  hardware.opengl = {
-    enable = true;
-    driSupport = true;
-    driSupport32Bit = true;
-  };
-  hardware.nvidia = {
-    modesetting.enable = true;
-    powerManagement.enable = true; # changed from default false
-    powerManagement.finegrained = false;
-    open = false;
-    nvidiaSettings = true;
-    package = config.boot.kernelPackages.nvidiaPackages.stable;
-  };
-
-  networking.hostName = "mountainball";
   networking.networkmanager.enable = true;
-  networking.firewall.allowedTCPPorts = [ 22 ];
 
-  programs.hyprland = {
-    enable = true;
-    xwayland.enable = true;
-  };
   programs.zsh.enable = true;
-
-  security.pam.services.swaylock = {}; # required for swaylock-effects functionality
-  security.polkit.enable = true; # hyprland support
-  security.rtkit.enable = true; # sound
 
   time.timeZone = "America/Los_Angeles";
 
@@ -181,18 +139,7 @@
   };
 
   # System services:
-  services.blueman.enable = true; # Bluetooth
-  services.pipewire = {
-    enable = true;
-    alsa.enable = true;
-    pulse.enable = true;
-    jack.enable = true;
-  };
-  services.flatpak.enable = true;
-  services.fprintd.enable = true;
   services.fwupd.enable = true; # Linux firmware updater
-  services.mullvad-vpn.enable = true; # Mullvad desktop app
-  services.printing.enable = true; # CUPS print support
   services.syncthing = {
     enable = true;
     dataDir = "/home/r6t/icloud";
@@ -209,10 +156,7 @@
   services.xserver = {
     layout = "us";
     xkbVariant = "";
-    videoDrivers = ["nvidia"];
   };
-
-  sound.enable = true; # see services.pipewire
 
   services.openssh = {
     enable = true;
@@ -227,7 +171,7 @@
       isNormalUser = true;
       openssh.authorizedKeys.keys = [
       ];
-      extraGroups = [ "docker" "networkmanager" "wheel"];
+      extraGroups = [ "docker" "libvirtd" "networkmanager" "wheel"];
       shell = pkgs.zsh;
     };
   };
@@ -244,12 +188,8 @@
       setSocketVariable = true;
     };
   };
-
-  # Desktop portal
-  xdg.portal = {
+  virtualisation.libvirt = {
     enable = true;
-    wlr.enable = true;
-    # gtk portal needed to make gtk apps happy
-    extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
+    qemu.ovmf.enable = true;
   };
 }
