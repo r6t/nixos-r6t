@@ -146,7 +146,7 @@ in
   };
   hardware.nvidia = {
     modesetting.enable = true;
-    powerManagement.enable = true; # changed from default false
+    powerManagement.enable = false; # changed from default false (back to false for testing)
     powerManagement.finegrained = false;
     open = false;
     nvidiaSettings = true;

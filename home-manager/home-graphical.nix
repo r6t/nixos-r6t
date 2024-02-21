@@ -42,8 +42,8 @@
     username = "r6t";
   };
   # Set dotfiles
-  home.file.".config/hypr/hyprland.conf".source = ../dotfiles/hypr/hyprland.conf;
-  home.file.".config/hypr/hyprpaper.conf".source = ../dotfiles/hypr/hyprpaper.conf;
+#  home.file.".config/hypr/hyprland.conf".source = ../dotfiles/hypr/hyprland.conf;
+#  home.file.".config/hypr/hyprpaper.conf".source = ../dotfiles/hypr/hyprpaper.conf;
   home.file.".config/swaylock/config".source = ../dotfiles/swaylock/config;
   home.file.".config/waybar/config".source = ../dotfiles/waybar/config;
 
