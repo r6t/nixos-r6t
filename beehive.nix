@@ -69,6 +69,7 @@
   networking.firewall.allowedTCPPorts = [ 22 5900 ];
   # networking.firewall.allowedUDPPorts = [ ... ];
 
+
   nix = {
     # NixOS garbage collection
     gc = {
@@ -78,6 +79,7 @@
     };
     settings = {
       auto-optimise-store = true;
+      experimental-features = [ "nix-command" "flakes" ];
     };
   };
 
