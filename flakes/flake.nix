@@ -21,10 +21,22 @@
     # NixOS configuration entrypoint
     # Available through 'nixos-rebuild --flake .#your-hostname'
     nixosConfigurations = {
+      # vm server
+      beehive = nixpkgs.lib.nixosSystem {
+        specialArgs = {inherit inputs outputs;};
+        modules = [./nixos/beehive-configuration.nix];
+      };
+      # desktop
       mountainball = nixpkgs.lib.nixosSystem {
         specialArgs = {inherit inputs outputs;};
         modules = [./nixos/mountainball-configuration.nix];
       };
+      # container server
+      saguaro = nixpkgs.lib.nixosSystem {
+        specialArgs = {inherit inputs outputs;};
+        modules = [./nixos/saguaro-configuration.nix];
+      };
+      # laptop
       silvertorch = nixpkgs.lib.nixosSystem {
         specialArgs = {inherit inputs outputs;};
         modules = [./nixos/silvertorch-configuration.nix];
