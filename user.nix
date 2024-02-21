@@ -1,14 +1,6 @@
 { config, pkgs, ... }:
 
 {
-  # Users:
-  users.users.r6t = {
-    isNormalUser = true;
-    description = "r6t";
-    extraGroups = [ "docker" "libvirtd" "networkmanager" "wheel" ];
-    packages = with pkgs; [];
-    shell = pkgs.zsh;
-  };
   home-manager.users.r6t = { pkgs, ...}: {
     programs.git = {
       enable = true;
