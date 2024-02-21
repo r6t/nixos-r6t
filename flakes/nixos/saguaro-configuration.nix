@@ -175,11 +175,11 @@
     daemon.settings = {
       data-root = "/home/r6t/docker-root";
     };
-    enable = false;
-    enableOnBoot = false;
+    enable = true;
+    enableOnBoot = true;
     rootless = {
-      enable = false;
-      setSocketVariable = false;
+      enable = true;
+      setSocketVariable = true;
     };
   };
 }
