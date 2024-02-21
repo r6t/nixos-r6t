@@ -9,15 +9,6 @@
   # You can import other NixOS modules here
   imports = [
     inputs.home-manager.nixosModules.home-manager
-
-    # Hardware list: https://github.com/NixOS/nixos-hardware/blob/master/flake.nix
-    inputs.hardware.nixosModules.framework-13-7040-amd
-
-    # You can also split up your configuration and import pieces of it here:
-    # ./users.nix
-
-    # Import your generated (nixos-generate-config) hardware configuration
-    ./silvertorch-hardware-configuration.nix
   ];
 
 
@@ -82,16 +73,7 @@
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
-  boot.initrd.luks.devices."luks-9fc9c182-0bad-474f-a9bb-ee2e6aa1be50".device = "/dev/disk/by-uuid/9fc9c182-0bad-474f-a9bb-ee2e6aa1be50";
 
-  environment.sessionVariables = {
-    # Electron hint
-    NIXOS_OZONE_WL = "1";
-    QT_STYLE_OVERRIDE = "Breeze-Dark"; # maybe not needed 
-    # Wayland Nvidia disappearing cursor fix
-    WLR_NO_HARDWARE_CURSORS = "1";
-
-  };
   environment.shells = with pkgs; [ zsh ]; # /etc/shells
   # System packages
   environment.systemPackages = with pkgs; [
@@ -100,7 +82,6 @@
      curl
      fd
      git
-     home-manager
      lshw
      neovim
      neofetch
@@ -116,34 +97,7 @@
      tree
   ];
 
-  fonts.packages = with pkgs; [
-     font-awesome
-     hack-font
-     nerdfonts
-     source-sans-pro
-  ];
-
-  hardware.bluetooth.enable = true;
-  # Experimental settings allow the os to read bluetooth device battery level
-  hardware.bluetooth.settings = {
-    General = {
-      Experimental = true;
-     };
-  };
-
-  networking.hostName = "silvertorch";
-  networking.networkmanager.enable = true;
-  networking.firewall.allowedTCPPorts = [ 22 ];
-
-  programs.hyprland = {
-    enable = true;
-    xwayland.enable = true;
-  };
   programs.zsh.enable = true;
-
-  security.pam.services.swaylock = {}; # required for swaylock-effects functionality
-  security.polkit.enable = true; # hyprland support
-  security.rtkit.enable = true; # sound
 
   time.timeZone = "America/Los_Angeles";
 
@@ -163,21 +117,11 @@
   };
 
   # System services:
-  services.blueman.enable = true; # Bluetooth
-  services.pipewire = {
-    enable = true;
-    alsa.enable = true;
-    pulse.enable = true;
-    jack.enable = true;
-  };
   services.flatpak.enable = true;
-  services.fprintd.enable = true;
   services.fwupd.enable = true; # Linux firmware updater
-  services.mullvad-vpn.enable = true; # Mullvad desktop app
-  services.printing.enable = true; # CUPS print support
   services.syncthing = {
     enable = true;
-    dataDir = "/home/r6t/icloud";
+    dataDir = "/home/r6t/Sync";
     openDefaultPorts = true;
     overrideDevices = false;
     overrideFolders = false;
@@ -192,8 +136,6 @@
     layout = "us";
     xkbVariant = "";
   };
-
-  sound.enable = true; # see services.pipewire
 
   services.openssh = {
     enable = true;
