@@ -56,7 +56,20 @@
       "inputs": {
         "hardware": "hardware",
         "home-manager": "home-manager",
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": "nixpkgs",
+        "ssh-keys": "ssh-keys"
+      }
+    },
+    "ssh-keys": {
+      "flake": false,
+      "locked": {
+        "narHash": "sha256-7rnxDNOurCLoEP0nt+QjT3lRjxDSEP6EnH7d/okdCoI=",
+        "type": "file",
+        "url": "https://github.com/r6t.keys"
+      },
+      "original": {
+        "type": "file",
+        "url": "https://github.com/r6t.keys"
       }
     }
   },

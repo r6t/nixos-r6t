@@ -8,6 +8,12 @@
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
     hardware.url = "github:nixos/nixos-hardware";
+
+    # ssh-keys approach copied from https://github.com/borgstad/nixos-config/
+    ssh-keys = {
+      url = "https://github.com/r6t.keys";
+      flake = false;
+    };
   };
 
   outputs = {

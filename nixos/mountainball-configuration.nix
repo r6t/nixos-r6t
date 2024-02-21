@@ -5,7 +5,12 @@
   pkgs,
   outputs,
   ...
-}: {
+}:
+
+let
+  inherit (inputs) ssh-keys;
+in
+{
   # You can import other NixOS modules here
   imports = [
     inputs.home-manager.nixosModules.home-manager
@@ -224,8 +229,7 @@
   users.users = {
     r6t = {
       isNormalUser = true;
-      openssh.authorizedKeys.keys = [
-      ];
+      openssh.authorizedKeys.keyFiles = [ ssh-keys.outPath ];
       extraGroups = [ "docker" "networkmanager" "wheel"];
       shell = pkgs.zsh;
     };
