@@ -20,8 +20,6 @@
     ./beehive-hardware-configuration.nix
   ];
 
-
-
   nixpkgs = {
     # You can add overlays here
     overlays = [
@@ -35,9 +33,7 @@
       #   });
       # })
     ];
-    # Configure your nixpkgs instance
     config = {
-      # Disable if you don't want unfree packages
       allowUnfree = true;
     };
   };
@@ -79,12 +75,9 @@
     };
   };
 
-  # FIXME: Add the rest of your current configuration
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
-  boot.initrd.luks.devices."luks-ca693f0d-4d0a-4eee-ba6a-fdc2db22dfb1".device = "/dev/disk/by-uuid/ca693f0d-4d0a-4eee-ba6a-fdc2db22dfb1";
-  boot.kernelParams = [ "nvidia.NVreg_PreserveVideoMemoryAllocations=1" ]; # sleep/wake
 
   environment.shells = with pkgs; [ zsh ]; # /etc/shells
   # System packages
@@ -181,11 +174,11 @@
     daemon.settings = {
       data-root = "/home/r6t/docker-root";
     };
-    enable = true;
-    enableOnBoot = true;
+    enable = false;
+    enableOnBoot = false;
     rootless = {
-      enable = true;
-      setSocketVariable = true;
+      enable = false;
+      setSocketVariable = false;
     };
   };
   virtualisation.libvirt = {
