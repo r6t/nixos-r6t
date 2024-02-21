@@ -5,13 +5,30 @@
 {
   imports =
     [
-      <home-manager/nixos>
+    #  <home-manager/nixos>
+      inputs.home-manager.nixosModules.home-manager
       ./common-graphical.nix
       ./hardware-configuration.nix
-      ./user.nix
-      ./user-graphical.nix
+    #  ./user.nix
+    #  ./user-graphical.nix
     ];
 
+  # Users:
+  users.users.r6t = {
+    isNormalUser = true;
+    description = "r6t";
+    extraGroups = [ "docker" "libvirtd" "networkmanager" "wheel" ];
+    packages = with pkgs; [];
+    shell = pkgs.zsh;
+  };
+
+  home-manager = {
+    extraSpecialArgs = { inherit inputs outputs; };
+    users = {
+      # Import your home-manager configuration
+      r6t = import ../home-manager/user-graphical.nix;
+    };
+  };
 
   # Bootloader
   boot.loader.systemd-boot.enable = true;
