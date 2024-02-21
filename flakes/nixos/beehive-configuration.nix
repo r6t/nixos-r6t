@@ -132,7 +132,7 @@
   };
 
   # System services:
-  services.fwupd.enable = true; # Linux firmware updater
+  services.fwupd.enable = false; # Linux firmware updater
   services.syncthing = {
     enable = true;
     dataDir = "/home/r6t/icloud";
