@@ -42,7 +42,7 @@
     extraSpecialArgs = { inherit inputs outputs; };
     users = {
       # Import your home-manager configuration
-      r6t = import ../home-manager/home.nix;
+      r6t = import ../home-manager/home-shell.nix;
     };
   };
 

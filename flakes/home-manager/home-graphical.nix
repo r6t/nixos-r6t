@@ -36,6 +36,11 @@
     };
   };
 
+  home = {
+    homeDirectory = "/home/r6t";
+    stateVersion = "23.11";
+    username = "r6t";
+  };
   # Set dotfiles
   home.file.".config/hypr/hyprland.conf".source = ../dotfiles/hypr/hyprland.conf;
   home.file.".config/hypr/hyprpaper.conf".source = ../dotfiles/hypr/hyprpaper.conf;
@@ -87,6 +92,43 @@
     wlr-randr # wayland
     youtube-dl
   ];
+  programs.git = {
+    enable = true;
+    userName = "r6t";
+    userEmail = "ryancast@gmail.com";
+    extraConfig = {
+      core = {
+        editor = "nvim";
+      };
+    };
+    ignores = [
+      ".DS_Store"
+      "*.pyc"
+    ];
+  };
+  programs.neovim = {
+    enable = true;
+    defaultEditor = true;
+    viAlias = true;
+    vimAlias = true;
+    vimdiffAlias = true;
+    plugins = with pkgs.vimPlugins; [
+      rose-pine
+    ];
+    extraConfig = ''
+      colorscheme rose-pine
+      set number relativenumber
+      set nowrap
+      set nobackup
+      set nowritebackup
+      set noswapfile
+    '';
+    # extraLuaConfig goes to .config/nvim/init.lua, which cannot be managed as an individual file when using this
+    extraLuaConfig = ''
+    '';
+    extraPackages = [
+    ];
+  };
   programs.alacritty = {
     enable = true;
     settings = {
@@ -124,6 +166,15 @@
       "window.titleBarStyle" = "custom";
     };
   };
+  programs.zsh = {
+    enable = true;
+    oh-my-zsh = {
+      enable = true;
+      plugins = [ "aws" "git" "python" "thefuck" ];
+      theme = "xiong-chiamiov-plus";
+    };
+  };
+
   home.sessionVariables = {
       MOZ_ENABLE_WAYLAND = 1;
       XDG_CURRENT_SESSION = "hyprland";
@@ -131,4 +182,7 @@
       QT_QPA_PLATFORM="wayland"; # maybe "wayland-egl"
       QT_WAYLAND_DISABLE_WINDOWDECORATION = 1;
   };
+
+  # Nicely reload system units when changing configs
+  systemd.user.startServices = "sd-switch";
 }
