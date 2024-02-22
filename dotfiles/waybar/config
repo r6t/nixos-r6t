@@ -3,11 +3,11 @@
     "position": "bottom", // Waybar position (top|bottom|left|right)
     "height": 34, // Waybar height (to be removed for auto height)
     // "width": 1280, // Waybar width
-    "spacing": 6, // Gaps between modules (4px)
+    "spacing": 2, // Gaps between modules (4px)
     // Choose the order of the modules
-    "modules-left": [ "hyprland/window", "custom/media", "tray"],
-    "modules-center": [ "hyprland/workspaces" ],
-    "modules-right": ["mpd", "idle_inhibitor", "pulseaudio", "network", "cpu", "memory", "temperature", "backlight", "keyboard-state", "battery", "battery#bat2", "clock"],
+    "modules-left": [ "hyprland/workspaces", "idle_inhibitor", "hyprland/window", "custom/media", "mpd" ],
+    "modules-center": [ "custom/hostname", "clock", "date" ],
+    "modules-right": [ "keyboard-state", "pulseaudio", "backlight", "network",  "battery", "tray" ],
     // Modules configuration
     "hyprland/window": {
         "max-length": 200,
@@ -26,6 +26,7 @@
          "7": "7",
          "8": "8",
          "9": "9",
+         "10": "10",
          "default": "1"
        },
        "on-click": "activate",
@@ -79,10 +80,18 @@
         // "icon-size": 21,
         "spacing": 10
     },
+    "custom/hostname": {
+        "exec": "hostname",
+        "format": "{}"
+    },
     "clock": {
         // "timezone": "America/New_York",
         "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
         "format-alt": "{:%Y-%m-%d}"
+    },
+    "date": {
+        "format": "{:%a :%m-%d}",
+        "tooltip": false
     },
     "cpu": {
         "format": "{usage}% ",

@@ -65,6 +65,7 @@
     libsForQt5.breeze-gtk # KDE Breeze theme
     libsForQt5.breeze-icons # KDE app icons
     libsForQt5.elisa # KDE music player
+    libsForQt5.gwenview # KDE image viewer
     libsForQt5.kio-extras # KDE support
     libsForQt5.polkit-kde-agent # KDE privlege escalation helper
     libsForQt5.qtwayland # KDE app support + https://wiki.hyprland.org/hyprland-wiki/pages/Nvidia/
