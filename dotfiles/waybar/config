@@ -7,7 +7,7 @@
     // Choose the order of the modules
     "modules-left": [ "hyprland/workspaces", "idle_inhibitor", "hyprland/window", "custom/media", "mpd" ],
     "modules-center": [ "custom/hostname", "clock", "date" ],
-    "modules-right": [ "keyboard-state", "pulseaudio", "backlight", "network", "cpu", "memory", "battery", "tray" ],
+    "modules-right": [ "keyboard-state", "pulseaudio", "backlight", "cpu", "memory", "network", "battery", "tray" ],
     // Modules configuration
     "hyprland/window": {
         "max-length": 200,
