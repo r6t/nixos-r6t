@@ -50,6 +50,8 @@
     extraConfig = {
       core = {
         editor = "nvim";
+        init = { defaultBranch = "main"; };
+        pull = { rebase = false; };
       };
     };
     ignores = [
@@ -87,7 +89,14 @@
       plugins = [ "aws" "git" "python" "thefuck" ];
       theme = "xiong-chiamiov-plus";
     };
+    shellAliases = {
+      "h" = "Hyprland";
+      "gst" = "git status";
+      "gd" = "git diff";
+      "gds" = "git diff --staged";
+    };
   };
+
 
   # Nicely reload system units when changing configs
   systemd.user.startServices = "sd-switch";

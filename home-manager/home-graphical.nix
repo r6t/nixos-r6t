@@ -100,6 +100,8 @@
     extraConfig = {
       core = {
         editor = "nvim";
+        init = { defaultBranch = "main"; };
+        pull = { rebase = false; };
       };
     };
     ignores = [
@@ -173,6 +175,12 @@
       enable = true;
       plugins = [ "aws" "git" "python" "thefuck" ];
       theme = "xiong-chiamiov-plus";
+    };
+    shellAliases = {
+      "h" = "Hyprland";
+      "gst" = "git status";
+      "gd" = "git diff";
+      "gds" = "git diff --staged";
     };
   };
 
