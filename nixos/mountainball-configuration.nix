@@ -230,7 +230,8 @@ in
     r6t = {
       isNormalUser = true;
       openssh.authorizedKeys.keyFiles = [ ssh-keys.outPath ];
-      extraGroups = [ "docker" "networkmanager" "wheel"];
+      # input group reqd for waybar
+      extraGroups = [ "docker" "input" "networkmanager" "wheel"];
       shell = pkgs.zsh;
     };
   };
