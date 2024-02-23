@@ -6,7 +6,8 @@
     "spacing": 2, // Gaps between modules (4px)
     // Choose the order of the modules
     "modules-left": [ "hyprland/workspaces", "idle_inhibitor", "hyprland/window", "custom/media", "mpd" ],
-    "modules-center": [ "custom/hostname", "clock", "date" ],
+    "modules-center": [ "custom/hostname", "clock#1", "clock#2" ],
+    "fixed-center": true, // keep middle of modules-center in middle of screen
     "modules-right": [ "keyboard-state", "pulseaudio", "backlight", "cpu", "memory", "network", "battery", "tray" ],
     // Modules configuration
     "hyprland/window": {
@@ -78,16 +79,20 @@
     },
     "tray": {
         // "icon-size": 21,
-        "spacing": 10
+        "spacing": 8
     },
     "custom/hostname": {
         "exec": "hostname",
         "format": "{}"
     },
-    "clock": {
+    "clock#1": {
         // "timezone": "America/New_York",
         "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
         "format-alt": "{:%Y-%m-%d}"
+    },
+    "clock#2": {
+		"format": "{:%a %m-%d}",
+		"tooltip": false
     },
     "date": {
         "format": "{:%a %-m/%-d}",
@@ -95,7 +100,7 @@
     },
     "cpu": {
         "format": "{usage}% ",
-        "tooltip": false
+        "tooltip": "Load avg: {load}"
     },
     "memory": {
         "format": "{used}G "
