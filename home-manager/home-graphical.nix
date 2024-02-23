@@ -56,6 +56,7 @@
     firefox-wayland
     freecad
     freerdp
+    gnome.gnome-font-viewer
     grim # screenshot functionality
     hyprpaper # wallpaper
     kate # KDE text editor
@@ -191,6 +192,9 @@
       QT_QPA_PLATFORM="wayland"; # maybe "wayland-egl"
       QT_WAYLAND_DISABLE_WINDOWDECORATION = 1;
   };
+
+  services.kdeconnect.enable = true; 
+  services.kdeconnect.indicator = true; 
 
   # Nicely reload system units when changing configs
   systemd.user.startServices = "sd-switch";

@@ -94,10 +94,6 @@
 		"format": "{:%a %m-%d}",
 		"tooltip": false
     },
-    "date": {
-        "format": "{:%a %-m/%-d}",
-        "tooltip": false
-    },
     "cpu": {
         "format": "{usage}% ",
         "tooltip": "Load avg: {load}"
