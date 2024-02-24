@@ -114,7 +114,7 @@
 	},
     "cpu": {
         "format": "{usage}% ",
-        "tooltip": false
+        "tooltip": "Load avg: {load}"
     },
     "memory": {
         "format": "{used}G "
