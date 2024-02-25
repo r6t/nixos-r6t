@@ -261,6 +261,7 @@
     ];
     userSettings = {
       "window.titleBarStyle" = "custom";
+      "merge-conflict.autoNavigateNextConflict.enabled" = true;
     };
   };
   programs.zsh = {
