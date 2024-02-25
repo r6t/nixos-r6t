@@ -110,70 +110,70 @@
       "*.pyc"
     ];
   };
-  # programs.neovim = {
-  #   enable = true;
-  #   defaultEditor = true;
-  #   viAlias = true;
-  #   vimAlias = true;
-  #   vimdiffAlias = true;
-  #   plugins = with pkgs.vimPlugins; [
-  #     rose-pine
-  #   ];
-  #   extraConfig = ''
-  #     colorscheme rose-pine
-  #     set number relativenumber
-  #     set nowrap
-  #     set nobackup
-  #     set nowritebackup
-  #     set noswapfile
-  #   '';
-  #   # extraLuaConfig goes to .config/nvim/init.lua, which cannot be managed as an individual file when using this
-  #   extraLuaConfig = ''
-  #   '';
-  #   extraPackages = [
-  #   ];
-  # };
+  programs.neovim = {
+    enable = true;
+    defaultEditor = true;
+    viAlias = true;
+    vimAlias = true;
+    vimdiffAlias = true;
+    plugins = with pkgs.vimPlugins; [
+      rose-pine
+    ];
+    extraConfig = ''
+      colorscheme rose-pine
+      set number relativenumber
+      set nowrap
+      set nobackup
+      set nowritebackup
+      set noswapfile
+    '';
+    # extraLuaConfig goes to .config/nvim/init.lua, which cannot be managed as an individual file when using this
+    extraLuaConfig = ''
+    '';
+    extraPackages = [
+    ];
+  };
 
-  programs.nixvim = {
-      enable = true;
-      colorschemes.onedark.enable = true;
+  #programs.nixvim = {
+  #    enable = true;
+  #    colorschemes.onedark.enable = true;
 
-      options = {
-        shiftwidth = 2;
-        number = true;
-        relativenumber = true;
-      };
+  #    options = {
+  #      shiftwidth = 2;
+  #      number = true;
+  #      relativenumber = true;
+  #    };
 
-      highlight = {
-       Comment.fg = "#708090";
-       Comment.bg = "none";
-       Comment.bold = true;
-      };
+  #    highlight = {
+  #     Comment.fg = "#708090";
+  #     Comment.bg = "none";
+  #     Comment.bold = true;
+  #    };
 
-      plugins = {
-          lualine = { enable = true; };
-          nvim-tree = { enable = true; };
-          luasnip = { enable = true; };
-          cmp-buffer  = { enable = true; };
-          cmp-emoji  = { enable = true; };
-          cmp-nvim-lsp  = { enable = true; };
-          cmp-path = { enable = true; };
-      };
+  #    plugins = {
+  #        lualine = { enable = true; };
+  #        nvim-tree = { enable = true; };
+  #        luasnip = { enable = true; };
+  #        cmp-buffer  = { enable = true; };
+  #        cmp-emoji  = { enable = true; };
+  #        cmp-nvim-lsp  = { enable = true; };
+  #        cmp-path = { enable = true; };
+  #    };
 
-      plugins.lsp = {
-        enable = true;
+  #    plugins.lsp = {
+  #      enable = true;
 
-        servers = {
-          nil_ls.enable = true;
-          bashls.enable = true;
+  #      servers = {
+  #        nil_ls.enable = true;
+  #        bashls.enable = true;
 
-          lua-ls = {
-            enable = true;
-            settings.telemetry.enable = false;
-          };
+  #        lua-ls = {
+  #          enable = true;
+  #          settings.telemetry.enable = false;
+  #        };
 
-        };
-      };
+  #      };
+  #    };
 
       plugins.nvim-cmp = {
         enable = true;
