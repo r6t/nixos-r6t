@@ -113,6 +113,7 @@ in
      neofetch
      nmap
      nodejs
+     nvidia-docker
      pciutils
      ripgrep
      thefuck
