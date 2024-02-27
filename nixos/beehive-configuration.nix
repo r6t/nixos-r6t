@@ -111,6 +111,19 @@ in
      usbutils
      wget
      tree
+     # osx-kvm list
+     qemu
+     uml_utilities
+     virtmanager
+     git
+     wget
+     libguestfs
+     p7zip
+     gnumake
+     dmg2img
+     tesseract
+     tesseract-eng
+     cdrkit # genisoimage equivalent
   ];
 
   hardware.bluetooth.enable = false;
@@ -174,7 +187,7 @@ in
     r6t = {
       isNormalUser = true;
       openssh.authorizedKeys.keyFiles = [ ssh-keys.outPath ];
-      extraGroups = [ "docker" "libvirtd" "networkmanager" "wheel"];
+      extraGroups = [ "docker" "input" "kvm" "libvirtd" "networkmanager" "wheel"];
       shell = pkgs.zsh;
     };
   };
