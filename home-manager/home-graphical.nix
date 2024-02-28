@@ -73,12 +73,14 @@
     libsForQt5.qt5ct # KDE app support + https://wiki.hyprland.org/hyprland-wiki/pages/Nvidia/
     libnotify # reqd for mako
     mako # notification system developed by swaywm maintainer
+    obsidian # best notes app ever
     protonmail-bridge
     librewolf
     pamixer # pulseaudio controls
     playerctl # media keys
     remmina
     rofi-wayland
+    signal-desktop
     slurp # screenshot functionality
     swaylock-effects # lock screen
     ungoogled-chromium
