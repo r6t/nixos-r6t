@@ -114,6 +114,8 @@ in
     3000 # ollama-web
     8000 # paperless-ngx
     8080 # stirling-pdf
+    8384 # syncthing
+    22000 # syncthing
     ];
   networking.hostName = "saguaro";
   networking.networkmanager.enable = true;
