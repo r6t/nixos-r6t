@@ -148,7 +148,7 @@ in
     configDir = "/home/r6t/.config/syncthing";
     user = "r6t";
     group = "users";
-    guiAddress = "127.0.0.1:8384";
+    guiAddress = "0.0.0.0:8384";
   };
   services.tailscale.enable = true;
   # Configure keymap in X11

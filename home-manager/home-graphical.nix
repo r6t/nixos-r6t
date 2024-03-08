@@ -73,6 +73,7 @@
     libsForQt5.qt5ct # KDE app support + https://wiki.hyprland.org/hyprland-wiki/pages/Nvidia/
     libnotify # reqd for mako
     mako # notification system developed by swaywm maintainer
+    mellowplayer # music streaming
     obsidian # best notes app ever
     protonmail-bridge
     librewolf
