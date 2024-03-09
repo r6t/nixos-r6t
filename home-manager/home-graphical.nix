@@ -52,7 +52,9 @@
     bitwarden
     brave
     brightnessctl # display brightness
+    calibre # ebook manager
     dconf # hyprland support
+    digikam # photo manager
     firefox-wayland
     freecad
     freerdp
