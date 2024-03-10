@@ -78,6 +78,7 @@
     mellowplayer # music streaming
     obsidian # best notes app ever
     protonmail-bridge
+    python3
     librewolf
     pamixer # pulseaudio controls
     playerctl # media keys
@@ -254,7 +255,7 @@
     package = pkgs.vscodium;
     extensions = with pkgs.vscode-extensions; [
       bbenoist.nix
-      # continue.continue # https://github.com/NixOS/nixpkgs/pull/289289
+      continue.continue
       dracula-theme.theme-dracula
       ms-azuretools.vscode-docker
       ms-python.isort
