@@ -4,37 +4,46 @@
   config,
   pkgs,
   ...
-}: {
-  # You can import other home-manager modules here
-  imports = [
-    # If you want to use home-manager modules from other flakes (such as nix-colors):
-    # inputs.nix-colors.homeManagerModule
+}:
 
-    # You can also split up your configuration and import pieces of it here:
-    # ./nvim.nix
+let
+  appleEmojiFont = pkgs.stdenv.mkDerivation rec {
+    pname = "apple-emoji-linux";
+    version = "16.4-patch.1";
+    src = pkgs.fetchurl {
+      url = "https://github.com/samuelngs/apple-emoji-linux/releases/download/v${version}/AppleColorEmoji.ttf";
+      sha256 = "15assqyxax63hah0g51jd4d4za0kjyap9m2cgd1dim05pk7mgvfm";
+    };
+
+    phases = [ "installPhase" ];
+
+    installPhase = ''
+      mkdir -p $out/share/fonts/apple-emoji
+      cp ${src} $out/share/fonts/apple-emoji/AppleColorEmoji.ttf
+    '';
+
+    meta = {
+      homepage = "https://github.com/samuelngs/apple-emoji-linux";
+      description = "Apple Color Emoji font";
+      license = pkgs.lib.licenses.unfree;
+    };
+  };
+in
+
+{
+  imports = [
   ];
 
   nixpkgs = {
-    # You can add overlays here
     overlays = [
-      # If you want to use overlays exported from other flakes:
-      # neovim-nightly-overlay.overlays.default
-
-      # Or define it inline, for example:
-      # (final: prev: {
-      #   hi = final.hello.overrideAttrs (oldAttrs: {
-      #     patches = [ ./change-hello-to-hi.patch ];
-      #   });
-      # })
     ];
-    # Configure your nixpkgs instance
     config = {
-      # Disable if you don't want unfree packages
       allowUnfree = true;
       # Workaround for https://github.com/nix-community/home-manager/issues/2942
       allowUnfreePredicate = _: true;
     };
   };
+
 
   home = {
     homeDirectory = "/home/r6t";
@@ -49,6 +58,7 @@
   home.file.".config/waybar/style.css".source = ../dotfiles/waybar/style.css;
 
   home.packages = with pkgs; [
+    appleEmojiFont # see let block
     betaflight-configurator
     bitwarden
     brave
@@ -86,6 +96,7 @@
     playerctl # media keys
     remmina
     rofi-wayland
+    rofimoji
     signal-desktop
     slurp # screenshot functionality
     swaylock-effects # lock screen
@@ -286,6 +297,8 @@
       "gds" = "git diff --staged";
     };
   };
+
+  fonts.fontconfig.enable = true;
 
   home.sessionVariables = {
       MOZ_ENABLE_WAYLAND = 1;
