@@ -46,6 +46,7 @@
   home.file.".config/hypr/hyprpaper.conf".source = ../dotfiles/hypr/hyprpaper.conf;
   home.file.".config/swaylock/config".source = ../dotfiles/swaylock/config;
   home.file.".config/waybar/config".source = ../dotfiles/waybar/config;
+  home.file.".config/waybar/style.css".source = ../dotfiles/waybar/style.css;
 
   home.packages = with pkgs; [
     betaflight-configurator
@@ -55,6 +56,7 @@
     calibre # ebook manager
     dconf # hyprland support
     digikam # photo manager
+    element-desktop # matrix client
     firefox-wayland
     freecad
     freerdp

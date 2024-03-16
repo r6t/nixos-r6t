@@ -13,9 +13,7 @@
 		"mpd",
 	],
 	"modules-center": [
-		"custom/hostname",
-		"clock#1",
-		"clock#2",
+		"clock",
 	],
 	"modules-right": [
 		"pulseaudio",
@@ -50,12 +48,8 @@
         "exec": "hostname",
         "format": "{}"
     },
-	"clock#1": {
-		"format": "{:%H:%M}",
-		"tooltip": false
-	},
-	"clock#2": {
-		"format": "{:%a %m-%d}",
+	"clock": {
+		"format": "{:%a %m-%d %H:%M}",
 		"tooltip": false
 	},
 	"pulseaudio": {
