@@ -104,6 +104,7 @@ in
      ansible
      awscli2
      curl
+     docker-compose
      fd
      git
      home-manager
@@ -156,7 +157,7 @@ in
 
   networking.hostName = "mountainball";
   networking.networkmanager.enable = true;
-  networking.firewall.allowedTCPPorts = [ 22 ];
+  networking.firewall.allowedTCPPorts = [ 22 3000 11434 ];
 
   programs.hyprland = {
     enable = true;
