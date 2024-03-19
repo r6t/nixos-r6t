@@ -2,6 +2,7 @@
 	font-size: 18px;
 	font-family: monospace;
 }
+
 window#waybar {
 	background: #222222; /* Dark grey background */
 	color: #FFFFFF; /* White text */
