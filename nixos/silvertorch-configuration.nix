@@ -194,8 +194,10 @@ in
   services.tailscale.enable = true;
   # Configure keymap in X11
   services.xserver = {
-    layout = "us";
-    xkbVariant = "";
+    xkb = {
+      layout = "us";
+      variant = "";
+    };
   };
 
   sound.enable = true; # see services.pipewire
