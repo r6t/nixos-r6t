@@ -104,6 +104,7 @@ in
      ansible
      awscli2
      curl
+     docker-compose
      fd
      git
      home-manager
@@ -124,12 +125,16 @@ in
      tree
   ];
 
-  fonts.packages = with pkgs; [
-     font-awesome
-     hack-font
-     nerdfonts
-     source-sans-pro
-  ];
+  fonts = {
+    fontDir.enable = true;
+    packages = with pkgs; [
+      noto-fonts-emoji
+      font-awesome
+      hack-font
+      nerdfonts
+      source-sans-pro
+    ];
+  };
 
   hardware.bluetooth.enable = true;
   # Experimental settings allow the os to read bluetooth device battery level
@@ -156,7 +161,7 @@ in
 
   networking.hostName = "mountainball";
   networking.networkmanager.enable = true;
-  networking.firewall.allowedTCPPorts = [ 22 ];
+  networking.firewall.allowedTCPPorts = [ 22 3000 11434 ];
 
   programs.hyprland = {
     enable = true;
