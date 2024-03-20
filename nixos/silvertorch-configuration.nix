@@ -122,8 +122,8 @@ in
   ];
 
   fonts = {
-    enableFontDir = true;
-    fonts = with pkgs; [
+    fontDir.enable = true;
+    packages = with pkgs; [
       noto-fonts-emoji
       font-awesome
       hack-font
@@ -131,14 +131,6 @@ in
       source-sans-pro
     ];
   };
-
- # fonts.packages = with pkgs; [
- #    font-awesome
- #    hack-font
- #    nerdfonts
- #    source-sans-pro
- # ];
-
   hardware.bluetooth.enable = true;
   # Experimental settings allow the os to read bluetooth device battery level
   hardware.bluetooth.settings = {

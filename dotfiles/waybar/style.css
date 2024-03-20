@@ -1,6 +1,6 @@
 * {
 	font-size: 18px;
-	font-family: "Noto Color Emoji, monospace";
+	font-family: "Hack Nerd Font", "Noto Color Emoji";
 }
 window#waybar {
 	background: #222222; /* Dark grey background */
@@ -17,6 +17,8 @@ window#waybar {
 #battery,
 #tray {
 	background: #000000; /* Black background */
+	font-size: 18px;
+	font-family: "Hack Nerd Font", "Noto Color Emoji";
 	margin: 3px; /* Gaps between modules */
 	border-radius: 5px; /* Add some rounding */
 	padding: 0 10px;
@@ -44,4 +46,6 @@ window#waybar {
 #network,
 #battery {
 	color: #FFFFFF; /* White text */
+	font-size: 18px;
+	font-family: "Hack Nerd Font", "Noto Color Emoji";
 }
