@@ -24,6 +24,10 @@
 		"battery",
 		"tray"
 	],
+    "style": {
+        "font-family": "Hack Nerd Font, Noto Color Emoji",
+        "font-size": 22
+    },
 
     "hyprland/workspaces": {
        "format": "{icon}",
