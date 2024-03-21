@@ -71,8 +71,10 @@ in
     freecad
     freerdp
     gnome.gnome-font-viewer
-    grim # screenshot functionality
+    grim # screenshots
+    hyprlock
     hyprpaper # wallpaper
+    hyprpicker # color picker
     kate # KDE text editor
     kdiff3 # KDE utility
     krename # KDE utility
@@ -98,7 +100,7 @@ in
     rofi-wayland
     rofimoji
     signal-desktop
-    slurp # screenshot functionality
+    slurp # screenshots
     swaylock-effects # lock screen
     ungoogled-chromium
     virt-manager
