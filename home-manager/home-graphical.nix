@@ -97,7 +97,6 @@ in
     pamixer # pulseaudio controls
     playerctl # media keys
     remmina
-    rofi-wayland
     rofimoji
     signal-desktop
     slurp # screenshots
@@ -257,6 +256,11 @@ in
       save_to_clipboard = true;
     };
     };
+  };
+  programs.rofi = {
+    enable = true;
+    package = pkgs.rofi-wayland;
+    theme = "/home/r6t/.nix-profile/share/rofi/themes/arthur.rasi";
   };
   programs.thunderbird = {
     enable = true;
