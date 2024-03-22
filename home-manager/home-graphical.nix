@@ -56,6 +56,8 @@ in
   home.file.".config/hypr/hyprpaper.conf".source = ../dotfiles/hypr/hyprpaper.conf;
   home.file.".config/waybar/config".source = ../dotfiles/waybar/config;
   home.file.".config/waybar/style.css".source = ../dotfiles/waybar/style.css;
+  home.file.".local/share/rofi/themes/rounded-common.rasi".source = ../dotfiles/rofi/themes/rounded-common.rasi;
+  home.file.".local/share/rofi/themes/rounded-purple-dark.rasi".source = ../dotfiles/rofi/themes/rounded-purple-dark.rasi;
 
   home.packages = with pkgs; [
     appleEmojiFont # see let block
@@ -260,7 +262,8 @@ in
   programs.rofi = {
     enable = true;
     package = pkgs.rofi-wayland;
-    theme = "/home/r6t/.nix-profile/share/rofi/themes/arthur.rasi";
+    # theme = "/home/r6t/.nix-profile/share/rofi/themes/arthur.rasi";
+    theme = "/home/r6t/.local/share/rofi/themes/rounded-purple-dark.rasi";
   };
   programs.thunderbird = {
     enable = true;
