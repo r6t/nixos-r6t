@@ -62,6 +62,7 @@ in
 
   home.packages = with pkgs; [
     appleEmojiFont # see let block
+    awscli2
     betaflight-configurator
     bitwarden
     brave
@@ -288,8 +289,8 @@ in
       dracula-theme.theme-dracula
       ms-azuretools.vscode-docker
       ms-python.isort
-      # ms-python.python
-      # ms-python.vscode-pylance # unfree
+      ms-python.python
+      ms-python.vscode-pylance # unfree
       redhat.vscode-yaml
       vscodevim.vim
       yzhang.markdown-all-in-one
