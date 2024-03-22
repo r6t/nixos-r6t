@@ -74,6 +74,7 @@ in
     freerdp
     gnome.gnome-font-viewer
     grim # screenshots
+    hypridle
     hyprlock
     hyprpaper # wallpaper
     hyprpicker # color picker
@@ -90,7 +91,7 @@ in
     libsForQt5.qtwayland # KDE app support + https://wiki.hyprland.org/hyprland-wiki/pages/Nvidia/
     libsForQt5.qt5ct # KDE app support + https://wiki.hyprland.org/hyprland-wiki/pages/Nvidia/
     libnotify # reqd for mako
-    mako # notification system developed by swaywm maintainer
+    mako # notifications
     mellowplayer # music streaming
     obsidian # best notes app ever
     protonmail-bridge
@@ -99,7 +100,8 @@ in
     pamixer # pulseaudio controls
     playerctl # media keys
     remmina
-    rofimoji
+    rofi-calc
+    rofi-emoji
     signal-desktop
     slurp # screenshots
     swaylock-effects # lock screen
@@ -260,9 +262,13 @@ in
     };
   };
   programs.rofi = {
+    cycle = true;
     enable = true;
     package = pkgs.rofi-wayland;
-    # theme = "/home/r6t/.nix-profile/share/rofi/themes/arthur.rasi";
+    plugins = [
+      pkgs.rofi-calc
+      pkgs.rofi-emoji
+    ];
     theme = "/home/r6t/.local/share/rofi/themes/rounded-purple-dark.rasi";
   };
   programs.thunderbird = {
