@@ -101,7 +101,6 @@ in
   # System packages
   environment.systemPackages = with pkgs; [
      ansible
-     awscli2
      curl
      fd
      git
@@ -113,7 +112,6 @@ in
      nodejs
      pciutils
      ripgrep
-     thefuck
      tmux
      unzip
      usbutils
@@ -179,7 +177,7 @@ in
     jack.enable = true;
   };
   services.flatpak.enable = true;
-  services.fprintd.enable = true;
+  services.fprintd.enable = false; # causing nix build error 3/22/24
   services.fwupd.enable = true; # Linux firmware updater
   services.mullvad-vpn.enable = true; # Mullvad desktop app
   services.printing.enable = true; # CUPS print support

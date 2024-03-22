@@ -86,7 +86,7 @@
     enable = true;
     oh-my-zsh = {
       enable = true;
-      plugins = [ "aws" "git" "python" "thefuck" ];
+      plugins = [ "aws" "git" "python" ];
       theme = "xiong-chiamiov-plus";
     };
     shellAliases = {

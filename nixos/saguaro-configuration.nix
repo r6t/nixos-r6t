@@ -88,7 +88,6 @@ in
   # System packages
   environment.systemPackages = with pkgs; [
      ansible
-     awscli2
      curl
      fd
      git
@@ -99,7 +98,6 @@ in
      nodejs
      pciutils
      ripgrep
-     thefuck
      tmux
      unzip
      usbutils

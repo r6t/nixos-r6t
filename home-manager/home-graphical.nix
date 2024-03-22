@@ -51,6 +51,7 @@ in
     username = "r6t";
   };
   # Set dotfiles
+  home.file.".config/hypr/hypridle.conf".source = ../dotfiles/hypr/hypridle.conf;
   home.file.".config/hypr/hyprland.conf".source = ../dotfiles/hypr/hyprland.conf;
   home.file.".config/hypr/hyprlock.conf".source = ../dotfiles/hypr/hyprlock.conf;
   home.file.".config/hypr/hyprpaper.conf".source = ../dotfiles/hypr/hyprpaper.conf;
@@ -287,8 +288,8 @@ in
       dracula-theme.theme-dracula
       ms-azuretools.vscode-docker
       ms-python.isort
-      ms-python.python
-      ms-python.vscode-pylance # unfree
+      # ms-python.python
+      # ms-python.vscode-pylance # unfree
       redhat.vscode-yaml
       vscodevim.vim
       yzhang.markdown-all-in-one
@@ -302,7 +303,7 @@ in
     enable = true;
     oh-my-zsh = {
       enable = true;
-      plugins = [ "aws" "git" "python" "thefuck" ];
+      plugins = [ "aws" "git" "python" ];
       theme = "xiong-chiamiov-plus";
     };
     shellAliases = {
