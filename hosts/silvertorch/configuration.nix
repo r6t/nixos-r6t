@@ -18,11 +18,8 @@ in
     # Hardware list: https://github.com/NixOS/nixos-hardware/blob/master/flake.nix
     inputs.hardware.nixosModules.framework-13-7040-amd
 
-    # You can also split up your configuration and import pieces of it here:
-    # ./users.nix
-
-    # Import your generated (nixos-generate-config) hardware configuration
     ./hardware-configuration.nix
+    ../../modules/nixos/system/fonts/default.nix
   ];
 
 
@@ -120,16 +117,6 @@ in
      tree
   ];
 
-  fonts = {
-    fontDir.enable = true;
-    packages = with pkgs; [
-      noto-fonts-emoji
-      font-awesome
-      hack-font
-      nerdfonts
-      source-sans-pro
-    ];
-  };
   hardware.bluetooth.enable = true;
   # Experimental settings allow the os to read bluetooth device battery level
   hardware.bluetooth.settings = {
