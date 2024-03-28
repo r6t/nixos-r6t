@@ -1,4 +1,4 @@
-{ inputs, lib, config, ... }: { 
+{ lib, config, ... }: { 
 
     options = {
       mine.localization.enable =

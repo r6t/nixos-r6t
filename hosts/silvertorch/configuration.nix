@@ -19,18 +19,24 @@ in
     inputs.hardware.nixosModules.framework-13-7040-amd
 
     ./hardware-configuration.nix
+    ../../modules/nixos/apps/hypr/default.nix
     ../../modules/nixos/system/bluetooth/default.nix
+    ../../modules/nixos/system/env/default.nix
     ../../modules/nixos/system/fonts/default.nix
     ../../modules/nixos/system/localization/default.nix
     ../../modules/nixos/system/nix/default.nix
     ../../modules/nixos/system/nixpkgs/default.nix
+    ../../modules/nixos/system/syncthing/default.nix
   ];
 
   mine.bluetooth.enable = true;
+  mine.env.enable = true;
   mine.fonts.enable = true;
+  mine.hypr.enable = true;
   mine.localization.enable = true;
   mine.nix.enable = true;
   mine.nixpkgs.enable = true;
+  mine.syncthing.enable = true;
 
   home-manager = {
     extraSpecialArgs = { inherit inputs outputs; };
@@ -45,49 +51,12 @@ in
   boot.loader.efi.canTouchEfiVariables = true;
   boot.initrd.luks.devices."luks-9fc9c182-0bad-474f-a9bb-ee2e6aa1be50".device = "/dev/disk/by-uuid/9fc9c182-0bad-474f-a9bb-ee2e6aa1be50";
 
-  environment.sessionVariables = {
-    # Electron hint
-    NIXOS_OZONE_WL = "1";
-    QT_STYLE_OVERRIDE = "Breeze-Dark"; # maybe not needed 
-    # Wayland Nvidia disappearing cursor fix
-    WLR_NO_HARDWARE_CURSORS = "1";
-
-  };
-  environment.shells = with pkgs; [ zsh ]; # /etc/shells
-  # System packages
-  environment.systemPackages = with pkgs; [
-     ansible
-     curl
-     fd
-     git
-     home-manager
-     lshw
-     neovim
-     neofetch
-     netdata
-     nmap
-     nodejs
-     pciutils
-     ripgrep
-     tmux
-     unzip
-     usbutils
-     wget
-     tree
-  ];
-
   networking.hostName = "silvertorch";
   networking.networkmanager.enable = true;
   networking.firewall.allowedTCPPorts = [ 22 ];
 
-  programs.hyprland = {
-    enable = true;
-    xwayland.enable = true;
-  };
   programs.zsh.enable = true;
 
-  security.pam.services.swaylock = {}; # required for swaylock-effects functionality
-  security.polkit.enable = true; # hyprland support
   security.rtkit.enable = true; # sound
 
   # System services:
@@ -108,25 +77,8 @@ in
     group = "users";
   };
   services.printing.enable = true; # CUPS print support
-  services.syncthing = {
-    enable = true;
-    dataDir = "/home/r6t/icloud";
-    openDefaultPorts = true;
-    overrideDevices = false;
-    overrideFolders = false;
-    configDir = "/home/r6t/.config/syncthing";
-    user = "r6t";
-    group = "users";
-    guiAddress = "127.0.0.1:8384";
-  };
+
   services.tailscale.enable = true;
-  # Configure keymap in X11
-  services.xserver = {
-    xkb = {
-      layout = "us";
-      variant = "";
-    };
-  };
 
   sound.enable = true; # see services.pipewire
 
@@ -161,11 +113,4 @@ in
     };
   };
 
-  # Desktop portal
-  xdg.portal = {
-    enable = true;
-    wlr.enable = true;
-    # gtk portal needed to make gtk apps happy
-    extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
-  };
 }
