@@ -1,5 +1,5 @@
 {
-  description = "r6t nixos system config";
+  description = "r6t nixos systems configuration flake";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
@@ -37,17 +37,17 @@
       # desktop
       mountainball = nixpkgs.lib.nixosSystem {
         specialArgs = {inherit inputs outputs;};
-        modules = [./nixos/mountainball-configuration.nix];
+        modules = [./hosts/mountainball/configuration.nix];
       };
-      # container server
+      # server
       saguaro = nixpkgs.lib.nixosSystem {
         specialArgs = {inherit inputs outputs;};
-        modules = [./nixos/saguaro-configuration.nix];
+        modules = [./hosts/saguaro/configuration.nix];
       };
       # laptop
       silvertorch = nixpkgs.lib.nixosSystem {
         specialArgs = {inherit inputs outputs;};
-        modules = [./nixos/silvertorch-configuration.nix];
+        modules = [./hosts/silvertorch/configuration.nix];
       };
     };
   };

@@ -10,19 +10,19 @@
 let
   inherit (inputs) ssh-keys;
 in
- {
+{
   # You can import other NixOS modules here
   imports = [
     inputs.home-manager.nixosModules.home-manager
-
-    # Hardware list: https://github.com/NixOS/nixos-hardware/blob/master/flake.nix
-    inputs.hardware.nixosModules.framework-13-7040-amd
+    # If you want to use modules from other flakes (such as nixos-hardware):
+    # inputs.hardware.nixosModules.common-cpu-amd
+    # inputs.hardware.nixosModules.common-ssd
 
     # You can also split up your configuration and import pieces of it here:
     # ./users.nix
 
     # Import your generated (nixos-generate-config) hardware configuration
-    ./silvertorch-hardware-configuration.nix
+    ./hardware-configuration.nix
   ];
 
 
@@ -87,7 +87,8 @@ in
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
-  boot.initrd.luks.devices."luks-9fc9c182-0bad-474f-a9bb-ee2e6aa1be50".device = "/dev/disk/by-uuid/9fc9c182-0bad-474f-a9bb-ee2e6aa1be50";
+  boot.initrd.luks.devices."luks-ca693f0d-4d0a-4eee-ba6a-fdc2db22dfb1".device = "/dev/disk/by-uuid/ca693f0d-4d0a-4eee-ba6a-fdc2db22dfb1";
+  boot.kernelParams = [ "nvidia.NVreg_PreserveVideoMemoryAllocations=1" ]; # sleep/wake
 
   environment.sessionVariables = {
     # Electron hint
@@ -102,15 +103,17 @@ in
   environment.systemPackages = with pkgs; [
      ansible
      curl
+     docker-compose
      fd
      git
      home-manager
+     libva # https://wiki.hyprland.org/hyprland-wiki/pages/Nvidia/
      lshw
      neovim
      neofetch
-     netdata
      nmap
      nodejs
+     nvidia-docker
      pciutils
      ripgrep
      tmux
@@ -130,6 +133,7 @@ in
       source-sans-pro
     ];
   };
+
   hardware.bluetooth.enable = true;
   # Experimental settings allow the os to read bluetooth device battery level
   hardware.bluetooth.settings = {
@@ -138,9 +142,24 @@ in
      };
   };
 
-  networking.hostName = "silvertorch";
+  # Nvidia GPU (unfree)
+  hardware.opengl = {
+    enable = true;
+    driSupport = true;
+    driSupport32Bit = true;
+  };
+  hardware.nvidia = {
+    modesetting.enable = true;
+    powerManagement.enable = false; # changed from default false (back to false for testing)
+    powerManagement.finegrained = false;
+    open = false;
+    nvidiaSettings = true;
+    package = config.boot.kernelPackages.nvidiaPackages.stable;
+  };
+
+  networking.hostName = "mountainball";
   networking.networkmanager.enable = true;
-  networking.firewall.allowedTCPPorts = [ 22 ];
+  networking.firewall.allowedTCPPorts = [ 22 3000 11434 ];
 
   programs.hyprland = {
     enable = true;
@@ -181,11 +200,6 @@ in
   services.fprintd.enable = false; # causing nix build error 3/22/24
   services.fwupd.enable = true; # Linux firmware updater
   services.mullvad-vpn.enable = true; # Mullvad desktop app
-  services.netdata = {
-    enable = true;
-    user = "r6t";
-    group = "users";
-  };
   services.printing.enable = true; # CUPS print support
   services.syncthing = {
     enable = true;
@@ -201,6 +215,7 @@ in
   services.tailscale.enable = true;
   # Configure keymap in X11
   services.xserver = {
+    videoDrivers = ["nvidia"];
     xkb = {
       layout = "us";
       variant = "";

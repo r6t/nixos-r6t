@@ -22,7 +22,7 @@ in
     # ./users.nix
 
     # Import your generated (nixos-generate-config) hardware configuration
-    ./saguaro-hardware-configuration.nix
+    ./hardware-configuration.nix
   ];
 
   nixpkgs = {
