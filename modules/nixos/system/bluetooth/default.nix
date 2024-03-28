@@ -1,4 +1,4 @@
-{ lib, ... }: { 
+{ lib, config, ... }: { 
 
     options = {
       mine.bluetooth.enable =

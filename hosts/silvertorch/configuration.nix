@@ -21,12 +21,14 @@ in
     ./hardware-configuration.nix
     ../../modules/nixos/system/bluetooth/default.nix
     ../../modules/nixos/system/fonts/default.nix
+    ../../modules/nixos/system/localization/default.nix
     ../../modules/nixos/system/nix/default.nix
     ../../modules/nixos/system/nixpkgs/default.nix
   ];
 
   mine.bluetooth.enable = true;
   mine.fonts.enable = true;
+  mine.localization.enable = true;
   mine.nix.enable = true;
   mine.nixpkgs.enable = true;
 
@@ -87,23 +89,6 @@ in
   security.pam.services.swaylock = {}; # required for swaylock-effects functionality
   security.polkit.enable = true; # hyprland support
   security.rtkit.enable = true; # sound
-
-  time.timeZone = "America/Los_Angeles";
-
-  # Internationalization 
-  i18n.defaultLocale = "en_US.UTF-8";
-
-  i18n.extraLocaleSettings = {
-    LC_ADDRESS = "en_US.UTF-8";
-    LC_IDENTIFICATION = "en_US.UTF-8";
-    LC_MEASUREMENT = "en_US.UTF-8";
-    LC_MONETARY = "en_US.UTF-8";
-    LC_NAME = "en_US.UTF-8";
-    LC_NUMERIC = "en_US.UTF-8";
-    LC_PAPER = "en_US.UTF-8";
-    LC_TELEPHONE = "en_US.UTF-8";
-    LC_TIME = "en_US.UTF-8";
-  };
 
   # System services:
   services.blueman.enable = true; # Bluetooth
