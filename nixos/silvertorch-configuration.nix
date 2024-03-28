@@ -108,6 +108,7 @@ in
      lshw
      neovim
      neofetch
+     netdata
      nmap
      nodejs
      pciutils
@@ -180,6 +181,11 @@ in
   services.fprintd.enable = false; # causing nix build error 3/22/24
   services.fwupd.enable = true; # Linux firmware updater
   services.mullvad-vpn.enable = true; # Mullvad desktop app
+  services.netdata = {
+    enable = true;
+    user = "r6t";
+    group = "users";
+  };
   services.printing.enable = true; # CUPS print support
   services.syncthing = {
     enable = true;
