@@ -26,7 +26,7 @@ in
     ../../modules/nixos/system/localization/default.nix
     ../../modules/nixos/system/nix/default.nix
     ../../modules/nixos/system/nixpkgs/default.nix
-    ../../modules/nixos/system/syncthing/default.nix
+    ../../modules/nixos/apps/syncthing/default.nix
   ];
 
   mine.bluetooth.enable = true;
