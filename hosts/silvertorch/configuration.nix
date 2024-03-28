@@ -51,7 +51,7 @@ in
     extraSpecialArgs = { inherit inputs outputs; };
     users = {
       # Import your home-manager configuration
-      r6t = import ../home-manager/home-graphical.nix;
+      r6t = import ../../home-manager/home-graphical.nix;
     };
   };
 
