@@ -299,6 +299,10 @@ in
       "window.titleBarStyle" = "custom";
       "merge-conflict.autoNavigateNextConflict.enabled" = true;
     };
+    Settings = {
+      "editor.fontFamily" = "Hack Nerd Font, Noto Color Emoji";
+      "editor.fontSize" = 14;
+    };
   };
   programs.zsh = {
     enable = true;
