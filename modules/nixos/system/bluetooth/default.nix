@@ -13,5 +13,7 @@
           Experimental = true;
          };
       };
+
+      services.blueman.enable = true;
     };
 }

@@ -19,23 +19,27 @@ in
     inputs.hardware.nixosModules.framework-13-7040-amd
 
     ./hardware-configuration.nix
+    ../../modules/nixos/apps/docker/default.nix
     ../../modules/nixos/apps/hypr/default.nix
+    ../../modules/nixos/apps/syncthing/default.nix
     ../../modules/nixos/system/bluetooth/default.nix
     ../../modules/nixos/system/env/default.nix
     ../../modules/nixos/system/fonts/default.nix
     ../../modules/nixos/system/localization/default.nix
     ../../modules/nixos/system/nix/default.nix
     ../../modules/nixos/system/nixpkgs/default.nix
-    ../../modules/nixos/apps/syncthing/default.nix
+    ../../modules/nixos/system/sound/default.nix
   ];
 
   mine.bluetooth.enable = true;
+  mine.docker.enable = true;
   mine.env.enable = true;
   mine.fonts.enable = true;
   mine.hypr.enable = true;
   mine.localization.enable = true;
   mine.nix.enable = true;
   mine.nixpkgs.enable = true;
+  mine.sound.enable = true;
   mine.syncthing.enable = true;
 
   home-manager = {
@@ -57,36 +61,13 @@ in
 
   programs.zsh.enable = true;
 
-  security.rtkit.enable = true; # sound
-
-  # System services:
-  services.blueman.enable = true; # Bluetooth
-  services.pipewire = {
-    enable = true;
-    alsa.enable = true;
-    pulse.enable = true;
-    jack.enable = true;
-  };
-  services.flatpak.enable = true;
-  services.fprintd.enable = false; # causing nix build error 3/22/24
   services.fwupd.enable = true; # Linux firmware updater
-  services.mullvad-vpn.enable = true; # Mullvad desktop app
-  services.netdata = {
-    enable = true;
-    user = "r6t";
-    group = "users";
-  };
+
   services.printing.enable = true; # CUPS print support
 
   services.tailscale.enable = true;
 
-  sound.enable = true; # see services.pipewire
 
-  services.openssh = {
-    enable = true;
-      # PermitRootLogin = "no";
-      # PasswordAuthentication = true;
-    };
 
   system.stateVersion = "23.11";
 
@@ -99,18 +80,4 @@ in
       shell = pkgs.zsh;
     };
   };
-
-  # Containers
-  virtualisation.docker = { 
-    daemon.settings = {
-      data-root = "/home/r6t/docker-root";
-    };
-    enable = true;
-    enableOnBoot = true;
-    rootless = {
-      enable = true;
-      setSocketVariable = true;
-    };
-  };
-
 }
