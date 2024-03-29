@@ -6,10 +6,10 @@
     };
 
     config = lib.mkIf config.mine.env.enable { 
+      # Env vars currently included in base-system
       environment.sessionVariables = {
-        # Electron hint
         NIXOS_OZONE_WL = "1";
-        QT_STYLE_OVERRIDE = "Breeze-Dark"; # maybe not needed 
+        QT_STYLE_OVERRIDE = "Breeze-Dark";
         # Wayland Nvidia disappearing cursor fix
         WLR_NO_HARDWARE_CURSORS = "1";
     

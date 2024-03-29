@@ -8,6 +8,7 @@
       apps/tailscale/default.nix
       apps/zsh/default.nix
 
+      system/env/default.nix
       system/fwupd/default.nix
       system/localization/default.nix
       system/nix/default.nix

@@ -26,6 +26,7 @@ in
   mine.zsh.enable = true;
 
   # system modules
+  mine.env.enable = true;
   mine.fwupd.enable = true;
   mine.localization.enable = true;
   mine.nix.enable = true;
