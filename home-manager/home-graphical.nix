@@ -296,12 +296,10 @@ in
       yzhang.markdown-all-in-one
     ];
     userSettings = {
-      "window.titleBarStyle" = "custom";
-      "merge-conflict.autoNavigateNextConflict.enabled" = true;
-    };
-    Settings = {
       "editor.fontFamily" = "Hack Nerd Font, Noto Color Emoji";
       "editor.fontSize" = 14;
+      "window.titleBarStyle" = "custom";
+      "merge-conflict.autoNavigateNextConflict.enabled" = true;
     };
   };
   programs.zsh = {
