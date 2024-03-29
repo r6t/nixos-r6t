@@ -18,6 +18,7 @@
       # System packages
       environment.systemPackages = with pkgs; [
          ansible
+         bolt
          curl
          fd
          git
