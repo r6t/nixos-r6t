@@ -50,6 +50,7 @@ in
     8000 # paperless-ngx
     8080 # stirling-pdf
     8384 # syncthing
+    19999 # netdata
     22000 # syncthing
     ];
   networking.hostName = "saguaro";
