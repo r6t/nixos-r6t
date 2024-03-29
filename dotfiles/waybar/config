@@ -53,7 +53,7 @@
         "format": "{}"
     },
 	"clock": {
-		"format": "{:%H:%M %A, %B %d}",
+		"format": "{:%A, %B %d | %H:%M}",
 		"tooltip": false
 	},
 	"pulseaudio": {
