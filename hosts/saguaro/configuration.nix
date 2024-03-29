@@ -56,6 +56,14 @@ in
     8888
     9090
     9999
+    32400
+    32469
+    ];
+  networking.firewall.allowedUDPPorts = [ 
+    32400
+    32469
+    5353
+    1900
     ];
   networking.hostName = "saguaro";
   networking.networkmanager.enable = true;
