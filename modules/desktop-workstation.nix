@@ -12,4 +12,4 @@
       system/printing/default.nix
       system/sound/default.nix
     ]
-}
+};

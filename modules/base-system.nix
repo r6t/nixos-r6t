@@ -12,4 +12,4 @@
       system/nix/default.nix
       system/nixpkgs/default.nix
     ]
-}
+};
