@@ -19,34 +19,65 @@ in
     inputs.hardware.nixosModules.framework-13-7040-amd
 
     ./hardware-configuration.nix
-    ../../modules/nixos/apps/docker/default.nix
-    ../../modules/nixos/apps/hypr/default.nix
-    ../../modules/nixos/apps/syncthing/default.nix
-    ../../modules/nixos/system/bluetooth/default.nix
-    ../../modules/nixos/system/env/default.nix
-    ../../modules/nixos/system/fonts/default.nix
-    ../../modules/nixos/system/localization/default.nix
-    ../../modules/nixos/system/nix/default.nix
-    ../../modules/nixos/system/nixpkgs/default.nix
-    ../../modules/nixos/system/sound/default.nix
+
+    ../../modules/apps/docker/default.nix
+    ../../modules/apps/flatpak/default.nix
+    ../../modules/apps/hypr/default.nix
+    ../../modules/apps/mullvad/default.nix
+    ../../modules/apps/netdata/default.nix
+    ../../modules/apps/ssh/default.nix
+    ../../modules/apps/syncthing/default.nix
+    ../../modules/apps/tailscale/default.nix
+    ../../modules/apps/zsh/default.nix
+
+    ../../modules/system/bluetooth/default.nix
+    ../../modules/system/env/default.nix
+    ../../modules/system/fonts/default.nix
+    ../../modules/system/fwupd/default.nix
+    ../../modules/system/localization/default.nix
+    ../../modules/system/nix/default.nix
+    ../../modules/system/nixpkgs/default.nix
+    ../../modules/system/printing/default.nix
+    ../../modules/system/sound/default.nix
   ];
 
-  mine.bluetooth.enable = true;
+  # apps modules
   mine.docker.enable = true;
+  mine.flatpak.enable = true;
+  mine.hypr.enable = true;
+  mine.mullvad.enable = true;
+  mine.netdata.enable = true;
+  mine.ssh.enable = true;
+  mine.syncthing.enable = true;
+  mine.tailscale.enable = true;
+  mine.zsh.enable = true;
+
+  # system modules
+  mine.bluetooth.enable = true;
   mine.env.enable = true;
   mine.fonts.enable = true;
-  mine.hypr.enable = true;
+  mine.fwupd.enable = true;
   mine.localization.enable = true;
   mine.nix.enable = true;
   mine.nixpkgs.enable = true;
+  mine.printing.enable = true;
   mine.sound.enable = true;
-  mine.syncthing.enable = true;
 
   home-manager = {
     extraSpecialArgs = { inherit inputs outputs; };
     users = {
       # Import your home-manager configuration
       r6t = import ../../home-manager/home-graphical.nix;
+    };
+  };
+
+  users.users = {
+    r6t = {
+      isNormalUser = true;
+      openssh.authorizedKeys.keyFiles = [ ssh-keys.outPath ];
+      # input group reqd for waybar
+      extraGroups = [ "docker" "input" "networkmanager" "wheel"];
+      shell = pkgs.zsh;
     };
   };
 
@@ -59,25 +90,6 @@ in
   networking.networkmanager.enable = true;
   networking.firewall.allowedTCPPorts = [ 22 ];
 
-  programs.zsh.enable = true;
-
-  services.fwupd.enable = true; # Linux firmware updater
-
-  services.printing.enable = true; # CUPS print support
-
-  services.tailscale.enable = true;
-
-
-
   system.stateVersion = "23.11";
 
-  users.users = {
-    r6t = {
-      isNormalUser = true;
-      openssh.authorizedKeys.keyFiles = [ ssh-keys.outPath ];
-      # input group reqd for waybar
-      extraGroups = [ "docker" "input" "networkmanager" "wheel"];
-      shell = pkgs.zsh;
-    };
-  };
 }
