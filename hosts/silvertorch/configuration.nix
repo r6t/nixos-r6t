@@ -32,6 +32,7 @@ in
 
   # system modules
   mine.bluetooth.enable = true;
+  mine.bolt.enable = true;
   mine.env.enable = true;
   mine.fonts.enable = true;
   mine.fwupd.enable = true;
