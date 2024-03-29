@@ -19,7 +19,6 @@ in
 
   # apps modules
   mine.docker.enable = true;
-  mine.flatpak.enable = true;
   mine.netdata.enable = true;
   mine.ssh.enable = true;
   mine.syncthing.enable = true;
