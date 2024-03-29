@@ -11,34 +11,12 @@ let
   inherit (inputs) ssh-keys;
 in
  {
-  # You can import other NixOS modules here
   imports = [
     inputs.home-manager.nixosModules.home-manager
-
-    # Hardware list: https://github.com/NixOS/nixos-hardware/blob/master/flake.nix
     inputs.hardware.nixosModules.framework-13-7040-amd
-
     ./hardware-configuration.nix
-
-    ../../modules/apps/docker/default.nix
-    ../../modules/apps/flatpak/default.nix
-    ../../modules/apps/hypr/default.nix
-    ../../modules/apps/mullvad/default.nix
-    ../../modules/apps/netdata/default.nix
-    ../../modules/apps/ssh/default.nix
-    ../../modules/apps/syncthing/default.nix
-    ../../modules/apps/tailscale/default.nix
-    ../../modules/apps/zsh/default.nix
-
-    ../../modules/system/bluetooth/default.nix
-    ../../modules/system/env/default.nix
-    ../../modules/system/fonts/default.nix
-    ../../modules/system/fwupd/default.nix
-    ../../modules/system/localization/default.nix
-    ../../modules/system/nix/default.nix
-    ../../modules/system/nixpkgs/default.nix
-    ../../modules/system/printing/default.nix
-    ../../modules/system/sound/default.nix
+    ../../modules/base-system.nix
+    ../../modules/desktop-workstation.nix
   ];
 
   # apps modules
