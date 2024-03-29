@@ -11,5 +11,5 @@
       system/localization/default.nix
       system/nix/default.nix
       system/nixpkgs/default.nix
-    ]
-};
+    ];
+}
