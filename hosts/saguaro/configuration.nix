@@ -52,6 +52,10 @@ in
     8384 # syncthing
     19999 # netdata
     22000 # syncthing
+    6595
+    8888
+    9090
+    9999
     ];
   networking.hostName = "saguaro";
   networking.networkmanager.enable = true;
