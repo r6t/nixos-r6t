@@ -1,6 +1,7 @@
 { pkgs, lib, ...}: {
 
     imports = [
+      apps/docker/default.nix
       apps/netdata/default.nix
       apps/ssh/default.nix
       apps/syncthing/default.nix

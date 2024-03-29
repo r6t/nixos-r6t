@@ -1,7 +1,6 @@
 { pkgs, lib, ...}: {
 
     imports = [
-      apps/docker/default.nix
       apps/flatpak/default.nix
       apps/hypr/default.nix
       apps/mullvad/default.nix
