@@ -17,9 +17,8 @@
       environment.shells = with pkgs; [ zsh ]; # /etc/shells
       # System packages
       environment.systemPackages = with pkgs; [
-         ansible
-         bolt
          curl
+         cryptsetup
          fd
          git
          home-manager
