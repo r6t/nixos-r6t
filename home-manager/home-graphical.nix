@@ -98,6 +98,11 @@ in
     obsidian # best notes app ever
     protonmail-bridge
     python3
+    python311Packages.boto3
+    python311Packages.pip
+    python311Packages.troposphere
+    python311Packages.jq
+    python311Packages.yq
     librewolf
     pamixer # pulseaudio controls
     playerctl # media keys
@@ -300,6 +305,7 @@ in
       "editor.fontSize" = 14;
       "window.titleBarStyle" = "custom";
       "merge-conflict.autoNavigateNextConflict.enabled" = true;
+      "redhat.telemetry.enabled" = false;
     };
   };
   programs.zsh = {

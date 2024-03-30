@@ -58,6 +58,9 @@ in
     9999
     32400
     32469
+    7878
+    8686
+    8989
     ];
   networking.firewall.allowedUDPPorts = [ 
     32400
