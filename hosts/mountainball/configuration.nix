@@ -10,22 +10,36 @@
 let
   inherit (inputs) ssh-keys;
 in
-{
-  # You can import other NixOS modules here
+ {
   imports = [
     inputs.home-manager.nixosModules.home-manager
-    # If you want to use modules from other flakes (such as nixos-hardware):
-    # inputs.hardware.nixosModules.common-cpu-amd
-    # inputs.hardware.nixosModules.common-ssd
-
-    # You can also split up your configuration and import pieces of it here:
-    # ./users.nix
-
-    # Import your generated (nixos-generate-config) hardware configuration
     ./hardware-configuration.nix
+    ../../modules/base-system.nix
+    ../../modules/desktop-workstation.nix
   ];
 
+  # apps modules
+  mine.docker.enable = false;
+  mine.flatpak.enable = false;
+  mine.hypr.enable = false;
+  mine.mullvad.enable = false;
+  mine.netdata.enable = false;
+  mine.ssh.enable = false;
+  mine.syncthing.enable = false;
+  mine.tailscale.enable = false;
+  mine.zsh.enable = false;
 
+  # system modules
+  mine.bluetooth.enable = false;
+  mine.bolt.enable = false;
+  mine.env.enable = false;
+  mine.fonts.enable = false;
+  mine.fwupd.enable = false;
+  mine.localization.enable = false;
+  mine.nix.enable = false;
+  mine.nixpkgs.enable = false;
+  mine.printing.enable = false;
+  mine.sound.enable = false;
 
   nixpkgs = {
     # You can add overlays here
