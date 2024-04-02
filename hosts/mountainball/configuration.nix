@@ -19,27 +19,27 @@ in
   ];
 
   # apps modules
-  mine.docker.enable = false;
-  mine.flatpak.enable = false;
-  mine.hypr.enable = false;
-  mine.mullvad.enable = false;
-  mine.netdata.enable = false;
-  mine.ssh.enable = false;
-  mine.syncthing.enable = false;
-  mine.tailscale.enable = false;
-  mine.zsh.enable = false;
+  mine.docker.enable = true;
+  mine.flatpak.enable = true;
+  mine.hypr.enable = false; # TODO: make nvidia stuff modular
+  mine.mullvad.enable = true;
+  mine.netdata.enable = true;
+  mine.ssh.enable = true;
+  mine.syncthing.enable = true;
+  mine.tailscale.enable = true;
+  mine.zsh.enable = true;
 
   # system modules
   mine.bluetooth.enable = false;
-  mine.bolt.enable = false;
-  mine.env.enable = false;
-  mine.fonts.enable = false;
-  mine.fwupd.enable = false;
-  mine.localization.enable = false;
-  mine.nix.enable = false;
-  mine.nixpkgs.enable = false;
-  mine.printing.enable = false;
-  mine.sound.enable = false;
+  mine.bolt.enable = false; # system doesn't have thunderbolt
+  mine.env.enable = false; # TODO: make nvidia stuff modular
+  mine.fonts.enable = true;
+  mine.fwupd.enable = true;
+  mine.localization.enable = true;
+  mine.nix.enable = true;
+  mine.nixpkgs.enable = true;
+  mine.printing.enable = true;
+  mine.sound.enable = true;
 
   nixpkgs = {
     # You can add overlays here
@@ -66,35 +66,6 @@ in
     users = {
       # Import your home-manager configuration
       r6t = import ../../home-manager/home-graphical.nix;
-    };
-  };
-
-  # This will add each flake input as a registry
-  # To make nix3 commands consistent with your flake
-  nix.registry = (lib.mapAttrs (_: flake: {inherit flake;})) ((lib.filterAttrs (_: lib.isType "flake")) inputs);
-
-  # This will additionally add your inputs to the system's legacy channels
-  # Making legacy nix commands consistent as well, awesome!
-  nix.nixPath = ["/etc/nix/path"];
-  environment.etc =
-    lib.mapAttrs'
-    (name: value: {
-      name = "nix/path/${name}";
-      value.source = value.flake;
-    })
-    config.nix.registry;
-
-
-  nix = {
-    # NixOS garbage collection
-    gc = {
-      automatic = true;
-      dates = "monthly";
-      options = "--delete-older-than-60d";
-    };
-    settings = {
-      auto-optimise-store = true;
-      experimental-features = "nix-command flakes";
     };
   };
 
@@ -137,25 +108,6 @@ in
      tree
   ];
 
-  fonts = {
-    fontDir.enable = true;
-    packages = with pkgs; [
-      noto-fonts-emoji
-      font-awesome
-      hack-font
-      nerdfonts
-      source-sans-pro
-    ];
-  };
-
-  hardware.bluetooth.enable = true;
-  # Experimental settings allow the os to read bluetooth device battery level
-  hardware.bluetooth.settings = {
-    General = {
-      Experimental = true;
-     };
-  };
-
   # Nvidia GPU (unfree)
   hardware.opengl = {
     enable = true;
@@ -179,54 +131,10 @@ in
     enable = true;
     xwayland.enable = true;
   };
-  programs.zsh.enable = true;
 
   security.pam.services.swaylock = {}; # required for swaylock-effects functionality
   security.polkit.enable = true; # hyprland support
-  security.rtkit.enable = true; # sound
 
-  time.timeZone = "America/Los_Angeles";
-
-  # Internationalization 
-  i18n.defaultLocale = "en_US.UTF-8";
-
-  i18n.extraLocaleSettings = {
-    LC_ADDRESS = "en_US.UTF-8";
-    LC_IDENTIFICATION = "en_US.UTF-8";
-    LC_MEASUREMENT = "en_US.UTF-8";
-    LC_MONETARY = "en_US.UTF-8";
-    LC_NAME = "en_US.UTF-8";
-    LC_NUMERIC = "en_US.UTF-8";
-    LC_PAPER = "en_US.UTF-8";
-    LC_TELEPHONE = "en_US.UTF-8";
-    LC_TIME = "en_US.UTF-8";
-  };
-
-  # System services:
-  services.blueman.enable = true; # Bluetooth
-  services.pipewire = {
-    enable = true;
-    alsa.enable = true;
-    pulse.enable = true;
-    jack.enable = true;
-  };
-  services.flatpak.enable = true;
-  services.fprintd.enable = false; # causing nix build error 3/22/24
-  services.fwupd.enable = true; # Linux firmware updater
-  services.mullvad-vpn.enable = true; # Mullvad desktop app
-  services.printing.enable = true; # CUPS print support
-  services.syncthing = {
-    enable = true;
-    dataDir = "/home/r6t/icloud";
-    openDefaultPorts = true;
-    overrideDevices = false;
-    overrideFolders = false;
-    configDir = "/home/r6t/.config/syncthing";
-    user = "r6t";
-    group = "users";
-    guiAddress = "127.0.0.1:8384";
-  };
-  services.tailscale.enable = true;
   # Configure keymap in X11
   services.xserver = {
     videoDrivers = ["nvidia"];
@@ -235,14 +143,6 @@ in
       variant = "";
     };
   };
-
-  sound.enable = true; # see services.pipewire
-
-  services.openssh = {
-    enable = true;
-      # PermitRootLogin = "no";
-      # PasswordAuthentication = true;
-    };
 
   system.stateVersion = "23.11";
 
@@ -253,19 +153,6 @@ in
       # input group reqd for waybar
       extraGroups = [ "docker" "input" "networkmanager" "wheel"];
       shell = pkgs.zsh;
-    };
-  };
-
-  # Containers
-  virtualisation.docker = { 
-    daemon.settings = {
-      data-root = "/home/r6t/docker-root";
-    };
-    enable = true;
-    enableOnBoot = true;
-    rootless = {
-      enable = true;
-      setSocketVariable = true;
     };
   };
 
