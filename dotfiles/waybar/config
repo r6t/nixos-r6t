@@ -69,9 +69,9 @@
 	},
 
 	"pulseaudio": {
-		"format": "{volume:2} {icon}",
-		"format-bluetooth": "{volume} {icon}",
-		"format-muted": "MUTE",
+		"format": "{volume:2} 🔊",
+		"format-bluetooth": "{volume} 🎧",
+		"format-muted": "MUTE 🔇",
 		"format-icons": {
 			"headphones": "",
 			"default": [
@@ -85,7 +85,7 @@
 	},
 
     "backlight": {
-	    "format": "{percent} 󰉄"
+	    "format": "{percent} 🔦"
 	    // "format-icons": ["", ""]
     },
 
