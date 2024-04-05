@@ -3,6 +3,7 @@
     imports = [
       apps/docker/default.nix
       apps/netdata/default.nix
+      apps/ollama/default.nix
       apps/ssh/default.nix
       apps/syncthing/default.nix
       apps/tailscale/default.nix

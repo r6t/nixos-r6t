@@ -24,6 +24,7 @@ in
   mine.hypr.enable = false; # TODO: make nvidia stuff modular
   mine.mullvad.enable = true;
   mine.netdata.enable = true;
+  mine.ollama.enable = true;
   mine.ssh.enable = true;
   mine.syncthing.enable = true;
   mine.tailscale.enable = true;
@@ -125,7 +126,7 @@ in
 
   networking.hostName = "mountainball";
   networking.networkmanager.enable = true;
-  networking.firewall.allowedTCPPorts = [ 22 3000 11434 ];
+  networking.firewall.allowedTCPPorts = [ 22 3000 8080 11434 ]; # ssh ollama
 
   programs.hyprland = {
     enable = true;
