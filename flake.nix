@@ -34,7 +34,7 @@
     # NixOS configuration entrypoint
     # Available through 'nixos-rebuild --flake .#your-hostname'
     nixosConfigurations = {
-      # desktop
+      # laptop
       mountainball = nixpkgs.lib.nixosSystem {
         specialArgs = {inherit inputs outputs;};
         modules = [./hosts/mountainball/configuration.nix];
@@ -44,7 +44,7 @@
         specialArgs = {inherit inputs outputs;};
         modules = [./hosts/saguaro/configuration.nix];
       };
-      # laptop
+      # desktop
       silvertorch = nixpkgs.lib.nixosSystem {
         specialArgs = {inherit inputs outputs;};
         modules = [./hosts/silvertorch/configuration.nix];
