@@ -7,7 +7,6 @@
 
 	"modules-left": [
 		"hyprland/workspaces",
-		"idle_inhibitor",
 		"hyprland/window",
 		"custom/media",
 		"mpd",
@@ -17,6 +16,7 @@
 	],
 	"modules-right": [
 		"pulseaudio",
+		"idle_inhibitor",
 		"backlight",
 		"cpu",
 		"memory",
@@ -48,17 +48,29 @@
        "on-scroll-up": "hyprctl dispatch workspace e+1",
        "on-scroll-down": "hyprctl dispatch workspace e-1"
      },
+     
+    "idle_inhibitor": {
+        "format": "{icon}",
+        "format-icons": {
+            "activated": "🕶️",
+            "deactivated": "👓"
+        },
+        "timeout": 120
+    },
+
     "custom/hostname": {
         "exec": "hostname",
         "format": "{}"
     },
+
 	"clock": {
 		"format": "{:%A, %B %d | %H:%M}",
 		"tooltip": false
 	},
+
 	"pulseaudio": {
-		"format": "{icon} {volume:2}%",
-		"format-bluetooth": "{icon}  {volume}%",
+		"format": "{volume:2} {icon}",
+		"format-bluetooth": "{volume} {icon}",
 		"format-muted": "MUTE",
 		"format-icons": {
 			"headphones": "",
@@ -71,13 +83,21 @@
 		"on-click": "pamixer -t",
 		"on-click-right": "pavucontrol"
 	},
+
+    "backlight": {
+	    "format": "{percent} 󰉄"
+	    // "format-icons": ["", ""]
+    },
+
     "cpu": {
-        "format": "{usage}% ",
+        "format": "{usage} ",
         "tooltip": "Load avg: {load}"
     },
+
     "memory": {
-        "format": "{used}G "
+        "format": "{used}G " 
     },
+
     "network": {
         // "interface": "wlp2*", // (Optional) To force the use of this interface
         "format-wifi": "{essid} ({signalStrength}%) ",
@@ -87,6 +107,7 @@
         "format-disconnected": "Disconnected ⚠",
         "format-alt": "{ifname}: {ipaddr}/{cidr}"
     },
+
 	"battery": {
         "states": {
             // "good": 95,
@@ -101,7 +122,9 @@
         // "format-full": "",
         "format-icons": ["", "", "", "", ""]
 	},
+
 	"tray": {
 		"icon-size": 20
 	}
+
 }
