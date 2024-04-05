@@ -26,6 +26,7 @@ in
   mine.netdata.enable = true;
   mine.ollama.enable = true;
   mine.ssh.enable = true;
+  mine.steam.enable = true;
   mine.syncthing.enable = true;
   mine.tailscale.enable = true;
   mine.zsh.enable = true;
@@ -161,7 +162,9 @@ in
   xdg.portal = {
     enable = true;
     wlr.enable = true;
-    # gtk portal needed to make gtk apps happy
     extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
+    config = {
+      common.default = ["gtk"];
+    };
   };
 }
