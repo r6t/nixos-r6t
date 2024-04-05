@@ -90,12 +90,12 @@
     },
 
     "cpu": {
-        "format": "{usage} ",
+        "format": "{usage} 🧠",
         "tooltip": "Load avg: {load}"
     },
 
     "memory": {
-        "format": "{used}G " 
+        "format": "{used}G 🐏" 
     },
 
     "network": {
