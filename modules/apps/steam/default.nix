@@ -8,6 +8,7 @@
     config = lib.mkIf config.mine.steam.enable { 
       programs.steam = {
         enable = true;
+        gamescopeSession.enable = true;
         };
     };
 }
