@@ -15,8 +15,7 @@ in
     inputs.home-manager.nixosModules.home-manager
     inputs.hardware.nixosModules.framework-13-7040-amd
     ./hardware-configuration.nix
-    ../../modules/base-system.nix
-    ../../modules/desktop-workstation.nix
+    ../../modules/default.nix
   ];
 
   # apps modules

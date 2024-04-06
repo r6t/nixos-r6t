@@ -14,8 +14,7 @@ in
   imports = [
     inputs.home-manager.nixosModules.home-manager
     ./hardware-configuration.nix
-    ../../modules/base-system.nix
-    ../../modules/desktop-workstation.nix
+    ../../modules/default.nix
   ];
 
   # apps modules
