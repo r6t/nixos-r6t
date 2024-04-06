@@ -1,14 +1,14 @@
 { pkgs, lib, ...}: {
 
     imports = [
-      apps/flatpak/default.nix
-      apps/hypr/default.nix
-      apps/mullvad/default.nix
-      apps/steam/default.nix
+      nixos/flatpak/default.nix
+      nixos/hypr/default.nix
+      nixos/mullvad/default.nix
+      nixos/steam/default.nix
       
-      system/bluetooth/default.nix
-      system/fonts/default.nix
-      system/printing/default.nix
-      system/sound/default.nix
+      nixos/bluetooth/default.nix
+      nixos/fonts/default.nix
+      nixos/printing/default.nix
+      nixos/sound/default.nix
     ];
 }

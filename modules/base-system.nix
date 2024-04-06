@@ -1,19 +1,19 @@
 { pkgs, lib, ...}: {
 
     imports = [
-      apps/docker/default.nix
-      apps/netdata/default.nix
-      apps/ollama/default.nix
-      apps/ssh/default.nix
-      apps/syncthing/default.nix
-      apps/tailscale/default.nix
-      apps/zsh/default.nix
+      nixos/docker/default.nix
+      nixos/netdata/default.nix
+      nixos/ollama/default.nix
+      nixos/ssh/default.nix
+      nixos/syncthing/default.nix
+      nixos/tailscale/default.nix
+      nixos/zsh/default.nix
 
-      system/bolt/default.nix
-      system/env/default.nix
-      system/fwupd/default.nix
-      system/localization/default.nix
-      system/nix/default.nix
-      system/nixpkgs/default.nix
+      nixos/bolt/default.nix
+      nixos/env/default.nix
+      nixos/fwupd/default.nix
+      nixos/localization/default.nix
+      nixos/nix/default.nix
+      nixos/nixpkgs/default.nix
     ];
 }
