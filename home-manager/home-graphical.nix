@@ -9,10 +9,6 @@
 
 
 {
-  imports = [
-  ];
-
-
   home = {
     homeDirectory = "/home/r6t";
     stateVersion = "23.11";
@@ -89,21 +85,6 @@
     youtube-dl
   ];
 
-
-  programs.zsh = {
-    enable = true;
-    oh-my-zsh = {
-      enable = true;
-      plugins = [ "aws" "git" "python" ];
-      theme = "xiong-chiamiov-plus";
-    };
-    shellAliases = {
-      "h" = "Hyprland";
-      "gst" = "git status";
-      "gd" = "git diff";
-      "gds" = "git diff --staged";
-    };
-  };
 
   fonts = {
     fontconfig.enable = true;

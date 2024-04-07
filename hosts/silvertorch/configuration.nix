@@ -56,6 +56,7 @@
   mine.home.rofi.enable = true;
   mine.home.thunderbird.enable = true;
   mine.home.vscodium.enable = true;
+  mine.home.zsh.enable = true;
 
   # Bootloader.
   boot.loader.systemd-boot.enable = true;

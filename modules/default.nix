@@ -9,6 +9,7 @@
       home/rofi/default.nix
       home/thunderbird/default.nix
       home/vscodium/default.nix
+      home/zsh/default.nix
       nixos/bluetooth/default.nix
       nixos/bolt/default.nix
       nixos/docker/default.nix
