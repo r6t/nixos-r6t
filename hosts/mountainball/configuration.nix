@@ -37,6 +37,7 @@
   mine.nixpkgs.enable = true;
   mine.printing.enable = true;
   mine.sound.enable = true;
+  mine.user.enable = true;
 
   home-manager = {
     extraSpecialArgs = { inherit inputs outputs; };
