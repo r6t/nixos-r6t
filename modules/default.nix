@@ -3,6 +3,7 @@
     imports = [
       home/alacritty/default.nix
       home/apple-emoji/default.nix
+      home/awscli/default.nix
       home/git/default.nix
       home/fontconfig/default.nix
       home/home-manager/default.nix

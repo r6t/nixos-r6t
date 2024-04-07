@@ -20,7 +20,6 @@
   home.file.".local/share/rofi/themes/rounded-purple-dark.rasi".source = ../dotfiles/rofi/themes/rounded-purple-dark.rasi;
 
   home.packages = with pkgs; [
-    awscli2
     betaflight-configurator
     bitwarden
     brave
@@ -80,9 +79,6 @@
     youtube-dl
   ];
 
-
-
-
   home.sessionVariables = {
       MOZ_ENABLE_WAYLAND = 1;
       XDG_CURRENT_SESSION = "hyprland";
@@ -90,8 +86,5 @@
       QT_QPA_PLATFORM="wayland"; # maybe "wayland-egl"
       QT_WAYLAND_DISABLE_WINDOWDECORATION = 1;
   };
-
-  services.kdeconnect.enable = true; 
-  services.kdeconnect.indicator = true; 
 
 }
