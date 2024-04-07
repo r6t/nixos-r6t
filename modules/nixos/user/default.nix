@@ -1,4 +1,4 @@
-{ inputs, lib, config, ... }: 
+{ inputs, lib, config, pkgs, ... }: 
 
 let
   inherit (inputs) ssh-keys;
@@ -7,11 +7,11 @@ in
 { 
 
     options = {
-      mine.nixpkgs.enable =
+      mine.user.enable =
         lib.mkEnableOption "enable my user account";
     };
 
-    config = lib.mkIf config.mine.nixpkgs.enable { 
+    config = lib.mkIf config.mine.user.enable { 
       users.users = {
         r6t = {
           isNormalUser = true;
