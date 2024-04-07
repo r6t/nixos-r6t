@@ -1,6 +1,7 @@
 { pkgs, lib, ...}: {
 
     imports = [
+      home/git/default.nix
       nixos/bluetooth/default.nix
       nixos/bolt/default.nix
       nixos/docker/default.nix
