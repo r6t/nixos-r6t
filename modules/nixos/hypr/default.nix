@@ -2,16 +2,29 @@
 
     options = {
       mine.hypr.enable =
-        lib.mkEnableOption "enable and configure my hypr apps";
+        lib.mkEnableOption "enable and configure my hypr desktop";
     };
 
     config = lib.mkIf config.mine.hypr.enable { 
+
+      environment.systemPackages = with pkgs; [
+        brightnessctl
+        dconf
+        gnome.gnome-font-viewer
+        pamixer
+        playerctl
+        waybar
+        wdisplays
+        wl-clipboard
+        wlogout
+        xdg-utils
+      ];
+
       programs.hyprland = {
         enable = true;
         xwayland.enable = true;
       };
       
-      security.pam.services.swaylock = {}; # required for swaylock-effects functionality
       security.polkit.enable = true; # hyprland authentication support
 
       # Configure keymap in X11
