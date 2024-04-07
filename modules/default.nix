@@ -56,6 +56,7 @@
       nixos/localization/default.nix
       nixos/mullvad/default.nix
       nixos/netdata/default.nix
+      nixos/nvidia/default.nix
       nixos/nix/default.nix
       nixos/nixpkgs/default.nix
       nixos/ollama/default.nix

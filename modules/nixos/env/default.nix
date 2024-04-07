@@ -10,8 +10,6 @@
       environment.sessionVariables = {
         NIXOS_OZONE_WL = "1";
         QT_STYLE_OVERRIDE = "Breeze-Dark";
-        # Wayland Nvidia disappearing cursor fix
-        WLR_NO_HARDWARE_CURSORS = "1";
     
       };
       environment.shells = with pkgs; [ zsh ]; # /etc/shells
