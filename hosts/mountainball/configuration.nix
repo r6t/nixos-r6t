@@ -7,9 +7,6 @@
   ...
 }:
 
-let
-  inherit (inputs) ssh-keys;
-in
  {
   imports = [
     inputs.home-manager.nixosModules.home-manager
@@ -49,15 +46,46 @@ in
     };
   };
 
-  users.users = {
-    r6t = {
-      isNormalUser = true;
-      openssh.authorizedKeys.keyFiles = [ ssh-keys.outPath ];
-      # input group reqd for waybar
-      extraGroups = [ "docker" "input" "networkmanager" "wheel"];
-      shell = pkgs.zsh;
-    };
-  };
+  mine.home.alacritty.enable = true;
+  mine.home.apple-emoji.enable = true;
+  mine.home.awscli.enable = true;
+  mine.home.betaflight-configurator.enable = true;
+  mine.home.bitwarden.enable = true;
+  mine.home.brave.enable = true;
+  mine.home.calibre.enable = true;
+  mine.home.chromium.enable = true;
+  mine.home.digikam.enable = true;
+  mine.home.element-desktop.enable = true;
+  mine.home.firefox.enable = true;
+  mine.home.fontconfig.enable = true;
+  mine.home.freecad.enable = true;
+  mine.home.freerdp.enable = true;
+  mine.home.git.enable = true;
+  mine.home.home-manager.enable = true;
+  mine.home.hypridle.enable = true;
+  mine.home.hyprland.enable = true;
+  mine.home.hyprpaper.enable = true;
+  mine.home.hyprpicker.enable = true;
+  mine.home.kde-apps.enable = true;
+  mine.home.librewolf.enable = true;
+  mine.home.mako.enable = true;
+  mine.home.neovim.enable = true;
+  mine.home.obsidian.enable = true;
+  mine.home.protonmail-bridge.enable = true;
+  mine.home.python3.enable = true;
+  mine.home.remmina.enable = true;
+  mine.home.rofi.enable = true;
+  mine.home.screenshots.enable = true;
+  mine.home.signal-desktop.enable = true;
+  mine.home.thunderbird.enable = true;
+  mine.home.virt-manager.enable = true;
+  mine.home.virt-viewer.enable = true;
+  mine.home.vlc.enable = true;
+  mine.home.vscodium.enable = true;
+  mine.home.waybar.enable = true;
+  mine.home.webcord.enable = true;
+  mine.home.youtube-dl.enable = true;
+  mine.home.zsh.enable = true;
 
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
