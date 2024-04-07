@@ -6,7 +6,7 @@
     };
 
     config = lib.mkIf config.mine.home.alacritty.enable { 
-      programs.alacritty = {
+      home-manager.users.r6t.programs.alacritty = {
         enable = true;
         settings = {
         font = {

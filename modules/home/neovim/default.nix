@@ -1,4 +1,4 @@
-{ lib, config, ... }: { 
+{ lib, config, pkgs, ... }: { 
 
     options = {
       mine.home.neovim.enable =
@@ -6,7 +6,7 @@
     };
 
     config = lib.mkIf config.mine.home.neovim.enable { 
-      programs.neovim = {
+      home-manager.users.r6t.programs.neovim = {
         enable = true;
         defaultEditor = true;
         viAlias = true;
