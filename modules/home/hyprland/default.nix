@@ -8,7 +8,7 @@
     config = lib.mkIf config.mine.home.hyprland.enable { 
       home-manager.users.r6t = { 
         home = {
-          file.".config/hypr/hyprland.conf".source = ../dotfiles/hypr/hyprland.conf;
+          file.".config/hypr/hyprland.conf".source = ../../../dotfiles/hypr/hyprland.conf;
         };
         
         home.sessionVariables = {
