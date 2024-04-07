@@ -107,8 +107,6 @@ in
     pamixer # pulseaudio controls
     playerctl # media keys
     remmina
-    rofi-calc
-    rofi-emoji
     signal-desktop
     slurp # screenshots
     swaylock-effects # lock screen
@@ -126,16 +124,6 @@ in
     youtube-dl
   ];
 
-  programs.rofi = {
-    cycle = true;
-    enable = true;
-    package = pkgs.rofi-wayland;
-    plugins = [
-      pkgs.rofi-calc
-      pkgs.rofi-emoji
-    ];
-    theme = "/home/r6t/.local/share/rofi/themes/rounded-purple-dark.rasi";
-  };
   programs.thunderbird = {
     enable = true;
     package = pkgs.thunderbird;

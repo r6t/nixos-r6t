@@ -51,6 +51,7 @@
   mine.home.alacritty.enable = true;
   mine.home.git.enable = true;
   mine.home.neovim.enable = true;
+  mine.home.rofi.enable = true;
 
   # Bootloader.
   boot.loader.systemd-boot.enable = true;

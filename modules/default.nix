@@ -4,6 +4,7 @@
       home/alacritty/default.nix
       home/git/default.nix
       home/neovim/default.nix
+      home/rofi/default.nix
       nixos/bluetooth/default.nix
       nixos/bolt/default.nix
       nixos/docker/default.nix
