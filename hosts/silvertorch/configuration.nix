@@ -41,6 +41,7 @@ in
   mine.nixpkgs.enable = true;
   mine.printing.enable = true;
   mine.sound.enable = true;
+  mine.user.enable = true;
 
   nixpkgs = {
     # You can add overlays here
@@ -145,16 +146,6 @@ in
   };
 
   system.stateVersion = "23.11";
-
-  users.users = {
-    r6t = {
-      isNormalUser = true;
-      openssh.authorizedKeys.keyFiles = [ ssh-keys.outPath ];
-      # input group reqd for waybar
-      extraGroups = [ "docker" "input" "networkmanager" "wheel"];
-      shell = pkgs.zsh;
-    };
-  };
 
   # Desktop portal
   xdg.portal = {

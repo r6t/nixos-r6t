@@ -22,5 +22,6 @@
       nixos/syncthing/default.nix
       nixos/tailscale/default.nix
       nixos/zsh/default.nix
+      nixos/user/default.nix
     ];
 }
