@@ -1,6 +1,7 @@
 { pkgs, lib, ...}: {
 
     imports = [
+      home/alacritty/default.nix
       home/git/default.nix
       home/neovim/default.nix
       nixos/bluetooth/default.nix

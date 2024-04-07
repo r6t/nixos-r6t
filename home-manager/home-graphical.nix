@@ -126,17 +126,6 @@ in
     youtube-dl
   ];
 
-  programs.alacritty = {
-    enable = true;
-    settings = {
-    font = {
-      size = 14.0;
-    };
-    selection = {
-      save_to_clipboard = true;
-    };
-    };
-  };
   programs.rofi = {
     cycle = true;
     enable = true;

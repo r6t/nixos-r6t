@@ -48,6 +48,7 @@
     };
   };
 
+  mine.home.alacritty.enable = true;
   mine.home.git.enable = true;
   mine.home.neovim.enable = true;
 
