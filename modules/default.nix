@@ -43,8 +43,6 @@
       home/youtube-dl/default.nix
       home/zsh/default.nix
 
-
-
       nixos/bluetooth/default.nix
       nixos/bootloader/default.nix
       nixos/bolt/default.nix
@@ -57,6 +55,7 @@
       nixos/localization/default.nix
       nixos/mullvad/default.nix
       nixos/netdata/default.nix
+      nixos/networkmanager/default.nix
       nixos/nvidia/default.nix
       nixos/nix/default.nix
       nixos/nixpkgs/default.nix

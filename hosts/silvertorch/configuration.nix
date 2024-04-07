@@ -14,10 +14,9 @@
     ../../modules/default.nix
   ];
 
-  # Bootloader.
+  # system details
   boot.initrd.luks.devices."luks-ca693f0d-4d0a-4eee-ba6a-fdc2db22dfb1".device = "/dev/disk/by-uuid/ca693f0d-4d0a-4eee-ba6a-fdc2db22dfb1";
   networking.hostName = "silvertorch";
-  networking.networkmanager.enable = true;
   networking.firewall.allowedTCPPorts = [ 22 3000 8080 11434 ]; # ssh ollama
   system.stateVersion = "23.11";
 
@@ -32,6 +31,7 @@
   mine.localization.enable = true;
   mine.mullvad.enable = true;
   mine.netdata.enable = true;
+  mine.networkmanager.enable = true;
   mine.nix.enable = true;
   mine.nixpkgs.enable = true;
   mine.nvidia.enable = true;

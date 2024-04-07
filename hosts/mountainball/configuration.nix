@@ -15,38 +15,37 @@
     ../../modules/default.nix
   ];
 
-  # apps modules
-  mine.docker.enable = true;
-  mine.flatpak.enable = true;
-  mine.hypr.enable = true;
-  mine.mullvad.enable = true;
-  mine.netdata.enable = true;
-  mine.ssh.enable = true;
-  mine.syncthing.enable = true;
-  mine.tailscale.enable = true;
-  mine.zsh.enable = true;
+  # system details
+  boot.initrd.luks.devices."luks-9fc9c182-0bad-474f-a9bb-ee2e6aa1be50".device = "/dev/disk/by-uuid/9fc9c182-0bad-474f-a9bb-ee2e6aa1be50";
+  networking.hostName = "mountainball";
+  networking.firewall.allowedTCPPorts = [ 22 ];
+  system.stateVersion = "23.11";
 
   # system modules
   mine.bluetooth.enable = true;
   mine.bolt.enable = true;
+  mine.bootloader.enable = true;
+  mine.docker.enable = true;
   mine.env.enable = true;
+  mine.flatpak.enable = true;
   mine.fonts.enable = true;
   mine.fwupd.enable = true;
+  mine.hypr.enable = true;
   mine.localization.enable = true;
+  mine.mullvad.enable = true;
+  mine.netdata.enable = true;
+  mine.networkmanager.enable = true;
   mine.nix.enable = true;
   mine.nixpkgs.enable = true;
   mine.printing.enable = true;
   mine.sound.enable = true;
+  mine.ssh.enable = true;
+  mine.syncthing.enable = true;
+  mine.tailscale.enable = true;
   mine.user.enable = true;
+  mine.zsh.enable = true;
 
-  home-manager = {
-    extraSpecialArgs = { inherit inputs outputs; };
-    users = {
-      # Import your home-manager configuration
-      r6t = import ../../home-manager/home-graphical.nix;
-    };
-  };
-
+  # home modules
   mine.home.alacritty.enable = true;
   mine.home.apple-emoji.enable = true;
   mine.home.awscli.enable = true;
@@ -87,16 +86,4 @@
   mine.home.webcord.enable = true;
   mine.home.youtube-dl.enable = true;
   mine.home.zsh.enable = true;
-
-  # Bootloader.
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
-  boot.initrd.luks.devices."luks-9fc9c182-0bad-474f-a9bb-ee2e6aa1be50".device = "/dev/disk/by-uuid/9fc9c182-0bad-474f-a9bb-ee2e6aa1be50";
-
-  networking.hostName = "mountainball";
-  networking.networkmanager.enable = true;
-  networking.firewall.allowedTCPPorts = [ 22 ];
-
-  system.stateVersion = "23.11";
-
 }

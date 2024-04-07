@@ -14,9 +14,8 @@
     ../../modules/default.nix
   ];
 
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
-
+  # system details
+  networking.hostName = "saguaro";
   networking.firewall.allowedTCPPorts = [ 
     22
     3000 # ollama-web
@@ -41,26 +40,24 @@
     5353
     1900
     ];
-  networking.hostName = "saguaro";
-  networking.networkmanager.enable = true;
-
   system.stateVersion = "23.11";
-  # apps modules
-  mine.docker.enable = true;
-  mine.netdata.enable = true;
-  mine.ssh.enable = true;
-  mine.syncthing.enable = true;
-  mine.tailscale.enable = true;
-  mine.zsh.enable = true;
 
   # system modules
   mine.bolt.enable = true;
+  mine.bootloader.enable = true;
+  mine.docker.enable = true;
   mine.env.enable = true;
   mine.fwupd.enable = true;
   mine.localization.enable = true;
+  mine.netdata.enable = true;
+  mine.networkmanager.enable = true;
   mine.nix.enable = true;
   mine.nixpkgs.enable = true;
+  mine.ssh.enable = true;
+  mine.syncthing.enable = true;
+  mine.tailscale.enable = true;
   mine.user.enable = true;
+  mine.zsh.enable = true;
 
   # home modules
   mine.home.awscli.enable = true;
@@ -68,5 +65,4 @@
   mine.home.home-manager.enable = true;
   mine.home.python3.enable = true;
   mine.home.zsh.enable = true;
-
 }
