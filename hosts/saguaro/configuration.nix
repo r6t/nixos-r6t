@@ -7,9 +7,6 @@
   ...
 }:
 
-let
-  inherit (inputs) ssh-keys;
-in
  {
   imports = [
     inputs.home-manager.nixosModules.home-manager
@@ -17,30 +14,6 @@ in
     ../../modules/default.nix
   ];
 
-  # apps modules
-  mine.docker.enable = true;
-  mine.netdata.enable = true;
-  mine.ssh.enable = true;
-  mine.syncthing.enable = true;
-  mine.tailscale.enable = true;
-  mine.zsh.enable = true;
-
-  # system modules
-  mine.env.enable = true;
-  mine.fwupd.enable = true;
-  mine.localization.enable = true;
-  mine.nix.enable = true;
-  mine.nixpkgs.enable = true;
-
-  home-manager = {
-    extraSpecialArgs = { inherit inputs outputs; };
-    users = {
-      # Import your home-manager configuration
-      r6t = import ../../home-manager/home-shell.nix;
-    };
-  };
-
-  # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
@@ -72,13 +45,28 @@ in
   networking.networkmanager.enable = true;
 
   system.stateVersion = "23.11";
+  # apps modules
+  mine.docker.enable = true;
+  mine.netdata.enable = true;
+  mine.ssh.enable = true;
+  mine.syncthing.enable = true;
+  mine.tailscale.enable = true;
+  mine.zsh.enable = true;
 
-  users.users = {
-    r6t = {
-      isNormalUser = true;
-      openssh.authorizedKeys.keyFiles = [ ssh-keys.outPath ];
-      extraGroups = [ "docker" "networkmanager" "wheel"];
-      shell = pkgs.zsh;
-    };
-  };
+  # system modules
+  mine.bolt.enable = true;
+  mine.env.enable = true;
+  mine.fwupd.enable = true;
+  mine.localization.enable = true;
+  mine.nix.enable = true;
+  mine.nixpkgs.enable = true;
+  mine.user.enable = true;
+
+  # home modules
+  mine.home.awscli.enable = true;
+  mine.home.git.enable = true;
+  mine.home.home-manager.enable = true;
+  mine.home.python3.enable = true;
+  mine.home.zsh.enable = true;
+
 }
