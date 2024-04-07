@@ -7,6 +7,8 @@
 
     config = lib.mkIf config.mine.nvidia.enable { 
       
+      boot.kernelParams = [ "nvidia.NVreg_PreserveVideoMemoryAllocations=1" ]; # sleep/wake
+
       environment.sessionVariables = {
         # Wayland Nvidia disappearing cursor fix
         WLR_NO_HARDWARE_CURSORS = "1";

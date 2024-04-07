@@ -14,31 +14,36 @@
     ../../modules/default.nix
   ];
 
-  # apps modules
+  # Bootloader.
+  boot.initrd.luks.devices."luks-ca693f0d-4d0a-4eee-ba6a-fdc2db22dfb1".device = "/dev/disk/by-uuid/ca693f0d-4d0a-4eee-ba6a-fdc2db22dfb1";
+  networking.hostName = "silvertorch";
+  networking.networkmanager.enable = true;
+  networking.firewall.allowedTCPPorts = [ 22 3000 8080 11434 ]; # ssh ollama
+  system.stateVersion = "23.11";
+
+  # system modules
+  mine.bootloader.enable = true;
   mine.docker.enable = true;
+  mine.env.enable = true;
   mine.flatpak.enable = true;
+  mine.fonts.enable = true;
+  mine.fwupd.enable = true;
   mine.hypr.enable = true;
+  mine.localization.enable = true;
   mine.mullvad.enable = true;
   mine.netdata.enable = true;
+  mine.nix.enable = true;
+  mine.nixpkgs.enable = true;
+  mine.nvidia.enable = true;
   mine.ollama.enable = true;
+  mine.printing.enable = true;
+  mine.sound.enable = true;
   mine.ssh.enable = true;
   mine.steam.enable = true;
   mine.syncthing.enable = true;
   mine.tailscale.enable = true;
-  mine.zsh.enable = true;
-
-  # system modules
-  mine.bluetooth.enable = false;
-  mine.env.enable = true;
-  mine.fonts.enable = true;
-  mine.fwupd.enable = true;
-  mine.localization.enable = true;
-  mine.nix.enable = true;
-  mine.nixpkgs.enable = true;
-  mine.printing.enable = true;
-  mine.sound.enable = true;
-  mine.nvidia.enable = true;
   mine.user.enable = true;
+  mine.zsh.enable = true;
 
   # home modules
   mine.home.alacritty.enable = true;
@@ -81,16 +86,4 @@
   mine.home.webcord.enable = true;
   mine.home.youtube-dl.enable = true;
   mine.home.zsh.enable = true;
-
-  # Bootloader.
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
-  boot.initrd.luks.devices."luks-ca693f0d-4d0a-4eee-ba6a-fdc2db22dfb1".device = "/dev/disk/by-uuid/ca693f0d-4d0a-4eee-ba6a-fdc2db22dfb1";
-  boot.kernelParams = [ "nvidia.NVreg_PreserveVideoMemoryAllocations=1" ]; # sleep/wake
-
-  networking.hostName = "silvertorch";
-  networking.networkmanager.enable = true;
-  networking.firewall.allowedTCPPorts = [ 22 3000 8080 11434 ]; # ssh ollama
-
-  system.stateVersion = "23.11";
 }

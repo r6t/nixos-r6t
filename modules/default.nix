@@ -46,6 +46,7 @@
 
 
       nixos/bluetooth/default.nix
+      nixos/bootloader/default.nix
       nixos/bolt/default.nix
       nixos/docker/default.nix
       nixos/env/default.nix
