@@ -40,13 +40,6 @@
   mine.sound.enable = true;
   mine.user.enable = true;
 
-  home-manager = {
-    extraSpecialArgs = { inherit inputs outputs; };
-    users = {
-      # Import your home-manager configuration
-      r6t = import ../../home-manager/home-graphical.nix;
-    };
-  };
 
   mine.home.alacritty.enable = true;
   mine.home.apple-emoji.enable = true;
