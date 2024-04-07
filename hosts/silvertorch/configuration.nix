@@ -7,9 +7,6 @@
   ...
 }:
 
-let
-  inherit (inputs) ssh-keys;
-in
  {
   imports = [
     inputs.home-manager.nixosModules.home-manager
