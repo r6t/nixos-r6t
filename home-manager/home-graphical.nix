@@ -9,11 +9,6 @@
 
 
 {
-  home = {
-    homeDirectory = "/home/r6t";
-    stateVersion = "23.11";
-    username = "r6t";
-  };
   # Set dotfiles
   home.file.".config/hypr/hypridle.conf".source = ../dotfiles/hypr/hypridle.conf;
   home.file.".config/hypr/hyprland.conf".source = ../dotfiles/hypr/hyprland.conf;
@@ -99,6 +94,4 @@
   services.kdeconnect.enable = true; 
   services.kdeconnect.indicator = true; 
 
-  # Nicely reload system units when changing configs
-  systemd.user.startServices = "sd-switch";
 }
