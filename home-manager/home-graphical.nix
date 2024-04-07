@@ -6,29 +6,7 @@
   ...
 }:
 
-let
-  appleEmojiFont = pkgs.stdenv.mkDerivation rec {
-    pname = "apple-emoji-linux";
-    version = "16.4-patch.1";
-    src = pkgs.fetchurl {
-      url = "https://github.com/samuelngs/apple-emoji-linux/releases/download/v${version}/AppleColorEmoji.ttf";
-      sha256 = "15assqyxax63hah0g51jd4d4za0kjyap9m2cgd1dim05pk7mgvfm";
-    };
 
-    phases = [ "installPhase" ];
-
-    installPhase = ''
-      mkdir -p $out/share/fonts/apple-emoji
-      cp ${src} $out/share/fonts/apple-emoji/AppleColorEmoji.ttf
-    '';
-
-    meta = {
-      homepage = "https://github.com/samuelngs/apple-emoji-linux";
-      description = "Apple Color Emoji font";
-      license = pkgs.lib.licenses.unfree;
-    };
-  };
-in
 
 {
   imports = [
@@ -61,7 +39,6 @@ in
   home.file.".local/share/rofi/themes/rounded-purple-dark.rasi".source = ../dotfiles/rofi/themes/rounded-purple-dark.rasi;
 
   home.packages = with pkgs; [
-    appleEmojiFont # see let block
     awscli2
     betaflight-configurator
     bitwarden
