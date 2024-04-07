@@ -50,6 +50,7 @@
 
   mine.home.alacritty.enable = true;
   mine.home.apple-emoji.enable = true;
+  mine.home.fontconfig.enable = true;
   mine.home.git.enable = true;
   mine.home.neovim.enable = true;
   mine.home.obsidian.enable = true;

@@ -4,6 +4,7 @@
       home/alacritty/default.nix
       home/apple-emoji/default.nix
       home/git/default.nix
+      home/fontconfig/default.nix
       home/neovim/default.nix
       home/obsidian/default.nix
       home/rofi/default.nix
