@@ -94,8 +94,6 @@ in
     libsForQt5.qt5ct # KDE app support + https://wiki.hyprland.org/hyprland-wiki/pages/Nvidia/
     libnotify # reqd for mako
     mako # notifications
-    mellowplayer # music streaming
-    obsidian # best notes app ever
     protonmail-bridge
     python3
     python311Packages.boto3
@@ -124,29 +122,7 @@ in
     youtube-dl
   ];
 
-  programs.vscode = {
-    enable = true;
-    package = pkgs.vscodium;
-    extensions = with pkgs.vscode-extensions; [
-      bbenoist.nix
-      continue.continue
-      dracula-theme.theme-dracula
-      ms-azuretools.vscode-docker
-      ms-python.isort
-      ms-python.python
-      ms-python.vscode-pylance # unfree
-      redhat.vscode-yaml
-      vscodevim.vim
-      yzhang.markdown-all-in-one
-    ];
-    userSettings = {
-      "editor.fontFamily" = "Hack Nerd Font, Noto Color Emoji";
-      "editor.fontSize" = 14;
-      "window.titleBarStyle" = "custom";
-      "merge-conflict.autoNavigateNextConflict.enabled" = true;
-      "redhat.telemetry.enabled" = false;
-    };
-  };
+
   programs.zsh = {
     enable = true;
     oh-my-zsh = {

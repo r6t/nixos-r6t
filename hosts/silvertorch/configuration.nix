@@ -51,8 +51,10 @@
   mine.home.alacritty.enable = true;
   mine.home.git.enable = true;
   mine.home.neovim.enable = true;
+  mine.home.obsidian.enable = true;
   mine.home.rofi.enable = true;
   mine.home.thunderbird.enable = true;
+  mine.home.vscodium.enable = true;
 
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
