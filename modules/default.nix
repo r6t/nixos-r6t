@@ -5,6 +5,7 @@
       home/git/default.nix
       home/neovim/default.nix
       home/rofi/default.nix
+      home/thunderbird/default.nix
       nixos/bluetooth/default.nix
       nixos/bolt/default.nix
       nixos/docker/default.nix

@@ -52,6 +52,7 @@
   mine.home.git.enable = true;
   mine.home.neovim.enable = true;
   mine.home.rofi.enable = true;
+  mine.home.thunderbird.enable = true;
 
   # Bootloader.
   boot.loader.systemd-boot.enable = true;

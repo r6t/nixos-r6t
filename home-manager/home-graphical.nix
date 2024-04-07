@@ -124,13 +124,6 @@ in
     youtube-dl
   ];
 
-  programs.thunderbird = {
-    enable = true;
-    package = pkgs.thunderbird;
-    profiles.r6t = {
-      isDefault = true;
-    };
-  };
   programs.vscode = {
     enable = true;
     package = pkgs.vscodium;
