@@ -52,6 +52,7 @@
       nixos/fonts/default.nix
       nixos/fwupd/default.nix
       nixos/hypr/default.nix
+      nixos/jellyfin/default.nix
       nixos/localization/default.nix
       nixos/mullvad/default.nix
       nixos/netdata/default.nix

@@ -48,6 +48,7 @@
   mine.docker.enable = true;
   mine.env.enable = true;
   mine.fwupd.enable = true;
+  mine.jellyfin.enable = true;
   mine.localization.enable = true;
   mine.netdata.enable = true;
   mine.networkmanager.enable = true;
@@ -56,7 +57,7 @@
   mine.ssh.enable = true;
   mine.syncthing.enable = true;
   mine.tailscale.enable = true;
-  mine.thunderbay.enable = true; # wip
+  mine.thunderbay.enable = true;
   mine.user.enable = true;
   mine.zsh.enable = true;
 
