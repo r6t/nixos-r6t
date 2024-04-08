@@ -51,7 +51,6 @@
   mine.docker.enable = true;
   mine.env.enable = true;
   mine.fwupd.enable = true;
-  mine.jellyfin.enable = true;
   mine.localization.enable = true;
   mine.netdata.enable = true;
   mine.networkmanager.enable = true;
