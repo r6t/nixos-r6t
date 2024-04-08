@@ -9,7 +9,7 @@
       environment.etc.crypttab = {
         enable = true;
         text = ''
-          8TB-A1 UUID=cb067a1e-147b-4052-b561-e2c16c31dd0e /home/r6t/luks-keys/tbay/8tba
+          8TB-C1 UUID=cb067a1e-147b-4052-b561-e2c16c31dd0e /home/r6t/luks-keys/tbay/8tbd luks
         '';
       };
 
