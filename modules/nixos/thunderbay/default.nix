@@ -29,27 +29,27 @@
           keyFile = "/home/r6t/luks-keys/tbay/2tbf";
           allowDiscards = true;
         };
+      };
 
-        fileSystems."/home/r6t/external-ssd/8TB-A" = {
-          device = "/dev/mapper/8TB-A1";
-          fsType = "ext4";
-        };
-        fileSystems."/home/r6t/external-ssd/8TB-B" = {
-          device = "/dev/mapper/8TB-B1";
-          fsType = "ext4";
-        };
-        fileSystems."/home/r6t/external-ssd/8TB-D" = {
-          device = "/dev/mapper/8TB-D1";
-          fsType = "ext4";
-        };
-        fileSystems."/home/r6t/external-ssd/4TB-E" = {
-          device = "/dev/mapper/4TB-E1";
-          fsType = "ext4";
-        };
-        fileSystems."/home/r6t/external-ssd/2TB-PRO" = {
-          device = "/dev/mapper/2TB-F1";
-          fsType = "ext4";
-        };
+      fileSystems."/home/r6t/external-ssd/8TB-A" = {
+        device = "/dev/mapper/8TB-A1";
+        fsType = "ext4";
+      };
+      fileSystems."/home/r6t/external-ssd/8TB-B" = {
+        device = "/dev/mapper/8TB-B1";
+        fsType = "ext4";
+      };
+      fileSystems."/home/r6t/external-ssd/8TB-D" = {
+        device = "/dev/mapper/8TB-D1";
+        fsType = "ext4";
+      };
+      fileSystems."/home/r6t/external-ssd/4TB-E" = {
+        device = "/dev/mapper/4TB-E1";
+        fsType = "ext4";
+      };
+      fileSystems."/home/r6t/external-ssd/2TB-PRO" = {
+        device = "/dev/mapper/2TB-F1";
+        fsType = "ext4";
       };
     };
   } 
