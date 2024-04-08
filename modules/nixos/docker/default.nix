@@ -7,6 +7,7 @@
 
     config = lib.mkIf config.mine.docker.enable { 
       virtualisation.docker = { 
+        autoPrune.enable = true;
         daemon.settings = {
           data-root = "/home/r6t/docker-root";
         };

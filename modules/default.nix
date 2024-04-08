@@ -47,6 +47,7 @@
       nixos/bootloader/default.nix
       nixos/bolt/default.nix
       nixos/docker/default.nix
+      nixos/download/default.nix
       nixos/env/default.nix
       nixos/flatpak/default.nix
       nixos/fonts/default.nix
