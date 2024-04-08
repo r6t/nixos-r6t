@@ -18,6 +18,8 @@
   networking.hostName = "saguaro";
   networking.firewall.allowedTCPPorts = [ 
     22
+    8096 # jellyfin
+    8920 # jellyfin
     3000 # ollama-web
     8000 # paperless-ngx
     8080 # stirling-pdf
@@ -35,10 +37,11 @@
     8989
     ];
   networking.firewall.allowedUDPPorts = [ 
+    1900 # jellyfin
+    7359 # jellyfin
     32400
     32469
     5353
-    1900
     ];
   system.stateVersion = "23.11";
 
