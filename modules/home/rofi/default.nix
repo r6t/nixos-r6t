@@ -18,8 +18,8 @@
           theme = "/home/r6t/.local/share/rofi/themes/rounded-purple-dark.rasi";
         };
 
-        home.file.".local/share/rofi/themes/rounded-common.rasi".source = ../../../dotfiles/rofi/themes/rounded-common.rasi;
-        home.file.".local/share/rofi/themes/rounded-purple-dark.rasi".source = ../../../dotfiles/rofi/themes/rounded-purple-dark.rasi;
+        home.file.".local/share/rofi/themes/rounded-common.rasi".source = dotfiles/themes/rounded-common.rasi;
+        home.file.".local/share/rofi/themes/rounded-purple-dark.rasi".source = dotfiles/themes/rounded-purple-dark.rasi;
       };
     };
 }

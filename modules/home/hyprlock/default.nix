@@ -8,7 +8,7 @@
     config = lib.mkIf config.mine.home.hyprlock.enable { 
       home-manager.users.r6t.home = {
         packages = with pkgs; [ hyprlock ];
-        file.".config/hypr/hyprlock.conf".source = ../../../dotfiles/hypr/hyprlock.conf;
+        file.".config/hypr/hyprlock.conf".source = dotfiles/hyprlock.conf;
       };
     };
 }

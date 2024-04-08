@@ -8,7 +8,7 @@
     config = lib.mkIf config.mine.home.hypridle.enable { 
       home-manager.users.r6t.home = {
         packages = with pkgs; [ hypridle ];
-        file.".config/hypr/hypridle.conf".source = ../../../dotfiles/hypr/hypridle.conf;
+        file.".config/hypr/hypridle.conf".source = dotfiles/hypridle.conf;
       };
     };
 }
