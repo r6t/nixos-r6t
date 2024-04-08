@@ -56,6 +56,7 @@
   mine.ssh.enable = true;
   mine.syncthing.enable = true;
   mine.tailscale.enable = true;
+  mine.thunderbay.enable = true;
   mine.user.enable = true;
   mine.zsh.enable = true;
 

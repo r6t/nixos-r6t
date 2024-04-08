@@ -66,6 +66,7 @@
       nixos/steam/default.nix
       nixos/syncthing/default.nix
       nixos/tailscale/default.nix
+      nixos/thunderbay/default.nix
       nixos/zsh/default.nix
       nixos/user/default.nix
     ];
