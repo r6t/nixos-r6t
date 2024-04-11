@@ -13,15 +13,12 @@
         
         home.sessionVariables = {
           MOZ_ENABLE_WAYLAND = 1;
-          XDG_CURRENT_SESSION = "hyprland";
-          XDG_SESSION_TYPE = "wayland";
-          __GLX_VENDOR_LIBRARY_NAME = "nvidia";
-          LIBVA_DRIVER_NAME = "nvidia";
-          GBM_BACKEND = "nvidia-drm";
-          QT_QPA_PLATFORM="wayland";
-          QT_WAYLAND_DISABLE_WINDOWDECORATION = 1;
           NIXOS_OZONE_WL = "1";
+          QT_QPA_PLATFORM="wayland";
+          QT_QPA_PLATFORMTHEME="qt5ct";
           QT_STYLE_OVERRIDE = "Breeze-Dark";
+          QT_WAYLAND_DISABLE_WINDOWDECORATION = 1;
+          XDG_CURRENT_SESSION = "hyprland";
         };
       };
     };

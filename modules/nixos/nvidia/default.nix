@@ -10,8 +10,11 @@
       boot.kernelParams = [ "nvidia.NVreg_PreserveVideoMemoryAllocations=1" ]; # sleep/wake
 
       environment.sessionVariables = {
-        # Wayland Nvidia disappearing cursor fix
+        GBM_BACKEND = "nvidia-drm";
+        LIBVA_DRIVER_NAME = "nvidia";
         WLR_NO_HARDWARE_CURSORS = "1";
+        XDG_SESSION_TYPE = "wayland";
+        __GLX_VENDOR_LIBRARY_NAME = "nvidia";
       };
       environment.systemPackages = with pkgs; [ libva ];
 
