@@ -6,7 +6,6 @@
     };
 
     config = lib.mkIf config.mine.hypr.enable { 
-
       environment.systemPackages = with pkgs; [
         brightnessctl
         dconf
@@ -25,9 +24,8 @@
         xwayland.enable = true;
       };
       
-      security.polkit.enable = true; # hyprland authentication support
+      security.polkit.enable = true;
 
-      # Configure keymap in X11
       services.xserver = {
         xkb = {
           layout = "us";
@@ -35,11 +33,9 @@
         };
       };
 
-      # Desktop portal
       xdg.portal = {
         enable = true;
         wlr.enable = true;
-        # gtk portal needed to make gtk apps happy
         extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
         config = {
           common.default = ["gtk"];

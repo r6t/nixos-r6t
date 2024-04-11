@@ -6,12 +6,6 @@
     };
 
     config = lib.mkIf config.mine.env.enable { 
-      # Env vars currently included in base-system
-      environment.sessionVariables = {
-        NIXOS_OZONE_WL = "1";
-        QT_STYLE_OVERRIDE = "Breeze-Dark";
-    
-      };
       environment.shells = with pkgs; [ zsh ]; # /etc/shells
       # System packages
       environment.systemPackages = with pkgs; [
