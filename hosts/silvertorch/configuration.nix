@@ -25,7 +25,9 @@
  sops.defaultSopsFormat = "yaml";
  sops.age.keyFile = /home/r6t/.config/sops/age/keys.txt;
  sops.secrets.example-key = { };
- sops.secrets."myservice/my_subdir/my_secret" = { };
+ sops.secrets."myservice/my_subdir/my_secret" = { 
+  owner = config.users.users.r6t.name;
+ };
 
   # system modules
   mine.bootloader.enable = true;
