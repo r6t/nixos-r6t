@@ -10,6 +10,7 @@
  {
   imports = [
     inputs.home-manager.nixosModules.home-manager
+    inputs.sops-nix.nixosModules.sops
     ./hardware-configuration.nix
     ../../modules/default.nix
   ];
@@ -19,6 +20,12 @@
   networking.hostName = "silvertorch";
   networking.firewall.allowedTCPPorts = [ 22 3000 8080 11434 ]; # ssh ollama
   system.stateVersion = "23.11";
+
+ sops.defaultSopsFile = ./secrets.yaml;
+ sops.defaultSopsFormat = "yaml";
+ sops.age.keyFile = "home/r6t/.config/sops/age/keys.txt";
+ sops.secrets.example-key = { };
+ sops.secrets."myservice/my_subdir/my_secret" = { };
 
   # system modules
   mine.bootloader.enable = true;
