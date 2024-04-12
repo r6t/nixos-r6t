@@ -22,6 +22,7 @@
          nodejs
          pciutils
          ripgrep
+         sops
          tmux
          unzip
          usbutils
