@@ -16,6 +16,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    sops-nix = {
+      url = "github:Mic92/sops-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # ssh-keys approach copied from https://github.com/borgstad/nixos-config/
     ssh-keys = {
       url = "https://github.com/r6t.keys";
