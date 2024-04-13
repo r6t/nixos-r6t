@@ -1,5 +1,6 @@
 {
   inputs,
+  jovian,
   lib,
   config,
   pkgs,
@@ -20,7 +21,7 @@
   system.stateVersion = "23.11";
 
   # jovian modules
-  # jovian.devices.steamdeck.enable = true;
+  jovian.devices.steamdeck.enable = true;
 
   # system modules
   mine.bootloader.enable = true;

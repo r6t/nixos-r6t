@@ -39,6 +39,7 @@
     self,
     nixpkgs,
     home-manager, # maybe not needed since removing homeConfigurations?
+    jovian,
     ...
   } @ inputs: let
     inherit (self) outputs;
