@@ -21,38 +21,6 @@
   networking.firewall.allowedTCPPorts = [ 22 3000 8080 11434 ]; # ssh ollama
   system.stateVersion = "23.11";
 
- sops.defaultSopsFile = ../../secrets.yaml;
- sops.defaultSopsFormat = "yaml";
- sops.age.keyFile = /home/r6t/.config/sops/age/keys.txt;
- sops.secrets.example-key = { };
- sops.secrets."myservice/my_subdir/my_secret" = { 
-  # owner = config.users.users.r6t.name;
-  owner = "sometestservice";
- };
-  systemd.services."sometestservice" = {
-    script = ''
-        echo "
-        Hey bro! I'm a service, and imma send this secure password:
-        $(cat ${config.sops.secrets."myservice/my_subdir/my_secret".path})
-        located in:
-        ${config.sops.secrets."myservice/my_subdir/my_secret".path}
-        to database and hack the mainframe
-        " > /var/lib/sometestservice/testfile
-      '';
-    serviceConfig = {
-      User = "sometestservice";
-      WorkingDirectory = "/var/lib/sometestservice";
-    };
-  };
-
-  users.users.sometestservice = {
-    home = "/var/lib/sometestservice";
-    createHome = true;
-    isSystemUser = true;
-    group = "sometestservice";
-  };
-  users.groups.sometestservice = { };
-
   # system modules
   mine.bootloader.enable = true;
   mine.docker.enable = true;

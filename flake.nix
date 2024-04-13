@@ -21,6 +21,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    sops-ryan = {
+      url = "git-codecommit.us-west-2.amazonaws.com/v1/repos/sops-ryan";
+      inputs.nixpkgs.follows = "sops-nix";
+    };
+
     # ssh-keys approach copied from https://github.com/borgstad/nixos-config/
     ssh-keys = {
       url = "https://github.com/r6t.keys";
