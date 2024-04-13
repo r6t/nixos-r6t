@@ -15,7 +15,7 @@
         steam = {
           enable = true;
           autoStart = true;
-          user = r6t;
+          user = "r6t";
         };
       };
     };
