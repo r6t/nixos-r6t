@@ -22,7 +22,7 @@
     };
 
     sops-ryan = {
-      url = "git-codecommit.us-west-2.amazonaws.com/v1/repos/sops-ryan";
+      url = "ssh://git-codecommit.us-west-2.amazonaws.com/v1/repos/sops-ryan";
       inputs.nixpkgs.follows = "sops-nix";
     };
 

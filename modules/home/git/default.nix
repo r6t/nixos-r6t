@@ -16,6 +16,10 @@
             init = { defaultBranch = "main"; };
             pull = { rebase = false; };
           };
+          credential = {
+            helper = "!aws codecommit credential-helper $@";
+            UseHttpPath = true;
+          };
         };
         ignores = [
           ".DS_Store"
