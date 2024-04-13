@@ -39,6 +39,7 @@
   # home modules
   mine.home.alacritty.enable = true;
   mine.home.git.enable = true;
+  mine.home.home-manager.enable = true;
   mine.home.neovim.enable = true;
   mine.home.zsh.enable = true;
 
