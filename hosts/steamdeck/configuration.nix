@@ -41,19 +41,4 @@
   mine.home.home-manager.enable = true;
   mine.home.neovim.enable = true;
   mine.home.zsh.enable = true;
-
-  # Enable the X11 windowing system.
-  services.xserver.enable = true;
-
-  # Enable the GNOME Desktop Environment.
-  # services.xserver.displayManager.gdm.enable = true;
-  services.xserver.desktopManager.gnome.enable = true;
-
-  # Configure keymap in X11
-  services.xserver = {
-    layout = "us";
-    xkbVariant = "";
-  };
-
-  hardware.pulseaudio.enable = false;
  }

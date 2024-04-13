@@ -16,7 +16,17 @@
           enable = true;
           autoStart = true;
           user = "r6t";
+          desktopSession = "gnome";
         };
       };
+
+      services.xserver = {
+          enable = true;
+          desktopManager.gnome.enable = true;
+          layout = "us";
+          xkbVariant = "";
+      };
+
+      hardware.pulseaudio.enable = false;
     };
 }
