@@ -11,7 +11,6 @@
  {
   imports = [
     inputs.home-manager.nixosModules.home-manager
-    inputs.jovian.nixosModules.default
     ./hardware-configuration.nix
     ../../modules/default.nix
   ];
@@ -47,7 +46,7 @@
   services.xserver.enable = true;
 
   # Enable the GNOME Desktop Environment.
-  services.xserver.displayManager.gdm.enable = true;
+  # services.xserver.displayManager.gdm.enable = true;
   services.xserver.desktopManager.gnome.enable = true;
 
   # Configure keymap in X11
