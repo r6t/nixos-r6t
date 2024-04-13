@@ -23,8 +23,10 @@
       services.xserver = {
           enable = true;
           desktopManager.gnome.enable = true;
-          layout = "us";
-          xkbVariant = "";
+          xkb = {
+            variant = "";
+            layout = "us";
+          };
       };
 
       hardware.pulseaudio.enable = false;
