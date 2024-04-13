@@ -10,6 +10,12 @@
     };
 
     config = lib.mkIf config.mine.jovian.enable { 
-      jovian.devices.steamdeck.enable = true;
+      jovian = {
+        devices.steamdeck.enable = true;
+        steam = {
+          enable = true;
+          autoStart = true;
+        };
+      };
     };
 }
