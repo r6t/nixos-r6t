@@ -21,14 +21,12 @@
   networking.firewall.allowedTCPPorts = [ 22 ];
   system.stateVersion = "23.11";
 
-  # jovian modules
-  jovian.devices.steamdeck.enable = true;
-
   # system modules
   mine.bootloader.enable = true;
   mine.env.enable = true;
   mine.localization.enable = true;
   mine.networkmanager.enable = true;
+  mine.jovian.enable = true;
   mine.nix.enable = true;
   mine.nixpkgs.enable = true;
   mine.printing.enable = true;
