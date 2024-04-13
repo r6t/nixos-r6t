@@ -33,6 +33,7 @@
       home/rofi/default.nix
       home/screenshots/default.nix
       home/signal-desktop/default.nix
+      home/ssh/default.nix
       home/thunderbird/default.nix
       home/virt-manager/default.nix
       home/virt-viewer/default.nix
