@@ -11,6 +11,7 @@
  {
   imports = [
     inputs.home-manager.nixosModules.home-manager
+    inputs.jovian.nixosModules.default
     ./hardware-configuration.nix
     ../../modules/default.nix
   ];
