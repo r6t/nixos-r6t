@@ -13,6 +13,7 @@
          cryptsetup
          fd
          git
+         git-remote-codecommit
          home-manager
          lshw
          neovim
