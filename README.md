@@ -1,5 +1,5 @@
 # nixos-r6t
-Flake for managing personal NixOS systems 💻🖥️🌐🎮
+Flake for managing personal NixOS systems 💻 🖥️ 🌐 🎮
 
 TODO: add info
 #### Use:
