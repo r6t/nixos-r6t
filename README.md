@@ -1,2 +1,11 @@
 # nixos-r6t
-Personal NixOS config
+Flake for managing personal NixOS systems 💻🖥️🌐🎮
+
+TODO: add info
+#### Use:
+
+#### Inputs:
+- nixpkgs
+- nixos-hardware
+- jovian-nixos
+- ssh-keys
