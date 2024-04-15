@@ -10,7 +10,7 @@
         enable = true;
           matchBlocks = {
             "git-codecommit.*.amazonaws.com" = {
-              user = "APKAYS2NW3CV2ZGOXWZU";
+              user = "APKAYS2NW3CVZZ7ZOA5Y";
               identityFile = "/home/r6t/.ssh/cc_ryan_codecommit_rsa";
             };
           };

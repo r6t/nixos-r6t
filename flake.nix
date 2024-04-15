@@ -21,12 +21,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-#   sops-ryan = {
-#     # hitting aws codecommit credential helper asking for creds only during nixos-rebuild
-#     url = "git+https://git-codecommit.us-west-2.amazonaws.com/v1/repos/sops-ryan";
-#     # url = "path:/home/r6t/git/sops-ryan";
-#     inputs.nixpkgs.follows = "nixpkgs";
-#   };
+    sops-ryan = {
+      url = "git+https://git-codecommit.us-west-2.amazonaws.com/v1/repos/sops-ryan?ref=main";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     # ssh-keys approach copied from https://github.com/borgstad/nixos-config/
     ssh-keys = {

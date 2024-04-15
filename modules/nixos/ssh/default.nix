@@ -8,8 +8,10 @@
     config = lib.mkIf config.mine.ssh.enable { 
       services.openssh = {
         enable = true;
-          # PermitRootLogin = "no";
-          # PasswordAuthentication = true;
+        settings = {
+          PermitRootLogin = "no";
+          PasswordAuthentication = false;
         };
+      };
     };
 }
