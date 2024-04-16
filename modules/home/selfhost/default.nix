@@ -1,15 +1,15 @@
-{ lib, config, pkgs, ... }:
+{ lib, config, ... }:
 
 {
   options = { 
-    mine.selfhost = {
+    mine.home.selfhost = {
       enable =
         lib.mkEnableOption "enable Jellyfin container";
     };
   };
 
-  config = lib.mkIf config.mine.selfhost.enable {
-    virtualisation.oci-containers = {
+  config = lib.mkIf config.mine.home.selfhost.enable {
+    home-manager.users.r6t.virtualisation.oci-containers = {
       backend = "docker";
       containers = {
         jellyfin = {

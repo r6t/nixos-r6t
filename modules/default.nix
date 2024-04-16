@@ -32,6 +32,7 @@
       home/remmina/default.nix
       home/rofi/default.nix
       home/screenshots/default.nix
+      home/selfhost/default.nix
       home/signal-desktop/default.nix
       home/ssh/default.nix
       home/thunderbird/default.nix
@@ -63,7 +64,6 @@
       nixos/nvidia/default.nix
       nixos/ollama/default.nix
       nixos/printing/default.nix
-      nixos/selfhost/default.nix
       nixos/sound/default.nix
       nixos/ssh/default.nix
       nixos/steam/default.nix
