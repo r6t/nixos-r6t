@@ -62,6 +62,7 @@
       nixos/nixpkgs/default.nix
       nixos/nvidia/default.nix
       nixos/ollama/default.nix
+      nixos/podman/default.nix
       nixos/printing/default.nix
       nixos/selfhost/default.nix
       nixos/sound/default.nix

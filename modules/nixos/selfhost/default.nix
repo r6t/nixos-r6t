@@ -10,7 +10,7 @@
 
   config = lib.mkIf config.mine.selfhost.enable {
     virtualisation.oci-containers = {
-      backend = "docker";
+      backend = "podman";
       containers = {
         jellyfin = {
           image = "jellyfin/jellyfin";
