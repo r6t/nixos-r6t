@@ -46,6 +46,7 @@
   system.stateVersion = "23.11";
 
   # system modules
+  mine.arion-jellyfin.enable = true;
   mine.bolt.enable = true;
   mine.bootloader.enable = true;
   mine.docker.enable = true;
