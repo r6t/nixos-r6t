@@ -44,10 +44,9 @@
       home/youtube-dl/default.nix
       home/zsh/default.nix
 
-      nixos/arion-jellyfin/default.nix
       nixos/bluetooth/default.nix
-      nixos/bootloader/default.nix
       nixos/bolt/default.nix
+      nixos/bootloader/default.nix
       nixos/docker/default.nix
       nixos/env/default.nix
       nixos/flatpak/default.nix
@@ -59,18 +58,19 @@
       nixos/mullvad/default.nix
       nixos/netdata/default.nix
       nixos/networkmanager/default.nix
-      nixos/nvidia/default.nix
       nixos/nix/default.nix
       nixos/nixpkgs/default.nix
+      nixos/nvidia/default.nix
       nixos/ollama/default.nix
       nixos/printing/default.nix
+      nixos/selfhost/default.nix
       nixos/sound/default.nix
       nixos/ssh/default.nix
       nixos/steam/default.nix
       nixos/syncthing/default.nix
       nixos/tailscale/default.nix
       nixos/thunderbay/default.nix
-      nixos/zsh/default.nix
       nixos/user/default.nix
+      nixos/zsh/default.nix
     ];
 }
