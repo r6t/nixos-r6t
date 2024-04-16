@@ -44,6 +44,7 @@
       home/youtube-dl/default.nix
       home/zsh/default.nix
 
+      nixos/arion-jellyfin/default.nix
       nixos/bluetooth/default.nix
       nixos/bootloader/default.nix
       nixos/bolt/default.nix

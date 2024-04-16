@@ -9,6 +9,7 @@
       environment.shells = with pkgs; [ zsh ]; # /etc/shells
       # System packages
       environment.systemPackages = with pkgs; [
+         arion
          curl
          cryptsetup
          fd
