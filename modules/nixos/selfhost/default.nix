@@ -22,7 +22,6 @@
             "/home/r6t/external-ssd/8TB-D/storage/plex/music:/media/music"
             "/home/r6t/external-ssd/8TB-D/storage/plex/tv:/media/tv"
           ];
-          extraOptions = [ "--user=1000:100" ];
         };
       };
     };
