@@ -19,9 +19,11 @@
          lshw
          neovim
          neofetch
+         netcat
          netdata
          nmap
          nodejs
+         openssl
          pciutils
          ripgrep
          sops
