@@ -11,6 +11,8 @@
 
     hardware.url = "github:nixos/nixos-hardware";
 
+    hyprland.url = "github:hyprwm/Hyprland";
+
     jovian = {
       url = "github:Jovian-Experiments/Jovian-NixOS";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -26,7 +28,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # ssh-keys approach copied from https://github.com/borgstad/nixos-config/
     ssh-keys = {
       url = "https://github.com/r6t.keys";
       flake = false;
