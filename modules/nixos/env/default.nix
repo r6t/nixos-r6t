@@ -12,6 +12,7 @@
          arion
          curl
          cryptsetup
+         dig
          fd
          git
          git-remote-codecommit
