@@ -11,7 +11,7 @@
           STEAM_EXTRA_COMPAT_TOOLS_PATHS = "/home/r6t/.steam/root/compatibilitytools.d";
         };
         systemPackages = with pkgs; [
-          "protonup"
+          "protonup-qt"
         ];
       };
       programs.gamemode.enable = true;
