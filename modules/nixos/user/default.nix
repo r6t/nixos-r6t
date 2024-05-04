@@ -5,7 +5,6 @@ let
 in
 
 { 
-
     options = {
       mine.user.enable =
         lib.mkEnableOption "enable my user account";
@@ -16,7 +15,6 @@ in
         r6t = {
           isNormalUser = true;
           openssh.authorizedKeys.keyFiles = [ ssh-keys.outPath ];
-          # input group reqd for waybar
           extraGroups = [ "docker" "input" "networkmanager" "wheel"];
           shell = pkgs.zsh;
         };

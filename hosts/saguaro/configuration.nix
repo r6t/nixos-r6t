@@ -48,7 +48,7 @@
   # system modules
   mine.bolt.enable = true;
   mine.bootloader.enable = true;
-  mine.docker.enable = true;
+  mine.podman.enable = true;
   mine.env.enable = true;
   mine.fwupd.enable = true;
   mine.localization.enable = true;
@@ -56,6 +56,7 @@
   mine.networkmanager.enable = true;
   mine.nix.enable = true;
   mine.nixpkgs.enable = true;
+  mine.selfhost.enable = true;
   mine.ssh.enable = true;
   mine.syncthing.enable = true;
   mine.tailscale.enable = true;

@@ -1,4 +1,4 @@
-{ lib, config, ... }: { 
+{ lib, config, pkgs, ... }: { 
 
     options = {
       mine.steam.enable =
@@ -6,6 +6,12 @@
     };
 
     config = lib.mkIf config.mine.steam.enable { 
+      environment = {
+        sessionVariables = {
+          STEAM_EXTRA_COMPAT_TOOLS_PATHS = "/home/r6t/.steam/root/compatibilitytools.d";
+        };
+      };
+      programs.gamemode.enable = true;
       programs.steam = {
         enable = true;
         gamescopeSession.enable = true;

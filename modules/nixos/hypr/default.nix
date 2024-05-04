@@ -1,8 +1,8 @@
-{ lib, config, pkgs, ... }: { 
+{ lib, config, pkgs, inputs, ... }: { 
 
     options = {
       mine.hypr.enable =
-        lib.mkEnableOption "enable and configure my hypr desktop";
+        lib.mkEnableOption "enable and configure hypr desktop with hyprland flake";
     };
 
     config = lib.mkIf config.mine.hypr.enable { 
@@ -21,6 +21,7 @@
 
       programs.hyprland = {
         enable = true;
+        package = inputs.hyprland.packages."${pkgs.system}".hyprland;
         xwayland.enable = true;
       };
       

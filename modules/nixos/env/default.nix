@@ -9,8 +9,10 @@
       environment.shells = with pkgs; [ zsh ]; # /etc/shells
       # System packages
       environment.systemPackages = with pkgs; [
+         arion
          curl
          cryptsetup
+         dig
          fd
          git
          git-remote-codecommit
@@ -18,9 +20,11 @@
          lshw
          neovim
          neofetch
+         netcat
          netdata
          nmap
          nodejs
+         openssl
          pciutils
          ripgrep
          sops
