@@ -48,7 +48,8 @@
   # system modules
   mine.bolt.enable = true;
   mine.bootloader.enable = true;
-  mine.podman.enable = true;
+  mine.docker.enable = true;
+  mine.podman.enable = false;
   mine.env.enable = true;
   mine.fwupd.enable = true;
   mine.localization.enable = true;

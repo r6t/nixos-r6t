@@ -11,7 +11,7 @@
         mako
       ];
 
-      home-manager.users.r6t.options.services.mako = {
+      home-manager.users.r6t.services.mako = {
         enable = true;
         font = "Hack Nerd Font 12";
         icons = false;
