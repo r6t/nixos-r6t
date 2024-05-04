@@ -77,6 +77,7 @@
   mine.home.rofi.enable = true;
   mine.home.screenshots.enable = true;
   mine.home.signal-desktop.enable = true;
+  mine.home.ssh.enable = true;
   mine.home.thunderbird.enable = true;
   mine.home.virt-manager.enable = true;
   mine.home.virt-viewer.enable = true;

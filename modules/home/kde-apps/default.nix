@@ -19,7 +19,6 @@
         libsForQt5.polkit-kde-agent # KDE privlege escalation helper
         libsForQt5.qtwayland # KDE app support + https://wiki.hyprland.org/hyprland-wiki/pages/Nvidia/
         libsForQt5.qt5ct # KDE app support + https://wiki.hyprland.org/hyprland-wiki/pages/Nvidia/
-        libnotify # reqd for mako
       ];
     };
 }
