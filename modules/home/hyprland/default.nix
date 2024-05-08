@@ -2,7 +2,7 @@
 
     options = {
       mine.home.hyprland.enable =
-        lib.mkEnableOption "enable hyprland environment config";
+        lib.mkEnableOption "enable hyprland with flatpak support";
     };
 
     config = lib.mkIf config.mine.home.hyprland.enable { 
@@ -19,6 +19,7 @@
           QT_STYLE_OVERRIDE = "Breeze-Dark";
           QT_WAYLAND_DISABLE_WINDOWDECORATION = 1;
           XDG_CURRENT_SESSION = "hyprland";
+          XDG_DATA_DIRS = "$XDG_DATA_DIRS:/usr/share:/var/lib/flatpak/exports/share:$HOME/.local/share/flatpak/exports/share";
         };
       };
     };
