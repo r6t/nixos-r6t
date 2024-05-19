@@ -57,7 +57,7 @@
   mine.networkmanager.enable = true;
   mine.nix.enable = true;
   mine.nixpkgs.enable = true;
-  mine.selfhost.enable = true;
+  mine.selfhost.enable = false;
   mine.ssh.enable = true;
   mine.syncthing.enable = true;
   mine.tailscale.enable = true;
