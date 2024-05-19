@@ -18,6 +18,7 @@
   networking.hostName = "saguaro";
   networking.firewall.allowedTCPPorts = [ 
     22
+    2283 # immich
     8096 # jellyfin
     8920 # jellyfin
     3000 # ollama-web
