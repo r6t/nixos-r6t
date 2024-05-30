@@ -20,22 +20,47 @@
       fileSystems."/home/r6t/external-ssd/8TB-A" = {
         device = "/dev/mapper/8TB-A1";
         fsType = "ext4";
+        options = [
+          "noauto"
+          "x-systemd.automount"
+          "x-systemd.requires=cryptsetup.target"
+        ];
       };
       fileSystems."/home/r6t/external-ssd/4TB-B" = {
         device = "/dev/mapper/4TB-B1";
         fsType = "ext4";
+        options = [
+          "noauto"
+          "x-systemd.automount"
+          "x-systemd.requires=cryptsetup.target"
+        ];
       };
       fileSystems."/home/r6t/external-ssd/8TB-C" = {
         device = "/dev/mapper/8TB-C1";
         fsType = "ext4";
+        options = [
+          "noauto"
+          "x-systemd.automount"
+          "x-systemd.requires=cryptsetup.target"
+        ];
       };
       fileSystems."/home/r6t/external-ssd/8TB-D" = {
         device = "/dev/mapper/8TB-D1";
         fsType = "ext4";
+        options = [
+          "noauto"
+          "x-systemd.automount"
+          "x-systemd.requires=cryptsetup.target"
+        ];
       };
       fileSystems."/home/r6t/external-ssd/2TB-E" = {
         device = "/dev/mapper/2TB-E1";
         fsType = "ext4";
+        options = [
+          "noauto"
+          "x-systemd.automount"
+          "x-systemd.requires=cryptsetup.target"
+        ];
       };
     };
   } 

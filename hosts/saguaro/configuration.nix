@@ -18,6 +18,7 @@
   networking.hostName = "saguaro";
   networking.firewall.allowedTCPPorts = [ 
     22
+    2283 # immich
     8096 # jellyfin
     8920 # jellyfin
     3000 # ollama-web
@@ -56,11 +57,11 @@
   mine.networkmanager.enable = true;
   mine.nix.enable = true;
   mine.nixpkgs.enable = true;
-  mine.selfhost.enable = true;
+  mine.selfhost.enable = false;
   mine.ssh.enable = true;
   mine.syncthing.enable = true;
   mine.tailscale.enable = true;
-  mine.thunderbay.enable = true;
+  mine.thunderbay.enable = false;
   mine.user.enable = true;
   mine.zsh.enable = true;
 
