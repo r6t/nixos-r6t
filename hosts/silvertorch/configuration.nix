@@ -10,6 +10,7 @@
  {
   imports = [
     inputs.home-manager.nixosModules.home-manager
+  #  inputs.hardware.nixosModules.common.cpu.amd "common isnt right"
     ./hardware-configuration.nix
     ../../modules/default.nix
   ];
