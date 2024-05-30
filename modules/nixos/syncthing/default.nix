@@ -16,6 +16,10 @@
         user = "r6t";
         group = "users";
         guiAddress = "0.0.0.0:8384";
+        settings.gui = {
+          user = "rsyncthing";
+          password = "syncthingpasswordtoreplace";
+        };
       };
     };
 }
