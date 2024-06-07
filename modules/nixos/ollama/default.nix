@@ -9,8 +9,8 @@
       services.ollama = {
         enable = true;
         acceleration = "cuda";
-        # listenAddress = "0.0.0.0:11434";
-        port = 11434;
+        listenAddress = "0.0.0.0:11434";
+        # port = 11434;
       };
     };
 }

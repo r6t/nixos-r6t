@@ -45,6 +45,8 @@
     5353
     ];
   system.stateVersion = "23.11";
+  
+  users.users.r6t.linger = true;
 
   # system modules
   mine.bolt.enable = true;
