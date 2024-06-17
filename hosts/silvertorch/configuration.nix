@@ -41,7 +41,7 @@
   mine.printing.enable = true;
   mine.sound.enable = true;
   mine.ssh.enable = true;
-  mine.steam.enable = true;
+  mine.steam.enable = false;
   mine.syncthing.enable = true;
   mine.tailscale.enable = true;
   mine.user.enable = true;
