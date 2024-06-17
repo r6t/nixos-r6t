@@ -28,7 +28,8 @@
   mine.flatpak.enable = true;
   mine.fonts.enable = true;
   mine.fwupd.enable = true;
-  mine.hypr.enable = true;
+  mine.hypr.enable = false;
+  mine.kde.enable = true;
   mine.localization.enable = true;
   mine.mullvad.enable = true;
   mine.netdata.enable = true;
