@@ -6,6 +6,7 @@
     };
 
     config = lib.mkIf config.mine.home.home-manager.enable { 
+      home-manager.backupFileExtension = "replacedbyhomemanager"; 
       home-manager.users.r6t = {
         home = {
           homeDirectory = "/home/r6t";

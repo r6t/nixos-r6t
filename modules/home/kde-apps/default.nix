@@ -11,14 +11,15 @@
         kdiff3 # KDE utility
         krename # KDE utility
         krusader # KDE file manager
-        libsForQt5.breeze-gtk # KDE Breeze theme
-        libsForQt5.breeze-icons # KDE app icons
-        libsForQt5.elisa # KDE music player
-        libsForQt5.gwenview # KDE image viewer
-        libsForQt5.kio-extras # KDE support
-        libsForQt5.polkit-kde-agent # KDE privlege escalation helper
-        libsForQt5.qtwayland # KDE app support + https://wiki.hyprland.org/hyprland-wiki/pages/Nvidia/
-        libsForQt5.qt5ct # KDE app support + https://wiki.hyprland.org/hyprland-wiki/pages/Nvidia/
+        kdePackages.breeze-gtk # KDE Breeze theme
+        kdePackages.breeze-icons # KDE app icons
+        kdePackages.elisa # KDE music player
+        kdePackages.gwenview # KDE image viewer
+        kdePackages.kdeconnect-kde # KDE Connect phone pairing
+        kdePackages.kio-extras # KDE support
+        kdePackages.polkit-kde-agent-1 # KDE privlege escalation helper
+        kdePackages.qtwayland # KDE app support + https://wiki.hyprland.org/hyprland-wiki/pages/Nvidia/
+        kdePackages.qt6ct # KDE app support + https://wiki.hyprland.org/hyprland-wiki/pages/Nvidia/
       ];
     };
 }
