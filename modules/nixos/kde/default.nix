@@ -7,6 +7,11 @@
 
     config = lib.mkIf config.mine.kde.enable { 
       environment.systemPackages = with pkgs; [
+        aha
+        clinfo
+        glxinfo
+        vulkan-tools
+        wayland-utils
       ];
       services.displayManager.sddm.enable = true;
       services.desktopManager.plasma6.enable = true;
