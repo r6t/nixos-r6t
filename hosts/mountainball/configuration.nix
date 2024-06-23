@@ -30,7 +30,7 @@
   mine.flatpak.enable = true;
   mine.fonts.enable = true;
   mine.fwupd.enable = true;
-  mine.hypr.enable = true;
+  mine.hypr.enable = false;
   mine.kde.enable = true;
   mine.localization.enable = true;
   mine.mullvad.enable = true;
@@ -63,10 +63,10 @@
   mine.home.freerdp.enable = true;
   mine.home.git.enable = true;
   mine.home.home-manager.enable = true;
-  mine.home.hypridle.enable = true;
-  mine.home.hyprland.enable = true;
-  mine.home.hyprpaper.enable = true;
-  mine.home.hyprpicker.enable = true;
+  mine.home.hypridle.enable = false;
+  mine.home.hyprland.enable = false;
+  mine.home.hyprpaper.enable = false;
+  mine.home.hyprpicker.enable = false;
   mine.home.kde-apps.enable = true;
   mine.home.librewolf.enable = true;
   mine.home.mako.enable = true;
