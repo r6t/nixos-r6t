@@ -13,11 +13,15 @@
         vulkan-tools
         wayland-utils
       ];
-      services.displayManager.sddm.enable = true;
-      services.desktopManager.plasma6.enable = true;
-      services.displayManager.defaultSession = "plasma";
-      services.displayManager.sddm.wayland.enable = true;
       programs.dconf.enable = true;
+      services.desktopManager.plasma6.enable = true;
+      services.displayManager = {
+        defaultSession = "plasma";
+        sddm = {
+          enable = true;
+          wayland.enable = true;
+        };
+      };
       services.xserver = {
         enable = true;
         xkb = {

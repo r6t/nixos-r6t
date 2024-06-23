@@ -2,16 +2,16 @@
   description = "r6t nixos systems configuration flake";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-24.05";
-    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
+    # nixpkgs.url = "github:nixos/nixpkgs/nixos-24.05";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
+    # home-manager = {
+    #   url = "github:nix-community/home-manager/release-24.05";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
     home-manager = {
-      url = "github:nix-community/home-manager/release-24.05";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    home-manager-unstable = {
       url = "github:nix-community/home-manager/master";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     hardware.url = "github:nixos/nixos-hardware";
@@ -20,7 +20,7 @@
 
     jovian = {
       url = "github:Jovian-Experiments/Jovian-NixOS";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     nixvim = {
@@ -42,9 +42,7 @@
   outputs = {
     self,
     nixpkgs,
-    nixpkgs-unstable,
     home-manager,
-    home-manager-unstable,
     jovian,
     ...
   } @ inputs: let
@@ -69,7 +67,7 @@
         modules = [./hosts/silvertorch/configuration.nix];
       };
       # steam deck
-      steamdeck = nixpkgs-unstable.lib.nixosSystem {
+      steamdeck = nixpkgs.lib.nixosSystem {
         specialArgs = {inherit inputs outputs;};
         modules = [./hosts/steamdeck/configuration.nix];
       };

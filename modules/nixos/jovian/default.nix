@@ -16,13 +16,12 @@
           enable = true;
           autoStart = true;
           user = "r6t";
-          desktopSession = "gnome";
+          desktopSession = "kde";
         };
       };
 
       services.xserver = {
           enable = true;
-          desktopManager.gnome.enable = true;
           xkb = {
             variant = "";
             layout = "us";
