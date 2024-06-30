@@ -6,10 +6,10 @@
     };
 
     config = lib.mkIf config.mine.home.libvirtd.enable { 
-      home-manager.users.r6t.home.dconf.settings = {
+      home-manager.users.r6t.dconf.settings = {
         "org/virt-manager/virt-manager/connections" = {
-          autoconnect = ["qemu:///silvertorch.ryan.magic.internal"];
-          uris = ["qemu:///silvertorch.ryan.magic.internal"];
+          autoconnect = ["qemu:///system"];
+          uris = ["qemu:///system"];
         };
       };
 
