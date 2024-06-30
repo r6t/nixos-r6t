@@ -30,6 +30,7 @@
   mine.fwupd.enable = true;
   mine.hypr.enable = false;
   mine.kde.enable = true;
+  mine.libvirtd.enable = true;
   mine.localization.enable = true;
   mine.mullvad.enable = true;
   mine.netdata.enable = true;
@@ -81,7 +82,7 @@
   mine.home.signal-desktop.enable = true;
   mine.home.ssh.enable = true;
   mine.home.thunderbird.enable = true;
-  mine.home.virt-manager.enable = true;
+  mine.home.libvirtd.enable = true;
   mine.home.virt-viewer.enable = true;
   mine.home.vlc.enable = true;
   mine.home.vscodium.enable = true;
