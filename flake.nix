@@ -56,6 +56,11 @@
         specialArgs = {inherit inputs outputs;};
         modules = [./hosts/mountainball/configuration.nix];
       };
+      # photo server
+      photolab = nixpkgs.lib.nixosSystem {
+        specialArgs = {inherit inputs outputs;};
+        modules = [./hosts/photolab/configuration.nix];
+      };
       # server
       saguaro = nixpkgs.lib.nixosSystem {
         specialArgs = {inherit inputs outputs;};
