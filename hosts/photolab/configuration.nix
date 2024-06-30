@@ -37,6 +37,7 @@
   mine.networkmanager.enable = true;
   mine.nix.enable = true;
   mine.nixpkgs.enable = true;
+  mine.nvidia.enable = true;
   mine.selfhost.enable = false;
   mine.ssh.enable = true;
   mine.syncthing.enable = true;
