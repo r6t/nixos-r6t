@@ -15,7 +15,7 @@
   ];
 
   # system details
-  networking.hostName = "photo-lab";
+  networking.hostName = "photolab";
   networking.firewall.allowedTCPPorts = [ 
     22
     2283 # immich
