@@ -35,7 +35,7 @@
       home/signal-desktop/default.nix
       home/ssh/default.nix
       home/thunderbird/default.nix
-      home/virt-manager/default.nix
+      home/libvirtd/default.nix
       home/virt-viewer/default.nix
       home/vlc/default.nix
       home/vscodium/default.nix
@@ -55,6 +55,7 @@
       nixos/hypr/default.nix
       nixos/jovian/default.nix
       nixos/kde/default.nix
+      nixos/libvirtd/default.nix
       nixos/localization/default.nix
       nixos/mullvad/default.nix
       nixos/netdata/default.nix
