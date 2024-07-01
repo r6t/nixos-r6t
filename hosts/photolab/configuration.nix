@@ -27,6 +27,14 @@
     ];
   system.stateVersion = "23.11";
   
+  # testing GPU passthru to VM
+  boot.blacklistedKernelModules = [ "nvidia" "nouveau" ];
+  boot.extraModprobeConfig = ''
+    options vfio-pci ids=10de:1b82,10de:10f0,8086:15d3
+  '';
+  boot.kernelModules = [ "kvm-intel" "vfio_virqfd" "vfio" "vfio_pci" "vfio_iommu_type1" ];
+  boot.kernelParams = [ "intel_iommu=on" ];
+
   # users.users.r6t.linger = true;
 
   # system modules
