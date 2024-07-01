@@ -6,7 +6,14 @@
     };
 
     config = lib.mkIf config.mine.libvirtd.enable { 
-      virtualisation.libvirtd.enable = true;
+      virtualisation = {
+        libvirtd = {
+          enable = true;
+          qemuOvmf = true;
+          extraOptions = ["--listen"];
+          tcpListen = true;
+        };
+      };
       programs.virt-manager.enable = true;
     };
 }
