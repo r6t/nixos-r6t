@@ -13,6 +13,7 @@
         };
         enable = true;
         enableOnBoot = true;
+        package = pkgs.docker_26;
         rootless = {
           enable = true;
           setSocketVariable = true;
