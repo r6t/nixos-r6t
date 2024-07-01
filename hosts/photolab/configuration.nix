@@ -19,6 +19,8 @@
   networking.firewall.allowedTCPPorts = [ 
     22
     2283 # immich
+    8384
+    22000
     ];
   networking.firewall.allowedUDPPorts = [ 
     ];
