@@ -19,6 +19,7 @@
   networking.firewall.allowedTCPPorts = [ 
     22
     2283 # immich
+    3389 # VM RDP
     8384
     22000
     ];
@@ -34,6 +35,7 @@
   mine.docker.enable = true;
   mine.env.enable = true;
   mine.fwupd.enable = true;
+  mine.libvirtd.enable = true;
   mine.localization.enable = true;
   mine.netdata.enable = true;
   mine.networkmanager.enable = true;
