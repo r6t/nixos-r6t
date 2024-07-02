@@ -9,11 +9,10 @@
       virtualisation = {
         libvirtd = {
           enable = true;
-          qemuOvmf = true;
-          extraOptions = ["--listen"];
-          tcpListen = true;
+          qemu.ovmf.enable = true;
         };
       };
+      users.users.r6t.extraGroups = [ "libvirtd" ];
       programs.virt-manager.enable = true;
     };
 }

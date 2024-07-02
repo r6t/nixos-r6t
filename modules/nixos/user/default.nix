@@ -18,6 +18,10 @@ in
           extraGroups = [ "docker" "input" "networkmanager" "wheel"];
           shell = pkgs.zsh;
         };
+        root = {
+          openssh.authorizedKeys.keyFiles = lib.mkForce [ ssh-keys.outPath ];
+          shell = pkgs.zsh;
+        };
       };
     };
 }
