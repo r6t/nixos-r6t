@@ -40,6 +40,7 @@
   # system modules
   mine.bolt.enable = true;
   mine.bootloader.enable = true;
+  mine.bridge.enable = true;
   mine.docker.enable = true;
   mine.env.enable = true;
   mine.fwupd.enable = true;

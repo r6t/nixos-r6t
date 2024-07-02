@@ -14,5 +14,5 @@
       };
       users.users.r6t.extraGroups = [ "libvirtd" ];
       programs.virt-manager.enable = true;
-    };
+  };
 }
