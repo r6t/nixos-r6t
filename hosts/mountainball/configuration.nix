@@ -55,6 +55,7 @@
   mine.home.brave.enable = true;
   mine.home.calibre.enable = true;
   mine.home.chromium.enable = true;
+  mine.home.darktable.enable = true;
   mine.home.digikam.enable = true;
   mine.home.element-desktop.enable = true;
   mine.home.firefox.enable = true;

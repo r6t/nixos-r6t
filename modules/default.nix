@@ -9,6 +9,7 @@
       home/brave/default.nix
       home/calibre/default.nix
       home/chromium/default.nix
+      home/darktable/default.nix
       home/digikam/default.nix
       home/element-desktop/default.nix
       home/firefox/default.nix
