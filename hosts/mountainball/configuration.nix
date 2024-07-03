@@ -81,7 +81,6 @@
   mine.home.signal-desktop.enable = true;
   mine.home.ssh.enable = true;
   mine.home.thunderbird.enable = true;
-  mine.home.virt-manager.enable = true;
   mine.home.virt-viewer.enable = true;
   mine.home.vlc.enable = true;
   mine.home.vscodium.enable = true;
