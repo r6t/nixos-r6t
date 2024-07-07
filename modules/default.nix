@@ -55,7 +55,6 @@
       nixos/fonts/default.nix
       nixos/fwupd/default.nix
       nixos/hypr/default.nix
-      nixos/jovian/default.nix
       nixos/kde/default.nix
       nixos/libvirtd/default.nix
       nixos/localization/default.nix
