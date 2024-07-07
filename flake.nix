@@ -16,17 +16,17 @@
 
     hardware.url = "github:nixos/nixos-hardware";
 
-    hyprland.url = "github:hyprwm/Hyprland";
+    # hyprland.url = "github:hyprwm/Hyprland";
 
-    jovian = {
-      url = "github:Jovian-Experiments/Jovian-NixOS";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    # jovian = {
+    #   url = "github:Jovian-Experiments/Jovian-NixOS";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
 
-    nixvim = {
-      url = "github:nix-community/nixvim";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    # nixvim = {
+    #   url = "github:nix-community/nixvim";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
 
     sops-ryan = {
       url = "git+https://git-codecommit.us-west-2.amazonaws.com/v1/repos/sops-ryan?ref=main";
@@ -43,7 +43,6 @@
     self,
     nixpkgs,
     home-manager,
-    jovian,
     ...
   } @ inputs: let
     inherit (self) outputs;
@@ -70,11 +69,6 @@
       silvertorch = nixpkgs.lib.nixosSystem {
         specialArgs = {inherit inputs outputs;};
         modules = [./hosts/silvertorch/configuration.nix];
-      };
-      # steam deck
-      steamdeck = nixpkgs.lib.nixosSystem {
-        specialArgs = {inherit inputs outputs;};
-        modules = [./hosts/steamdeck/configuration.nix];
       };
     };
   };

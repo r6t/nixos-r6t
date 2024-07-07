@@ -72,7 +72,7 @@
   mine.home.hyprpicker.enable = false;
   mine.home.kde-apps.enable = true;
   mine.home.librewolf.enable = true;
-  mine.home.mako.enable = true;
+  mine.home.mako.enable = false;
   mine.home.neovim.enable = true;
   mine.home.obsidian.enable = true;
   mine.home.protonmail-bridge.enable = true;
