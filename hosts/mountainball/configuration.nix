@@ -30,6 +30,7 @@
   mine.flatpak.enable = true;
   mine.fonts.enable = true;
   mine.fwupd.enable = true;
+  mine.fzf.enable = true;
   mine.hypr.enable = false;
   mine.kde.enable = true;
   mine.localization.enable = true;
@@ -62,7 +63,6 @@
   mine.home.fontconfig.enable = true;
   mine.home.freecad.enable = true;
   mine.home.freerdp.enable = true;
-  mine.home.fzf.enable = true;
   mine.home.git.enable = true;
   mine.home.home-manager.enable = true;
   mine.home.hypridle.enable = false;

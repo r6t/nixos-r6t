@@ -54,6 +54,7 @@
   mine.docker.enable = true;
   mine.env.enable = true;
   mine.fwupd.enable = true;
+  mine.fzf.enable = true;
   mine.localization.enable = true;
   mine.netdata.enable = true;
   mine.networkmanager.enable = true;
@@ -69,7 +70,6 @@
 
   # home modules
   mine.home.awscli.enable = true;
-  mine.home.fzf.enable = true;
   mine.home.git.enable = true;
   mine.home.home-manager.enable = true;
   mine.home.python3.enable = true;

@@ -16,7 +16,6 @@
       home/fontconfig/default.nix
       home/freecad/default.nix
       home/freerdp/default.nix
-      home/fzf/default.nix
       home/git/default.nix
       home/home-manager/default.nix
       home/hypridle/default.nix
@@ -54,6 +53,7 @@
       nixos/env/default.nix
       nixos/flatpak/default.nix
       nixos/fonts/default.nix
+      nixos/fzf/default.nix
       nixos/fwupd/default.nix
       nixos/hypr/default.nix
       nixos/kde/default.nix
