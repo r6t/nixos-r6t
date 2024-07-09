@@ -2,7 +2,7 @@
 
     options = {
       mine.home.screenshots.enable =
-        lib.mkEnableOption "enable screenshots in home-manager";
+        lib.mkEnableOption "enable screenshot utilites for tiling wm";
     };
 
     config = lib.mkIf config.mine.home.screenshots.enable { 

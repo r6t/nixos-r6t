@@ -62,6 +62,7 @@
   mine.home.fontconfig.enable = true;
   mine.home.freecad.enable = true;
   mine.home.freerdp.enable = true;
+  mine.home.fzf.enable = true;
   mine.home.git.enable = true;
   mine.home.home-manager.enable = true;
   mine.home.hypridle.enable = false;
@@ -76,8 +77,8 @@
   mine.home.protonmail-bridge.enable = true;
   mine.home.python3.enable = true;
   mine.home.remmina.enable = true;
-  mine.home.rofi.enable = true;
-  mine.home.screenshots.enable = true;
+  mine.home.rofi.enable = false;
+  mine.home.screenshots.enable = false;
   mine.home.signal-desktop.enable = true;
   mine.home.ssh.enable = true;
   mine.home.thunderbird.enable = true;

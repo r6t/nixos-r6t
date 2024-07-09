@@ -10,7 +10,6 @@
  {
   imports = [
     inputs.home-manager.nixosModules.home-manager
-  #  inputs.hardware.nixosModules.common.cpu.amd "common isnt right"
     ./hardware-configuration.nix
     ../../modules/default.nix
   ];
@@ -18,7 +17,7 @@
   # system details
   boot.initrd.luks.devices."luks-ca693f0d-4d0a-4eee-ba6a-fdc2db22dfb1".device = "/dev/disk/by-uuid/ca693f0d-4d0a-4eee-ba6a-fdc2db22dfb1";
   networking.hostName = "silvertorch";
-  networking.firewall.allowedTCPPorts = [ 22 3000 8080 11434 ]; # ssh ollama
+  networking.firewall.allowedTCPPorts = [ 22 3000 8080 11434 ];
   system.stateVersion = "23.11";
 
   # system modules
@@ -42,7 +41,7 @@
   mine.printing.enable = true;
   mine.sound.enable = true;
   mine.ssh.enable = true;
-  mine.steam.enable = false;
+  mine.steam.enable = false; # switched to flatpak
   mine.syncthing.enable = true;
   mine.tailscale.enable = true;
   mine.user.enable = true;
@@ -64,6 +63,7 @@
   mine.home.fontconfig.enable = true;
   mine.home.freecad.enable = true;
   mine.home.freerdp.enable = true;
+  mine.home.fzf.enable = true;
   mine.home.git.enable = true;
   mine.home.home-manager.enable = true;
   mine.home.hypridle.enable = false;
@@ -78,8 +78,8 @@
   mine.home.protonmail-bridge.enable = true;
   mine.home.python3.enable = true;
   mine.home.remmina.enable = true;
-  mine.home.rofi.enable = true;
-  mine.home.screenshots.enable = true;
+  mine.home.rofi.enable = false;
+  mine.home.screenshots.enable = false;
   mine.home.signal-desktop.enable = true;
   mine.home.ssh.enable = true;
   mine.home.thunderbird.enable = true;

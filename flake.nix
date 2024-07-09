@@ -16,18 +16,6 @@
 
     hardware.url = "github:nixos/nixos-hardware";
 
-    # hyprland.url = "github:hyprwm/Hyprland";
-
-    # jovian = {
-    #   url = "github:Jovian-Experiments/Jovian-NixOS";
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
-
-    # nixvim = {
-    #   url = "github:nix-community/nixvim";
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
-
     sops-ryan = {
       url = "git+https://git-codecommit.us-west-2.amazonaws.com/v1/repos/sops-ryan?ref=main";
       inputs.nixpkgs.follows = "nixpkgs";

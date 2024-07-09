@@ -2,7 +2,7 @@
 
     options = {
       mine.env.enable =
-        lib.mkEnableOption "enable my environment defaults";
+        lib.mkEnableOption "enable general utilities";
     };
 
     config = lib.mkIf config.mine.env.enable { 

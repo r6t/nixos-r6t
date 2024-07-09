@@ -20,15 +20,8 @@
           kdePackages.kdeconnect-kde # KDE Connect phone pairing
           kdePackages.kio-extras # KDE support
           kdePackages.polkit-kde-agent-1 # KDE privlege escalation helper
-	        kdePackages.plasma-integration # theme support, added to troubleshoot breeze-dark rendering issue
           kdePackages.qtwayland # KDE app support + https://wiki.hyprland.org/hyprland-wiki/pages/Nvidia/
-          kdePackages.qt6ct # KDE app support + https://wiki.hyprland.org/hyprland-wiki/pages/Nvidia/
         ];
-        qt = {
-          enable = true;
-          platformTheme.name = "qtct";
-          style.name = "breeze-dark";
-        };
       };
     };
 }

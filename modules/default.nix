@@ -16,6 +16,7 @@
       home/fontconfig/default.nix
       home/freecad/default.nix
       home/freerdp/default.nix
+      home/fzf/default.nix
       home/git/default.nix
       home/home-manager/default.nix
       home/hypridle/default.nix
