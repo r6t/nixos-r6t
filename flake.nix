@@ -21,6 +21,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    sops-nix = {
+      url = "github:Mic92/sops-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     ssh-keys = {
       url = "https://github.com/r6t.keys";
       flake = false;
@@ -31,6 +36,7 @@
     self,
     nixpkgs,
     home-manager,
+    sops-nix,
     ...
   } @ inputs: let
     inherit (self) outputs;
@@ -56,7 +62,9 @@
       # desktop
       silvertorch = nixpkgs.lib.nixosSystem {
         specialArgs = {inherit inputs outputs;};
-        modules = [./hosts/silvertorch/configuration.nix];
+        modules = [
+          ./hosts/silvertorch/configuration.nix
+        ];
       };
     };
   };

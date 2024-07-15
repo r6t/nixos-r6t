@@ -69,6 +69,7 @@
       nixos/podman/default.nix
       nixos/printing/default.nix
       nixos/selfhost/default.nix
+      nixos/sops/default.nix
       nixos/sound/default.nix
       nixos/ssh/default.nix
       nixos/steam/default.nix

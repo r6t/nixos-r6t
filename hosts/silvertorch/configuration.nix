@@ -10,6 +10,8 @@
  {
   imports = [
     inputs.home-manager.nixosModules.home-manager
+    # <sops-nix>/modules/sops
+    inputs.sops-nix.nixosModules.sops
     ./hardware-configuration.nix
     ../../modules/default.nix
   ];
@@ -40,6 +42,7 @@
   mine.nvidia.enable = true;
   mine.ollama.enable = true;
   mine.printing.enable = true;
+  mine.sops.enable = true;
   mine.sound.enable = true;
   mine.ssh.enable = true;
   mine.steam.enable = false; # switched to flatpak
