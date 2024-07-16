@@ -24,7 +24,7 @@ cat <<EOF > /home/r6t/.continue/config.json
       "title": "Tab Autocomplete Model",
       "provider": "ollama",
       "model": "deepseek-coder-v2:latest",
-      "apiBase": "http://127.0.0.1:11434"
+      "apiBase": "http://silvertorch.ryan.magic.internal:11434"
   },
   "slashCommands": [
     {
@@ -52,6 +52,14 @@ cat <<EOF > /home/r6t/.continue/config.json
     }
   ],
   "contextProviders": [
+    {
+      "name": "tree",
+      "params": {}
+    },
+    {
+      "name": "folder",
+      "params": {}
+    },
     {
       "name": "diff",
       "params": {}
