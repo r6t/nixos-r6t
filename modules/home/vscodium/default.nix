@@ -39,5 +39,14 @@
           "redhat.telemetry.enabled" = false;
         };
       };
+
+      systemd.services."generate-continue-config" = {
+        enable = true;
+        script = builtins.readFile ./continue/generate-continue-config.sh;
+        serviceConfig = {
+          User = "r6t";
+        };
+        wantedBy = [ "multi-user.target" ];
+      };
     };
 }
