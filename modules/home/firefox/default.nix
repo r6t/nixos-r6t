@@ -27,9 +27,14 @@
             "browser.newtabpage.activity-stream.feeds.discoverystreamfeed" = false;
             "browser.preferences.defaultPerformanceSettings.enabled" = false; # Do not use recommended performance settings
             "browser.search.defaultenginename" = "DuckDuckGo";
+            "browser.search.suggest.enabled" = false; # Disable search suggestions
+            "browser.urlbar.suggest.searches" = false; # Additional setting to disable search suggestions in the address bar.
+            "browser.search.showOneOffButtons" = false; # Possibly relevant for disabling quick-search buttons for other search engines.
+            "browser.newtabpage.activity-stream.showSponsored" = false; # Disable sponsored content on new tab page
             "browser.startup.homepage" = "about:blank";
             "browser.startup.page" = 0; # about:blank in new windows
             "browser.urlbar.placeholderName" = "DuckDuckGo";
+            "browser.urlbar.placeholderName.private" = "DuckDuckGo";
             "datareporting.healthreport.uploadEnabled" = false;
             "dom.security.https_only_mode" = true; # Enable HTTPS-Only Mode
             "extensions.getAddons.showPane" = false;
