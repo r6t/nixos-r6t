@@ -15,53 +15,56 @@
         profiles."default" = {
           id = 0;
           settings = {
+            "app.shield.optoutstudies.enabled" = false;
+            "browser.crashReports.enabled" = false;
+            "browser.discovery.enabled" = false;
+            "browser.download.dir" = "$HOME/Downloads";
+            "browser.download.folderList" = 2;
+            "browser.newtab.url" = "about:blank";
+            "browser.newtabpage.enabled" = false;
+            "browser.newtabpage.activity-stream.showSponsoredTopSites" = false;
+            "browser.newtabpage.activity-stream.feeds.section.topstories" = false;
+            "browser.newtabpage.activity-stream.feeds.discoverystreamfeed" = false;
+            "browser.preferences.defaultPerformanceSettings.enabled" = false; # Do not use recommended performance settings
+            "browser.search.defaultenginename" = "DuckDuckGo";
+            "browser.startup.homepage" = "about:blank";
+            "browser.startup.page" = 0; # about:blank in new windows
+            "browser.urlbar.placeholderName" = "DuckDuckGo";
+            "datareporting.healthreport.uploadEnabled" = false;
+            "dom.security.https_only_mode" = true; # Enable HTTPS-Only Mode
+            "extensions.getAddons.showPane" = false;
+            "extensions.noNewNetPrefsMigrate" = true; # Prevent migration of new network preferences from extensions
+            "general.smoothScroll" = true;
             "identity.sync.enabled" = true;
-            "identity.sync.username" = "$(cat ${config.sops.secrets."firefox_sync".path})";
             "identity.sync.engine.addons" = true;
-            "identity.sync.engine.prefs" = true;
-            "identity.sync.engine.tabs" = true;
+            "identity.sync.engine.addresses" = true;
+            "identity.sync.engine.creditcards" = true;
             "identity.sync.engine.extensions" = true;
             "identity.sync.engine.forms" = true;
             "identity.sync.engine.history" = true;
             "identity.sync.engine.passwords" = true;
-            "identity.sync.engine.addresses" = true;
-            "identity.sync.engine.creditcards" = true;
             "identity.sync.engine.payments" = true;
-            
-            # General Settings
-            "general.smoothScroll" = true;
-            "browser.download.folderList" = 2;
-            "browser.download.dir" = "$HOME/Downloads";
-            "browser.startup.homepage" = "";
-            
-            # Privacy & Security Settings
-            "privacy.donottrackheader.enabled" = true;
-            "privacy.trackingprotection.enabled" = true;
-            "privacy.trackingprotection.cryptomining.enabled" = false;
-            "privacy.trackingprotection.socialmedia.enabled" = false;
-            
-            # Cookie Settings
-            "network.cookie.cookieBehavior" = 4; # Block cross-site tracking cookies
+            "identity.sync.engine.prefs" = true;
+            "identity.sync.engine.tabs" = true;
+            "identity.sync.username" = "$(cat ${config.sops.secrets."firefox_sync".path})";
+            "layers.acceleration.disabled" = true; # Disable hardware acceleration
+            "network.cookie.cookieBehavior" = 1; # Block all cross-site cookies
+            "network.cookie.cookiePrefetch" = 0; # Disable cookie prefetching
             "network.cookie.lifetimePolicy" = 2; # Session cookies only (delete on close)
-            
-            # Strict Privacy Mode
-            "privacy.restrict3rdpartycookies" = true; # Restrict third-party cookies
+            "privacy.clearOnShutdown.cache" = true;
+            "privacy.clearOnShutdown.cookies" = true;
+            "privacy.clearOnShutdown.formData" = false;
+            "privacy.clearOnShutdown.history" = false;
             "privacy.cpd.enabled" = true; # Enable Content Preference for DOM storage
             "privacy.cpd.excludedDomains" = ""; # Add domains you want to exclude from strict mode if needed
-            
-            # Clear Data On Close Settings
-            "privacy.clearOnShutdown.cookies" = true;
-            "privacy.clearOnShutdown.cache" = true;
-            "privacy.clearOnShutdown.history" = true;
-            "privacy.clearOnShutdown.formData" = true;
-            
-            # Performance Settings
-            "browser.preferences.defaultPerformanceSettings.enabled" = false; # Do not use recommended performance settings
-            "layers.acceleration.disabled" = true; # Disable hardware acceleration
-
-            # List of sites where cookies should be allowed to persist across sessions
-            "network.cookie.cookiePrefetch" = 0; # Disable cookie prefetching
-            "extensions.noNewNetPrefsMigrate" = true; # Prevent migration of new network preferences from extensions
+            "privacy.donottrackheader.enabled" = true;
+            "privacy.restrict3rdpartycookies" = true; # Restrict third-party cookies
+            "privacy.trackingprotection.cryptomining.enabled" = false;
+            "privacy.trackingprotection.enabled" = true;
+            "privacy.trackingprotection.socialmedia.enabled" = false;
+            "signon.rememberSignons" = false; # Disable Firefox credential store
+            "toolkit.telemetry.enabled" = false;
+            "ui.systemUsesDarkTheme" = 1;
           };
       };
       };
