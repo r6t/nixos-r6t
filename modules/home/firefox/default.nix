@@ -11,7 +11,6 @@
       home-manager.users.r6t.programs.firefox = {
         enable = true;
         package = pkgs.firefox-wayland;
-        ###
         profiles."default" = {
           id = 0;
           settings = {
