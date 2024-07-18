@@ -52,6 +52,7 @@
   mine.nixpkgs.enable = true;
   mine.nvidia.enable = true;
   mine.selfhost.enable = false;
+  mine.sops.enable = true;
   mine.ssh.enable = true;
   mine.syncthing.enable = true;
   mine.tailscale.enable = true;
