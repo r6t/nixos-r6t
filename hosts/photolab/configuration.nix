@@ -10,6 +10,7 @@
  {
   imports = [
     inputs.home-manager.nixosModules.home-manager
+    inputs.sops-nix.nixosModules.sops
     ./hardware-configuration.nix
     ../../modules/default.nix
   ];
