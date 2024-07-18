@@ -11,6 +11,7 @@
   imports = [
     inputs.home-manager.nixosModules.home-manager
     inputs.hardware.nixosModules.framework-13-7040-amd
+    inputs.sops-nix.nixosModules.sops
     ./hardware-configuration.nix
     ../../modules/default.nix
   ];
@@ -40,6 +41,7 @@
   mine.nix.enable = true;
   mine.nixpkgs.enable = true;
   mine.printing.enable = true;
+  mine.sops.enable = true;
   mine.sound.enable = true;
   mine.ssh.enable = true;
   mine.syncthing.enable = true;

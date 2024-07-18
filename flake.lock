@@ -164,11 +164,11 @@
         "sops-nix": "sops-nix_2"
       },
       "locked": {
-        "lastModified": 1721078317,
-        "narHash": "sha256-5Hs8eqr8oXNLhMYy8PhHlxvDRadNvA3R4BE40XRU6FM=",
+        "lastModified": 1721232039,
+        "narHash": "sha256-YFWoT54Qyej2kv8ZvyxadICZo0iigbkkMFpKGQFDmGQ=",
         "ref": "main",
-        "rev": "56352b817d5954ef1fe17fdad060b316d66e2278",
-        "revCount": 13,
+        "rev": "6d71a2fe2d1b5006042e9a9f5487d1753e033e10",
+        "revCount": 15,
         "type": "git",
         "url": "https://git-codecommit.us-west-2.amazonaws.com/v1/repos/sops-ryan"
       },
