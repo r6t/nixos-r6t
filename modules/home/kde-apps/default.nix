@@ -22,6 +22,7 @@
           kdePackages.polkit-kde-agent-1 # KDE privlege escalation helper
           kdePackages.qtwayland # KDE app support + https://wiki.hyprland.org/hyprland-wiki/pages/Nvidia/
         ];
+
       };
     };
 }
