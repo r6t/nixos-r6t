@@ -20,7 +20,7 @@
         # XDG_SESSION_TYPE = "wayland";
         # __GLX_VENDOR_LIBRARY_NAME = "nvidia";
       };
-      environment.systemPackages = with pkgs; [ libva ];
+      environment.systemPackages = with pkgs; [ libva nvidia-container-toolkit ];
 
       hardware.graphics = {
         enable = true;
