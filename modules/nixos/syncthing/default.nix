@@ -1,4 +1,4 @@
-{ lib, config, ... }: { 
+{ lib, config, pkgs, ... }: { 
 
     options = {
       mine.syncthing.enable =
@@ -17,9 +17,27 @@
         group = "users";
         guiAddress = "0.0.0.0:8384";
         settings.gui = {
-          user = "rsyncthing";
-          password = "syncthingpasswordtoreplace";
+          user = "r6t"; 
+          # password = "$(cat ${config.sops.secrets."syncthing/creds/password".path})";
         };
+      };
+
+      systemd.services.set-syncthing-gui-password = {
+        description = "Set Syncthing GUI password via SOPS lookup";
+        wantedBy = [ "multi-user.target" ];
+        after = [ "network.target" ];
+        before = [ "syncthing.service" ];
+        path = [ pkgs.syncthing ];
+        environment = {
+          HOME = "/home/r6t";
+        };
+        serviceConfig = {
+          User = "r6t";
+          Group = "users";
+        };
+        script = ''
+          ${pkgs.syncthing}/bin/syncthing generate --gui-password=$(cat ${config.sops.secrets."syncthing/creds/password".path}) --gui-user=r6t
+        '';
       };
     };
 }
