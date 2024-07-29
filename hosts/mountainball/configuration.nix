@@ -89,6 +89,6 @@
   mine.home.vscodium.enable = true;
   mine.home.waybar.enable = true;
   mine.home.webcord.enable = true;
-  mine.home.youtube-dl.enable = true;
+  mine.home.yt-dlp.enable = true;
   mine.home.zsh.enable = true;
 }

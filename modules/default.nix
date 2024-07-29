@@ -42,7 +42,7 @@
       home/vscodium/default.nix
       home/waybar/default.nix
       home/webcord/default.nix
-      home/youtube-dl/default.nix
+      home/yt-dlp/default.nix
       home/zsh/default.nix
 
       nixos/bluetooth/default.nix
