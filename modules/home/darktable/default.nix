@@ -10,9 +10,9 @@ in
 
   config = lib.mkIf cfg.enable {
     home-manager.users.r6t = {
-      home.packages = with pkgs; [ darktable ];
+      # home.packages = with pkgs; [ darktable ];
 
-      xdg.configFile."darktable/darktablerc".source = dotfiles/${config.networking.hostName}.darktablerc;
+      # xdg.configFile."darktable/darktablerc".source = dotfiles/${config.networking.hostName}.darktablerc;
     };
   };
 }
