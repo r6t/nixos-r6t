@@ -14,13 +14,14 @@
         ];
 
       environment.sessionVariables = {
+        # Used these with hyprland, now using plasma 6
         # GBM_BACKEND = "nvidia-drm";
         # LIBVA_DRIVER_NAME = "nvidia";
         # WLR_NO_HARDWARE_CURSORS = "1";
         # XDG_SESSION_TYPE = "wayland";
         # __GLX_VENDOR_LIBRARY_NAME = "nvidia";
       };
-      environment.systemPackages = with pkgs; [ libva nvidia-docker nvidia-container-toolkit ];
+      environment.systemPackages = with pkgs; [ libva ];
 
       hardware.graphics = {
         enable = true;
@@ -43,6 +44,8 @@
           persistencedSha256 = lib.fakeSha256;
         };
       };
+
+      hardware.nvidia-container-toolkit.enable = true;
 
       programs.gamemode.enable = true;
 
