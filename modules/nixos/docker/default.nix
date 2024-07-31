@@ -14,10 +14,10 @@
         enable = true;
         enableOnBoot = true;
         package = pkgs.docker_27;
-        rootless = {
-          enable = true;
-          setSocketVariable = true;
-        };
+     #   rootless = {
+     #     enable = true;
+     #     setSocketVariable = true;
+     #   };
       };
 
       environment.systemPackages = with pkgs; [ docker-compose ];
