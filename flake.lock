@@ -181,7 +181,7 @@
     "ssh-keys": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-uTh/DFsEY6lVf0H9F4quKNUw9ccSeLbNFrE+rSPvYfw=",
+        "narHash": "sha256-zF966glDLYt/89MpySueilXeccLVE2uI7SfwqnW4H7k=",
         "type": "file",
         "url": "https://github.com/r6t.keys"
       },
