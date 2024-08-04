@@ -16,12 +16,12 @@
       sops.secrets."openai/platform_key" = { 
         owner = config.users.users.r6t.name;
       };
-      sops.secrets."syncthing/creds/user" = {
-        owner = config.users.users.r6t.name;
-       };
-      sops.secrets."syncthing/creds/password" = {
-        owner = config.users.users.r6t.name;
-       };
+      # sops.secrets."syncthing/creds/user" = {
+      #   owner = config.users.users.r6t.name;
+      #  };
+      # sops.secrets."syncthing/creds/password" = {
+      #   owner = config.users.users.r6t.name;
+      #  };
       sops.secrets."syncthing/machine_id/mailmac" = {
         owner = config.users.users.r6t.name;
        };
