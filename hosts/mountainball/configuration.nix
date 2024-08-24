@@ -72,7 +72,7 @@
   mine.home.hyprpaper.enable = false;
   mine.home.hyprpicker.enable = false;
   mine.home.kde-apps.enable = true;
-  mine.home.librewolf.enable = true;
+  # mine.home.librewolf.enable = true;
   mine.home.mako.enable = false;
   mine.home.neovim.enable = true;
   mine.home.obsidian.enable = true;
@@ -83,6 +83,7 @@
   mine.home.screenshots.enable = false;
   mine.home.signal-desktop.enable = true;
   mine.home.ssh.enable = true;
+  mine.home.super-productivity.enable = true;
   mine.home.thunderbird.enable = true;
   mine.home.virt-viewer.enable = true;
   mine.home.vlc.enable = true;

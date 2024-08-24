@@ -5,14 +5,13 @@ let
 in
 {
   options.mine.home.darktable = {
-    enable = lib.mkEnableOption "enable darktable in home-manager";
+    enable = lib.mkEnableOption "darktable";
   };
 
   config = lib.mkIf cfg.enable {
     home-manager.users.r6t = {
-      # home.packages = with pkgs; [ darktable ];
-
-      # xdg.configFile."darktable/darktablerc".source = dotfiles/${config.networking.hostName}.darktablerc;
+      home.packages = with pkgs; [ darktable ];
+      xdg.configFile."darktable/darktablerc".source = dotfiles/${config.networking.hostName}.darktablerc;
     };
   };
 }

@@ -35,6 +35,7 @@
       home/screenshots/default.nix
       home/signal-desktop/default.nix
       home/ssh/default.nix
+      home/super-productivity/default.nix
       home/thunderbird/default.nix
       home/libvirtd/default.nix
       home/virt-viewer/default.nix
