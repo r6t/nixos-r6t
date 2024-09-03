@@ -34,7 +34,7 @@
   mine.kde.enable = true;
   mine.libvirtd.enable = true;
   mine.localization.enable = true;
-  mine.mullvad.enable = true;
+  mine.mullvad.enable = false;
   mine.netdata.enable = true;
   mine.networkmanager.enable = true;
   mine.nix.enable = true;
@@ -53,20 +53,20 @@
 
   # home modules
   mine.home.alacritty.enable = true;
-  mine.home.apple-emoji.enable = true;
+  mine.home.apple-emoji.enable = false;
   mine.home.awscli.enable = true;
-  mine.home.betaflight-configurator.enable = true;
+  mine.home.betaflight-configurator.enable = false;
   mine.home.bitwarden.enable = true;
   mine.home.brave.enable = true;
-  mine.home.calibre.enable = true;
+  mine.home.calibre.enable = false;
   mine.home.chromium.enable = true;
-  mine.home.darktable.enable = true;
-  mine.home.digikam.enable = true;
-  mine.home.element-desktop.enable = true;
+  mine.home.darktable.enable = false;
+  mine.home.digikam.enable = false;
+  mine.home.element-desktop.enable = false;
   mine.home.firefox.enable = true;
   mine.home.fontconfig.enable = true;
-  mine.home.freecad.enable = true;
-  mine.home.freerdp.enable = true;
+  mine.home.freecad.enable = false;
+  mine.home.freerdp.enable = false;
   mine.home.git.enable = true;
   mine.home.home-manager.enable = true;
   mine.home.hypridle.enable = false;
@@ -83,15 +83,15 @@
   mine.home.remmina.enable = true;
   mine.home.rofi.enable = false;
   mine.home.screenshots.enable = false;
-  mine.home.signal-desktop.enable = true;
+  mine.home.signal-desktop.enable = false;
   mine.home.ssh.enable = true;
-  mine.home.thunderbird.enable = true;
+  mine.home.thunderbird.enable = false;
   mine.home.libvirtd.enable = true;
   mine.home.virt-viewer.enable = true;
   mine.home.vlc.enable = true;
   mine.home.vscodium.enable = true;
-  mine.home.waybar.enable = true;
-  mine.home.webcord.enable = true;
-  mine.home.yt-dlp.enable = true;
+  mine.home.waybar.enable = false;
+  mine.home.webcord.enable = false;
+  mine.home.yt-dlp.enable = false;
   mine.home.zsh.enable = true;
 }

@@ -88,7 +88,7 @@
   mine.home.virt-viewer.enable = true;
   mine.home.vlc.enable = true;
   mine.home.vscodium.enable = true;
-  mine.home.waybar.enable = true;
+  mine.home.waybar.enable = false;
   mine.home.webcord.enable = true;
   mine.home.yt-dlp.enable = true;
   mine.home.zsh.enable = true;
