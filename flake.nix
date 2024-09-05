@@ -48,6 +48,11 @@
         specialArgs = {inherit inputs outputs;};
         modules = [./hosts/mountainball/configuration.nix];
       };
+      # headscale exit node
+      mv-exit-node = nixpkgs.lib.nixosSystem {
+        specialArgs = {inherit inputs outputs;};
+        modules = [./hosts/mv-exit-node/configuration.nix];
+      };
       # photo server
       photolab = nixpkgs.lib.nixosSystem {
         specialArgs = {inherit inputs outputs;};
