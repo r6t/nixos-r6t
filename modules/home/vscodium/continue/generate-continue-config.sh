@@ -14,17 +14,17 @@ cat <<EOF > /home/r6t/.continue/config.json
       "apiKey": "$OPENAI_KEY"
     },
     {
-      "title": "Ollama",
-      "provider": "ollama",
       "model": "AUTODETECT",
-      "completionOptions": {}
+      "title": "Ollama",
+      "apiBase": "http://silvertorch.magic.internal:11434",
+      "provider": "ollama"
     }
   ],
   "tabAutocompleteModel": {
       "title": "Tab Autocomplete Model",
       "provider": "ollama",
       "model": "deepseek-coder-v2:latest",
-      "apiBase": "http://silvertorch.ryan.magic.internal:11434"
+      "apiBase": "http://silvertorch.magic.internal:11434"
   },
   "slashCommands": [
     {

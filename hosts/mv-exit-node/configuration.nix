@@ -12,7 +12,6 @@
     inputs.home-manager.nixosModules.home-manager
     inputs.sops-nix.nixosModules.sops
     inputs.hardware.nixosModules.raspberry-pi-4
-
     ./hardware-configuration.nix
     ../../modules/default.nix
   ];
@@ -43,7 +42,7 @@
     ];
   networking.firewall.allowedUDPPorts = [ 
     ];
-  system.stateVersion = "24.11";
+  system.stateVersion = "23.11";
   
   # Boot options for KVM with EGPU passthrough
   # boot.blacklistedKernelModules = [ "nvidia" "nouveau" ];
