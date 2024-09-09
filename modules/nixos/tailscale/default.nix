@@ -7,5 +7,12 @@
 
     config = lib.mkIf config.mine.tailscale.enable { 
       services.tailscale.enable = true;
+
+      # prevent nixos rebuilds getting hung up on network manager checking tailscale interface
+      networking.networkmanager.settings = {
+        keyfile = {
+          unmanaged-devices = "interface-name:tailscale0";
+        };
+      };
     };
 }
