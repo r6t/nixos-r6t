@@ -32,7 +32,6 @@
   mine.fonts.enable = true;
   mine.fwupd.enable = true;
   mine.fzf.enable = true;
-  mine.hypr.enable = false;
   mine.kde.enable = true;
   mine.localization.enable = true;
   mine.mullvad.enable = true;
@@ -67,19 +66,13 @@
   mine.home.freerdp.enable = true;
   mine.home.git.enable = true;
   mine.home.home-manager.enable = true;
-  mine.home.hypridle.enable = false;
-  mine.home.hyprland.enable = false;
-  mine.home.hyprpaper.enable = false;
-  mine.home.hyprpicker.enable = false;
   mine.home.kde-apps.enable = true;
-  # mine.home.librewolf.enable = true;
-  mine.home.mako.enable = false;
-  mine.home.neovim.enable = true;
+  mine.home.librewolf.enable = true;
+  mine.home.nixvim.enable = true;
   mine.home.obsidian.enable = true;
   mine.home.protonmail-bridge.enable = true;
   mine.home.python3.enable = true;
   mine.home.remmina.enable = true;
-  mine.home.rofi.enable = false;
   mine.home.screenshots.enable = false;
   mine.home.signal-desktop.enable = true;
   mine.home.ssh.enable = true;
@@ -88,7 +81,6 @@
   mine.home.virt-viewer.enable = true;
   mine.home.vlc.enable = true;
   mine.home.vscodium.enable = true;
-  mine.home.waybar.enable = false;
   mine.home.webcord.enable = true;
   mine.home.yt-dlp.enable = true;
   mine.home.zsh.enable = true;

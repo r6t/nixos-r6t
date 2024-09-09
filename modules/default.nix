@@ -27,6 +27,7 @@
       home/librewolf/default.nix
       home/mako/default.nix
       home/neovim/default.nix
+      home/nixvim/default.nix
       home/obsidian/default.nix
       home/protonmail-bridge/default.nix
       home/python3/default.nix

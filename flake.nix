@@ -16,6 +16,13 @@
 
     hardware.url = "github:nixos/nixos-hardware";
 
+    nixvim = {
+        url = "github:nix-community/nixvim/nixos-24.05";
+        # url = "github:nix-community/nixvim?ref=nixos-24.05";
+        # url = "github:nix-community/nixvim"; nixos-unstable
+        inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     sops-ryan = {
       url = "git+https://git-codecommit.us-west-2.amazonaws.com/v1/repos/sops-ryan?ref=main";
     };
@@ -34,6 +41,7 @@
   outputs = {
     self,
     nixpkgs,
+    nixvim,
     home-manager,
     sops-nix,
     ...

@@ -1,4 +1,4 @@
-{ lib, config, ... }: { 
+{ inputs, lib, config, ... }: { 
 
     options = {
       mine.home.home-manager.enable =
@@ -7,6 +7,9 @@
 
     config = lib.mkIf config.mine.home.home-manager.enable { 
       home-manager.backupFileExtension = "replacedbyhomemanager"; 
+      home-manager.sharedModules = [
+        inputs.nixvim.homeManagerModules.nixvim
+      ];
       home-manager.users.r6t = {
         home = {
           homeDirectory = "/home/r6t";
