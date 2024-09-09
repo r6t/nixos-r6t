@@ -23,11 +23,19 @@
       };
       environment.systemPackages = with pkgs; [ libva ];
 
-      hardware.graphics = {
-        enable = true;
-        enable32Bit = true;
-      };
+      # replaces hardware.opengl after nixos 24.05
+      # hardware.graphics = {
+      #   enable = true;
+      #   enable32Bit = true;
+      # };
 
+      # the current/old way
+      hardware.opengl = {
+        enable = true;
+        driSupport = true;
+        driSupport32Bit = true;
+      };
+      
       hardware.nvidia = {
         modesetting.enable = true;
         powerManagement.enable = true; # changed from default false

@@ -24,7 +24,7 @@
 
   # system modules
   mine.bootloader.enable = true;
-  mine.docker.enable = true;
+  mine.docker.enable = false;
   mine.env.enable = true;
   mine.flatpak.enable = true;
   mine.fonts.enable = true;
@@ -32,7 +32,7 @@
   mine.fzf.enable = true;
   mine.hypr.enable = false;
   mine.kde.enable = true;
-  mine.libvirtd.enable = true;
+  mine.libvirtd.enable = false;
   mine.localization.enable = true;
   mine.mullvad.enable = false;
   mine.netdata.enable = true;
@@ -41,7 +41,7 @@
   mine.nixpkgs.enable = true;
   mine.nvidia.enable = true;
   mine.ollama.enable = true;
-  mine.printing.enable = true;
+  mine.printing.enable = false;
   mine.sops.enable = true;
   mine.sound.enable = true;
   mine.ssh.enable = true;
@@ -59,7 +59,7 @@
   mine.home.bitwarden.enable = true;
   mine.home.brave.enable = true;
   mine.home.calibre.enable = false;
-  mine.home.chromium.enable = true;
+  mine.home.chromium.enable = false;
   mine.home.darktable.enable = false;
   mine.home.digikam.enable = false;
   mine.home.element-desktop.enable = false;
@@ -74,11 +74,11 @@
   mine.home.hyprpaper.enable = false;
   mine.home.hyprpicker.enable = false;
   mine.home.kde-apps.enable = true;
-  mine.home.librewolf.enable = true;
+  mine.home.librewolf.enable = false;
   mine.home.mako.enable = false;
   mine.home.neovim.enable = true;
-  mine.home.obsidian.enable = true;
-  mine.home.protonmail-bridge.enable = true;
+  mine.home.obsidian.enable = false;
+  mine.home.protonmail-bridge.enable = false;
   mine.home.python3.enable = true;
   mine.home.remmina.enable = true;
   mine.home.rofi.enable = false;
@@ -86,8 +86,8 @@
   mine.home.signal-desktop.enable = false;
   mine.home.ssh.enable = true;
   mine.home.thunderbird.enable = false;
-  mine.home.libvirtd.enable = true;
-  mine.home.virt-viewer.enable = true;
+  mine.home.libvirtd.enable = false;
+  mine.home.virt-viewer.enable = false;
   mine.home.vlc.enable = true;
   mine.home.vscodium.enable = true;
   mine.home.waybar.enable = false;
