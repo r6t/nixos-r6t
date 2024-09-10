@@ -28,7 +28,7 @@
       sops.secrets."syncthing/machine_id/mountainball" = {
         owner = config.users.users.r6t.name;
        };
-      sops.secrets."syncthing/machine_id/photolab" = {
+      sops.secrets."syncthing/machine_id/starfish" = {
         owner = config.users.users.r6t.name;
        };
       sops.secrets."syncthing/machine_id/silvertorch" = {

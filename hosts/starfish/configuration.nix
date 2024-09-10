@@ -11,32 +11,16 @@
   imports = [
     inputs.home-manager.nixosModules.home-manager
     inputs.sops-nix.nixosModules.sops
-    inputs.hardware.nixosModules.raspberry-pi-4
     ./hardware-configuration.nix
     ../../modules/default.nix
   ];
- 
-  boot.loader.grub.enable = false;
-  boot.loader.generic-extlinux-compatible.enable = true;
 
-  hardware = {
-    raspberry-pi."4".apply-overlays-dtmerge.enable = true;
-    deviceTree = {
-      enable = true;
-      filter = "*rpi-4-*.dtb";
-    };
-  };
-
-  console.enable = false;
-
-  environment.systemPackages = with pkgs; [
-    libraspberrypi
-    raspberrypi-eeprom
-  ];
   # system details
-  networking.hostName = "mv-exit-node";
+  networking.hostName = "starfish";
   networking.firewall.allowedTCPPorts = [ 
     22
+    2283 # immich
+    3389 # VM RDP
     8384
     22000
     ];
@@ -55,10 +39,25 @@
   # users.users.r6t.linger = true;
 
   # system modules
+  mine.bolt.enable = true;
+  mine.bootloader.enable = true;
+  mine.bridge.enable = false;
+  mine.docker.enable = true;
+  mine.env.enable = true;
+  mine.fwupd.enable = true;
+  mine.libvirtd.enable = false;
+  mine.localization.enable = true;
+  mine.netdata.enable = true;
+  mine.networkmanager.enable = true;
+  mine.nix.enable = true;
+  mine.nixpkgs.enable = true;
+  mine.nvidia.enable = true;
+  mine.selfhost.enable = false;
   mine.sops.enable = true;
   mine.ssh.enable = true;
   mine.syncthing.enable = true;
   mine.tailscale.enable = true;
+  mine.thunderbay.enable = false;
   mine.user.enable = true;
   mine.zsh.enable = true;
 

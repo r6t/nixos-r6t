@@ -9,7 +9,7 @@
       services.openssh = {
         enable = true;
         settings = {
-          PermitRootLogin = if config.networking.hostName == "photolab" then "yes" else "no";
+          PermitRootLogin = if config.networking.hostName == "starfish" then "yes" else "no";
           PasswordAuthentication = false;
         };
       };
