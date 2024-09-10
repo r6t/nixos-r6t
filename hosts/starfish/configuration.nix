@@ -35,6 +35,19 @@
     "net.ipv6.conf.all.forwarding" = true;
   };
 
+  systemd.services.ethtool-tailscale = {
+    description = "Configure ethtool settings for Tailscale";
+    wantedBy = [ "network.target" ];
+
+    serviceConfig = {
+      ExecStart = "${pkgs.ethtool}/bin/ethtool -K $(ip -o route get 8.8.8.8 | cut -f 5 -d ' ') rx-udp-gro-forwarding on rx-gro-list off";
+      Restart = "on-failure";
+    };
+  };
+
+  # Make sure systemd service is enabled
+  systemd.services.ethtool-tailscale.enable = true;
+
   system.stateVersion = "23.11";
   
   # Boot options for KVM with EGPU passthrough
