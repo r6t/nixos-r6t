@@ -74,6 +74,7 @@
   mine.nix.enable = true;
   mine.nixpkgs.enable = true;
   mine.nvidia.enable = true;
+  mine.mullvad.enable = true;
   mine.selfhost.enable = false;
   mine.sops.enable = true;
   mine.ssh.enable = true;
