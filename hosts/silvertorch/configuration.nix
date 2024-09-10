@@ -34,7 +34,6 @@
   mine.kde.enable = true;
   mine.libvirtd.enable = false;
   mine.localization.enable = true;
-  mine.mullvad.enable = false;
   mine.netdata.enable = true;
   mine.networkmanager.enable = true;
   mine.nix.enable = true;
