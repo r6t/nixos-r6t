@@ -26,6 +26,15 @@
     ];
   networking.firewall.allowedUDPPorts = [ 
     ];
+  networking = {
+    enableIPv6 = true;
+  };
+
+  boot.kernel.sysctl = {
+    "net.ipv4.ip_forward" = true;
+    "net.ipv6.conf.all.forwarding" = true;
+  };
+
   system.stateVersion = "23.11";
   
   # Boot options for KVM with EGPU passthrough
@@ -65,6 +74,7 @@
   mine.home.awscli.enable = true;
   mine.home.git.enable = true;
   mine.home.home-manager.enable = true;
+  mine.home.nixvim.enable = true;
   mine.home.python3.enable = true;
   mine.home.zsh.enable = true;
 }

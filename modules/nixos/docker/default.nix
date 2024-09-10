@@ -9,7 +9,10 @@
       virtualisation.docker = { 
         autoPrune.enable = true;
         daemon.settings = {
+	  experimental = true;
           data-root = "/home/r6t/docker-root";
+          ipv6 = true;
+          fixed-cidr-v6 = "fdcb:ab14:ad77::/64";
         };
         enable = true;
         enableOnBoot = true;
