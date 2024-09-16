@@ -18,8 +18,6 @@
          git-remote-codecommit
          home-manager
          lshw
-         neovim
-         neofetch
          netcat
          netdata
          nmap
