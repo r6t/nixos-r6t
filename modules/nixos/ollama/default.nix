@@ -1,6 +1,7 @@
 { lib, config, inputs, ... }:let
   # Perform an ad-hoc import for `nixpkgs-unstable` with the desired configuration.
   nixpkgs-unstable = import inputs.nixpkgs-unstable {
+    system = "x86_64-linux";
     config = { allowUnfree = true; };
   };
 
