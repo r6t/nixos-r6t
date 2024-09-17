@@ -6,7 +6,7 @@
   };
 
   # Define the package using the ad-hoc imported and configured `nixpkgs-unstable`
-  ollamaPackage = nixpkgs-unstable.legacyPackages.x86_64-linux.ollama;
+  ollamaPackage = nixpkgs-unstable.ollama;
 in { 
 
     options = {
