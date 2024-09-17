@@ -44,17 +44,6 @@
     ...
   } @ inputs: let
     inherit (self) outputs;
-
-      allowUnfreeOverlay = final: prev: {
-        nixpkgs.config = {
-          allowUnfree = true;
-        };
-      };
-
-      pkgsUnstable = import nixpkgs-unstable {
-        overlays = [ allowUnfreeOverlay ];
-        config = { allowUnfree = true; };
-      };
   in {
     # NixOS configuration entrypoint
     # Available through 'nixos-rebuild --flake .#your-hostname'
