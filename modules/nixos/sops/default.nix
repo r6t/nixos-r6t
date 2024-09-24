@@ -13,15 +13,21 @@
       sops.secrets."firefox_sync" = {
         owner = config.users.users.r6t.name;
       };
+      sops.secrets."netdata/cloud/claim_token" = {
+        owner = config.users.users.r6t.name;
+      };
+      sops.secrets."netdata/cloud/claim_rooms" = {
+        owner = config.users.users.r6t.name;
+      };
+      sops.secrets."ollama/apiBase" = { 
+        owner = config.users.users.r6t.name;
+      };
       sops.secrets."openai/platform_key" = { 
         owner = config.users.users.r6t.name;
       };
-      # sops.secrets."syncthing/creds/user" = {
-      #   owner = config.users.users.r6t.name;
-      #  };
-      # sops.secrets."syncthing/creds/password" = {
-      #   owner = config.users.users.r6t.name;
-      #  };
+      sops.secrets."syncthing/password" = {
+        owner = config.users.users.r6t.name;
+       };
       sops.secrets."syncthing/machine_id/mailmac" = {
         owner = config.users.users.r6t.name;
        };

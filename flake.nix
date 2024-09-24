@@ -21,6 +21,7 @@
 
     sops-ryan = {
       url = "git+https://git-codecommit.us-west-2.amazonaws.com/v1/repos/sops-ryan?ref=main";
+      inputs.nixpkgs.follows = "sops-nix";
     };
 
     sops-nix = {
@@ -41,6 +42,7 @@
     nixvim,
     home-manager,
     sops-nix,
+    sops-ryan,
     ...
   } @ inputs: let
     inherit (self) outputs;

@@ -16,9 +16,11 @@
           kdePackages.breeze-gtk # KDE Breeze theme
           kdePackages.breeze-icons # KDE app icons
           kdePackages.elisa # KDE music player
+          kdePackages.filelight # KDE disk utilization visualizer
           kdePackages.gwenview # KDE image viewer
           kdePackages.kdeconnect-kde # KDE Connect phone pairing
           kdePackages.kio-extras # KDE support
+          kdePackages.krdc # KDE VNC + RDP client
           kdePackages.polkit-kde-agent-1 # KDE privlege escalation helper
           kdePackages.qtwayland # KDE app support + https://wiki.hyprland.org/hyprland-wiki/pages/Nvidia/
         ];

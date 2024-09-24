@@ -10,9 +10,7 @@
         defaultEditor = true;
         enable = true;
         extraPlugins = [ pkgs.vimPlugins.oxocarbon-nvim ];
-        # extraPlugins = [ pkgs.vimPlugins.rose-pine ];
         colorschemes.oxocarbon.enable = true;
-        # colorschemes.rose-pine.enable = true;
         opts = {
 	  updatetime = 100;
 	  number = true;
@@ -30,11 +28,6 @@
 	  cmp = {
 	    enable = true;
 	    autoEnableSources = true;
-	   # sources = [
-	   #   { name = "nvim_lsp";}
-	   #   { name = "path";}
-	   #   { name = "buffer";}
-	   # ];
 	  };
 	  lualine.enable = true;
 	  luasnip.enable = true;

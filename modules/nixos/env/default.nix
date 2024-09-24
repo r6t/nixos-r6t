@@ -18,8 +18,8 @@
          git-remote-codecommit
          home-manager
          lshw
+         neovim
          netcat
-         netdata
          nmap
          nodejs
          openssl
