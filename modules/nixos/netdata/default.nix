@@ -15,7 +15,7 @@ in {
       services.netdata = {
         enable = true;
         # token file gets deleted during activation, subsequent reloads fail
-        claimTokenFile = /var/lib/netdata/cloud.d/token;
+        # claimTokenFile = /var/lib/netdata/cloud.d/token;
         package = netdataPackage;
       };
 
