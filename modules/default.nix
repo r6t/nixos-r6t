@@ -3,6 +3,7 @@
     imports = [
       home/alacritty/default.nix
       home/apple-emoji/default.nix
+      home/audacity/default.nix
       home/awscli/default.nix
       home/betaflight-configurator/default.nix
       home/bitwarden/default.nix
@@ -26,6 +27,7 @@
       home/kde-apps/default.nix
       home/librewolf/default.nix
       home/mako/default.nix
+      home/mpv/default.nix
       home/neovim/default.nix
       home/nixvim/default.nix
       home/obsidian/default.nix

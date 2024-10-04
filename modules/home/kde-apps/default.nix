@@ -19,6 +19,7 @@
           kdePackages.filelight # KDE disk utilization visualizer
           kdePackages.gwenview # KDE image viewer
           kdePackages.kdeconnect-kde # KDE Connect phone pairing
+          kdePackages.kdialog # KDE app support
           kdePackages.kio-extras # KDE support
           kdePackages.krdc # KDE VNC + RDP client
           kdePackages.polkit-kde-agent-1 # KDE privlege escalation helper

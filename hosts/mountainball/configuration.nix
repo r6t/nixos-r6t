@@ -16,6 +16,20 @@
     ../../modules/default.nix
   ];
 
+#  {
+#  hardware.opengl = {
+#    enable = true;
+#    driSupport = true;
+#    driSupport32Bit = true;
+#    extraPackages = with pkgs; [
+#      vaapiVdpau # Provides VA-API support for AMD
+#      libvdpau-va-gl # VDPAU backend for VA-API
+#    ];
+#  };
+#
+#  services.xserver.videoDrivers = [ "amdgpu" ];
+# }
+
   # system details
   boot.initrd.luks.devices."luks-9fc9c182-0bad-474f-a9bb-ee2e6aa1be50".device = "/dev/disk/by-uuid/9fc9c182-0bad-474f-a9bb-ee2e6aa1be50";
   networking.hostName = "mountainball";
@@ -51,6 +65,7 @@
   # home modules
   mine.home.alacritty.enable = true;
   mine.home.apple-emoji.enable = true;
+  mine.home.audacity.enable = false;
   mine.home.awscli.enable = true;
   mine.home.betaflight-configurator.enable = true;
   mine.home.bitwarden.enable = true;
@@ -68,6 +83,7 @@
   mine.home.home-manager.enable = true;
   mine.home.kde-apps.enable = true;
   mine.home.librewolf.enable = true;
+  mine.home.mpv.enable = true;
   mine.home.nixvim.enable = true;
   mine.home.obsidian.enable = true;
   mine.home.protonmail-bridge.enable = true;
