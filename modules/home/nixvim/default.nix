@@ -1,4 +1,4 @@
-{ lib, config, inputs, pkgs, ... }: { 
+{ lib, config, pkgs, ... }: { 
 
     options = {
       mine.home.nixvim.enable =
@@ -25,6 +25,22 @@
           signcolumn = "yes:1";
 	};
 	plugins = {
+	  conform-nvim = {
+            enable = true;
+	    formattersByFt = {
+	      css = ["prettier"];
+              html = ["prettier"];
+              json = ["prettier"];
+	      lua = ["stylua"];
+              markdown = ["prettier"];
+              nix = ["alejandra"];
+	      python = [ "black" ];
+              ruby = ["rubyfmt"];
+              terraform = ["tofu_fmt"];
+              tf = ["tofu_fmt"];
+              yaml = ["yamlfmt"];
+	    };
+          };
 	  cmp = {
 	    enable = true;
 	    autoEnableSources = true;
@@ -34,10 +50,30 @@
 	  lsp = {
             enable = true;
 	    servers = {
-	      pyright.enable = true; # python
+	      jsonls.enable = true;
 	      lua-ls.enable = true;
+	      marksman.enable = true;
+	      nixd.enable = true;
+	      pylsp = {
+	        enable = true;
+	        settings.plugins = {
+	          black.enabled = true;
+	          flake8.enabled = false;
+	          isort.enabled = true;
+	          jedi.enabled = false;
+	          mccabe.enabled = false;
+	          pycodestyle.enabled = false;
+	          pydocstyle.enabled = true;
+	          pyflakes.enabled = false;
+	          pylint.enabled = true;
+	          rope.enabled = false;
+	          yapf.enabled = false;
+	        };
+	      };
+	      yamlls.enable = true;
 	    };
 	  };
+	  none-ls.sources.formatting.black.enable = true;
 	  oil.enable = true;
 	  telescope.enable = true;
 	  treesitter.enable = true;
