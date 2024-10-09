@@ -9,7 +9,7 @@
       home-manager.users.r6t.programs.git = {
         enable = true;
         userName = "r6t";
-        userEmail = "ryancast@gmail.com";
+        userEmail = "git@r6t.io";
         extraConfig = {
           core = {
             editor = "nvim";

@@ -11,8 +11,8 @@
           file.".profile".source = dotfiles/.profile;
         };
         sessionVariables = {
-	  GDK_SCALE= "2";
-	  # GDK_DPI_SCALE = "0.5";
+				  GDK_SCALE= "2";
+				  # GDK_DPI_SCALE = "0.5";
           MOZ_ENABLE_WAYLAND = 1;
         };
 
