@@ -1,4 +1,4 @@
-{ lib, config, pkgs, ... }: { 
+{ lib, config, ... }: { 
 
     options = {
       mine.home.firefox.enable =
@@ -6,11 +6,8 @@
     };
 
     config = lib.mkIf config.mine.home.firefox.enable { 
-      home-manager.users.r6t.home.packages = with pkgs; [ firefox-wayland ];
-
       home-manager.users.r6t.programs.firefox = {
         enable = true;
-        package = pkgs.firefox-wayland;
         profiles."default" = {
           id = 0;
           settings = {

@@ -2,20 +2,20 @@
   description = "r6t nixos systems configuration flake";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-24.05";
-    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
+    #nixpkgs.url = "github:nixos/nixpkgs/nixos-24.05";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
     home-manager = {
-      url = "github:nix-community/home-manager/release-24.05";
-      # url = "github:nix-community/home-manager/master"; nixos-unstable
+      # url = "github:nix-community/home-manager/release-24.05";
+      url = "github:nix-community/home-manager/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     hardware.url = "github:nixos/nixos-hardware";
 
     nixvim = {
-        url = "github:nix-community/nixvim/nixos-24.05";
-        # url = "github:nix-community/nixvim"; nixos-unstable
+        # url = "github:nix-community/nixvim/nixos-24.05";
+        url = "github:nix-community/nixvim";
         inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -38,11 +38,6 @@
   outputs = {
     self,
     nixpkgs,
-    nixpkgs-unstable,
-    nixvim,
-    home-manager,
-    sops-nix,
-    sops-ryan,
     ...
   } @ inputs: let
     inherit (self) outputs;
