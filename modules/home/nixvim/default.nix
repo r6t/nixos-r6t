@@ -43,7 +43,7 @@
       	  conform-nvim = {
             enable = true;
 						settings = {
-      	  	  formatters_by_ft = {
+      	    	formatters_by_ft = {
       	      	css = ["prettier"];
                 html = ["prettier"];
                 json = ["prettier"];

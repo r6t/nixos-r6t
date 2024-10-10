@@ -70,6 +70,7 @@
       nixos/nixpkgs/default.nix
       nixos/nvidia/default.nix
       nixos/ollama/default.nix
+      nixos/open-webui/default.nix
       nixos/podman/default.nix
       nixos/printing/default.nix
       nixos/selfhost/default.nix
