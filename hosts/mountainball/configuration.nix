@@ -1,9 +1,5 @@
 {
   inputs,
-  lib,
-  config,
-  pkgs,
-  outputs,
   ...
 }:
 
@@ -88,14 +84,14 @@
   mine.home.obsidian.enable = true;
   mine.home.protonmail-bridge.enable = true;
   mine.home.python3.enable = true;
-  mine.home.remmina.enable = true;
-  mine.home.screenshots.enable = false;
+#  mine.home.remmina.enable = true;
+#  mine.home.screenshots.enable = false;
   mine.home.signal-desktop.enable = true;
   mine.home.ssh.enable = true;
   mine.home.super-productivity.enable = true;
   mine.home.thunderbird.enable = true;
   mine.home.virt-viewer.enable = true;
-  mine.home.vlc.enable = true;
+#  mine.home.vlc.enable = true;
   mine.home.vscodium.enable = true;
   mine.home.webcord.enable = true;
   mine.home.yt-dlp.enable = true;
