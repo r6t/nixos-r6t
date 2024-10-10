@@ -68,7 +68,7 @@
             enable = true;
       	    servers = {
       	      jsonls.enable = true;
-      	      lua-ls.enable = true;
+      	      lua_ls.enable = true;
       	      marksman.enable = true;
       	      nixd.enable = true;
       	      pylsp = {
