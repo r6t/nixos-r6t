@@ -37,6 +37,7 @@
   mine.nixpkgs.enable = true;
   mine.nvidia.enable = true;
   mine.ollama.enable = true;
+  mine.open-webui.enable = true;
   mine.sops.enable = true;
   mine.sound.enable = true;
   mine.ssh.enable = true;
