@@ -39,7 +39,7 @@
       hardware.nvidia = {
         modesetting.enable = true;
         powerManagement.enable = true; # changed from default false
-        powerManagement.finegrained = false; # trying during troubleshooting Plasma 6 resume/wake black screen
+        powerManagement.finegrained = true; # trying during troubleshooting Plasma 6 resume/wake black screen
         open = false;
         nvidiaSettings = true;
         # package = config.boot.kernelPackages.nvidiaPackages.stable;

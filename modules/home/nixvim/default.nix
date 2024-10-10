@@ -42,19 +42,21 @@
       	plugins = {
       	  conform-nvim = {
             enable = true;
-      	  	formattersByFt = {
-      	    	css = ["prettier"];
-              html = ["prettier"];
-              json = ["prettier"];
-      	    	lua = ["stylua"];
-              markdown = ["prettier"];
-              nix = ["alejandra"];
-      	      python = [ "black" ];
-              ruby = ["rubyfmt"];
-              terraform = ["tofu_fmt"];
-              tf = ["tofu_fmt"];
-              yaml = ["yamlfmt"];
-      	    };
+						settings = {
+      	    	formatters_by_ft = {
+      	      	css = ["prettier"];
+                html = ["prettier"];
+                json = ["prettier"];
+      	      	lua = ["stylua"];
+                markdown = ["prettier"];
+                nix = ["alejandra"];
+      	        python = [ "black" ];
+                ruby = ["rubyfmt"];
+                terraform = ["tofu_fmt"];
+                tf = ["tofu_fmt"];
+                yaml = ["yamlfmt"];
+      	      };
+						};
           };
       	  cmp = {
       	    enable = true;
@@ -97,6 +99,7 @@
       	  };
       	  telescope.enable = true;
       	  treesitter.enable = true;
+      	  web-devicons.enable = true;
       	};
         viAlias = true;
         vimAlias = true;
