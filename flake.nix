@@ -45,17 +45,17 @@
     # NixOS configuration entrypoint
     # Available through 'nixos-rebuild --flake .#your-hostname'
     nixosConfigurations = {
+      # network
+      exit-node = nixpkgs.lib.nixosSystem {
+        specialArgs = {inherit inputs outputs;};
+        modules = [./hosts/exit-node/configuration.nix];
+      };
       # laptop
       mountainball = nixpkgs.lib.nixosSystem {
         specialArgs = {inherit inputs outputs;};
         modules = [./hosts/mountainball/configuration.nix];
       };
-      # utility server
-      starfish = nixpkgs.lib.nixosSystem {
-        specialArgs = {inherit inputs outputs;};
-        modules = [./hosts/starfish/configuration.nix];
-      };
-      # main server
+      # server
       saguaro = nixpkgs.lib.nixosSystem {
         specialArgs = {inherit inputs outputs;};
         modules = [./hosts/saguaro/configuration.nix];

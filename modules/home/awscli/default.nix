@@ -6,6 +6,9 @@
     };
 
     config = lib.mkIf config.mine.home.awscli.enable { 
-      home-manager.users.r6t.home.packages = with pkgs; [ awscli2 ];
+      home-manager.users.r6t.home.packages = with pkgs; [
+			  awscli2
+			  ssm-session-manager-plugin
+			];
     };
 }

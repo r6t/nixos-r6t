@@ -6,10 +6,11 @@
     };
 
     config = lib.mkIf config.mine.ssh.enable { 
+      networking.firewall.allowedTCPPorts = [ 22 ];
       services.openssh = {
         enable = true;
         settings = {
-          PermitRootLogin = if config.networking.hostName == "starfish" then "yes" else "no";
+          PermitRootLogin = "no";
           PasswordAuthentication = false;
         };
       };

@@ -7,13 +7,11 @@
 
     config = lib.mkIf config.mine.bluetooth.enable { 
       hardware.bluetooth.enable = true;
-      # Experimental settings allow the os to read bluetooth device battery level
       hardware.bluetooth.settings = {
         General = {
+          # Experimental settings allow the os to read bluetooth device battery level
           Experimental = true;
          };
       };
-
-      services.blueman.enable = true;
     };
 }
