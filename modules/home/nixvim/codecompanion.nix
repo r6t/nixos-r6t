@@ -89,7 +89,7 @@ in
     }
     {
       mode = "v";
-      key = "ca";
+      key = "<leader>aa";
       action = "<Cmd>CodeCompanionChat Add<CR>";
       options = {
         noremap = true;

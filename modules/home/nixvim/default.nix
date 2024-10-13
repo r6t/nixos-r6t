@@ -101,8 +101,16 @@
       	    url = "http://silvertorch.magic.internal:11434";
       	  };
       	  telescope.enable = true;
-      	  treesitter.enable = true;
+      	  treesitter = {
+					  enable = true;
+						folding = false;
+						settings.indent.enable = true;
+					};
 					web-devicons.enable = true;
+					which-key = {
+					  enable = true;
+					  settings.preset = "helix";
+				  };
       	};
         viAlias = true;
         vimAlias = true;
