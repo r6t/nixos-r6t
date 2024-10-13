@@ -20,6 +20,9 @@ in
     })
   ];
 
+  home-manager.users.r6t.programs.nixvim.plugins = {
+	  dressing.enable = true;
+	};
   home-manager.users.r6t.programs.nixvim.extraConfigLua = ''
     require("codecompanion").setup({
 	      adapters = {
@@ -63,32 +66,42 @@ in
     {
       mode = [
         "n"
-        "v"
+				"v"
       ];
-      key = "<leader>oo";
-      action = "CodeCompanion";
+      key = "<C-a>";
+      action = "<Cmd>CodeCompanionActions<CR>";
       options = {
+        noremap = true;
         silent = true;
-        desc = "+codecompanion";
       };
     }
     {
-      key = "<leader>ot";
-      action = ":CodeCompanionToggle<CR>";
-      mode = "n";
+      mode = [
+        "n"
+				"v"
+      ];
+      key = "<leader>ac";
+      action = "<Cmd>CodeCompanionChat Toggle<CR>";
       options = {
+        noremap = true;
         silent = true;
-        desc = "Toggle CodeCompanion";
       };
     }
     {
-      key = "<leader>oa";
-      action = ":CodeCompanionActions<CR>";
-      mode = "n";
+      mode = "v";
+      key = "ca";
+      action = "<Cmd>CodeCompanionChat Add<CR>";
       options = {
+        noremap = true;
         silent = true;
-        desc = "CodeCompanion Actions";
       };
     }
   ];
+
+	home-manager.users.r6t.programs.nixvim.extraConfigVim = 
+	  ''
+	  cabbrev cc CodeCompanion
+		'';
+
 }
+
