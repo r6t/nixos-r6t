@@ -1,5 +1,8 @@
 { lib, config, pkgs, ... }: { 
 
+		imports = [
+			./codecompanion.nix
+		];
     options = {
       mine.home.nixvim.enable =
         lib.mkEnableOption "enable nixvim in home-manager";
