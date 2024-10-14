@@ -95,5 +95,6 @@
   mine.home.vscodium.enable = true;
   mine.home.webcord.enable = true;
   mine.home.yt-dlp.enable = true;
+  mine.home.zellij.enable = true;
   mine.home.zsh.enable = true;
 }

@@ -47,6 +47,7 @@
 #      home/waybar/default.nix
       home/webcord/default.nix
       home/yt-dlp/default.nix
+      home/zellij/default.nix
       home/zsh/default.nix
 
       nixos/bluetooth/default.nix

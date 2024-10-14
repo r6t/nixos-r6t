@@ -25,13 +25,13 @@ in
 	};
   home-manager.users.r6t.programs.nixvim.extraConfigLua = ''
     require("codecompanion").setup({
-	      adapters = {
+      adapters = {
           opts = {
             allow_insecure = true,
           },
           ollama = function()
             return require("codecompanion.adapters").extend("ollama", {
-				      schema = {
+	      schema = {
                 model = {
                   default = "deepseek-coder-v2:16b",
                 },
@@ -59,14 +59,14 @@ in
            adapter = "ollama",
          },
        },
-    }
-      );
-  '';
+      }
+    );
+    '';
   home-manager.users.r6t.programs.nixvim.keymaps = mkIf codecompanion_enable [
     {
       mode = [
         "n"
-				"v"
+	"v"
       ];
       key = "<C-a>";
       action = "<Cmd>CodeCompanionActions<CR>";
@@ -78,7 +78,7 @@ in
     {
       mode = [
         "n"
-				"v"
+	"v"
       ];
       key = "<leader>ac";
       action = "<Cmd>CodeCompanionChat Toggle<CR>";
@@ -98,10 +98,8 @@ in
     }
   ];
 
-	home-manager.users.r6t.programs.nixvim.extraConfigVim = 
-	  ''
-	  cabbrev cc CodeCompanion
-		'';
-
+  home-manager.users.r6t.programs.nixvim.extraConfigVim = ''
+    cabbrev cc CodeCompanion
+   '';
 }
 
