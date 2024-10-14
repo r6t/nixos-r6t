@@ -10,6 +10,7 @@
       # System packages
       environment.systemPackages = with pkgs; [
          arion
+			   bat
          curl
          cryptsetup
          dig

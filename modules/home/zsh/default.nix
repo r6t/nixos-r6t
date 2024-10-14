@@ -14,7 +14,7 @@
           theme = "xiong-chiamiov-plus";
         };
         shellAliases = {
-          "h" = "Hyprland";
+				  "nvf" = "nvim $(fzf -m --preview='bat --color=always {}')";
           "gst" = "git status";
           "gd" = "git diff";
           "gds" = "git diff --staged";
