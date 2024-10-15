@@ -6,7 +6,8 @@
     };
 
     config = lib.mkIf config.mine.home.betaflight-configurator.enable { 
-      # app.betaflight.com (requires chromium) web app uses newer unreleased version
+      # I run the app itself via flatpak
+      # app.betaflight.com (requires chromium) web app is another option
       # home-manager.users.r6t.home.packages = with pkgs; [ betaflight-configurator ];
 
       environment.systemPackages = with pkgs; [

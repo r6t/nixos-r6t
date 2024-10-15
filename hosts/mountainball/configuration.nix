@@ -60,23 +60,23 @@
 
   # home modules
   mine.home.alacritty.enable = true;
-  mine.home.apple-emoji.enable = true;
+#  mine.home.apple-emoji.enable = true;
   mine.home.atuin.enable = true;
-  mine.home.audacity.enable = false;
+#  mine.home.audacity.enable = false;
   mine.home.awscli.enable = true;
-  mine.home.betaflight-configurator.enable = true;
+#  mine.home.betaflight-configurator.enable = true;
   mine.home.bitwarden.enable = true;
   mine.home.brave.enable = true;
   mine.home.calibre.enable = true;
   mine.home.chromium.enable = true;
   mine.home.darktable.enable = true;
   #  mine.home.digikam.enable = true;
-  mine.home.element-desktop.enable = true;
+  #  mine.home.element-desktop.enable = true;
   mine.home.firefox.enable = true;
   mine.home.fish.enable = true;
   mine.home.fontconfig.enable = true;
   mine.home.freecad.enable = true;
-  mine.home.freerdp.enable = true;
+  #  mine.home.freerdp.enable = true;
   mine.home.git.enable = true;
   mine.home.home-manager.enable = true;
   mine.home.kde-apps.enable = true;
