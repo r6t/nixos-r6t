@@ -13,7 +13,7 @@
       home/calibre/default.nix
       home/chromium/default.nix
       home/darktable/default.nix
-      home/digikam/default.nix
+#      home/digikam/default.nix
       home/element-desktop/default.nix
       home/firefox/default.nix
       home/fish/default.nix
@@ -34,6 +34,7 @@
       home/neovim/default.nix
       home/nixvim/default.nix
       home/obsidian/default.nix
+      home/obs-studio/default.nix
       home/protonmail-bridge/default.nix
       home/python3/default.nix
 #      home/remmina/default.nix
@@ -51,7 +52,7 @@
       home/webcord/default.nix
       home/yt-dlp/default.nix
       home/zellij/default.nix
-      home/zsh/default.nix
+#       home/zsh/default.nix
 
       nixos/bluetooth/default.nix
       nixos/bolt/default.nix

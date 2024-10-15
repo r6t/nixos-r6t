@@ -61,7 +61,7 @@
   # home modules
   mine.home.alacritty.enable = true;
   mine.home.apple-emoji.enable = true;
-  mine.home.atuin.enable = false;
+  mine.home.atuin.enable = true;
   mine.home.audacity.enable = false;
   mine.home.awscli.enable = true;
   mine.home.betaflight-configurator.enable = true;
@@ -70,7 +70,7 @@
   mine.home.calibre.enable = true;
   mine.home.chromium.enable = true;
   mine.home.darktable.enable = true;
-  mine.home.digikam.enable = true;
+  #  mine.home.digikam.enable = true;
   mine.home.element-desktop.enable = true;
   mine.home.firefox.enable = true;
   mine.home.fish.enable = true;
@@ -84,6 +84,7 @@
   mine.home.mpv.enable = true;
   mine.home.nixvim.enable = true;
   mine.home.obsidian.enable = true;
+  mine.home.obs-studio.enable = true;
   mine.home.protonmail-bridge.enable = true;
   mine.home.python3.enable = true;
 #  mine.home.remmina.enable = true;
@@ -98,5 +99,5 @@
   mine.home.webcord.enable = true;
   mine.home.yt-dlp.enable = true;
   mine.home.zellij.enable = true;
-  mine.home.zsh.enable = true;
+#  mine.home.zsh.enable = true;
 }
