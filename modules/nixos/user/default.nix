@@ -16,11 +16,11 @@ in
           isNormalUser = true;
           openssh.authorizedKeys.keyFiles = [ ssh-keys.outPath ];
           extraGroups = [ "docker" "input" "networkmanager" "wheel"];
-          shell = pkgs.zsh;
+          shell = pkgs.fish;
         };
         root = {
           openssh.authorizedKeys.keyFiles = lib.mkForce [ ssh-keys.outPath ];
-          shell = pkgs.zsh;
+          shell = pkgs.fish;
         };
       };
     };

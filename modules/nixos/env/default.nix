@@ -6,7 +6,7 @@
     };
 
     config = lib.mkIf config.mine.env.enable { 
-      environment.shells = with pkgs; [ zsh ]; # /etc/shells
+      environment.shells = with pkgs; [ fish ]; # /etc/shells
       # System packages
       environment.systemPackages = with pkgs; [
          arion

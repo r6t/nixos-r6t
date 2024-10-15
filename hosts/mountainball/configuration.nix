@@ -61,6 +61,7 @@
   # home modules
   mine.home.alacritty.enable = true;
   mine.home.apple-emoji.enable = true;
+  mine.home.atuin.enable = false;
   mine.home.audacity.enable = false;
   mine.home.awscli.enable = true;
   mine.home.betaflight-configurator.enable = true;
@@ -72,6 +73,7 @@
   mine.home.digikam.enable = true;
   mine.home.element-desktop.enable = true;
   mine.home.firefox.enable = true;
+  mine.home.fish.enable = true;
   mine.home.fontconfig.enable = true;
   mine.home.freecad.enable = true;
   mine.home.freerdp.enable = true;

@@ -2,7 +2,9 @@
 
     imports = [
       home/alacritty/default.nix
+      home/atuin/default.nix
       home/apple-emoji/default.nix
+      home/atuin/default.nix
       home/audacity/default.nix
       home/awscli/default.nix
       home/betaflight-configurator/default.nix
@@ -14,6 +16,7 @@
       home/digikam/default.nix
       home/element-desktop/default.nix
       home/firefox/default.nix
+      home/fish/default.nix
       home/fontconfig/default.nix
       home/freecad/default.nix
       home/freerdp/default.nix

@@ -8,7 +8,7 @@
   config = lib.mkIf config.mine.home.zellij.enable {
     home-manager.users.r6t.programs.zellij = {
       enable = true;
-      enableZshIntegration = true;
+      enableFishIntegration = true;
       settings = {
 	theme = "oxocarbon";
 	themes.oxocarbon = {
