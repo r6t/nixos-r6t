@@ -1,11 +1,18 @@
-{ lib, config, ... }: { 
+{ lib, config, pkgs, ... }: { 
 
     options = {
-      mine.home.firefox.enable =
-        lib.mkEnableOption "enable firefox in home-manager";
+      mine.home.browsers.enable =
+        lib.mkEnableOption "enable desktop web browsers in home-manager";
     };
 
     config = lib.mkIf config.mine.home.firefox.enable { 
+    
+      home-manager.users.r6t.home.packages = with pkgs; [ 
+        brave
+        librewolf
+        ungoogled-chromium
+      ];
+
       home-manager.users.r6t.programs.firefox = {
         enable = true;
         profiles."default" = {
