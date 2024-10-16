@@ -50,8 +50,7 @@
   mine.home.alacritty.enable = true;
   mine.home.awscli.enable = true;
   mine.home.bitwarden.enable = true;
-  mine.home.brave.enable = true;
-  mine.home.firefox.enable = true;
+  mine.home.browsers.enable = true;
   mine.home.fontconfig.enable = true;
   mine.home.git.enable = true;
   mine.home.home-manager.enable = true;

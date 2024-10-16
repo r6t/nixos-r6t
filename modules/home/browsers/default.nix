@@ -5,7 +5,7 @@
         lib.mkEnableOption "enable desktop web browsers in home-manager";
     };
 
-    config = lib.mkIf config.mine.home.firefox.enable { 
+    config = lib.mkIf config.mine.home.browsers.enable { 
     
       home-manager.users.r6t.home.packages = with pkgs; [ 
         brave

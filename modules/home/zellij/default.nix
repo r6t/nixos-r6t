@@ -10,6 +10,11 @@
       enable = true;
       enableFishIntegration = true;
       settings = {
+	simplified_ui = false;
+	default_shell = "fish";
+	pane_frames = false;
+        copy_command = "wl-copy";
+	scrollback_editor = "nvim";
 	theme = "oxocarbon";
 	themes.oxocarbon = {
           fg = "#ffffff";

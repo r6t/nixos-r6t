@@ -7,18 +7,15 @@
       home/awscli/default.nix
       home/betaflight-configurator/default.nix
       home/bitwarden/default.nix
-      home/brave/default.nix
+      home/browsers/default.nix
       home/calibre/default.nix
-      home/chromium/default.nix
       home/darktable/default.nix
-      home/firefox/default.nix
       home/fish/default.nix
       home/fontconfig/default.nix
       home/freecad/default.nix
       home/git/default.nix
       home/home-manager/default.nix
       home/kde-apps/default.nix
-      home/librewolf/default.nix
       home/mpv/default.nix
       home/nixvim/default.nix
       home/obsidian/default.nix
