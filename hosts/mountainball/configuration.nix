@@ -17,6 +17,7 @@
   networking.hostName = "mountainball";
   networking.firewall.allowedTCPPorts = [ 22 ];
   system.stateVersion = "23.11";
+  services.fprintd.enable = false;
 
   # system modules
   mine.bluetooth.enable = true;
@@ -42,15 +43,16 @@
   mine.syncthing.enable = true;
   mine.tailscale.enable = true;
   mine.user.enable = true;
+  mine.v4l-utils.enable = true;
 
   # home modules
   mine.home.alacritty.enable = true;
   mine.home.atuin.enable = true;
   mine.home.awscli.enable = true;
   mine.home.betaflight-configurator.enable = true;
-  mine.home.bitwarden.enable = true;
+  #  mine.home.bitwarden.enable = true;
   mine.home.browsers.enable = true;
-  mine.home.calibre.enable = true;
+  #  mine.home.calibre.enable = true;
   mine.home.darktable.enable = true;
   mine.home.fish.enable = true;
   mine.home.fontconfig.enable = true;

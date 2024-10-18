@@ -65,6 +65,7 @@
       nixos/tailscale/default.nix
       nixos/thunderbay/default.nix
       nixos/user/default.nix
+      nixos/v4l-utils/default.nix
       nixos/zsh/default.nix
     ];
 }

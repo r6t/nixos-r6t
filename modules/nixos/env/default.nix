@@ -10,11 +10,12 @@
       # System packages
       environment.systemPackages = with pkgs; [
          arion
-			   bat
+         bat
          curl
          cryptsetup
          dig
          fd
+         ffmpeg
          git
          git-remote-codecommit
          home-manager

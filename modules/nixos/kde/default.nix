@@ -1,4 +1,4 @@
-{ lib, config, pkgs, inputs, ... }: { 
+{ lib, config, pkgs, ... }: { 
 
     options = {
       mine.kde.enable =
@@ -12,6 +12,7 @@
         glxinfo
         vulkan-tools
         wayland-utils
+        wl-clipboard
       ];
       programs.dconf.enable = true;
       services.desktopManager.plasma6.enable = true;
