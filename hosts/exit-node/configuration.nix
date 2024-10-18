@@ -1,6 +1,5 @@
 {
   inputs,
-  pkgs,
   ...
 }:
 
@@ -14,19 +13,16 @@
 
   # system details
   networking.hostName = "exit-node";
-  networking.firewall.allowedUDPPorts = [ 
-    ];
   networking = {
     enableIPv6 = true;
   };
 
- # boot.kernel.sysctl = {
- #   "net.ipv4.ip_forward" = true;
- #   "net.ipv6.conf.all.forwarding" = true;
- # };
+  boot.kernel.sysctl = {
+    "net.ipv4.ip_forward" = true;
+    "net.ipv6.conf.all.forwarding" = true;
+  };
 
   system.stateVersion = "23.11";
-  
 
   # system modules
   mine.bolt.enable = true;
