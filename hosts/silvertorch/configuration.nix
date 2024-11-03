@@ -57,7 +57,6 @@
   mine.home.kde-apps.enable = true;
   mine.home.nixvim.enable = true;
   mine.home.python3.enable = true;
-  mine.home.remmina.enable = true;
   mine.home.ssh.enable = true;
   mine.home.vlc.enable = true;
   mine.home.vscodium.enable = true;

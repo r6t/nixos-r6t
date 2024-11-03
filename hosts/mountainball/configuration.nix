@@ -44,6 +44,7 @@
   mine.tailscale.enable = true;
   mine.user.enable = true;
   mine.v4l-utils.enable = true;
+  mine.zola.enable = true;
 
   # home modules
   mine.home.alacritty.enable = true;
