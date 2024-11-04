@@ -30,6 +30,10 @@
 	  workspace.colorScheme = "BreezeDark";
 	  enable = true;
 	  overrideConfig = true;
+	  kscreenlocker = {
+	    timeout = 120; # minutes
+	    
+          };
 	  panels = [
     	    {
     	      location = "bottom";
