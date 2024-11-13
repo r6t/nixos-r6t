@@ -10,6 +10,7 @@
       home/browsers/default.nix
       home/calibre/default.nix
       home/darktable/default.nix
+      home/drawio/default.nix
       home/fish/default.nix
       home/fontconfig/default.nix
       home/freecad/default.nix
@@ -20,7 +21,8 @@
       home/nixvim/default.nix
       home/obsidian/default.nix
       home/obs-studio/default.nix
-      home/protonmail-bridge/default.nix
+    #  home/protonmail-bridge/default.nix
+    #  home/protonmail-desktop/default.nix
       home/python3/default.nix
       home/signal-desktop/default.nix
       home/ssh/default.nix
@@ -29,6 +31,7 @@
       home/libvirtd/default.nix
       home/virt-viewer/default.nix
       home/vscodium/default.nix
+    # home/web-apps/default.nix
       home/webcord/default.nix
       home/yt-dlp/default.nix
       home/zellij/default.nix
