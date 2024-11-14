@@ -39,6 +39,7 @@
       nixos/bridge/default.nix
       nixos/docker/default.nix
       nixos/env/default.nix
+      nixos/exit-node-routing/default.nix
       nixos/flatpak/default.nix
       nixos/fonts/default.nix
       nixos/fzf/default.nix

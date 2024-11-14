@@ -19,6 +19,7 @@
          git
          git-remote-codecommit
          home-manager
+         inetutils
          lshw
          neovim
          netcat
