@@ -30,6 +30,10 @@
 	  workspace.colorScheme = "BreezeDark";
 	  enable = true;
 	  overrideConfig = true;
+	  kscreenlocker = {
+	    timeout = 120; # minutes
+	    
+          };
 	  panels = [
     	    {
     	      location = "bottom";
@@ -52,6 +56,11 @@
     	              "applications:firefox.desktop"
     	              "applications:super-productivity.desktop"
     	              "applications:io.github.dweymouth.supersonic.desktop"
+    	              "applications:com.obsproject.Studio.desktop"
+    	              "applications:obsidian.desktop"
+    	              "applications:thunderbird.desktop"
+    	              "applications:signal-desktop.desktop"
+    	              "applications:webcord.desktop"
     	            ];
     	          };
     	        }

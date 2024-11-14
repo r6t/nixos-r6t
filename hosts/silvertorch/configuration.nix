@@ -44,23 +44,21 @@
   mine.syncthing.enable = true;
   mine.tailscale.enable = true;
   mine.user.enable = true;
-  mine.zsh.enable = true;
 
   # home modules
   mine.home.alacritty.enable = true;
   mine.home.awscli.enable = true;
   mine.home.bitwarden.enable = true;
   mine.home.browsers.enable = true;
+  mine.home.fish.enable = true;
   mine.home.fontconfig.enable = true;
   mine.home.git.enable = true;
   mine.home.home-manager.enable = true;
   mine.home.kde-apps.enable = true;
   mine.home.nixvim.enable = true;
   mine.home.python3.enable = true;
-  mine.home.remmina.enable = true;
   mine.home.ssh.enable = true;
   mine.home.vlc.enable = true;
   mine.home.vscodium.enable = true;
   mine.home.yt-dlp.enable = true;
-  mine.home.zsh.enable = true;
 }
