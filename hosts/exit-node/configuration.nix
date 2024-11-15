@@ -39,7 +39,6 @@
   mine.syncthing.enable = true;
   mine.tailscale.enable = true;
   mine.user.enable = true;
-  mine.zsh.enable = true;
 
   # home modules
   mine.home.awscli.enable = true;
