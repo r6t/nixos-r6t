@@ -19,6 +19,27 @@
         };
         # Nicely reload system units when changing configs
         systemd.user.startServices = "sd-switch";
+        xdg = {
+          desktopEntries = {
+	    focus-at-will = {
+              name = "FocusAtWill web";
+	      exec = "firefox https://focusatwill.com";
+	      terminal = false;
+	      icon = "internet-radio";
+	      type = "Application";
+	      categories = [ "Audio" "Music" ];
+	    };
+	    proton-mail = {
+              name = "Protonmail web";
+	      exec = "firefox https://mail.proton.me";
+	      terminal = false;
+	      icon = "internet-mail";
+	      type = "Application";
+	      categories = [ "Network" "Email" ];
+	      mimeType = [ "x-scheme-handler/mailto" ];
+	    };
+	  };
+        };
       };
     };
 }

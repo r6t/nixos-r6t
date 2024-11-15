@@ -17,18 +17,16 @@
     enableIPv6 = true;
   };
 
-  boot.kernel.sysctl = {
-    "net.ipv4.ip_forward" = true;
-    "net.ipv6.conf.all.forwarding" = true;
-  };
-
   system.stateVersion = "23.11";
 
   # system modules
   mine.bolt.enable = true;
   mine.bootloader.enable = true;
+  mine.docker.enable = false;
   mine.env.enable = true;
+  mine.exit-node-routing.enable = true;
   mine.fwupd.enable = true;
+  mine.fzf.enable = true;
   mine.localization.enable = true;
   mine.netdata.enable = true;
   mine.networkmanager.enable = true;

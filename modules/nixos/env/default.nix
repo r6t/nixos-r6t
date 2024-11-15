@@ -11,14 +11,16 @@
       environment.systemPackages = with pkgs; [
          arion
          bat
-         curl
          cryptsetup
+         curl
          dig
          fd
          ffmpeg
          git
          git-remote-codecommit
+         gnumake
          home-manager
+         inetutils
          lshw
          neovim
          netcat
@@ -29,10 +31,11 @@
          ripgrep
          sops
          tmux
+         tree
          unzip
          usbutils
          wget
-         tree
+         zip 
       ];
     };
 }
