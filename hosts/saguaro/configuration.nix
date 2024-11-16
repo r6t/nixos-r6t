@@ -1,9 +1,5 @@
 {
   inputs,
-  lib,
-  config,
-  pkgs,
-  outputs,
   ...
 }:
 
@@ -61,7 +57,10 @@
   mine.nix.enable = true;
   mine.nixpkgs.enable = true;
   mine.nvidia.enable = true;
+  mine.ollama.enable = true;
+  mine.open-webui.enable = true;
   mine.selfhost.enable = false;
+  # fix sops
   mine.ssh.enable = true;
   mine.syncthing.enable = true;
   mine.tailscale.enable = true;
@@ -73,5 +72,7 @@
   mine.home.fish.enable = true;
   mine.home.git.enable = true;
   mine.home.home-manager.enable = true;
+  mine.home.nixvim.enable = true;
   mine.home.python3.enable = true;
+  mine.home.yt-dlp.enable = true;
 }
