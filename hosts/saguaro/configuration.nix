@@ -66,12 +66,11 @@
   mine.tailscale.enable = true;
   mine.thunderbay.enable = false;
   mine.user.enable = true;
-  mine.zsh.enable = true;
 
   # home modules
   mine.home.awscli.enable = true;
+  mine.home.fish.enable = true;
   mine.home.git.enable = true;
   mine.home.home-manager.enable = true;
   mine.home.python3.enable = true;
-  mine.home.zsh.enable = true;
 }
