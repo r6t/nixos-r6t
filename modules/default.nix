@@ -17,6 +17,7 @@
       home/git/default.nix
       home/home-manager/default.nix
       home/kde-apps/default.nix
+      home/libreoffice/default.nix
       home/mpv/default.nix
       home/nixvim/default.nix
       home/obsidian/default.nix
@@ -62,7 +63,7 @@
       nixos/podman/default.nix
       nixos/printing/default.nix
       nixos/selfhost/default.nix
-#      nixos/sops/default.nix
+      nixos/sops/default.nix
       nixos/sound/default.nix
       nixos/ssh/default.nix
       nixos/syncthing/default.nix

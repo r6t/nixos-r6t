@@ -53,7 +53,7 @@
   mine.home.betaflight-configurator.enable = true;
   mine.home.bitwarden.enable = true;
   mine.home.browsers.enable = true;
-  mine.home.calibre.enable = true;
+  mine.home.calibre.enable = false;
   mine.home.darktable.enable = true;
   mine.home.drawio.enable = true;
   mine.home.fish.enable = true;
@@ -62,6 +62,7 @@
   mine.home.git.enable = true;
   mine.home.home-manager.enable = true;
   mine.home.kde-apps.enable = true;
+  mine.home.libreoffice.enable = true;
   mine.home.mpv.enable = true;
   mine.home.nixvim.enable = true;
   mine.home.obsidian.enable = true;
