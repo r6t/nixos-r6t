@@ -23,7 +23,7 @@
       home/obsidian/default.nix
       home/obs-studio/default.nix
     #  home/protonmail-bridge/default.nix
-    #  home/protonmail-desktop/default.nix
+      home/protonmail-desktop/default.nix
       home/python3/default.nix
       home/signal-desktop/default.nix
       home/ssh/default.nix

@@ -18,6 +18,7 @@
           kdePackages.elisa # KDE music player
           kdePackages.filelight # KDE disk utilization visualizer
           kdePackages.gwenview # KDE image viewer
+	  kdePackages.kalk # KDE Calculator, Kcalc alternative
           kdePackages.kdeconnect-kde # KDE Connect phone pairing
           kdePackages.kdialog # KDE app support
           kdePackages.kio-extras # KDE support
@@ -58,7 +59,7 @@
     	              "applications:io.github.dweymouth.supersonic.desktop"
     	              "applications:com.obsproject.Studio.desktop"
     	              "applications:obsidian.desktop"
-    	              "applications:thunderbird.desktop"
+    	              "applications:me.proton.Mail.desktop"
     	              "applications:signal-desktop.desktop"
     	              "applications:webcord.desktop"
     	            ];

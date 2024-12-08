@@ -62,11 +62,12 @@
   mine.home.git.enable = true;
   mine.home.home-manager.enable = true;
   mine.home.kde-apps.enable = true;
-  mine.home.libreoffice.enable = true;
+  # mine.home.libreoffice.enable = true;
   mine.home.mpv.enable = true;
   mine.home.nixvim.enable = true;
   mine.home.obsidian.enable = true;
   mine.home.obs-studio.enable = true;
+  # mine.home.protonmail-desktop.enable = true;
   mine.home.python3.enable = true;
   mine.home.signal-desktop.enable = true;
   mine.home.ssh.enable = true;
