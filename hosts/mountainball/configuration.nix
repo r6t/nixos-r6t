@@ -14,10 +14,27 @@
 
   # system details
   boot.initrd.luks.devices."luks-9fc9c182-0bad-474f-a9bb-ee2e6aa1be50".device = "/dev/disk/by-uuid/9fc9c182-0bad-474f-a9bb-ee2e6aa1be50";
-  networking.hostName = "mountainball";
-  networking.firewall.allowedTCPPorts = [ 22 ];
+  networking = {
+    firewall.allowedTCPPorts = [ 22 ];
+    hostName = "mountainball";
+    networkmanager.ensureProfiles = {
+      profiles = {
+        "Thunderbolt-Network" = {
+          connection = {
+            id = "Thunderbolt Network";
+            type = "ethernet";
+            interface-name = "enp100s0";
+          };
+          ethernet.mtu = 9000;
+          ipv4.method = "auto";
+          ipv6.method = "auto";
+        };
+      };
+    };
+  };
   system.stateVersion = "23.11";
   services.fprintd.enable = false;
+
 
   # system modules
   mine.bluetooth.enable = true;
@@ -30,6 +47,7 @@
   mine.fonts.enable = true;
   mine.fwupd.enable = true;
   mine.fzf.enable = true;
+  mine.iperf.enable = true;
   mine.kde.enable = true;
   mine.localization.enable = true;
   mine.mullvad.enable = true;
@@ -46,6 +64,7 @@
   mine.tailscale.enable = true;
   mine.user.enable = true;
   mine.v4l-utils.enable = true;
+  mine.zola.enable = true;
 
   # home modules
   mine.home.alacritty.enable = true;
@@ -75,5 +94,4 @@
   mine.home.webcord.enable = true;
   mine.home.yt-dlp.enable = true;
   mine.home.zellij.enable = true;
-  mine.home.zola.enable = true;
 }

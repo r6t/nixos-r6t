@@ -22,7 +22,6 @@
       home/nixvim/default.nix
       home/obsidian/default.nix
       home/obs-studio/default.nix
-    #  home/protonmail-bridge/default.nix
       home/protonmail-desktop/default.nix
       home/python3/default.nix
       home/signal-desktop/default.nix
@@ -32,7 +31,6 @@
       home/libvirtd/default.nix
       home/virt-viewer/default.nix
       home/vscodium/default.nix
-    # home/web-apps/default.nix
       home/webcord/default.nix
       home/yt-dlp/default.nix
       home/zellij/default.nix
@@ -51,6 +49,7 @@
       nixos/fzf/default.nix
       nixos/fwupd/default.nix
       nixos/immich/default.nix
+      nixos/iperf/default.nix
       nixos/kde/default.nix
       nixos/libvirtd/default.nix
       nixos/localization/default.nix
@@ -75,5 +74,6 @@
       nixos/user/default.nix
       nixos/v4l-utils/default.nix
       nixos/zsh/default.nix
+      nixos/zola/default.nix
     ];
 }
