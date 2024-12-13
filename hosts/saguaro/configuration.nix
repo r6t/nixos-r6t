@@ -51,20 +51,21 @@
   mine.env.enable = true;
   mine.fwupd.enable = true;
   mine.fzf.enable = true;
+  # mine.immich.enable = true;
   mine.localization.enable = true;
   mine.netdata.enable = true;
   mine.networkmanager.enable = true;
   mine.nix.enable = true;
   mine.nixpkgs.enable = true;
   mine.nvidia.enable = true;
-  mine.ollama.enable = true;
+  #  mine.ollama.enable = true;
   mine.open-webui.enable = true;
   mine.selfhost.enable = false;
   # fix sops
   mine.ssh.enable = true;
   mine.syncthing.enable = true;
   mine.tailscale.enable = true;
-  mine.thunderbay.enable = false;
+  mine.thunderbay.enable = true;
   mine.user.enable = true;
 
   # home modules
