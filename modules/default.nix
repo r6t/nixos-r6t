@@ -36,11 +36,13 @@
       home/webcord/default.nix
       home/yt-dlp/default.nix
       home/zellij/default.nix
+      home/zola/default.nix
 
       nixos/bluetooth/default.nix
       nixos/bolt/default.nix
       nixos/bootloader/default.nix
       nixos/bridge/default.nix
+      nixos/czkawka/default.nix
       nixos/docker/default.nix
       nixos/env/default.nix
       nixos/exit-node-routing/default.nix
@@ -62,6 +64,7 @@
       nixos/open-webui/default.nix
       nixos/podman/default.nix
       nixos/printing/default.nix
+      nixos/rdfind/default.nix
       nixos/selfhost/default.nix
       nixos/sops/default.nix
       nixos/sound/default.nix
@@ -71,7 +74,6 @@
       nixos/thunderbay/default.nix
       nixos/user/default.nix
       nixos/v4l-utils/default.nix
-      nixos/zola/default.nix
       nixos/zsh/default.nix
     ];
 }

@@ -23,6 +23,7 @@
   mine.bluetooth.enable = true;
   mine.bolt.enable = true;
   mine.bootloader.enable = true;
+  mine.czkawka.enable = true;
   mine.docker.enable = true;
   mine.env.enable = true;
   mine.flatpak.enable = true;
@@ -37,6 +38,7 @@
   mine.nix.enable = true;
   mine.nixpkgs.enable = true;
   mine.printing.enable = true;
+  mine.rdfind.enable = true;
   mine.sops.enable = true;
   mine.sound.enable = true;
   mine.ssh.enable = true;
@@ -44,7 +46,6 @@
   mine.tailscale.enable = true;
   mine.user.enable = true;
   mine.v4l-utils.enable = true;
-  mine.zola.enable = true;
 
   # home modules
   mine.home.alacritty.enable = true;
@@ -53,7 +54,6 @@
   mine.home.betaflight-configurator.enable = true;
   mine.home.bitwarden.enable = true;
   mine.home.browsers.enable = true;
-  mine.home.calibre.enable = false;
   mine.home.darktable.enable = true;
   mine.home.drawio.enable = true;
   mine.home.fish.enable = true;
@@ -62,20 +62,18 @@
   mine.home.git.enable = true;
   mine.home.home-manager.enable = true;
   mine.home.kde-apps.enable = true;
-  # mine.home.libreoffice.enable = true;
   mine.home.mpv.enable = true;
   mine.home.nixvim.enable = true;
   mine.home.obsidian.enable = true;
   mine.home.obs-studio.enable = true;
-  # mine.home.protonmail-desktop.enable = true;
   mine.home.python3.enable = true;
   mine.home.signal-desktop.enable = true;
   mine.home.ssh.enable = true;
   mine.home.super-productivity.enable = true;
-  mine.home.thunderbird.enable = true;
   mine.home.virt-viewer.enable = true;
   mine.home.vscodium.enable = true;
   mine.home.webcord.enable = true;
   mine.home.yt-dlp.enable = true;
   mine.home.zellij.enable = true;
+  mine.home.zola.enable = true;
 }

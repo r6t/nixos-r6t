@@ -91,6 +91,10 @@
     	      hiding = "none";
     	    }
     	  ];
+          powerdevil = {
+            AC.powerProfile = "performance";
+            battery.powerProfile = "powerSaving";
+          };
 	  shortcuts = {
             "kmix"."decrease_microphone_volume" = "Microphone Volume Down";
             "kmix"."decrease_volume" = "Volume Down";
