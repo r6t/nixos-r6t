@@ -14,10 +14,10 @@
   networking.hostName = "saguaro";
   networking.firewall.allowedTCPPorts = [ 
     22
-    2283 # immich
     8096 # jellyfin
     8920 # jellyfin
     3000 # ollama-web
+    5201 # iperf
     8000 # paperless-ngx
     8080 # stirling-pdf
     8384 # syncthing
@@ -27,8 +27,6 @@
     8888
     9090
     9999
-    32400
-    32469
     7878
     8686
     8989
@@ -36,8 +34,6 @@
   networking.firewall.allowedUDPPorts = [ 
     1900 # jellyfin
     7359 # jellyfin
-    32400
-    32469
     5353
     ];
   system.stateVersion = "23.11";
@@ -51,7 +47,7 @@
   mine.env.enable = true;
   mine.fwupd.enable = true;
   mine.fzf.enable = true;
-  # mine.immich.enable = true;
+  mine.iperf.enable = true;
   mine.localization.enable = true;
   mine.netdata.enable = true;
   mine.networkmanager.enable = true;

@@ -14,21 +14,40 @@
 
   # system details
   boot.initrd.luks.devices."luks-9fc9c182-0bad-474f-a9bb-ee2e6aa1be50".device = "/dev/disk/by-uuid/9fc9c182-0bad-474f-a9bb-ee2e6aa1be50";
-  networking.hostName = "mountainball";
-  networking.firewall.allowedTCPPorts = [ 22 ];
+  networking = {
+    firewall.allowedTCPPorts = [ 22 ];
+    hostName = "mountainball";
+    networkmanager.ensureProfiles = {
+      profiles = {
+        "Thunderbolt-Network" = {
+          connection = {
+            id = "Thunderbolt Network";
+            type = "ethernet";
+            interface-name = "enp100s0";
+          };
+          ethernet.mtu = 9000;
+          ipv4.method = "auto";
+          ipv6.method = "auto";
+        };
+      };
+    };
+  };
   system.stateVersion = "23.11";
   services.fprintd.enable = false;
+
 
   # system modules
   mine.bluetooth.enable = true;
   mine.bolt.enable = true;
   mine.bootloader.enable = true;
+  mine.czkawka.enable = true;
   mine.docker.enable = true;
   mine.env.enable = true;
   mine.flatpak.enable = true;
   mine.fonts.enable = true;
   mine.fwupd.enable = true;
   mine.fzf.enable = true;
+  mine.iperf.enable = true;
   mine.kde.enable = true;
   mine.localization.enable = true;
   mine.mullvad.enable = true;
@@ -37,6 +56,7 @@
   mine.nix.enable = true;
   mine.nixpkgs.enable = true;
   mine.printing.enable = true;
+  mine.rdfind.enable = true;
   mine.sops.enable = true;
   mine.sound.enable = true;
   mine.ssh.enable = true;
@@ -53,7 +73,6 @@
   mine.home.betaflight-configurator.enable = true;
   mine.home.bitwarden.enable = true;
   mine.home.browsers.enable = true;
-  mine.home.calibre.enable = true;
   mine.home.darktable.enable = true;
   mine.home.drawio.enable = true;
   mine.home.fish.enable = true;
@@ -70,7 +89,6 @@
   mine.home.signal-desktop.enable = true;
   mine.home.ssh.enable = true;
   mine.home.super-productivity.enable = true;
-  mine.home.thunderbird.enable = true;
   mine.home.virt-viewer.enable = true;
   mine.home.vscodium.enable = true;
   mine.home.webcord.enable = true;

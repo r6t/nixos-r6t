@@ -12,7 +12,8 @@
           noto-fonts-emoji
           font-awesome
           hack-font
-          nerdfonts
+          nerd-fonts.hack
+          nerd-fonts.blex-mono
           source-sans-pro
         ];
       };
