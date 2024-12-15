@@ -1,4 +1,4 @@
-{ lib, config, ... }: { 
+{ lib, config, nix-flatpak, ... }: { 
 
     options = {
       mine.flatpak.enable =
@@ -7,14 +7,15 @@
 
     config = lib.mkIf config.mine.home.flatpak.enable { 
       home-manager.users.r6t = { 
+        imports = [ nix-flatpak.homeManagerModules.nix-flatpak ];
         home = {
           file.".profile".source = dotfiles/.profile;
         };
         sessionVariables = {
-				  GDK_SCALE= "2";
-				  # GDK_DPI_SCALE = "0.5";
+	  GDK_SCALE= "2";
           MOZ_ENABLE_WAYLAND = 1;
         };
+        services.flatpak.packages = [ "com.github.iwalton3.jellyfin-media-player" ];
 
       };
     };

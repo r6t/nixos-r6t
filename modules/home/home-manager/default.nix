@@ -29,15 +29,6 @@
 	      type = "Application";
 	      categories = [ "Audio" "Music" ];
 	    };
-	    proton-mail = {
-              name = "Protonmail web";
-	      exec = "firefox https://mail.proton.me";
-	      terminal = false;
-	      icon = "internet-mail";
-	      type = "Application";
-	      categories = [ "Network" "Email" ];
-	      mimeType = [ "x-scheme-handler/mailto" ];
-	    };
 	  };
         };
       };

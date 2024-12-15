@@ -67,13 +67,6 @@
         specialArgs = {inherit inputs outputs;};
         modules = [./hosts/saguaro/configuration.nix];
       };
-      # htpc
-      silvertorch = nixpkgs.lib.nixosSystem {
-        specialArgs = {inherit inputs outputs;};
-        modules = [
-          ./hosts/silvertorch/configuration.nix
-        ];
-      };
     };
   };
 }
