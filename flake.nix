@@ -11,15 +11,19 @@
 
     hardware.url = "github:nixos/nixos-hardware";
 
+    nix-flatpak = {
+      url = "github:gmodena/nix-flatpak";
+    };
+
     nixvim = {
-        url = "github:nix-community/nixvim";
-        inputs.nixpkgs.follows = "nixpkgs";
+      url = "github:nix-community/nixvim";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     plasma-manager = {
-        url = "github:nix-community/plasma-manager";
-        inputs.nixpkgs.follows = "nixpkgs";
-        inputs.home-manager.follows = "home-manager";
+      url = "github:nix-community/plasma-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.home-manager.follows = "home-manager";
     };
 
     sops-ryan = {
