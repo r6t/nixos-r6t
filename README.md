@@ -1,4 +1,3 @@
-# nixos-r6t
 [Flake](https://www.youtube.com/watch?v=JCeYq72Sko0) for managing personal [NixOS](https://nixos.org/) systems 💻
 
 #### Use:
