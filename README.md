@@ -11,6 +11,7 @@ Build the Nix flake and switch into the generated config for hostname:
 ├── hosts                   # System/host definitions
 ├── modules                 # Used by host definitions
 │   ├── default.nix         # Modules must be listed here
-│   ├── home                # User level modules, mostly uses home-manager
+│   ├── flatpak             # Flatpak modules
+│   ├── home                # User level home-manager modules
 │   └── nixos               # System level modules
 ```

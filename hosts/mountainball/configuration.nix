@@ -8,6 +8,7 @@
     inputs.home-manager.nixosModules.home-manager
     inputs.hardware.nixosModules.framework-13-7040-amd
     inputs.sops-nix.nixosModules.sops
+    inputs.nix-flatpak.nixosModules.nix-flatpak
     ./hardware-configuration.nix
     ../../modules/default.nix
   ];
@@ -35,6 +36,48 @@
   system.stateVersion = "23.11";
   services.fprintd.enable = false;
 
+  # flatpak modules
+  mine.flatpak.bottles.enable = true;
+  mine.flatpak.deezer.enable = true;
+  mine.flatpak.inkscape.enable = true;
+  mine.flatpak.jellyfin-player.enable = true;
+  mine.flatpak.picard.enable = true;
+  mine.flatpak.proton-mail.enable = true;
+  mine.flatpak.protonup-qt.enable = true;
+  mine.flatpak.remmina.enable = true;
+  mine.flatpak.retroarch.enable = true;
+  mine.flatpak.steam.enable = true;
+  mine.flatpak.supersonic.enable = true;
+  mine.flatpak.zoom.enable = true;
+
+  # home modules
+  mine.home.alacritty.enable = true;
+  mine.home.atuin.enable = true;
+  mine.home.awscli.enable = true;
+  mine.home.betaflight-configurator.enable = true;
+  mine.home.bitwarden.enable = true;
+  mine.home.browsers.enable = true;
+  mine.home.darktable.enable = true;
+  mine.home.drawio.enable = true;
+  mine.home.fish.enable = true;
+  mine.home.fontconfig.enable = true;
+  mine.home.freecad.enable = true;
+  mine.home.git.enable = true;
+  mine.home.home-manager.enable = true;
+  mine.home.kde-apps.enable = true;
+  mine.home.mpv.enable = true;
+  mine.home.nixvim.enable = true;
+  mine.home.obsidian.enable = true;
+  mine.home.obs-studio.enable = true;
+  mine.home.python3.enable = true;
+  mine.home.signal-desktop.enable = true;
+  mine.home.ssh.enable = true;
+  mine.home.super-productivity.enable = true;
+  mine.home.virt-viewer.enable = true;
+  mine.home.vscodium.enable = true;
+  mine.home.webcord.enable = true;
+  mine.home.yt-dlp.enable = true;
+  mine.home.zellij.enable = true;
 
   # system modules
   mine.bluetooth.enable = true;
@@ -65,33 +108,4 @@
   mine.user.enable = true;
   mine.v4l-utils.enable = true;
   mine.zola.enable = true;
-
-  # home modules
-  mine.home.alacritty.enable = true;
-  mine.home.atuin.enable = true;
-  mine.home.awscli.enable = true;
-  mine.home.betaflight-configurator.enable = true;
-  mine.home.bitwarden.enable = true;
-  mine.home.browsers.enable = true;
-  mine.home.darktable.enable = true;
-  mine.home.drawio.enable = true;
-  mine.home.fish.enable = true;
-  mine.home.fontconfig.enable = true;
-  mine.home.freecad.enable = true;
-  mine.home.git.enable = true;
-  mine.home.home-manager.enable = true;
-  mine.home.kde-apps.enable = true;
-  mine.home.mpv.enable = true;
-  mine.home.nixvim.enable = true;
-  mine.home.obsidian.enable = true;
-  mine.home.obs-studio.enable = true;
-  mine.home.python3.enable = true;
-  mine.home.signal-desktop.enable = true;
-  mine.home.ssh.enable = true;
-  mine.home.super-productivity.enable = true;
-  mine.home.virt-viewer.enable = true;
-  mine.home.vscodium.enable = true;
-  mine.home.webcord.enable = true;
-  mine.home.yt-dlp.enable = true;
-  mine.home.zellij.enable = true;
 }

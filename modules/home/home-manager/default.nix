@@ -10,6 +10,7 @@
       home-manager.sharedModules = [
         inputs.nixvim.homeManagerModules.nixvim
         inputs.plasma-manager.homeManagerModules.plasma-manager
+        inputs.nix-flatpak.homeManagerModules.nix-flatpak
       ];
       home-manager.users.r6t = {
         home = {
