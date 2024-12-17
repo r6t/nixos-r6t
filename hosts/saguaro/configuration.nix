@@ -6,6 +6,7 @@
  {
   imports = [
     inputs.home-manager.nixosModules.home-manager
+    inputs.sops-nix.nixosModules.sops
     ./hardware-configuration.nix
     ../../modules/default.nix
   ];
@@ -57,7 +58,7 @@
   #  mine.ollama.enable = true;
   mine.open-webui.enable = true;
   mine.selfhost.enable = false;
-  # fix sops
+  mine.sops.enable = true;
   mine.ssh.enable = true;
   mine.syncthing.enable = true;
   mine.tailscale.enable = true;
