@@ -73,6 +73,7 @@
       nixos/nvidia/default.nix
       nixos/ollama/default.nix
       nixos/open-webui/default.nix
+      nixos/paperless/default.nix
       nixos/podman/default.nix
       nixos/printing/default.nix
       nixos/rdfind/default.nix

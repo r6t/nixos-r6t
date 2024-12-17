@@ -56,6 +56,7 @@
   mine.nvidia.enable = true;
   mine.ollama.enable = false;
   mine.open-webui.enable = true;
+  mine.paperless.enable = true;
   mine.selfhost.enable = false;
   mine.sops.enable = true;
   mine.ssh.enable = true;
