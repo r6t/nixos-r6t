@@ -6,6 +6,7 @@
  {
   imports = [
     inputs.home-manager.nixosModules.home-manager
+    inputs.nix-flatpak.nixosModules.nix-flatpak
     inputs.sops-nix.nixosModules.sops
     ./hardware-configuration.nix
     ../../modules/default.nix

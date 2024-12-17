@@ -86,7 +86,6 @@
   mine.czkawka.enable = true;
   mine.docker.enable = true;
   mine.env.enable = true;
-  mine.flatpak.enable = true;
   mine.fonts.enable = true;
   mine.fwupd.enable = true;
   mine.fzf.enable = true;
