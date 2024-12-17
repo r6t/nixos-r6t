@@ -10,6 +10,7 @@
       home-manager.sharedModules = [
         inputs.nixvim.homeManagerModules.nixvim
         inputs.plasma-manager.homeManagerModules.plasma-manager
+        inputs.nix-flatpak.homeManagerModules.nix-flatpak
       ];
       home-manager.users.r6t = {
         home = {
@@ -28,15 +29,6 @@
 	      icon = "internet-radio";
 	      type = "Application";
 	      categories = [ "Audio" "Music" ];
-	    };
-	    proton-mail = {
-              name = "Protonmail web";
-	      exec = "firefox https://mail.proton.me";
-	      terminal = false;
-	      icon = "internet-mail";
-	      type = "Application";
-	      categories = [ "Network" "Email" ];
-	      mimeType = [ "x-scheme-handler/mailto" ];
 	    };
 	  };
         };
