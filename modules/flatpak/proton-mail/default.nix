@@ -6,6 +6,7 @@
     };
 
     config = lib.mkIf config.mine.flatpak.proton-mail.enable { 
+      services.flatpak.enable = true;
       services.flatpak.packages = [
         { appId = "me.proton.Mail"; origin = "flathub";  }
       ];

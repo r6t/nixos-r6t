@@ -6,6 +6,7 @@
     };
 
     config = lib.mkIf config.mine.flatpak.supersonic.enable { 
+      services.flatpak.enable = true;
       services.flatpak.packages = [
         { appId = "io.github.dweymouth.supersonic"; origin = "flathub";  }
       ];

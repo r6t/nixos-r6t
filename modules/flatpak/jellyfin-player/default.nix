@@ -6,6 +6,7 @@
     };
 
     config = lib.mkIf config.mine.flatpak.jellyfin-player.enable { 
+      services.flatpak.enable = true;
       services.flatpak.packages = [
         { appId = "com.github.iwalton3.jellyfin-media-player"; origin = "flathub";  }
       ];

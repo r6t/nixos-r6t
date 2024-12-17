@@ -6,6 +6,7 @@
  {
   imports = [
     inputs.home-manager.nixosModules.home-manager
+    inputs.nix-flatpak.nixosModules.nix-flatpak
     inputs.sops-nix.nixosModules.sops
     ./hardware-configuration.nix
     ../../modules/default.nix
@@ -17,9 +18,7 @@
     22
     8096 # jellyfin
     8920 # jellyfin
-    3000 # ollama-web
     5201 # iperf
-    8000 # paperless-ngx
     8080 # stirling-pdf
     8384 # syncthing
     19999 # netdata
@@ -55,7 +54,7 @@
   mine.nix.enable = true;
   mine.nixpkgs.enable = true;
   mine.nvidia.enable = true;
-  #  mine.ollama.enable = true;
+  mine.ollama.enable = false;
   mine.open-webui.enable = true;
   mine.selfhost.enable = false;
   mine.sops.enable = true;

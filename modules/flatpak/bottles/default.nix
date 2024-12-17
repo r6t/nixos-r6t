@@ -6,6 +6,7 @@
     };
 
     config = lib.mkIf config.mine.flatpak.bottles.enable { 
+      services.flatpak.enable = true;
       services.flatpak.packages = [
         { appId = "com.usebottles.bottles"; origin = "flathub";  }
       ];

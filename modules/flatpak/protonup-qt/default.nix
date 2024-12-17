@@ -6,6 +6,7 @@
     };
 
     config = lib.mkIf config.mine.flatpak.protonup-qt.enable { 
+      services.flatpak.enable = true;
       services.flatpak.packages = [
         { appId = "net.davidotek.pupgui2"; origin = "flathub";  }
       ];

@@ -6,6 +6,7 @@
     };
 
     config = lib.mkIf config.mine.flatpak.deezer.enable { 
+      services.flatpak.enable = true;
       services.flatpak.packages = [
         { appId = "dev.aunetx.deezer"; origin = "flathub";  }
       ];

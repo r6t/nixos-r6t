@@ -6,6 +6,7 @@
     };
 
     config = lib.mkIf config.mine.flatpak.steam.enable { 
+      services.flatpak.enable = true;
       services.flatpak.packages = [
         { appId = "com.valvesoftware.Steam"; origin = "flathub";  }
       ];
