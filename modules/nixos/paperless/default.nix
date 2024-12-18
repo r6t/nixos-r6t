@@ -11,20 +11,12 @@
       services.postgresql = {
         enable = true;
         package = pkgs.postgresql_14;
-        dataDir = "/var/lib/postgresql/paperless";
+        dataDir = "/mnt/thunderbay/2TB-E/data/paperless";
         authentication = pkgs.lib.mkOverride 10 ''
           # TYPE  DATABASE        USER            ADDRESS                 METHOD
           local   all             all                                     trust
           host    all             all             127.0.0.1/32            trust
           host    all             all             ::1/128                 trust
-          host    all             all             192.168.6.0/24          trust
-          host    all             all             172.17.0.0/16           trust
-          host    all             all             172.18.0.0/16           trust
-          host    all             all             172.19.0.0/16           trust
-          host    all             all             172.20.0.0/16           trust
-          host    all             all             172.21.0.0/16           trust
-          host    all             all             172.22.0.0/16           trust
-          host    all             all             172.23.0.0/16           trust
           host    all             all             100.64.0.0/10           trust
         '';
         initialScript = pkgs.writeText "paperless-init.sql" ''
@@ -38,12 +30,12 @@
       services.paperless = {
         enable = true;
         address = "0.0.0.0";
-        dataDir = "/var/lib/paperless/data";
-        consumptionDir = "/var/lib/paperless/consume";
-        mediaDir = "/var/lib/paperless/media";
+        dataDir = "/mnt/thunderbay/2TB-E/app-storage/paperless/data";
+        consumptionDir = "/mnt/thunderbay/2TB-E/app-storage/paperless/consume";
+        mediaDir = "/mnt/thunderbay/2TB-E/app-storage/paperless/media";
         passwordFile = "/plcred";
         settings = {
-          PAPERLESS_ALLOWED_HOSTS = "100.64.0.5,fd7a:115c:a1e0::5,saguaro,saguaro.magic.internal";
+          PAPERLESS_ALLOWED_HOSTS = "saguaro,saguaro.magic.internal";
           PAPERLESS_DBHOST = "/var/run/postgresql";
           PAPERLESS_DBNAME = "paperless";
           PAPERLESS_DBUSER = "paperless";
@@ -55,12 +47,13 @@
 
       # Activation scripts to set storage permissions
       system.activationScripts = {
-        createPostgresDir = ''
-          mkdir -p /var/lib/postgresql/paperless
-          chown -R postgres:postgres /var/lib/postgresql/paperless
+        postgresPermission = ''
+          chown -R postgres:postgres /mnt/thunderbay/2TB-E/data/paperless
+        '';
+        immichPermission = ''
+          chown -R paperless:paperless /mnt/thunderbay/2TB-E/app-storage/paperless
         '';
       };
-
 
       # Service launch sequence including dependency on storage availability (thunderbay)
       systemd.services.postgresql = {
@@ -77,6 +70,5 @@
 
       # Open firewall
       networking.firewall.allowedTCPPorts = [ 28981 ];
-
     };
 }

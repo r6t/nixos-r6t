@@ -12,6 +12,15 @@
       ];
     };
 
+    # Ensure mount directories exist
+    system.activationScripts.createThunderbayDirs = ''
+      mkdir -p /mnt/thunderbay/8TB-A
+      mkdir -p /mnt/thunderbay/4TB-B
+      mkdir -p /mnt/thunderbay/8TB-C
+      mkdir -p /mnt/thunderbay/8TB-D
+      mkdir -p /mnt/thunderbay/2TB-E
+    '';
+
     systemd.services.thunderbay = {
       enable = true;
       wantedBy = [ "multi-user.target" ];
@@ -38,19 +47,19 @@
         ];
         ExecStart = [
           ""
-          "${pkgs.utillinux}/bin/mount /dev/mapper/8TB-A1 /home/r6t/external-ssd/8TB-A"
-          "${pkgs.utillinux}/bin/mount /dev/mapper/4TB-B1 /home/r6t/external-ssd/4TB-B"
-          "${pkgs.utillinux}/bin/mount /dev/mapper/8TB-C1 /home/r6t/external-ssd/8TB-C"
-          "${pkgs.utillinux}/bin/mount /dev/mapper/8TB-D1 /home/r6t/external-ssd/8TB-D"
-          "${pkgs.utillinux}/bin/mount /dev/mapper/2TB-E1 /home/r6t/external-ssd/2TB-E"
+          "${pkgs.utillinux}/bin/mount /dev/mapper/8TB-A1 /mnt/thunderbay/8TB-A"
+          "${pkgs.utillinux}/bin/mount /dev/mapper/4TB-B1 /mnt/thunderbay/4TB-B"
+          "${pkgs.utillinux}/bin/mount /dev/mapper/8TB-C1 /mnt/thunderbay/8TB-C"
+          "${pkgs.utillinux}/bin/mount /dev/mapper/8TB-D1 /mnt/thunderbay/8TB-D"
+          "${pkgs.utillinux}/bin/mount /dev/mapper/2TB-E1 /mnt/thunderbay/2TB-E"
         ];
         ExecStopPost = [
           ""
-          "${pkgs.utillinux}/bin/umount /home/r6t/external-ssd/2TB-E"
-          "${pkgs.utillinux}/bin/umount /home/r6t/external-ssd/4TB-B"
-          "${pkgs.utillinux}/bin/umount /home/r6t/external-ssd/8TB-A"
-          "${pkgs.utillinux}/bin/umount /home/r6t/external-ssd/8TB-C"
-          "${pkgs.utillinux}/bin/umount /home/r6t/external-ssd/8TB-D"
+          "${pkgs.utillinux}/bin/umount /mnt/thunderbay/2TB-E"
+          "${pkgs.utillinux}/bin/umount /mnt/thunderbay/4TB-B"
+          "${pkgs.utillinux}/bin/umount /mnt/thunderbay/8TB-A"
+          "${pkgs.utillinux}/bin/umount /mnt/thunderbay/8TB-C"
+          "${pkgs.utillinux}/bin/umount /mnt/thunderbay/8TB-D"
           "${pkgs.cryptsetup}/sbin/cryptsetup luksClose 2TB-E1"
           "${pkgs.cryptsetup}/sbin/cryptsetup luksClose 4TB-B1"
           "${pkgs.cryptsetup}/sbin/cryptsetup luksClose 8TB-A1"

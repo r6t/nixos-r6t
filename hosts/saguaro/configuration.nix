@@ -47,6 +47,7 @@
   mine.env.enable = true;
   mine.fwupd.enable = true;
   mine.fzf.enable = true;
+  mine.immich.enable = true;
   mine.iperf.enable = true;
   mine.localization.enable = true;
   mine.netdata.enable = true;
