@@ -1,4 +1,4 @@
-{ lib, config, ... }: {
+{ lib, config, userConfig, ... }: {
 
   options = {
     mine.home.zellij.enable =
@@ -6,7 +6,7 @@
   };
 
   config = lib.mkIf config.mine.home.zellij.enable {
-    home-manager.users.r6t.programs.zellij = {
+    home-manager.users.${userConfig.username}.programs.zellij = {
       enable = true;
       enableFishIntegration = true;
       settings = {

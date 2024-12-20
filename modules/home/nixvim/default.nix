@@ -1,4 +1,4 @@
-{ lib, config, pkgs, ... }: { 
+{ lib, config, pkgs, userConfig, ... }: { 
 
     imports = [
       ./codecompanion.nix
@@ -10,7 +10,7 @@
     };
 
     config = lib.mkIf config.mine.home.nixvim.enable { 
-      home-manager.users.r6t.programs.nixvim = {
+      home-manager.users.${userConfig.username}.programs.nixvim = {
         defaultEditor = true;
         enable = true;
         extraPlugins = [ pkgs.vimPlugins.oxocarbon-nvim ];

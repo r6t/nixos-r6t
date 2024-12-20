@@ -1,4 +1,4 @@
-{ lib, config, ... }: { 
+{ lib, config, userConfig, ... }: { 
 
     options = {
       mine.home.ssh.enable =
@@ -6,12 +6,12 @@
     };
 
     config = lib.mkIf config.mine.home.ssh.enable { 
-      home-manager.users.r6t.programs.ssh = {
+      home-manager.users.${userConfig.username}.programs.ssh = {
         enable = true;
           matchBlocks = {
             "git-codecommit.*.amazonaws.com" = {
               user = "APKAYS2NW3CVZZ7ZOA5Y";
-              identityFile = "/home/r6t/.ssh/misc-keys/cc_ryan_codecommit_rsa";
+              identityFile = "/home/${userConfig.username}/.ssh/misc-keys/cc_ryan_codecommit_rsa";
             };
           };
       };

@@ -1,4 +1,4 @@
-{ lib, config, pkgs, ... }: { 
+{ lib, config, pkgs, userConfig, ... }: { 
 
     options = {
       mine.home.awscli.enable =
@@ -6,9 +6,9 @@
     };
 
     config = lib.mkIf config.mine.home.awscli.enable { 
-      home-manager.users.r6t.home.packages = with pkgs; [
-			  awscli2
-			  ssm-session-manager-plugin
-			];
+      home-manager.users.${userConfig.username}.home.packages = with pkgs; [
+	  awscli2
+	  ssm-session-manager-plugin
+	];
     };
 }

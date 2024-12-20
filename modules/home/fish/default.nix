@@ -1,4 +1,4 @@
-{ lib, config, pkgs, ... }: { 
+{ lib, config, pkgs, userConfig, ... }: { 
 
     options = {
       mine.home.fish.enable =
@@ -13,7 +13,7 @@
       ];
       programs.fish.enable = true;
 
-      home-manager.users.r6t.programs.fish = {
+      home-manager.users.${userConfig.username}.programs.fish = {
         enable = true;
         shellAliases = {
 	  "nvf" = "nvim $(fzf -m --preview='bat --color=always {}')";

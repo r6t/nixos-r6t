@@ -1,4 +1,4 @@
-{ lib, config, pkgs, ... }: { 
+{ lib, config, userConfig, ... }: { 
 
     options = {
       mine.home.alacritty.enable =
@@ -6,7 +6,7 @@
     };
 
     config = lib.mkIf config.mine.home.alacritty.enable { 
-      home-manager.users.r6t.programs.alacritty = {
+      home-manager.users.${userConfig.username}.programs.alacritty = {
         enable = true;
         settings = {
 	       colors = {

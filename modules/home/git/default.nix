@@ -1,4 +1,4 @@
-{ lib, config, ... }: { 
+{ lib, config, userConfig, ... }: { 
 
     options = {
       mine.home.git.enable =
@@ -6,7 +6,7 @@
     };
 
     config = lib.mkIf config.mine.home.git.enable { 
-      home-manager.users.r6t.programs.git = {
+      home-manager.users.${userConfig.username}.programs.git = {
         enable = true;
         userName = "r6t";
         userEmail = "git@r6t.io";

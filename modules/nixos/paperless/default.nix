@@ -1,4 +1,4 @@
-{ lib, config, pkgs, ... }: { 
+{ lib, config, pkgs, userConfig, ... }: { 
 
     options = {
       mine.paperless.enable =
@@ -66,7 +66,7 @@
 
       # Add me to paperless group
       # TODO: make the user dynamic
-      users.users.r6t.extraGroups = [ "paperless" ];
+      users.users.${userConfig.username}.extraGroups = [ "paperless" ];
 
       # Open firewall
       networking.firewall.allowedTCPPorts = [ 28981 ];

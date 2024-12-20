@@ -1,4 +1,4 @@
-{ lib, config, pkgs, ... }: { 
+{ lib, config, pkgs, userConfig, ... }: { 
 
     options = {
       mine.libvirtd.enable =
@@ -16,7 +16,7 @@
           # package = pkgs.qemu_kvm;
         };
       };
-      users.users.r6t.extraGroups = [ "libvirtd" ];
+      users.users.${userConfig.username}.extraGroups = [ "libvirtd" ];
       programs.virt-manager.enable = true;
   };
 }

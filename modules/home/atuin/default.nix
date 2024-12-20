@@ -1,4 +1,4 @@
-{ lib, config, ... }: { 
+{ lib, config, userConfig, ... }: { 
 
     options = {
       mine.home.atuin.enable =
@@ -6,7 +6,7 @@
     };
 
     config = lib.mkIf config.mine.home.atuin.enable { 
-      home-manager.users.r6t.programs.atuin = {
+      home-manager.users.${userConfig.username}.programs.atuin = {
         enable = true;
         enableFishIntegration = true;
         # settings = {};

@@ -1,5 +1,6 @@
 {
   inputs,
+  userConfig,
   ...
 }:
 
@@ -38,7 +39,7 @@
     ];
   system.stateVersion = "23.11";
   
-  users.users.r6t.linger = true;
+  users.users.${userConfig.username}.linger = true;
 
   # system modules
   mine.bolt.enable = true;

@@ -41,10 +41,13 @@
     };
   };
 
-  outputs = {self, nixpkgs, home-manager, ... } @inputs:
+  outputs = {self, nixpkgs, ... } @inputs:
   let
+    userConfig = {
+      username = "r6t";
+      homeDirectory = "/home/r6t";
+    };
     inherit (self) outputs;
-    userConfig = import ./user-config.nix;
   in {
     # NixOS configuration entrypoint
     # Available through 'nixos-rebuild --flake .#your-hostname'

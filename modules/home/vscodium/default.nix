@@ -1,4 +1,4 @@
-{ lib, config, pkgs, ... }: { 
+{ lib, config, pkgs, userConfig, ... }: { 
 
     options = {
       mine.home.vscodium.enable =
@@ -16,7 +16,7 @@
         };
       };
 
-      home-manager.users.r6t.programs.vscode = {
+      home-manager.users.${userConfig.username}.programs.vscode = {
         enable = true;
         package = pkgs.vscodium;
         extensions = with pkgs.vscode-extensions; [
@@ -44,7 +44,7 @@
         enable = true;
         script = builtins.readFile ./continue/generate-continue-config.sh;
         serviceConfig = {
-          User = "r6t";
+          User = "${userConfig.username}";
         };
         wantedBy = [ "multi-user.target" ];
       };

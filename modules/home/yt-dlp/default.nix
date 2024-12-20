@@ -1,4 +1,4 @@
-{ lib, config, pkgs, ... }: { 
+{ lib, config, pkgs, userConfig, ... }: { 
 
     options = {
       mine.home.yt-dlp.enable =
@@ -6,6 +6,6 @@
     };
 
     config = lib.mkIf config.mine.home.yt-dlp.enable { 
-      home-manager.users.r6t.home.packages = with pkgs; [ yt-dlp ];
+      home-manager.users.${userConfig.username}.home.packages = with pkgs; [ yt-dlp ];
     };
 }

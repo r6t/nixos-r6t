@@ -1,4 +1,4 @@
-{ lib, config, pkgs, ... }: { 
+{ lib, config, pkgs, userConfig, ... }: { 
 
     options = {
       mine.home.obsidian.enable =
@@ -16,6 +16,6 @@
         };
       };
 
-      home-manager.users.r6t.home.packages = with pkgs; [ obsidian ];
+      home-manager.users.${userConfig.username}.home.packages = with pkgs; [ obsidian ];
     };
 }

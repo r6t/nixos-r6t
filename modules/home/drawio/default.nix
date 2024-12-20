@@ -1,4 +1,4 @@
-{ lib, config, pkgs, ... }:
+{ lib, config, pkgs, userConfig, ... }:
 
 let
   cfg = config.mine.home.drawio;
@@ -9,7 +9,7 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    home-manager.users.r6t = {
+    home-manager.users.${userConfig.username} = {
       home.packages = with pkgs; [ drawio ];
     };
   };

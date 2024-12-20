@@ -22,7 +22,6 @@
       home/betaflight-configurator/default.nix
       home/bitwarden/default.nix
       home/browsers/default.nix
-      home/calibre/default.nix
       home/darktable/default.nix
       home/drawio/default.nix
       home/fish/default.nix
@@ -31,7 +30,6 @@
       home/git/default.nix
       home/home-manager/default.nix
       home/kde-apps/default.nix
-      home/libreoffice/default.nix
       home/mpv/default.nix
       home/nixvim/default.nix
       home/obsidian/default.nix
@@ -41,14 +39,12 @@
       home/signal-desktop/default.nix
       home/ssh/default.nix
       home/super-productivity/default.nix
-      home/thunderbird/default.nix
       home/libvirtd/default.nix
       home/virt-viewer/default.nix
       home/vscodium/default.nix
       home/webcord/default.nix
       home/yt-dlp/default.nix
       home/zellij/default.nix
-      home/zola/default.nix
 
       nixos/bluetooth/default.nix
       nixos/bolt/default.nix
@@ -88,6 +84,5 @@
       nixos/user/default.nix
       nixos/v4l-utils/default.nix
       nixos/zsh/default.nix
-      nixos/zola/default.nix
     ];
 }

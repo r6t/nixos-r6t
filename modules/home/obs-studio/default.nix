@@ -1,4 +1,4 @@
-{ lib, config, ... }: { 
+{ lib, config, userConfig, ... }: { 
 
     options = {
       mine.home.obs-studio.enable =
@@ -7,7 +7,7 @@
 
     config = lib.mkIf config.mine.home.obs-studio.enable { 
 
-      home-manager.users.r6t.programs.obs-studio = {
+      home-manager.users.${userConfig.username}.programs.obs-studio = {
         enable = true;
       };
     };

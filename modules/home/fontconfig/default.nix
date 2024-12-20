@@ -1,4 +1,4 @@
-{ lib, config, ... }: { 
+{ lib, config, userConfig, ... }: { 
 
     options = {
       mine.home.fontconfig.enable =
@@ -6,7 +6,7 @@
     };
 
     config = lib.mkIf config.mine.home.fontconfig.enable { 
-      home-manager.users.r6t.fonts = {
+      home-manager.users.${userConfig.username}.fonts = {
         fontconfig.enable = true;
       };
     };

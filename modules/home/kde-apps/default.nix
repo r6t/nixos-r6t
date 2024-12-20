@@ -1,4 +1,4 @@
-{ lib, config, pkgs, ... }: { 
+{ lib, config, pkgs, userConfig, ... }: { 
 
     options = {
       mine.home.kde-apps.enable =
@@ -6,7 +6,7 @@
     };
 
     config = lib.mkIf config.mine.home.kde-apps.enable { 
-      home-manager.users.r6t = {
+      home-manager.users.${userConfig.username} = {
         home.packages = with pkgs; [
           kate # KDE text editor
           kdiff3 # KDE utility

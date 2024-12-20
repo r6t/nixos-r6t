@@ -1,4 +1,4 @@
-{ lib, config, pkgs, ... }: { 
+{ lib, config, pkgs, userConfig, ... }: { 
 
     options = {
       mine.home.betaflight-configurator.enable =
@@ -8,7 +8,7 @@
     config = lib.mkIf config.mine.home.betaflight-configurator.enable { 
       # I run the app itself via flatpak
       # app.betaflight.com (requires chromium) web app is another option
-      # home-manager.users.r6t.home.packages = with pkgs; [ betaflight-configurator ];
+      # home-manager.users.${userConfig.username}.home.packages = with pkgs; [ betaflight-configurator ];
 
       environment.systemPackages = with pkgs; [
         dfu-util
@@ -23,7 +23,7 @@
       '';
 
       systemd.services.ModemManager.enable = false;
-      users.users.r6t.extraGroups = [ "plugdev" "dialout" ];
+      users.users.${userConfig.username}.extraGroups = [ "plugdev" "dialout" ];
 
     };
 }

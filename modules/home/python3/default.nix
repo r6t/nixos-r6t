@@ -1,4 +1,4 @@
-{ lib, config, pkgs, ... }: { 
+{ lib, config, pkgs, userConfig, ... }: { 
 
     options = {
       mine.home.python3.enable =
@@ -6,7 +6,7 @@
     };
 
     config = lib.mkIf config.mine.home.python3.enable { 
-      home-manager.users.r6t.home.packages = with pkgs; [ 
+      home-manager.users.${userConfig.username}.home.packages = with pkgs; [ 
         python3
         python311Packages.boto3
         python311Packages.pip
