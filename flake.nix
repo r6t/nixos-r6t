@@ -41,29 +41,27 @@
     };
   };
 
-  outputs = {
-    self,
-    nixpkgs,
-    ...
-  } @ inputs: let
+  outputs = {self, nixpkgs, home-manager, ... } @inputs:
+  let
     inherit (self) outputs;
+    userConfig = import ./user-config.nix;
   in {
     # NixOS configuration entrypoint
     # Available through 'nixos-rebuild --flake .#your-hostname'
     nixosConfigurations = {
-      # network
+      # nixos networking device
       exit-node = nixpkgs.lib.nixosSystem {
-        specialArgs = {inherit inputs outputs;};
+        specialArgs = {inherit inputs outputs userConfig;};
         modules = [./hosts/exit-node/configuration.nix];
       };
-      # laptop
+      # nixos laptop
       mountainball = nixpkgs.lib.nixosSystem {
-        specialArgs = {inherit inputs outputs;};
+        specialArgs = {inherit inputs outputs userConfig;};
         modules = [./hosts/mountainball/configuration.nix];
       };
-      # server
+      # nixos server
       saguaro = nixpkgs.lib.nixosSystem {
-        specialArgs = {inherit inputs outputs;};
+        specialArgs = {inherit inputs outputs userConfig;};
         modules = [./hosts/saguaro/configuration.nix];
       };
     };

@@ -1,4 +1,4 @@
-{ inputs, lib, config, ... }: { 
+{ inputs, lib, config, userConfig, ... }: { 
 
     options = {
       mine.home.home-manager.enable =
@@ -12,11 +12,11 @@
         inputs.plasma-manager.homeManagerModules.plasma-manager
         inputs.nix-flatpak.homeManagerModules.nix-flatpak
       ];
-      home-manager.users.r6t = {
+      home-manager.users.${userConfig.username} = {
         home = {
-          homeDirectory = "/home/r6t";
+          homeDirectory = userConfig.homeDirectory;
           stateVersion = "23.11";
-          username = "r6t";
+          username = userConfig.username;
         };
         # Nicely reload system units when changing configs
         systemd.user.startServices = "sd-switch";
@@ -24,7 +24,7 @@
           desktopEntries = {
 	    focus-at-will = {
               name = "FocusAtWill web";
-	      exec = "firefox https://focusatwill.com";
+	      exec = "firefox --new-window https://focusatwill.com";
 	      terminal = false;
 	      icon = "internet-radio";
 	      type = "Application";
