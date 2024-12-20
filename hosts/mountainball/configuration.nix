@@ -41,6 +41,7 @@
   mine.flatpak.deezer.enable = true;
   mine.flatpak.inkscape.enable = true;
   mine.flatpak.jellyfin-player.enable = true;
+  mine.flatpak.libreoffice.enable = true;
   mine.flatpak.picard.enable = true;
   mine.flatpak.proton-mail.enable = true;
   mine.flatpak.protonup-qt.enable = true;

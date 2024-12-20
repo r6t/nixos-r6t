@@ -5,6 +5,7 @@
       flatpak/deezer/default.nix
       flatpak/inkscape/default.nix
       flatpak/jellyfin-player/default.nix
+      flatpak/libreoffice/default.nix
       flatpak/picard/default.nix
       flatpak/proton-mail/default.nix
       flatpak/protonup-qt/default.nix
