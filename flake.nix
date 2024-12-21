@@ -32,10 +32,8 @@
     };
 
     sops-ryan = {
-      url =
-        if builtins.getEnv "CI" == ""
-        then "git+https://git-codecommit.us-west-2.amazonaws.com/v1/repos/sops-ryan?ref=main"
-        else null;
+      url = "git+https://git-codecommit.us-west-2.amazonaws.com/v1/repos/sops-ryan?ref=main";
+      flake = false;
     };
 
     sops-nix = {
@@ -58,6 +56,8 @@
       inherit (self) outputs;
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages.${system};
+      ciInputs = builtins.removeAttrs inputs [ "sops-ryan" ];
+      chooseInputs = if builtins.getEnv "CI" == "" then inputs else ciInputs;
     in
     {
       # NixOS configuration entrypoint
@@ -65,17 +65,17 @@
       nixosConfigurations = {
         # nixos networking device
         exit-node = nixpkgs.lib.nixosSystem {
-          specialArgs = { inherit inputs outputs userConfig; };
+          specialArgs = { inherit outputs userConfig; inputs = chooseInputs; };
           modules = [ ./hosts/exit-node/configuration.nix ];
         };
         # nixos laptop
         mountainball = nixpkgs.lib.nixosSystem {
-          specialArgs = { inherit inputs outputs userConfig; };
+          specialArgs = { inherit outputs userConfig; inputs = chooseInputs; };
           modules = [ ./hosts/mountainball/configuration.nix ];
         };
         # nixos server
         saguaro = nixpkgs.lib.nixosSystem {
-          specialArgs = { inherit inputs outputs userConfig; };
+          specialArgs = { inherit outputs userConfig; inputs = chooseInputs; };
           modules = [ ./hosts/saguaro/configuration.nix ];
         };
       };

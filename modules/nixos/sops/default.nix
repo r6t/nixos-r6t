@@ -1,11 +1,11 @@
-{ pkgs, lib, config, userConfig, ... }: {
+{ inputs, pkgs, lib, config, userConfig, ... }: {
 
   options = {
     mine.sops.enable =
       lib.mkEnableOption "set up my sops";
   };
 
-  config = lib.mkIf config.mine.sops.enable {
+  config = lib.mkIf (config.mine.sops.enable && (inputs ? sops-ryan)) {
     environment.systemPackages = with pkgs; [ age sops ];
 
     sops = {
