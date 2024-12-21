@@ -1,4 +1,4 @@
-#### [❄️ Flake](https://www.youtube.com/watch?v=JCeYq72Sko0) for managing personal [NixOS](https://nixos.org/) systems 🖧  💻 🖥️
+### [❄️ Flake](https://www.youtube.com/watch?v=JCeYq72Sko0) for managing personal [NixOS](https://nixos.org/) systems 🖧  💻 🖥️
 
 ### Development and use 🛠️
 I typically generate NixOS and home-manager config in the same step, and then upgrade into the latest with:
