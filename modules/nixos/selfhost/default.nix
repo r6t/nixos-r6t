@@ -1,7 +1,7 @@
 { lib, config, ... }:
 
 {
-  options = { 
+  options = {
     mine.selfhost = {
       enable =
         lib.mkEnableOption "enable Jellyfin container";

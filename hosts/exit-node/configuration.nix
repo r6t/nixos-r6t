@@ -1,10 +1,6 @@
-{
-  inputs,
-  userConfig,
-  ...
-}:
+{ inputs, ... }:
 
- {
+{
   imports = [
     inputs.home-manager.nixosModules.home-manager
     inputs.nix-flatpak.nixosModules.nix-flatpak
@@ -13,38 +9,40 @@
     ../../modules/default.nix
   ];
 
-  # system details
-  networking.hostName = "exit-node";
   networking = {
+    hostName = "exit-node";
     enableIPv6 = true;
   };
 
   system.stateVersion = "23.11";
 
-  # system modules
-  mine.bolt.enable = true;
-  mine.bootloader.enable = true;
-  mine.docker.enable = false;
-  mine.env.enable = true;
-  mine.exit-node-routing.enable = true;
-  mine.fwupd.enable = true;
-  mine.fzf.enable = true;
-  mine.localization.enable = true;
-  mine.netdata.enable = true;
-  mine.networkmanager.enable = true;
-  mine.nix.enable = true;
-  mine.nixpkgs.enable = true;
-  mine.sops.enable = true;
-  mine.ssh.enable = true;
-  mine.syncthing.enable = true;
-  mine.tailscale.enable = true;
-  mine.user.enable = true;
+  mine = {
+    bolt.enable = true;
+    bootloader.enable = true;
+    docker.enable = false;
+    env.enable = true;
+    exit-node-routing.enable = true;
+    fwupd.enable = true;
+    fzf.enable = true;
+    localization.enable = true;
+    netdata.enable = true;
+    networkmanager.enable = true;
+    nix.enable = true;
+    nixpkgs.enable = true;
+    sops.enable = true;
+    ssh.enable = true;
+    syncthing.enable = true;
+    tailscale.enable = true;
+    user.enable = true;
 
-  # home modules
-  mine.home.awscli.enable = true;
-  mine.home.fish.enable = true;
-  mine.home.git.enable = true;
-  mine.home.home-manager.enable = true;
-  mine.home.nixvim.enable = true;
-  mine.home.python3.enable = true;
+    home = {
+      awscli.enable = true;
+      fish.enable = true;
+      git.enable = true;
+      home-manager.enable = true;
+      nixvim.enable = true;
+      python3.enable = true;
+    };
+  };
 }
+

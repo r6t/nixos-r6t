@@ -1,14 +1,11 @@
-{ lib, config, pkgs, userConfig, ... }: { 
+{ lib, config, pkgs, userConfig, ... }: {
 
-    options = {
-      mine.paperless.enable =
-        lib.mkEnableOption "enable paperless-ngx server with local postgres backend";
-    };
+  options.mine.paperless.enable =
+    lib.mkEnableOption "enable paperless-ngx server with local postgres backend";
 
-    config = lib.mkIf config.mine.paperless.enable { 
-
-      # PostgreSQL database
-      services.postgresql = {
+  config = lib.mkIf config.mine.paperless.enable {
+    services = {
+      postgresql = {
         enable = true;
         package = pkgs.postgresql_14;
         dataDir = "/mnt/thunderbay/2TB-E/data/paperless";
@@ -24,10 +21,9 @@
           CREATE USER paperless WITH PASSWORD 'paperless';
           GRANT ALL PRIVILEGES ON DATABASE paperless TO paperless;
         '';
-      }; 
+      };
 
-      # Paperless-ngx
-      services.paperless = {
+      paperless = {
         enable = true;
         address = "0.0.0.0";
         dataDir = "/mnt/thunderbay/2TB-E/app-storage/paperless/data";
@@ -44,31 +40,30 @@
           PAPERLESS_TIME_ZONE = "America/Los_Angeles";
         };
       };
+    };
 
-      # Activation scripts to set storage permissions
-      system.activationScripts = {
-        postgresPermission = ''
-          chown -R postgres:postgres /mnt/thunderbay/2TB-E/data/paperless
-        '';
-        immichPermission = ''
-          chown -R paperless:paperless /mnt/thunderbay/2TB-E/app-storage/paperless
-        '';
-      };
+    system.activationScripts = {
+      postgresPermission = ''
+        chown -R postgres:postgres /mnt/thunderbay/2TB-E/data/paperless
+      '';
+      immichPermission = ''
+        chown -R paperless:paperless /mnt/thunderbay/2TB-E/app-storage/paperless
+      '';
+    };
 
-      # Service launch sequence including dependency on storage availability (thunderbay)
-      systemd.services.postgresql = {
+    systemd.services = {
+      postgresql = {
         after = [ "thunderbay.service" ];
         requires = [ "thunderbay.service" ];
       };
-      systemd.services.paperless-scheduler.after = [ "postgresql.service" ];
-      systemd.services.paperless-task-queue.after = [ "postgresql.service" ];
-      systemd.services.paperless-web.after = [ "postgresql.service" ];
-
-      # Add me to paperless group
-      # TODO: make the user dynamic
-      users.users.${userConfig.username}.extraGroups = [ "paperless" ];
-
-      # Open firewall
-      networking.firewall.allowedTCPPorts = [ 28981 ];
+      paperless-scheduler.after = [ "postgresql.service" ];
+      paperless-task-queue.after = [ "postgresql.service" ];
+      paperless-web.after = [ "postgresql.service" ];
     };
+
+    users.users.${userConfig.username}.extraGroups = [ "paperless" ];
+
+    networking.firewall.allowedTCPPorts = [ 28981 ];
+  };
 }
+

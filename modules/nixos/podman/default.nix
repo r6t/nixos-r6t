@@ -1,15 +1,15 @@
-{ lib, config, pkgs, ... }: { 
+{ lib, config, ... }: {
 
-    options = {
-      mine.podman.enable =
-        lib.mkEnableOption "enable podman";
-    };
+  options = {
+    mine.podman.enable =
+      lib.mkEnableOption "enable podman";
+  };
 
-    config = lib.mkIf config.mine.podman.enable { 
-      virtualisation.podman = { 
-        autoPrune.enable = true;
-        dockerSocket.enable = true;
-        enable = true;
-      };
+  config = lib.mkIf config.mine.podman.enable {
+    virtualisation.podman = {
+      autoPrune.enable = true;
+      dockerSocket.enable = true;
+      enable = true;
     };
+  };
 }

@@ -26,6 +26,11 @@
       inputs.home-manager.follows = "home-manager";
     };
 
+    pre-commit-hooks = {
+      url = "github:cachix/pre-commit-hooks.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     sops-ryan = {
       url = "git+https://git-codecommit.us-west-2.amazonaws.com/v1/repos/sops-ryan?ref=main";
     };
@@ -41,32 +46,53 @@
     };
   };
 
-  outputs = {self, nixpkgs, ... } @inputs:
-  let
-    userConfig = {
-      username = "r6t";
-      homeDirectory = "/home/r6t";
+  outputs = { self, nixpkgs, pre-commit-hooks, ... } @inputs:
+    let
+      userConfig = {
+        username = "r6t";
+        homeDirectory = "/home/r6t";
+      };
+      inherit (self) outputs;
+      system = "x86_64-linux";
+      pkgs = nixpkgs.legacyPackages.${system};
+    in
+    {
+      # NixOS configuration entrypoint
+      # Available through 'nixos-rebuild --flake .#your-hostname'
+      nixosConfigurations = {
+        # nixos networking device
+        exit-node = nixpkgs.lib.nixosSystem {
+          specialArgs = { inherit inputs outputs userConfig; };
+          modules = [ ./hosts/exit-node/configuration.nix ];
+        };
+        # nixos laptop
+        mountainball = nixpkgs.lib.nixosSystem {
+          specialArgs = { inherit inputs outputs userConfig; };
+          modules = [ ./hosts/mountainball/configuration.nix ];
+        };
+        # nixos server
+        saguaro = nixpkgs.lib.nixosSystem {
+          specialArgs = { inherit inputs outputs userConfig; };
+          modules = [ ./hosts/saguaro/configuration.nix ];
+        };
+      };
+
+      checks.${system} = {
+        pre-commit-check = pre-commit-hooks.lib.${system}.run {
+          src = ./.;
+          hooks = {
+            nixpkgs-fmt.enable = true;
+            statix.enable = true;
+            deadnix.enable = true;
+          };
+        };
+      };
+
+      devShells.${system}.default = pkgs.mkShell {
+        inherit (self.checks.${system}.pre-commit-check) shellHook;
+        buildInputs = with pkgs; [
+          pre-commit
+        ];
+      };
     };
-    inherit (self) outputs;
-  in {
-    # NixOS configuration entrypoint
-    # Available through 'nixos-rebuild --flake .#your-hostname'
-    nixosConfigurations = {
-      # nixos networking device
-      exit-node = nixpkgs.lib.nixosSystem {
-        specialArgs = {inherit inputs outputs userConfig;};
-        modules = [./hosts/exit-node/configuration.nix];
-      };
-      # nixos laptop
-      mountainball = nixpkgs.lib.nixosSystem {
-        specialArgs = {inherit inputs outputs userConfig;};
-        modules = [./hosts/mountainball/configuration.nix];
-      };
-      # nixos server
-      saguaro = nixpkgs.lib.nixosSystem {
-        specialArgs = {inherit inputs outputs userConfig;};
-        modules = [./hosts/saguaro/configuration.nix];
-      };
-    };
-  };
 }

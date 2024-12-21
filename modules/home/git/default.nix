@@ -1,12 +1,16 @@
-{ lib, config, userConfig, ... }: { 
+{ lib, config, pkgs, userConfig, ... }: {
 
-    options = {
-      mine.home.git.enable =
-        lib.mkEnableOption "enable git in home-manager";
-    };
+  options = {
+    mine.home.git.enable =
+      lib.mkEnableOption "enable git in home-manager";
+  };
 
-    config = lib.mkIf config.mine.home.git.enable { 
-      home-manager.users.${userConfig.username}.programs.git = {
+  config = lib.mkIf config.mine.home.git.enable {
+    home-manager.users.${userConfig.username} = {
+      home = {
+        packages = with pkgs; [ pre-commit ];
+      };
+      programs.git = {
         enable = true;
         userName = "r6t";
         userEmail = "git@r6t.io";
@@ -27,4 +31,5 @@
         ];
       };
     };
+  };
 }

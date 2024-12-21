@@ -62,7 +62,7 @@
             ];
           };
         };
-	# Static routes to keep tailnet traffic on tailscale interface
+        # Static routes to keep tailnet traffic on tailscale interface
         tailscale0 = {
           ipv4.routes = [
             {

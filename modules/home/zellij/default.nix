@@ -10,13 +10,13 @@
       enable = true;
       enableFishIntegration = true;
       settings = {
-	simplified_ui = false;
-	default_shell = "fish";
-	pane_frames = false;
+        simplified_ui = false;
+        default_shell = "fish";
+        pane_frames = false;
         copy_command = "wl-copy";
-	scrollback_editor = "nvim";
-	theme = "oxocarbon";
-	themes.oxocarbon = {
+        scrollback_editor = "nvim";
+        theme = "oxocarbon";
+        themes.oxocarbon = {
           fg = "#ffffff";
           bg = "#161616";
           black = "#262626";
@@ -35,7 +35,7 @@
           bright_magenta = "#ff7eb6";
           bright_cyan = "#3ddbd9";
           bright_white = "#ffffff";
-	  orange = "#ffdab9"; # zellij threw an error requiring orange, this isn't part of oxocarbon
+          orange = "#ffdab9"; # zellij threw an error requiring orange, this isn't part of oxocarbon
         };
       };
     };

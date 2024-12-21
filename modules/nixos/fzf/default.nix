@@ -1,11 +1,11 @@
-{ lib, config, pkgs, ... }: { 
+{ lib, config, pkgs, ... }: {
 
-    options = {
-      mine.fzf.enable =
-        lib.mkEnableOption "enable fzf";
-    };
+  options = {
+    mine.fzf.enable =
+      lib.mkEnableOption "enable fzf";
+  };
 
-    config = lib.mkIf config.mine.fzf.enable { 
-      environment.systemPackages = with pkgs; [ fzf ];
-    };
+  config = lib.mkIf config.mine.fzf.enable {
+    environment.systemPackages = with pkgs; [ fzf ];
+  };
 }

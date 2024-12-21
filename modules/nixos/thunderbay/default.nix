@@ -1,4 +1,4 @@
-{ lib, config, pkgs,... }: {
+{ lib, config, pkgs, ... }: {
   options = {
     mine.thunderbay.enable =
       lib.mkEnableOption "Unlock and mount drives in thunderbay box";
@@ -24,21 +24,21 @@
     systemd.services.thunderbay = {
       enable = true;
       wantedBy = [ "multi-user.target" ];
-      after = [ 
-        "network.target" 
-        "cryptsetup.target" 
-        "mnt-thunderkey.mount" 
+      after = [
+        "network.target"
+        "cryptsetup.target"
+        "mnt-thunderkey.mount"
       ];
-      requires = [ 
-        "network.target" 
-        "cryptsetup.target" 
-        "mnt-thunderkey.mount" 
+      requires = [
+        "network.target"
+        "cryptsetup.target"
+        "mnt-thunderkey.mount"
       ];
       serviceConfig = {
         Type = "oneshot";
         ExecStartPre = [
           ""
-	  "/run/current-system/sw/bin/sleep 30"
+          "/run/current-system/sw/bin/sleep 30"
           "${pkgs.cryptsetup}/sbin/cryptsetup luksOpen --key-file=/mnt/thunderkey/8tba /dev/disk/by-uuid/3c429d84-386d-4272-8739-7bd2dcde1159 8TB-A1"
           "${pkgs.cryptsetup}/sbin/cryptsetup luksOpen --key-file=/mnt/thunderkey/8tbb /dev/disk/by-uuid/5b66a482-036d-4a76-8cec-6ad15fe2360c 8TB-D1"
           "${pkgs.cryptsetup}/sbin/cryptsetup luksOpen --key-file=/mnt/thunderkey/8tbd /dev/disk/by-uuid/cb067a1e-147b-4052-b561-e2c16c31dd0e 8TB-C1"
