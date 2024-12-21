@@ -7,6 +7,9 @@
 
   config = lib.mkIf config.mine.home.home-manager.enable {
     home-manager = {
+      useGlobalPkgs = true;
+      useUserPackages = true;
+      extraSpecialArgs = { inherit userConfig; };
       backupFileExtension = "replacedbyhomemanager";
       sharedModules = [
         inputs.nixvim.homeManagerModules.nixvim
