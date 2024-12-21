@@ -16,10 +16,7 @@ pre-commit install
 ```
 .
 ├── .github                  # GitHub Actions workflow to lint code upon push to main
-├── .pre-commit-config.yaml  # # Nix store symlink, target file is managed by [this flake][1]
-
-
-Nix store symlink, target file is managed by [this flake](https://github.com/r6t/nixos-r6t/blob/6dc2d6c9bd67a276023f478f66f3c7e9ef2780a4/flake.nix#L83)
+├── .pre-commit-config.yaml  # Nix store symlink, target file is managed by [this flake][1]
 ├── flake.lock               # Input version control, managed by nix flake command
 ├── flake.nix                # Inputs (sources) and outputs (system configurations)
 ├── format.fish              # Shell script to format and lint project files
@@ -27,3 +24,4 @@ Nix store symlink, target file is managed by [this flake](https://github.com/r6t
 ├── modules                  # Used by host definitions
 └── README.md                # 👋
  ```
+[1](https://github.com/r6t/nixos-r6t/blob/6dc2d6c9bd67a276023f478f66f3c7e9ef2780a4/flake.nix#L83)
