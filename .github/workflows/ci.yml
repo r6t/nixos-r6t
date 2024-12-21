@@ -1,0 +1,23 @@
+name: "CI"
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: cachix/install-nix-action@v25
+      with:
+        github_access_token: ${{ secrets.GITHUB_TOKEN }}
+    - run: nix flake check
+    - name: Build NixOS configurations
+      run: |
+        nix build .#nixosConfigurations.exit-node.config.system.build.toplevel
+        nix build .#nixosConfigurations.mountainball.config.system.build.toplevel
+        nix build .#nixosConfigurations.saguaro.config.system.build.toplevel
+    - name: Check formatting
+      run: |
+        nix develop --command pre-commit run --all-files
