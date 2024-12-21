@@ -32,7 +32,10 @@
     };
 
     sops-ryan = {
-      url = "git+https://git-codecommit.us-west-2.amazonaws.com/v1/repos/sops-ryan?ref=main";
+      url =
+        if builtins.getEnv "CI" == ""
+        then "git+https://git-codecommit.us-west-2.amazonaws.com/v1/repos/sops-ryan?ref=main"
+        else null;
     };
 
     sops-nix = {
