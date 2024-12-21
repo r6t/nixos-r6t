@@ -5,7 +5,7 @@
       "title": "GPT-4 Turbo Paid",
       "apiBase": "https://api.openai.com/v1/",
       "provider": "openai",
-      "apiKey": "cat ${config.sops.secrets."openai/platform_key".path}"
+      "apiKey": "cat /run/secrets/openai/platform_key"
     },
     {
       "title": "Ollama",

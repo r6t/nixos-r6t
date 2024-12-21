@@ -31,10 +31,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    sops-ryan = {
-      url = "git+https://git-codecommit.us-west-2.amazonaws.com/v1/repos/sops-ryan?ref=main";
-      flake = false;
-    };
+    #    sops-ryan = {
+    #      url = "git+https://git-codecommit.us-west-2.amazonaws.com/v1/repos/sops-ryan?ref=main";
+    #      flake = false;
+    #    };
 
     sops-nix = {
       url = "github:Mic92/sops-nix";

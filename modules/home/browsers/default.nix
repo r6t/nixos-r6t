@@ -54,7 +54,7 @@
             "identity.sync.engine.payments" = true;
             "identity.sync.engine.prefs" = true;
             "identity.sync.engine.tabs" = true;
-            "identity.sync.username" = "$(cat ${config.sops.secrets."firefox_sync".path})";
+            "identity.sync.username" = "$(cat /run/secrets/firefox_sync)";
             "layers.acceleration.disabled" = true; # Disable hardware acceleration
             "network.cookie.cookieBehavior" = 1; # Block all cross-site cookies
             "network.cookie.cookiePrefetch" = 0; # Disable cookie prefetching
