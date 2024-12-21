@@ -12,10 +12,6 @@ jobs:
     - uses: cachix/install-nix-action@v25
       with:
         github_access_token: ${{ secrets.GITHUB_TOKEN }}
-    - uses: cachix/cachix-action@v14
-      with:
-        name: nixos-r6t
-        authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
     - name: Run pre-commit hooks
       run: |
         nix develop --command pre-commit run --all-files
