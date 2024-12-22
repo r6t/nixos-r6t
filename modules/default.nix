@@ -68,7 +68,6 @@
     nixos/nix/default.nix
     nixos/nixpkgs/default.nix
     nixos/nvidia/default.nix
-    nixos/ollama/default.nix
     nixos/open-webui/default.nix
     nixos/paperless/default.nix
     nixos/podman/default.nix
