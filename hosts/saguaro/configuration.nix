@@ -52,7 +52,6 @@
     nix.enable = true;
     nixpkgs.enable = true;
     nvidia.enable = true;
-    ollama.enable = false;
     open-webui.enable = true;
     paperless.enable = true;
     selfhost.enable = false;
