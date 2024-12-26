@@ -1,30 +1,20 @@
 #!/usr/bin/env bash
-
-OPENAI_KEY=$(cat /run/secrets/openai/platform_key)
-
 # Generate the final config.json
 cat <<EOF > /home/r6t/.continue/config.json
 {
   "models": [
     {
-      "model": "gpt-4-turbo-preview",
-      "title": "GPT-4 Turbo Paid",
-      "apiBase": "https://api.openai.com/v1/",
-      "provider": "openai",
-      "apiKey": "$OPENAI_KEY"
-    },
-    {
       "model": "AUTODETECT",
       "title": "Ollama",
-      "apiBase": "http://silvertorch.magic.internal:11434",
+      "apiBase": "http://hedgehog.magic.internal:11434",
       "provider": "ollama"
     }
   ],
   "tabAutocompleteModel": {
       "title": "Tab Autocomplete Model",
       "provider": "ollama",
-      "model": "deepseek-coder-v2:latest",
-      "apiBase": "http://silvertorch.magic.internal:11434"
+      "model": "qwen2.5-coder:14b",
+      "apiBase": "http://hedgehog.magic.internal:11434"
   },
   "slashCommands": [
     {

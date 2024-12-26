@@ -1,9 +1,5 @@
 { lib, config, pkgs, userConfig, ... }: {
 
-  imports = [
-    ./codecompanion.nix
-  ];
-
   options = {
     mine.home.nixvim.enable =
       lib.mkEnableOption "enable nixvim in home-manager";
@@ -71,10 +67,90 @@
             };
           };
         };
+        codecompanion = {
+          enable = true;
+          settings = {
+            adapters = {
+              ollama = {
+                __raw = ''
+                  function()
+                    return require('codecompanion.adapters').extend('ollama', {
+                        env = {
+                            url = "http://hedgehog.magic.internal:11434",
+                        },
+                        schema = {
+                            model = {
+                                default = 'qwen2.5-coder:14b',
+                                -- default = "llama3.1:8b-instruct-q8_0",
+                            },
+                            num_ctx = {
+                                default = 32768,
+                            },
+                        },
+                    })
+                  end
+                '';
+              };
+            };
+            keymaps = [
+              {
+                mode = [
+                  "n"
+                  "v"
+                ];
+                key = "<C-a>";
+                action = "<Cmd>CodeCompanionActions<CR>";
+                options = {
+                  noremap = true;
+                  silent = true;
+                };
+              }
+              {
+                mode = [
+                  "n"
+                  "v"
+                ];
+                key = "<leader>ac";
+                action = "<Cmd>CodeCompanionChat Toggle<CR>";
+                options = {
+                  noremap = true;
+                  silent = true;
+                };
+              }
+              {
+                mode = "v";
+                key = "<leader>aa";
+                action = "<Cmd>CodeCompanionChat Add<CR>";
+                options = {
+                  noremap = true;
+                  silent = true;
+                };
+              }
+            ];
+            opts = {
+              log_level = "TRACE";
+              send_code = true;
+              use_default_actions = true;
+              use_default_prompts = true;
+            };
+            strategies = {
+              agent = {
+                adapter = "ollama";
+              };
+              chat = {
+                adapter = "ollama";
+              };
+              inline = {
+                adapter = "ollama";
+              };
+            };
+          };
+        };
         cmp = {
           enable = true;
           autoEnableSources = true;
         };
+        dressing.enable = true;
         fugitive.enable = true;
         git-conflict.enable = true;
         lualine.enable = true;
@@ -116,11 +192,6 @@
         };
         none-ls.sources.formatting.black.enable = true;
         oil.enable = true;
-        ollama = {
-          enable = true;
-          model = "mistral";
-          url = "http://silvertorch.magic.internal:11434";
-        };
         telescope.enable = true;
         treesitter = {
           enable = true;
