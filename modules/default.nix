@@ -18,6 +18,7 @@
     home/alacritty/default.nix
     home/atuin/default.nix
     home/atuin/default.nix
+    home/awscdk/default.nix
     home/awscli/default.nix
     home/betaflight-configurator/default.nix
     home/bitwarden/default.nix

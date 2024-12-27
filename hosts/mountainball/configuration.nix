@@ -50,6 +50,7 @@
     home = {
       alacritty.enable = true;
       atuin.enable = true;
+      awscdk.enable = true;
       awscli.enable = true;
       betaflight-configurator.enable = true;
       bitwarden.enable = true;

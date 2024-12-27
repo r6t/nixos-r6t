@@ -14,10 +14,46 @@
       colorschemes.oxocarbon.enable = true;
       highlight.ExtraWhitespace.bg = "red";
       keymaps = [
+        # codecompanion
+        {
+          mode = [
+            "n"
+            "v"
+          ];
+          key = "<C-a>";
+          action = "<Cmd>CodeCompanionActions<CR>";
+          options = {
+            noremap = true;
+            silent = true;
+          };
+        }
+        {
+          mode = [
+            "n"
+            "v"
+          ];
+          key = "<leader>ac";
+          action = "<Cmd>CodeCompanionChat Toggle<CR>";
+          options = {
+            noremap = true;
+            silent = true;
+          };
+        }
+        {
+          mode = "v";
+          key = "<leader>aa";
+          action = "<Cmd>CodeCompanionChat Add<CR>";
+          options = {
+            noremap = true;
+            silent = true;
+          };
+        }
+        # oil
         {
           action = "<cmd>Oil<CR>";
           key = "<leader>-";
         }
+        # telescope
         {
           action = "<cmd>Telescope find_files<CR>";
           key = "<leader>ff";
@@ -92,41 +128,6 @@
                 '';
               };
             };
-            keymaps = [
-              {
-                mode = [
-                  "n"
-                  "v"
-                ];
-                key = "<C-a>";
-                action = "<Cmd>CodeCompanionActions<CR>";
-                options = {
-                  noremap = true;
-                  silent = true;
-                };
-              }
-              {
-                mode = [
-                  "n"
-                  "v"
-                ];
-                key = "<leader>ac";
-                action = "<Cmd>CodeCompanionChat Toggle<CR>";
-                options = {
-                  noremap = true;
-                  silent = true;
-                };
-              }
-              {
-                mode = "v";
-                key = "<leader>aa";
-                action = "<Cmd>CodeCompanionChat Add<CR>";
-                options = {
-                  noremap = true;
-                  silent = true;
-                };
-              }
-            ];
             opts = {
               log_level = "TRACE";
               send_code = true;
