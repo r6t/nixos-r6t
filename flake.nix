@@ -54,10 +54,9 @@
         homeDirectory = "/home/r6t";
       };
       inherit (self) outputs;
+      inherit (nixpkgs) lib;
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages.${system};
-      ciInputs = builtins.removeAttrs inputs [ "sops-ryan" ];
-      chooseInputs = if builtins.getEnv "CI" == "" then inputs else ciInputs;
     in
     {
       # NixOS configuration entrypoint
@@ -65,17 +64,17 @@
       nixosConfigurations = {
         # nixos networking device
         exit-node = nixpkgs.lib.nixosSystem {
-          specialArgs = { inherit outputs userConfig; inputs = chooseInputs; };
+          specialArgs = { inherit outputs userConfig inputs; };
           modules = [ ./hosts/exit-node/configuration.nix ];
         };
         # nixos laptop
         mountainball = nixpkgs.lib.nixosSystem {
-          specialArgs = { inherit outputs userConfig; inputs = chooseInputs; };
+          specialArgs = { inherit outputs userConfig inputs; };
           modules = [ ./hosts/mountainball/configuration.nix ];
         };
         # nixos server
         saguaro = nixpkgs.lib.nixosSystem {
-          specialArgs = { inherit outputs userConfig; inputs = chooseInputs; };
+          specialArgs = { inherit outputs userConfig inputs; };
           modules = [ ./hosts/saguaro/configuration.nix ];
         };
       };
@@ -87,15 +86,64 @@
             nixpkgs-fmt.enable = true;
             statix.enable = true;
             deadnix.enable = true;
+            prettier.enable = true;
+            black.enable = true;
+            isort.enable = true;
+            eslint.enable = true;
+            pylint.enable = true;
           };
         };
       };
 
-      devShells.${system}.default = pkgs.mkShell {
-        inherit (self.checks.${system}.pre-commit-check) shellHook;
-        buildInputs = with pkgs; [
-          pre-commit
-        ];
-      };
+      devShells.${system} =
+        let
+          devShellBasePkgs = with pkgs; [
+            awscli2
+            git
+            nixpkgs-fmt
+          ];
+
+          baseShell = pkgs.mkShell {
+            nativeBuildInputs = devShellBasePkgs ++ [ pkgs.fish ];
+            buildInputs = devShellBasePkgs;
+            shellHook = ''
+              ${self.checks.${system}.pre-commit-check.shellHook}
+              exec fish
+            '';
+          };
+        in
+        {
+          default = baseShell.overrideAttrs (oldAttrs: {
+            buildInputs = oldAttrs.buildInputs ++ (with pkgs; [
+              statix
+              deadnix
+            ]);
+          });
+
+          aws = baseShell.overrideAttrs (oldAttrs: {
+            buildInputs = oldAttrs.buildInputs ++ (with pkgs; [
+              (python3.withPackages (ps: with ps; [
+                troposphere
+                boto3
+                pip
+                black
+                pylint
+                isort
+              ]))
+              nodePackages.aws-cdk
+              nodePackages.prettier
+              nodePackages.eslint
+              nodejs
+            ]);
+            shellHook = oldAttrs.shellHook + ''
+              export AWS_REGION="us-west-2"
+              export AWS_CDK_VERSION="$(cdk --version)"
+              export PIP_PREFIX="$PWD/_pip"
+              export PYTHONPATH="$PIP_PREFIX/${pkgs.python3.sitePackages}:$PYTHONPATH"
+              export PATH="$PIP_PREFIX/bin:$PATH"
+              unset SOURCE_DATE_EPOCH
+            '';
+          });
+        };
     };
 }

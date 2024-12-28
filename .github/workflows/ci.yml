@@ -8,11 +8,10 @@ jobs:
   pre-commit:
     runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v4
-    - uses: cachix/install-nix-action@v25
-      with:
-        github_access_token: ${{ secrets.GITHUB_TOKEN }}
-    - name: Run pre-commit hooks
-      run: |
-        nix develop --command pre-commit run --all-files
-
+      - uses: actions/checkout@v4
+      - uses: cachix/install-nix-action@v25
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run pre-commit hooks
+        run: |
+          nix develop --command pre-commit run --all-files

@@ -25,7 +25,6 @@
       neovim
       netcat
       nmap
-      nodejs
       openssl
       pciutils
       ripgrep

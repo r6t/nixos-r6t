@@ -1,4 +1,8 @@
-{ lib, config, pkgs, userConfig, ... }: {
+{ lib, config, pkgs, userConfig, ... }:
+let
+  fishCommon = import ../../../lib/fish-common.nix;
+in
+{
 
   options = {
     mine.home.fish.enable =
@@ -11,7 +15,13 @@
       fishPlugins.fzf-fish
       fishPlugins.forgit
     ];
-    programs.fish.enable = true;
+    programs = {
+      fish.enable = true;
+      direnv = {
+        enable = true;
+        nix-direnv.enable = true;
+      };
+    };
 
     home-manager.users.${userConfig.username}.programs.fish = {
       enable = true;
@@ -21,9 +31,18 @@
         "Gd" = "git diff";
         "Gds" = "git diff --staged";
       };
-      shellInit = ''
+      functions = {
+        dev = {
+          description = "Use devShell - see flake.nix";
+          body = "fish -c \"nix develop /home/r6t/git/nixos-r6t#$argv\"";
+        };
+      };
+      interactiveShellInit = ''
         # Add pre-commit to PATH
         fish_add_path $HOME/.nix-profile/bin
+
+        # Import common shell config, shared with devshells
+        ${fishCommon.fishPrompt}
       '';
     };
   };

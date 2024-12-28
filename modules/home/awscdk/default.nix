@@ -7,7 +7,7 @@
 
   config = lib.mkIf config.mine.home.awscdk.enable {
     home-manager.users.${userConfig.username}.home.packages = with pkgs; [
-      nodePackages.aws-cdk
+      nodePackages_latest.aws-cdk
     ];
   };
 }

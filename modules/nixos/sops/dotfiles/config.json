@@ -15,10 +15,10 @@
     }
   ],
   "tabAutocompleteModel": {
-      "title": "Tab Autocomplete Model",
-      "provider": "ollama",
-      "model": "deepseek-coder:6.7b-base",
-      "apiBase": "http://127.0.0.1:11434"
+    "title": "Tab Autocomplete Model",
+    "provider": "ollama",
+    "model": "deepseek-coder:6.7b-base",
+    "apiBase": "http://127.0.0.1:11434"
   },
   "slashCommands": [
     {
