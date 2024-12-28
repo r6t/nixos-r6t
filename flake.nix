@@ -114,7 +114,10 @@
         in
         {
           default = baseShell.overrideAttrs (oldAttrs: {
-            name = "nix";
+            shellHook = ''
+              export DEVSHELL_NAME="nix"
+              ${oldAttrs.shellHook}
+            '';
             buildInputs = oldAttrs.buildInputs ++ (with pkgs; [
               statix
               deadnix
@@ -122,7 +125,16 @@
           });
 
           aws = baseShell.overrideAttrs (oldAttrs: {
-            name = "aws";
+            shellHook = ''
+              export AWS_REGION="us-west-2"
+              export AWS_CDK_VERSION="$(cdk --version)"
+              export PIP_PREFIX="$PWD/_pip"
+              export PYTHONPATH="$PIP_PREFIX/${pkgs.python3.sitePackages}:$PYTHONPATH"
+              export PATH="$PIP_PREFIX/bin:$PATH"
+              unset SOURCE_DATE_EPOCH
+              export DEVSHELL_NAME="aws"
+              ${oldAttrs.shellHook}
+            '';
             buildInputs = oldAttrs.buildInputs ++ (with pkgs; [
               (python3.withPackages (ps: with ps; [
                 troposphere
@@ -137,14 +149,6 @@
               nodePackages.eslint
               nodejs
             ]);
-            shellHook = oldAttrs.shellHook + ''
-              export AWS_REGION="us-west-2"
-              export AWS_CDK_VERSION="$(cdk --version)"
-              export PIP_PREFIX="$PWD/_pip"
-              export PYTHONPATH="$PIP_PREFIX/${pkgs.python3.sitePackages}:$PYTHONPATH"
-              export PATH="$PIP_PREFIX/bin:$PATH"
-              unset SOURCE_DATE_EPOCH
-            '';
           });
         };
     };
