@@ -16,7 +16,11 @@
       # Nix shell status with snowflake
       echo -n (set_color 82cfff)" ❄ "
       if test -n "$IN_NIX_SHELL"
-        echo -n (basename $name)
+        if test -n "$IN_NIX_SHELL_NAME"
+          echo -n $IN_NIX_SHELL_NAME
+        else
+          echo -n (basename $name)
+        end
       else
         echo -n "<none>"
       end

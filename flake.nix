@@ -114,6 +114,7 @@
         in
         {
           default = baseShell.overrideAttrs (oldAttrs: {
+            name = "nix";
             buildInputs = oldAttrs.buildInputs ++ (with pkgs; [
               statix
               deadnix
@@ -121,6 +122,7 @@
           });
 
           aws = baseShell.overrideAttrs (oldAttrs: {
+            name = "aws";
             buildInputs = oldAttrs.buildInputs ++ (with pkgs; [
               (python3.withPackages (ps: with ps; [
                 troposphere
