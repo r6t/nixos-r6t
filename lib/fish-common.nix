@@ -6,7 +6,7 @@
       echo -n (set_color 78a9ff)" "(prompt_pwd)
       
       # Git status with git icon
-      echo -n (set_color red)" 🌱 "
+      echo -n (set_color be95ff)" 🌱 "
       if git rev-parse --is-inside-work-tree &>/dev/null
         echo -n (git branch --show-current)
       else
@@ -30,7 +30,7 @@
       end
       
       echo
-      echo -n (set_color normal)"> "
+      echo -n (set_color normal)" > "
     end
   '';
 }
