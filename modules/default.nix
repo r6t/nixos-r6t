@@ -78,6 +78,7 @@
     nixos/sops/default.nix
     nixos/sound/default.nix
     nixos/ssh/default.nix
+    nixos/sshfs/default.nix
     nixos/syncthing/default.nix
     nixos/tailscale/default.nix
     nixos/thunderbay/default.nix

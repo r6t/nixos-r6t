@@ -9,42 +9,47 @@
     home-manager.users.${userConfig.username}.programs.nixvim = {
       defaultEditor = true;
       enable = true;
-      extraPlugins = [ pkgs.vimPlugins.oxocarbon-nvim ];
+      extraPlugins = with pkgs.vimPlugins; [
+        oxocarbon-nvim
+      ];
       globals.mapleader = " ";
       colorschemes.oxocarbon.enable = true;
       highlight.ExtraWhitespace.bg = "red";
       keymaps = [
-        # codecompanion
+        # codeCcmpanion
         {
-          mode = [
-            "n"
-            "v"
-          ];
-          key = "<C-a>";
-          action = "<Cmd>CodeCompanionActions<CR>";
+          mode = [ "n" "v" ];
+          key = "<leader>aa";
+          action = "<cmd>CodeCompanionActions<CR>";
           options = {
-            noremap = true;
+            desc = "CodeCompanion actions";
             silent = true;
           };
         }
         {
-          mode = [
-            "n"
-            "v"
-          ];
+          mode = [ "n" "v" ];
           key = "<leader>ac";
-          action = "<Cmd>CodeCompanionChat Toggle<CR>";
+          action = "<cmd>CodeCompanionChat Toggle<CR>";
           options = {
-            noremap = true;
+            desc = "Toggle CodeCompanion chat";
             silent = true;
           };
         }
         {
           mode = "v";
-          key = "<leader>aa";
-          action = "<Cmd>CodeCompanionChat Add<CR>";
+          key = "<leader>as";
+          action = "<cmd>CodeCompanionChat Add<CR>";
           options = {
-            noremap = true;
+            desc = "Send selection to chat";
+            silent = true;
+          };
+        }
+        {
+          mode = "n";
+          key = "<leader>ai";
+          action = "<cmd>CodeCompanion<CR>";
+          options = {
+            desc = "Inline assistant";
             silent = true;
           };
         }
@@ -85,6 +90,111 @@
         signcolumn = "yes:1";
       };
       plugins = {
+        cmp = {
+          enable = true;
+          autoEnableSources = true;
+          settings = {
+            sources = [
+              { name = "nvim_lsp"; }
+              { name = "luasnip"; }
+              { name = "buffer"; }
+              { name = "path"; }
+            ];
+            mapping = {
+              "<CR>" = "cmp.mapping.confirm({ select = true })";
+              "<Tab>" = ''
+                function(fallback)
+                  if cmp.visible() then
+                    cmp.select_next_item()
+                  else
+                    fallback()
+                  end
+                end
+              '';
+              "<S-Tab>" = ''
+                function(fallback)
+                  if cmp.visible() then
+                    cmp.select_prev_item()
+                  else
+                    fallback()
+                  end
+                end
+              '';
+            };
+          };
+        };
+        cmp-nvim-lsp.enable = true;
+        cmp-buffer.enable = true;
+        cmp-path.enable = true;
+        codecompanion = {
+          enable = true;
+          settings = {
+            adapters = {
+              ollama = {
+                __raw = ''
+                  function()
+                    return require('codecompanion.adapters').extend('ollama', {
+                      env = {
+                        url = "http://hedgehog.magic.internal:11434",
+                      },
+                      parameters = {
+                        temperature = 0.8,
+                        top_k = 40,
+                        top_p = 0.7,
+                        repeat_penalty = 1.1,
+                        num_ctx = 32768,
+                        stream = true,
+                      },
+                      schema = {
+                        model = {
+                          default = "qwen2.5-coder:14b",
+                        },
+                      }
+                    })
+                  end
+                '';
+              };
+            };
+            opts = {
+              log_level = "TRACE";
+              send_code = true;
+              use_default_actions = true;
+              use_default_prompts = true;
+              display = {
+                action_palette = {
+                  provider = "telescope";
+                };
+                completion = {
+                  provider = "nvim-cmp";
+                };
+                command_palette = {
+                  provider = "telescope";
+                };
+                chat = {
+                  window = {
+                    width = 0.4; # 40% of screen width
+                    border = "rounded";
+                  };
+                };
+              };
+              actions = {
+                auto_import = true;
+                auto_format = true;
+              };
+            };
+            strategies = {
+              agent = {
+                adapter = "ollama";
+              };
+              chat = {
+                adapter = "ollama";
+              };
+              inline = {
+                adapter = "ollama";
+              };
+            };
+          };
+        };
         conform-nvim = {
           enable = true;
           settings = {
@@ -102,54 +212,6 @@
               yaml = [ "yamlfmt" ];
             };
           };
-        };
-        codecompanion = {
-          enable = true;
-          settings = {
-            adapters = {
-              ollama = {
-                __raw = ''
-                  function()
-                    return require('codecompanion.adapters').extend('ollama', {
-                        env = {
-                            url = "http://hedgehog.magic.internal:11434",
-                        },
-                        schema = {
-                            model = {
-                                default = 'qwen2.5-coder:14b',
-                                -- default = "llama3.1:8b-instruct-q8_0",
-                            },
-                            num_ctx = {
-                                default = 32768,
-                            },
-                        },
-                    })
-                  end
-                '';
-              };
-            };
-            opts = {
-              log_level = "TRACE";
-              send_code = true;
-              use_default_actions = true;
-              use_default_prompts = true;
-            };
-            strategies = {
-              agent = {
-                adapter = "ollama";
-              };
-              chat = {
-                adapter = "ollama";
-              };
-              inline = {
-                adapter = "ollama";
-              };
-            };
-          };
-        };
-        cmp = {
-          enable = true;
-          autoEnableSources = true;
         };
         dressing.enable = true;
         fugitive.enable = true;

@@ -100,6 +100,7 @@
     sops.enable = true;
     sound.enable = true;
     ssh.enable = true;
+    sshfs.enable = true;
     syncthing.enable = true;
     tailscale.enable = true;
     user.enable = true;
