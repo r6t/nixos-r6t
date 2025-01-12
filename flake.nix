@@ -67,6 +67,11 @@
           specialArgs = { inherit outputs userConfig inputs; };
           modules = [ ./hosts/exit-node/configuration.nix ];
         };
+        # bazzite os desktop
+        hedgehog = nixpkgs.lib.homeManagerConfiguration {
+          specialArgs = { inherit outputs userConfig inputs; };
+          modules = [ ./hosts/hedgehog/configuration.nix ];
+        };
         # nixos laptop
         mountainball = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit outputs userConfig inputs; };
