@@ -1,7 +1,9 @@
 { ... }: {
 
   imports = [
+    flatpak/anki/default.nix
     flatpak/bottles/default.nix
+    flatpak/calibre/default.nix
     flatpak/deezer/default.nix
     flatpak/inkscape/default.nix
     flatpak/jellyfin-player/default.nix
@@ -30,6 +32,7 @@
     home/freecad/default.nix
     home/git/default.nix
     home/home-manager/default.nix
+    home/k2pdfopt/default.nix
     home/kde-apps/default.nix
     home/mpv/default.nix
     home/nixvim/default.nix

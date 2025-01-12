@@ -102,24 +102,13 @@
             ];
             mapping = {
               "<CR>" = "cmp.mapping.confirm({ select = true })";
-              "<Tab>" = ''
-                function(fallback)
-                  if cmp.visible() then
-                    cmp.select_next_item()
-                  else
-                    fallback()
-                  end
-                end
-              '';
-              "<S-Tab>" = ''
-                function(fallback)
-                  if cmp.visible() then
-                    cmp.select_prev_item()
-                  else
-                    fallback()
-                  end
-                end
-              '';
+              "<Down>" = "cmp.mapping(cmp.mapping.select_next_item(), {'i', 's'})";
+              "<Up>" = "cmp.mapping(cmp.mapping.select_prev_item(), {'i', 's'})";
+              "<Tab>" = "cmp.mapping(cmp.mapping.select_next_item(), {'i', 's'})";
+              "<S-Tab>" = "cmp.mapping(cmp.mapping.select_prev_item(), {'i', 's'})";
+              "<C-d>" = "cmp.mapping.scroll_docs(-4)";
+              "<C-f>" = "cmp.mapping.scroll_docs(4)";
+              "<C-Space>" = "cmp.mapping.complete()";
             };
           };
         };

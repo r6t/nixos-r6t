@@ -36,7 +36,9 @@
 
   mine = {
     flatpak = {
+      anki.enable = true;
       bottles.enable = true;
+      calibre.enable = true;
       deezer.enable = true;
       inkscape.enable = true;
       jellyfin-player.enable = true;
@@ -66,6 +68,7 @@
       freecad.enable = true;
       git.enable = true;
       home-manager.enable = true;
+      k2pdfopt.enable = true;
       kde-apps.enable = true;
       mpv.enable = true;
       nixvim.enable = true;
