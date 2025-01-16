@@ -22,7 +22,6 @@
         kdePackages.kdeconnect-kde # KDE Connect phone pairing
         kdePackages.kdialog # KDE app support
         kdePackages.kio-extras # KDE support
-        kdePackages.krdc # KDE VNC + RDP client
         kdePackages.polkit-kde-agent-1 # KDE privlege escalation helper
         kdePackages.qtwayland # KDE app support + https://wiki.hyprland.org/hyprland-wiki/pages/Nvidia/
       ];
