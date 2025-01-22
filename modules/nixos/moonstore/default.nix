@@ -12,8 +12,7 @@
 
     systemd.services.moonstore = {
       enable = true;
-      description = "Unlock moonstore LUKS";
-      wantedBy = [ "multi-user.target" ];
+      description = "Unlock and mount moonstore ssd";
       after = [
         "network.target"
         "cryptsetup.target"
@@ -22,36 +21,21 @@
         "network.target"
         "cryptsetup.target"
       ];
+      wantedBy = [ "local-fs.target" ];
       serviceConfig = {
         Type = "oneshot";
         RemainAfterExit = true;
-        RequiresMountsFor = [ "/etc/nixos" ];
+        ExecStartPre = [
+          "${pkgs.cryptsetup}/bin/cryptsetup luksOpen --key-file=/etc/nixos/moonstore-luks /dev/nvme0n1p1 moonstore"
+        ];
         ExecStart = [
-          ''
-            ${pkgs.bash}/bin/bash -c "
-              set -ex
-              ${pkgs.cryptsetup}/bin/cryptsetup luksOpen --key-file=/etc/nixos/moonstore-luks /dev/nvme0n1p1 moonstore || exit 1
-              [ -e /dev/mapper/moonstore ] || exit 1
-              ${pkgs.e2fsprogs}/bin/e2fsck -f /dev/mapper/moonstore || true
-            "
-          ''
+          "${pkgs.util-linux}/bin/mount /dev/mapper/moonstore /mnt/moonstore"
         ];
         ExecStop = [
-          ''
-            ${pkgs.bash}/bin/bash -c "
-              ${pkgs.util-linux}/bin/umount -l /mnt/moonstore || true
-              ${pkgs.cryptsetup}/bin/cryptsetup luksClose moonstore || true
-            "
-          ''
+          "${pkgs.util-linux}/bin/umount /mnt/moonstore"
+          "${pkgs.cryptsetup}/bin/cryptsetup luksClose moonstore"
         ];
       };
-    };
-
-    fileSystems."/mnt/moonstore" = {
-      device = "/dev/mapper/moonstore";
-      fsType = "ext4";
-      options = [ "defaults" "noatime" ];
-      depends = [ "moonstore.service" ];
     };
   };
 }
