@@ -11,8 +11,8 @@
       host = "0.0.0.0"; # 8080/tcp default
       openFirewall = true;
       environment = {
-        OLLAMA_API_BASE_URL = "http://hedgehog.magic.internal:11434/api";
-        OLLAMA_BASE_URL = "http://hedgehog.magic.internal:11434";
+        OLLAMA_API_BASE_URL = "http://localhost:11434/api";
+        OLLAMA_BASE_URL = "http://localhost:11434";
         ANONYMIZED_TELEMETRY = "False";
         DO_NOT_TRACK = "True";
         SCARF_NO_ANALYTICS = "True";
