@@ -8,15 +8,15 @@
   config = lib.mkIf config.mine.nvidia.enable {
 
     nixpkgs.config.nvidia.acceptLicense = true;
-    environment.systemPackages = with pkgs; [ libva ];
-
+    nixpkgs.config.cudaSupport = true;
+    environment.systemPackages = with pkgs; [ cudatoolkit libva ];
     hardware = {
       graphics = {
         enable = true;
         enable32Bit = true;
       };
       nvidia = {
-	datacenter.enable = true;
+        datacenter.enable = true;
         modesetting.enable = true;
         powerManagement.enable = true; # changed from default false
         open = false;

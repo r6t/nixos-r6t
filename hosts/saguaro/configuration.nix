@@ -13,21 +13,23 @@
     hostName = "saguaro";
     firewall = {
       allowedTCPPorts = [
-        22
-        8096
-        8920
-        5201
-        8080
-        8384
         19999
+        22
+	2222
         22000
+        5201
         6595
-        8888
-        9090
-        9999
         7878
+        8080
+        8096
+        8384
         8686
+        8888
+        8920
         8989
+        9090
+	9925
+        9999
       ];
       allowedUDPPorts = [ 1900 7359 5353 ];
     };
@@ -44,17 +46,14 @@
     env.enable = true;
     fwupd.enable = true;
     fzf.enable = true;
-    immich.enable = true;
     iperf.enable = true;
     localization.enable = true;
     netdata.enable = true;
     networkmanager.enable = true;
     nix.enable = true;
     nixpkgs.enable = true;
-    nvidia.enable = true;
     open-webui.enable = true;
     paperless.enable = true;
-    selfhost.enable = false;
     sops.enable = true;
     ssh.enable = true;
     syncthing.enable = true;
