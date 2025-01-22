@@ -12,6 +12,13 @@
   networking = {
     hostName = "moon";
     enableIPv6 = true;
+    firewall = {
+      allowedTCPPorts = [
+        22
+	8123
+	11434
+      ];
+    };
   };
 
   system.stateVersion = "23.11";
@@ -19,11 +26,12 @@
   mine = {
     bolt.enable = true;
     bootloader.enable = true;
-    docker.enable = false;
+    docker.enable = true;
     env.enable = true;
     fwupd.enable = true;
     fzf.enable = true;
     localization.enable = true;
+    moonstore.enable = true;
     netdata.enable = true;
     networkmanager.enable = true;
     nix.enable = true;

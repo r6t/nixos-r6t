@@ -7,6 +7,7 @@
 
   config = lib.mkIf config.mine.nvidia.enable {
 
+    nixpkgs.config.nvidia.acceptLicense = true;
     environment.systemPackages = with pkgs; [ libva ];
 
     hardware = {
@@ -15,16 +16,13 @@
         enable32Bit = true;
       };
       nvidia = {
+	datacenter.enable = true;
         modesetting.enable = true;
         powerManagement.enable = true; # changed from default false
         open = false;
         nvidiaSettings = true;
       };
       nvidia-container-toolkit.enable = true;
-    };
-
-    services.xserver = {
-      videoDrivers = [ "nvidia" ];
     };
   };
 }
