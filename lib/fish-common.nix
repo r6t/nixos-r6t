@@ -3,7 +3,7 @@
     function fish_prompt
       # Get hostname and create abbreviation
       set -l host (hostname)
-      set -l short_host (string replace -r '([a-zA-Z])[a-zA-Z]*[-.]?([a-zA-Z])?[a-zA-Z]*' '$1$2' "$host")
+      set -l short_host (string sub -l 1 $host)""(string sub -s -1 $host)
 
       # User, abbreviated hostname, cwd
       echo -n (set_color 3ddbd9)$USER(set_color normal)@(set_color 8d8d8d)$short_host
@@ -28,7 +28,6 @@
       if test -n "$IN_NIX_SHELL"
         echo -n (set_color 82cfff)" ❄ "$DEVSHELL_NAME
       end
-
 
       # Python venv indicator
       if test -n "$VIRTUAL_ENV"

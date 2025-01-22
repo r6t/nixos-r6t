@@ -97,6 +97,7 @@
     iperf.enable = true;
     kde.enable = true;
     localization.enable = true;
+    libimobiledevice.enable = true;
     mullvad.enable = true;
     netdata.enable = true;
     networkmanager.enable = true;

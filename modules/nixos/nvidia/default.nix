@@ -10,7 +10,6 @@
     nixpkgs.config.nvidia.acceptLicense = true;
     nixpkgs.config.cudaSupport = true;
     environment.systemPackages = with pkgs; [ cudatoolkit libva ];
-
     hardware = {
       graphics = {
         enable = true;

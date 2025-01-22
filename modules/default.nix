@@ -65,6 +65,7 @@
     nixos/iperf/default.nix
     nixos/kde/default.nix
     nixos/libvirtd/default.nix
+    nixos/libimobiledevice/default.nix
     nixos/localization/default.nix
     nixos/mullvad/default.nix
     nixos/netdata/default.nix
