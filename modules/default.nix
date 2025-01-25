@@ -14,6 +14,7 @@
     flatpak/remmina/default.nix
     flatpak/retroarch/default.nix
     flatpak/steam/default.nix
+    flatpak/super-productivity/default.nix
     flatpak/supersonic/default.nix
     flatpak/zoom/default.nix
 
@@ -42,7 +43,6 @@
     home/python3/default.nix
     home/signal-desktop/default.nix
     home/ssh/default.nix
-    home/super-productivity/default.nix
     home/libvirtd/default.nix
     home/virt-viewer/default.nix
     home/vscodium/default.nix
@@ -54,6 +54,7 @@
     nixos/bolt/default.nix
     nixos/bootloader/default.nix
     nixos/bridge/default.nix
+    nixos/certbot/default.nix
     nixos/czkawka/default.nix
     nixos/docker/default.nix
     nixos/env/default.nix
@@ -78,7 +79,6 @@
     nixos/podman/default.nix
     nixos/printing/default.nix
     nixos/rdfind/default.nix
-    nixos/selfhost/default.nix
     nixos/sops/default.nix
     nixos/sound/default.nix
     nixos/ssh/default.nix

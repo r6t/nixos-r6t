@@ -40,6 +40,7 @@
   mine = {
     bolt.enable = true;
     bootloader.enable = true;
+    certbot.enable = true;
     docker.enable = true;
     env.enable = true;
     fwupd.enable = true;
