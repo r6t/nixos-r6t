@@ -13,6 +13,9 @@
     hostName = "saguaro";
     firewall = {
       allowedTCPPorts = [
+	80
+	1080
+	10080
         19999
         22
 	2222
@@ -52,8 +55,6 @@
     networkmanager.enable = true;
     nix.enable = true;
     nixpkgs.enable = true;
-    open-webui.enable = true;
-    paperless.enable = true;
     sops.enable = true;
     ssh.enable = true;
     syncthing.enable = true;
