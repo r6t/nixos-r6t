@@ -69,13 +69,12 @@
     nixos/libimobiledevice/default.nix
     nixos/localization/default.nix
     nixos/mullvad/default.nix
+    nixos/moonstore/default.nix
     nixos/netdata/default.nix
     nixos/networkmanager/default.nix
     nixos/nix/default.nix
     nixos/nixpkgs/default.nix
     nixos/nvidia/default.nix
-    nixos/open-webui/default.nix
-    nixos/paperless/default.nix
     nixos/podman/default.nix
     nixos/printing/default.nix
     nixos/rdfind/default.nix
