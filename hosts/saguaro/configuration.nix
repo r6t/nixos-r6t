@@ -13,12 +13,12 @@
     hostName = "saguaro";
     firewall = {
       allowedTCPPorts = [
-	80
-	1080
-	10080
+        80
+        1080
+        10080
         19999
         22
-	2222
+        2222
         22000
         5201
         6595
@@ -33,7 +33,7 @@
         8920
         8989
         9090
-	9925
+        9925
         9999
       ];
       allowedUDPPorts = [ 1900 7359 5353 ];
@@ -47,6 +47,7 @@
   mine = {
     bolt.enable = true;
     bootloader.enable = true;
+    certbot.enable = true;
     docker.enable = true;
     env.enable = true;
     fwupd.enable = true;

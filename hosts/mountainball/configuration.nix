@@ -49,6 +49,7 @@
       remmina.enable = true;
       retroarch.enable = true;
       steam.enable = true;
+      super-productivity.enable = true;
       supersonic.enable = true;
       zoom.enable = true;
     };
@@ -77,7 +78,7 @@
       python3.enable = true;
       signal-desktop.enable = true;
       ssh.enable = true;
-      super-productivity.enable = true;
+      # super-productivity.enable = true;
       virt-viewer.enable = true;
       vscodium.enable = true;
       webcord.enable = true;
@@ -88,6 +89,7 @@
     bluetooth.enable = true;
     bolt.enable = true;
     bootloader.enable = true;
+    certbot.enable = true;
     czkawka.enable = true;
     docker.enable = true;
     env.enable = true;
