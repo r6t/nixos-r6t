@@ -380,7 +380,7 @@
     "ssh-keys": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-fzyR0r2nn5lvoUPjyc3GHlohk3vCp5pE3+v9346gva4=",
+        "narHash": "sha256-h3Ls+7uumz/M2/UU2h6b04kdkZdGL3igiCq/ozOvMVo",
         "type": "file",
         "url": "https://github.com/r6t.keys"
       },
