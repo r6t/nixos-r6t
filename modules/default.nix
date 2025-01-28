@@ -14,7 +14,6 @@
     flatpak/remmina/default.nix
     flatpak/retroarch/default.nix
     flatpak/steam/default.nix
-    flatpak/super-productivity/default.nix
     flatpak/supersonic/default.nix
     flatpak/zoom/default.nix
 
@@ -50,11 +49,11 @@
     home/yt-dlp/default.nix
     home/zellij/default.nix
 
+    nixos/apache/default.nix
     nixos/bluetooth/default.nix
     nixos/bolt/default.nix
     nixos/bootloader/default.nix
     nixos/bridge/default.nix
-    nixos/certbot/default.nix
     nixos/czkawka/default.nix
     nixos/docker/default.nix
     nixos/env/default.nix

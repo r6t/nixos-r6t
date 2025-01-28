@@ -28,7 +28,7 @@
         8384
         8443
         8686
-	8680
+        8680
         8888
         8920
         8989
@@ -47,7 +47,6 @@
   mine = {
     bolt.enable = true;
     bootloader.enable = true;
-    certbot.enable = true;
     docker.enable = true;
     env.enable = true;
     fwupd.enable = true;
