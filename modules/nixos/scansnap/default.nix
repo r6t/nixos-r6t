@@ -8,58 +8,69 @@
       drivers.scanSnap.enable = true;
     };
 
-    users.users.${userConfig.username}.extraGroups = [ "scanner" "lp" ];
+    users.users.${userConfig.username} = {
+      extraGroups = [ "scanner" "lp" ];
+    };
 
-    environment.systemPackages = with pkgs; let
-      mkScanScript = { scanType ? "duplex" }: writeScriptBin "scansnap-${scanType}" ''
-                #!${fish}/bin/fish
-                set scan_type "${scanType}"
-                set timestamp (date +"%Y-%m-%d-%H-%M-%S")
-                set device_id "epjitsu:libusb:001:009"
-                set output_dir "/home/${userConfig.username}/scans"
-
-                mkdir -p $output_dir
-
-                if not contains $scan_type front duplex
-                  echo "Invalid scan type: $scan_type. Use 'front' or 'duplex'"
-                  exit 1
-                end
-        
-        	# Run document scanner, crop, optimize and OCR
-                scanimage \
-                  --device-name $device_id \
-                  --format=png \
-                  --source "ADF "(string upper $scan_type) \
-                  --mode Color \
-                  --resolution 300 \
-                  --batch=scan-%d.png \
-                && magick scan-*.png \
-                  -fuzz 15% \
-                  -trim +repage \
-                  -shave 2x2 \
-                  -blur 0x0.5 \
-                  -sharpen 0x1 \
-                  -background white \
-                  -flatten \
-                  -define pdf:use-trimbox=true \
-                  -units PixelsPerInch \
-                  -density 300 \
-                  scansnap-temp.pdf \
-                && ocrmypdf \
-                  --rotate-pages \
-                  --deskew \
-                  --clean-final \
-                  --optimize 3 \
-                  --image-dpi 300 \
-                  scansnap-temp.pdf "$output_dir/scansnap-$scan_type-$timestamp.pdf" \
-                && rm scan-*.png scansnap-temp.pdf
-      '';
-    in
-    [
+    environment.systemPackages = with pkgs; [
       imagemagick
       ocrmypdf
-      (mkScanScript { scanType = "front"; })
-      (mkScanScript { scanType = "duplex"; })
+      (writeScriptBin "scansnap-front" ''
+        #!${fish}/bin/fish
+        set timestamp (date +"%Y-%m-%d-%H-%M-%S")
+        set device_id "epjitsu:libusb:001:031"
+        set output_dir "/home/${userConfig.username}/scans"
+
+        mkdir -p $output_dir
+
+        scanimage \
+          --device-name $device_id \
+          --format=png \
+          --source "ADF Front" \
+          --mode Color \
+          --resolution 300 \
+          --batch=scan-%d.png \
+        && magick scan-*.png \
+          -units PixelsPerInch \
+          -density 300 \
+          -define pdf:use-trimbox=true \
+          scansnap-temp.pdf \
+        && ocrmypdf \
+          --rotate-pages \
+          --deskew \
+          --clean-final \
+          --image-dpi 300 \
+          scansnap-temp.pdf "$output_dir/scansnap-front-$timestamp.pdf" \
+        && rm scan-*.png scansnap-temp.pdf
+      '')
+      (writeScriptBin "scansnap-duplex" ''
+        #!${fish}/bin/fish
+        set timestamp (date +"%Y-%m-%d-%H-%M-%S")
+        set device_id "epjitsu:libusb:001:031"
+        set output_dir "/home/${userConfig.username}/scans"
+
+        mkdir -p $output_dir
+
+        scanimage \
+          --device-name $device_id \
+          --format=png \
+          --source "ADF Duplex" \
+          --mode Color \
+          --resolution 300 \
+          --batch=scan-%d.png \
+        && magick scan-*.png \
+          -units PixelsPerInch \
+          -density 300 \
+          -define pdf:use-trimbox=true \
+          scansnap-temp.pdf \
+        && ocrmypdf \
+          --rotate-pages \
+          --deskew \
+          --clean-final \
+          --image-dpi 300 \
+          scansnap-temp.pdf "$output_dir/scansnap-duplex-$timestamp.pdf" \
+        && rm scan-*.png scansnap-temp.pdf
+      '')
     ];
 
     system.activationScripts.create-scan-dir = ''
@@ -68,4 +79,47 @@
     '';
   };
 }
+
+#         #!${fish}/bin/fish
+#         set timestamp (date +"%Y-%m-%d-%H-%M-%S")
+#         set device_id "epjitsu:libusb:001:031"
+#         set output_dir "/home/${userConfig.username}/scans"
+#         
+#         mkdir -p $output_dir
+#         
+#         # 1. Scan with optimized settings
+#         scanimage \
+#           --device-name $device_id \
+#           --format=png \
+#           --source "ADF Duplex" \
+#           --mode Gray \        # Grayscale reduces file size dramatically
+#           --resolution 200 \   # Lower resolution for documents
+#           --batch=scan-%d.png || exit 1
+#         
+#         # 2. Convert with compression
+#         magick scan-*.png \
+#           -units PixelsPerInch \
+#           -density 200 \
+#           -define pdf:use-trimbox=true \
+#           -compress JPEG \     # Explicit JPEG compression
+#           -quality 60 \        # Quality balance (60-80 for documents)
+#           scansnap-temp.pdf || exit 1
+#         
+#         # 3. OCR with aggressive optimization
+#         ocrmypdf \
+#           --rotate-pages \
+#           --deskew \
+#           --optimize 3 \       # Maximum optimization level
+#           --jpeg-quality 40 \   # Aggressive compression
+#           --jbig2-lossy \      # Better compression for B&W text
+#           --remove-vectors \   # Prevent vector art bloat
+#           --image-dpi 200 \    # Match scan resolution
+#           scansnap-temp.pdf "$output_dir/scansnap-duplex-$timestamp.pdf" || exit 1
+#         
+#         # 4. Cleanup
+#         rm -f scan-*.png scansnap-temp.pdf
+# To Modify Further:
+#    Quality Tradeoffs: Adjust -quality/--jpeg-quality (40-80 range)
+#    Color Documents: Keep --mode Color but add --color-conversion-strategy RGB in OCRmyPDF
+#    Resolution: For very dense text, increase to --resolution 250
 
