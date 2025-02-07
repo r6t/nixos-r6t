@@ -77,6 +77,7 @@
     nixos/podman/default.nix
     nixos/printing/default.nix
     nixos/rdfind/default.nix
+    nixos/scansnap/default.nix
     nixos/sops/default.nix
     nixos/sound/default.nix
     nixos/ssh/default.nix

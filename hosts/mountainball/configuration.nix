@@ -68,7 +68,6 @@
       freecad.enable = true;
       git.enable = true;
       home-manager.enable = true;
-      k2pdfopt.enable = true;
       kde-apps.enable = true;
       mpv.enable = true;
       nixvim.enable = true;
@@ -105,6 +104,7 @@
     nixpkgs.enable = true;
     printing.enable = true;
     rdfind.enable = true;
+    scansnap.enable = true;
     sops.enable = true;
     sound.enable = true;
     ssh.enable = true;

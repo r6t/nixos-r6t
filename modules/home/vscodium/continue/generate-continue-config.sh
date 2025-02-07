@@ -6,7 +6,7 @@ cat <<EOF > /home/r6t/.continue/config.json
     {
       "model": "AUTODETECT",
       "title": "Ollama",
-      "apiBase": "http://hedgehog.magic.internal:11434",
+      "apiBase": "http://moon.magic.internal:11434",
       "provider": "ollama"
     }
   ],
@@ -14,7 +14,7 @@ cat <<EOF > /home/r6t/.continue/config.json
       "title": "Tab Autocomplete Model",
       "provider": "ollama",
       "model": "qwen2.5-coder:14b",
-      "apiBase": "http://hedgehog.magic.internal:11434"
+      "apiBase": "http://moon.magic.internal:11434"
   },
   "slashCommands": [
     {
