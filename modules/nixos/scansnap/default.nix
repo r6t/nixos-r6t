@@ -55,19 +55,19 @@
           --device-name $device_id \
           --format=png \
           --source "ADF Duplex" \
-          --mode Color \
-          --resolution 300 \
+          --mode Gray \
+          --resolution 200 \
           --batch=scan-%d.png \
         && magick scan-*.png \
           -units PixelsPerInch \
-          -density 300 \
+          -density 200 \
           -define pdf:use-trimbox=true \
           scansnap-temp.pdf \
         && ocrmypdf \
           --rotate-pages \
           --deskew \
           --clean-final \
-          --image-dpi 300 \
+          --image-dpi 200 \
           scansnap-temp.pdf "$output_dir/scansnap-duplex-$timestamp.pdf" \
         && rm scan-*.png scansnap-temp.pdf
       '')
@@ -93,6 +93,8 @@
 #           --format=png \
 #           --source "ADF Duplex" \
 #           --mode Gray \        # Grayscale reduces file size dramatically
+# --mode Gray \         # Gray or Color
+#         --resolution 200 \    # Dropped from 300
 #           --resolution 200 \   # Lower resolution for documents
 #           --batch=scan-%d.png || exit 1
 #         
