@@ -25,21 +25,22 @@
 
         scanimage \
           --device-name $device_id \
-          --format=png \
-          --source "ADF Front" \
-          --mode Color \
-          --resolution 300 \
+          --mode Gray \
+          --resolution 200 \
           --batch=scan-%d.png \
         && magick scan-*.png \
           -units PixelsPerInch \
-          -density 300 \
+          -density 200 \
           -define pdf:use-trimbox=true \
           scansnap-temp.pdf \
         && ocrmypdf \
           --rotate-pages \
           --deskew \
+          --jpeg-quality 40 \
+          --jbig2-lossy \
+          --remove-vectors \
           --clean-final \
-          --image-dpi 300 \
+          --image-dpi 200 \
           scansnap-temp.pdf "$output_dir/scansnap-front-$timestamp.pdf" \
         && rm scan-*.png scansnap-temp.pdf
       '')
@@ -66,6 +67,9 @@
         && ocrmypdf \
           --rotate-pages \
           --deskew \
+          --jpeg-quality 40 \
+          --jbig2-lossy \
+          --remove-vectors \
           --clean-final \
           --image-dpi 200 \
           scansnap-temp.pdf "$output_dir/scansnap-duplex-$timestamp.pdf" \
@@ -80,21 +84,13 @@
   };
 }
 
-#         #!${fish}/bin/fish
-#         set timestamp (date +"%Y-%m-%d-%H-%M-%S")
-#         set device_id "epjitsu:libusb:001:031"
-#         set output_dir "/home/${userConfig.username}/scans"
-#         
-#         mkdir -p $output_dir
-#         
 #         # 1. Scan with optimized settings
 #         scanimage \
 #           --device-name $device_id \
 #           --format=png \
 #           --source "ADF Duplex" \
 #           --mode Gray \        # Grayscale reduces file size dramatically
-# --mode Gray \         # Gray or Color
-#         --resolution 200 \    # Dropped from 300
+#           --mode Color \         # Gray or Color
 #           --resolution 200 \   # Lower resolution for documents
 #           --batch=scan-%d.png || exit 1
 #         
@@ -105,21 +101,16 @@
 #           -define pdf:use-trimbox=true \
 #           -compress JPEG \     # Explicit JPEG compression
 #           -quality 60 \        # Quality balance (60-80 for documents)
+#           I found compress JPEG and quality 60 acutally made files bigger, going from 1.3 to 1.7MB in an example.
 #           scansnap-temp.pdf || exit 1
 #         
-#         # 3. OCR with aggressive optimization
+#         # 3. OCR with aggressive optimization, going from 1.3 to 1.2MB in the same example.
 #         ocrmypdf \
-#           --rotate-pages \
-#           --deskew \
 #           --optimize 3 \       # Maximum optimization level
 #           --jpeg-quality 40 \   # Aggressive compression
 #           --jbig2-lossy \      # Better compression for B&W text
 #           --remove-vectors \   # Prevent vector art bloat
 #           --image-dpi 200 \    # Match scan resolution
-#           scansnap-temp.pdf "$output_dir/scansnap-duplex-$timestamp.pdf" || exit 1
-#         
-#         # 4. Cleanup
-#         rm -f scan-*.png scansnap-temp.pdf
 # To Modify Further:
 #    Quality Tradeoffs: Adjust -quality/--jpeg-quality (40-80 range)
 #    Color Documents: Keep --mode Color but add --color-conversion-strategy RGB in OCRmyPDF
