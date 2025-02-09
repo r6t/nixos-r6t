@@ -30,11 +30,13 @@
   mine = {
     bolt.enable = true;
     bootloader.enable = true;
+    bridge.enable = true;
     docker.enable = true;
     env.enable = true;
     fwupd.enable = true;
     fzf.enable = true;
     localization.enable = true;
+    libvirtd.enable = true;
     moonstore.enable = true;
     netdata.enable = true;
     networkmanager.enable = true;

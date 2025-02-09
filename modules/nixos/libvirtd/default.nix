@@ -8,6 +8,8 @@
   config = lib.mkIf config.mine.libvirtd.enable {
     environment.systemPackages = with pkgs; [
       virtiofsd
+      usbutils
+      bridge-utils
     ];
     virtualisation = {
       libvirtd = {
