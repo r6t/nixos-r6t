@@ -16,7 +16,7 @@
       colorschemes.oxocarbon.enable = true;
       highlight.ExtraWhitespace.bg = "red";
       keymaps = [
-        # codeCcmpanion
+        # codecompanion
         {
           mode = [ "n" "v" ];
           key = "<leader>aa";
@@ -124,7 +124,7 @@
                   function()
                     return require('codecompanion.adapters').extend('ollama', {
                       env = {
-                        url = "http://hedgehog.magic.internal:11434",
+                        url = "http://moon.magic.internal:11434",
                       },
                       parameters = {
                         temperature = 0.8,

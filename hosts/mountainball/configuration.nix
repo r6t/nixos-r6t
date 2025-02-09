@@ -68,7 +68,6 @@
       freecad.enable = true;
       git.enable = true;
       home-manager.enable = true;
-      k2pdfopt.enable = true;
       kde-apps.enable = true;
       mpv.enable = true;
       nixvim.enable = true;
@@ -77,7 +76,6 @@
       python3.enable = true;
       signal-desktop.enable = true;
       ssh.enable = true;
-      super-productivity.enable = true;
       virt-viewer.enable = true;
       vscodium.enable = true;
       webcord.enable = true;
@@ -85,6 +83,7 @@
       zellij.enable = true;
     };
 
+    apache.enable = true;
     bluetooth.enable = true;
     bolt.enable = true;
     bootloader.enable = true;
@@ -105,6 +104,7 @@
     nixpkgs.enable = true;
     printing.enable = true;
     rdfind.enable = true;
+    scansnap.enable = true;
     sops.enable = true;
     sound.enable = true;
     ssh.enable = true;

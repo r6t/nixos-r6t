@@ -2,7 +2,7 @@
 
   options = {
     mine.home.k2pdfopt.enable =
-      lib.mkEnableOption "enable k2pdfopt in home-manager";
+      lib.mkEnableOption "enable k2pdfopt pdf optimizer for kindle in home-manager";
   };
 
   config = lib.mkIf config.mine.home.k2pdfopt.enable {

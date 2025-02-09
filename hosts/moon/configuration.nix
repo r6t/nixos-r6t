@@ -14,20 +14,22 @@
     enableIPv6 = true;
     firewall = {
       allowedTCPPorts = [
-	80
-	85
-        22
 	100
-	443
+	11000
 	2283
-	3003
 	3000
+	3003
+	443
+	80
 	8080
 	8123
-        8443
+	85
 	8888
-	11434
-	11000
+        11434
+        22
+        8123
+        8443
+        8888
       ];
     };
   };
@@ -37,11 +39,13 @@
   mine = {
     bolt.enable = true;
     bootloader.enable = true;
+    bridge.enable = true;
     docker.enable = true;
     env.enable = true;
     fwupd.enable = true;
     fzf.enable = true;
     localization.enable = true;
+    libvirtd.enable = true;
     moonstore.enable = true;
     netdata.enable = true;
     networkmanager.enable = true;

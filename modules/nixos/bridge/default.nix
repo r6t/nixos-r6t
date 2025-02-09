@@ -2,7 +2,7 @@
 
   options = {
     mine.bridge.enable =
-      lib.mkEnableOption "enable network bridge";
+      lib.mkEnableOption "enable moon network bridge";
   };
 
   config = lib.mkIf config.mine.bridge.enable {
@@ -12,7 +12,7 @@
           useDHCP = true;
         };
       };
-      bridges.br0.interfaces = [ "eno1" ];
+      bridges.br0.interfaces = [ "enp89s0" ];
     };
   };
 }

@@ -42,7 +42,6 @@
     home/python3/default.nix
     home/signal-desktop/default.nix
     home/ssh/default.nix
-    home/super-productivity/default.nix
     home/libvirtd/default.nix
     home/virt-viewer/default.nix
     home/vscodium/default.nix
@@ -50,6 +49,7 @@
     home/yt-dlp/default.nix
     home/zellij/default.nix
 
+    nixos/apache/default.nix
     nixos/bluetooth/default.nix
     nixos/bolt/default.nix
     nixos/bootloader/default.nix
@@ -74,13 +74,10 @@
     nixos/nix/default.nix
     nixos/nixpkgs/default.nix
     nixos/nvidia/default.nix
-    nixos/ollama/default.nix
-    nixos/open-webui/default.nix
-    nixos/paperless/default.nix
     nixos/podman/default.nix
     nixos/printing/default.nix
     nixos/rdfind/default.nix
-    nixos/selfhost/default.nix
+    nixos/scansnap/default.nix
     nixos/sops/default.nix
     nixos/sound/default.nix
     nixos/ssh/default.nix
