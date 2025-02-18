@@ -10,6 +10,7 @@
   ];
 
   networking = {
+    firewall.allowedTCPPorts = [ 22 5252 ];
     hostName = "exit-node";
     enableIPv6 = true;
   };

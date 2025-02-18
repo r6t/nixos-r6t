@@ -9,6 +9,8 @@
     environment.systemPackages = with pkgs; [
       virtiofsd
       usbutils
+      libusb1
+      pkg-config
       bridge-utils
     ];
     virtualisation = {
@@ -18,7 +20,7 @@
         # package = pkgs.qemu_kvm;
       };
     };
-    users.users.${userConfig.username}.extraGroups = [ "libvirtd" ];
+    users.users.${userConfig.username}.extraGroups = [ "libvirtd" "plugdev" "dialout" ];
     programs.virt-manager.enable = true;
   };
 }

@@ -14,6 +14,7 @@
     firewall = {
       allowedTCPPorts = [
         80
+	5252
         1080
         10080
         19999
