@@ -1,4 +1,4 @@
-{ lib, config, pkgs, ... }: {
+{ lib, config, ... }: {
 
   options = {
     mine.grafana.enable =
@@ -22,14 +22,14 @@
           type = "loki";
           access = "proxy";
           url = "http://localhost:3030";
-          jsonData = {};
-          secureJsonData = {};
+          jsonData = { };
+          secureJsonData = { };
           editable = true;
           orgId = 1;
           version = 1;
-          secureJsonFields = {};
+          secureJsonFields = { };
           jsonData = {
-            httpHeaderName1 = "X-Scope-OrgID"; 
+            httpHeaderName1 = "X-Scope-OrgID";
           };
           secureJsonData = {
             httpHeaderValue1 = "fake";
