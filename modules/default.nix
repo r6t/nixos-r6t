@@ -78,6 +78,7 @@
     nixos/nvidia/default.nix
     nixos/podman/default.nix
     nixos/printing/default.nix
+    nixos/prometheus/default.nix
     nixos/rdfind/default.nix
     nixos/scansnap/default.nix
     nixos/sops/default.nix

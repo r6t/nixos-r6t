@@ -14,6 +14,7 @@
     enableIPv6 = true;
     firewall = {
       allowedTCPPorts = [
+	9001
 	5252
 	100
 	11000
@@ -59,6 +60,7 @@
     nix.enable = true;
     nixpkgs.enable = true;
     nvidia.enable = true;
+    prometheus.enable = true;
     sops.enable = true;
     ssh.enable = true;
     syncthing.enable = true;
