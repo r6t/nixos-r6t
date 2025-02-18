@@ -69,6 +69,7 @@
     nixos/libimobiledevice/default.nix
     nixos/libvirtd/default.nix
     nixos/localization/default.nix
+    nixos/loki/default.nix
     nixos/moonstore/default.nix
     nixos/mullvad/default.nix
     nixos/netdata/default.nix

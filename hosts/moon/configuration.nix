@@ -53,6 +53,7 @@
     fzf.enable = true;
     grafana.enable = true;
     localization.enable = true;
+    loki.enable = true;
     libvirtd.enable = true;
     moonstore.enable = true;
     netdata.enable = true;
