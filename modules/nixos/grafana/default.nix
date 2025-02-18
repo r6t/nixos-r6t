@@ -11,18 +11,31 @@
       enable = true;
       settings = {
         server = {
-          # Listening Address
           http_addr = "0.0.0.0";
-          # and Port
-          http_port = 3000;
-          # Grafana needs to know on which domain and URL it's running
-          domain = "moon.magic.internal";
-          root_url = "http://moon.magic.internal:3000/"; # Not needed if it is `https://your.domain/`
+          domain = "localhost";
           serve_from_sub_path = true;
         };
       };
+      provision.datasources.settings.datasources = [
+        {
+          name = "Loki";
+          type = "loki";
+          access = "proxy";
+          url = "http://localhost:3030";
+          jsonData = {};
+          secureJsonData = {};
+          editable = true;
+          orgId = 1;
+          version = 1;
+          secureJsonFields = {};
+          jsonData = {
+            httpHeaderName1 = "X-Scope-OrgID"; 
+          };
+          secureJsonData = {
+            httpHeaderValue1 = "fake";
+          };
+        }
+      ];
     };
-
-    environment.systemPackages = with pkgs; [ grafana ];
   };
 }

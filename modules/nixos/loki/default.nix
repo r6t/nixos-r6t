@@ -11,6 +11,7 @@
         retentionDays = 7;
       in {
         server.http_listen_port = 3030;
+	server.http_listen_address = "0.0.0.0";
 
         common = {
           storage = {
