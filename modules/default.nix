@@ -60,16 +60,17 @@
     nixos/env/default.nix
     nixos/exit-node-routing/default.nix
     nixos/fonts/default.nix
-    nixos/fzf/default.nix
     nixos/fwupd/default.nix
+    nixos/fzf/default.nix
+    nixos/grafana/default.nix
     nixos/immich/default.nix
     nixos/iperf/default.nix
     nixos/kde/default.nix
-    nixos/libvirtd/default.nix
     nixos/libimobiledevice/default.nix
+    nixos/libvirtd/default.nix
     nixos/localization/default.nix
-    nixos/mullvad/default.nix
     nixos/moonstore/default.nix
+    nixos/mullvad/default.nix
     nixos/netdata/default.nix
     nixos/networkmanager/default.nix
     nixos/nix/default.nix

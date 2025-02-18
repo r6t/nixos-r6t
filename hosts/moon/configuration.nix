@@ -50,6 +50,7 @@
     env.enable = true;
     fwupd.enable = true;
     fzf.enable = true;
+    grafana.enable = true;
     localization.enable = true;
     libvirtd.enable = true;
     moonstore.enable = true;
