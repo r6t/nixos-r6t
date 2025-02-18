@@ -40,6 +40,7 @@
       bottles.enable = true;
       calibre.enable = true;
       deezer.enable = true;
+      element.enable = true;
       inkscape.enable = true;
       jellyfin-player.enable = true;
       libreoffice.enable = true;
@@ -96,6 +97,7 @@
     iperf.enable = true;
     kde.enable = true;
     localization.enable = true;
+    libvirtd.enable = true;
     libimobiledevice.enable = true;
     mullvad.enable = true;
     netdata.enable = true;

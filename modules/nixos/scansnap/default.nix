@@ -18,7 +18,7 @@
       (writeScriptBin "scansnap-front" ''
         #!${fish}/bin/fish
         set timestamp (date +"%Y-%m-%d-%H-%M-%S")
-        set device_id "epjitsu:libusb:001:035"
+        set device_id "epjitsu:libusb:001:082"
         set output_dir "/home/${userConfig.username}/scans"
 
         mkdir -p $output_dir
