@@ -6,6 +6,7 @@
   };
 
   config = lib.mkIf config.mine.ssh.enable {
+    programs.fuse.userAllowOther = true;
     networking.firewall.allowedTCPPorts = [ 22 ];
     services.openssh = {
       enable = true;

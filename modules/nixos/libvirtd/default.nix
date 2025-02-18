@@ -17,7 +17,6 @@
       libvirtd = {
         enable = true;
         qemu.ovmf.enable = true;
-        # package = pkgs.qemu_kvm;
       };
     };
     users.users.${userConfig.username}.extraGroups = [ "libvirtd" "plugdev" "dialout" ];

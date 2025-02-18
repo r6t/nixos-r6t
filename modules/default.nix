@@ -5,6 +5,7 @@
     flatpak/bottles/default.nix
     flatpak/calibre/default.nix
     flatpak/deezer/default.nix
+    flatpak/element/default.nix
     flatpak/inkscape/default.nix
     flatpak/jellyfin-player/default.nix
     flatpak/libreoffice/default.nix
