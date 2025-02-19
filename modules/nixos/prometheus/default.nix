@@ -10,6 +10,10 @@
     services.prometheus = {
       enable = true;
       port = 9001;
+      retentionTime = "30d";
+      remoteWrite = [{
+        url = "http://localhost:9090/api/v1/write";
+      }];
       exporters = {
         node = {
           enable = true;
@@ -19,9 +23,10 @@
       };
       scrapeConfigs = [
         {
-          job_name = "moon";
+          job_name = "alloy_nodes";
+          honor_labels = true;
           static_configs = [{
-            targets = [ "moon:${toString config.services.prometheus.exporters.node.port}" ];
+            targets = [ "localhost:12345" ];
           }];
         }
       ];
