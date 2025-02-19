@@ -30,6 +30,16 @@
           }];
         }
       ];
+      ruleFiles = [
+        (pkgs.writeText "alert.rules" ''
+          groups:
+          - name: node_alerts
+            rules:
+            - alert: HighMemoryUsage
+              expr: (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) * 100 < 10
+              for: 5m
+        '')
+      ];
     };
 
     environment.systemPackages = with pkgs; [ prometheus ];
