@@ -11,6 +11,7 @@
       enable = true;
       port = 9001;
       retentionTime = "30d";
+      # web_external_url = "http://moon:9001/";
       remoteWrite = [{
         url = "http://localhost:9090/api/v1/write";
       }];

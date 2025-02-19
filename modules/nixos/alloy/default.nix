@@ -14,17 +14,23 @@
     users.groups.alloy = { };
 
     environment.etc."alloy/config.river".text =
+      let
+        hostname = config.networking.hostName;
+        excludedHosts = [ "homeassistant" "scottsdale" "truenas" ];
+      in
       ''
         discovery.tailscale "peers" {
-          tags = ["tag:monitored"]
-        }
-        
+          filter = "os == \"linux\""
+        } 
+
         prometheus.scrape "tailnet" {
           targets = [
             for host in discovery.tailscale.peers.targets : {
-              __address__ = "${host}:9100",
-              __meta_tailscale_hostname = host.name,
-            }
+              // Explicit Tailscale IP access
+              __address__ = "$${host.addresses[0]}:9100",
+              __meta_tailscale_hostname = "$${host.name}",
+              __meta_os = "$${host.os}"
+            } if !std.member(${builtins.toJSON excludedHosts}, host.name)
           ]
           forward_to = [prometheus.remote_write.central.receiver]
         }
@@ -79,6 +85,8 @@
 
       serviceConfig = {
         ExecStart = "${pkgs.grafana-alloy}/bin/alloy run /etc/alloy/config.river";
+        RestartSec = "10s";
+        RuntimeMaxSec = "300s";
         WorkingDirectory = "/var/lib/alloy";
         Restart = "always";
         User = "alloy";
@@ -90,6 +98,8 @@
       };
 
       wantedBy = [ "multi-user.target" ];
+      after = [ "tailscaled.service" ];
+      requires = [ "tailscaled.service" ];
     };
 
     systemd.tmpfiles.rules = [

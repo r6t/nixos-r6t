@@ -12,10 +12,12 @@
           retentionDays = 7;
         in
         {
+          auth_enabled = false;
           server.http_listen_port = 3030;
           server.http_listen_address = "0.0.0.0";
 
           common = {
+            path_prefix = "/var/lib/loki";
             storage = {
               filesystem = {
                 chunks_directory = "/var/lib/loki/chunks";
