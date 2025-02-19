@@ -38,6 +38,9 @@
           };
 
           storage_config = {
+            filesystem = {
+              chunk_encoding = "snappy";
+            };
             tsdb_shipper = {
               active_index_directory = "/var/lib/loki/tsdb-active";
               cache_location = "/var/lib/loki/tsdb-cache";
@@ -48,12 +51,13 @@
           ingester = {
             lifecycler = {
               ring = {
-                kvstore.store = "inmemory";
-                replication_factor = 1;
+                kvstore.store = "memberlist";
+                replication_factor = 3;
               };
             };
             chunk_idle_period = "30m";
             chunk_target_size = 1572864;
+            max_transfer_retries = 10;
           };
 
           limits_config = {

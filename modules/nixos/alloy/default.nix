@@ -40,6 +40,17 @@
           ]
           forward_to = [loki.write.default.receiver]
         }
+
+        loki.source.journal "systemd" {
+          forward_to = [loki.write.default.receiver]
+          labels = {job="systemd-journal", host="${hostname}"}
+        }
+
+        loki.source.file "auth" {
+          targets = [{__path__ = "/var/log/auth.log"}]
+          forward_to = [loki.write.default.receiver]
+          labels = {job="auth", host="${hostname}"}
+        }
     
         loki.write "default" {
           endpoint {
