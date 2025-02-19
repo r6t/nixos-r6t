@@ -59,7 +59,7 @@
       atuin.enable = true;
       awscdk.enable = true;
       awscli.enable = true;
-      betaflight-configurator.enable = true;
+      betaflight-configurator.enable = false;
       bitwarden.enable = true;
       browsers.enable = true;
       darktable.enable = true;
@@ -84,7 +84,8 @@
       zellij.enable = true;
     };
 
-    apache.enable = true;
+    alloy.enable = true;
+    apache.enable = false;
     bluetooth.enable = true;
     bolt.enable = true;
     bootloader.enable = true;
@@ -98,7 +99,7 @@
     kde.enable = true;
     localization.enable = true;
     libvirtd.enable = true;
-    libimobiledevice.enable = true;
+    libimobiledevice.enable = false;
     mullvad.enable = true;
     netdata.enable = true;
     networkmanager.enable = true;

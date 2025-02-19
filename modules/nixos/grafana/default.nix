@@ -2,7 +2,7 @@
 
   options = {
     mine.grafana.enable =
-      lib.mkEnableOption "enable grafana";
+      lib.mkEnableOption "enable grafana - module written with a single host in mind";
   };
 
   config = lib.mkIf config.mine.grafana.enable {
