@@ -15,6 +15,22 @@
 
     environment.etc."alloy/config.river".text =
       ''
+        prometheus.exporter.unix "system" {
+          include_exporter_metrics = true
+          disable_collectors = ["mdadm","zfs"]
+        }
+
+        prometheus.scrape "local_metrics" {
+          targets    = prometheus.exporter.unix.system.targets
+          forward_to = [prometheus.remote_write.central.receiver]
+        }
+
+        prometheus.remote_write "central" {
+          endpoint {
+            url = "http://moon:9001/api/v1/write"
+          }
+        }
+
         loki.source.file "system" {
           targets = [
             {
