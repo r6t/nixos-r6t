@@ -40,9 +40,7 @@
           };
 
           storage_config = {
-            filesystem = {
-              chunk_encoding = "snappy";
-            };
+            filesystem = {};
             tsdb_shipper = {
               active_index_directory = "/var/lib/loki/tsdb-active";
               cache_location = "/var/lib/loki/tsdb-cache";
@@ -59,7 +57,6 @@
             };
             chunk_idle_period = "30m";
             chunk_target_size = 1572864;
-            max_transfer_retries = 10;
           };
 
           limits_config = {
