@@ -16,6 +16,7 @@
 	89
         80
 	86
+        5252
         1080
         10080
         19999
@@ -49,6 +50,7 @@
   users.users.${userConfig.username}.linger = true;
 
   mine = {
+    alloy.enable = true;
     bolt.enable = true;
     bootloader.enable = true;
     docker.enable = true;

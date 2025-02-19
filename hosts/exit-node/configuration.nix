@@ -10,6 +10,7 @@
   ];
 
   networking = {
+    firewall.allowedTCPPorts = [ 22 5252 ];
     hostName = "exit-node";
     enableIPv6 = true;
   };
@@ -17,6 +18,7 @@
   system.stateVersion = "23.11";
 
   mine = {
+    alloy.enable = true;
     bolt.enable = true;
     bootloader.enable = true;
     docker.enable = false;

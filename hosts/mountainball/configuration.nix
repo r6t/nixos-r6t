@@ -17,7 +17,7 @@
   users.users.r6t.extraGroups = [ "i2c" ];
 
   networking = {
-    firewall.allowedTCPPorts = [ 22 ];
+    firewall.allowedTCPPorts = [ 22 5252 ];
     hostName = "mountainball";
     networkmanager.ensureProfiles.profiles."Thunderbolt-Network" = {
       connection = {
@@ -40,6 +40,7 @@
       bottles.enable = true;
       calibre.enable = true;
       deezer.enable = true;
+      element.enable = true;
       inkscape.enable = true;
       jellyfin-player.enable = true;
       libreoffice.enable = true;
@@ -58,7 +59,7 @@
       atuin.enable = true;
       awscdk.enable = true;
       awscli.enable = true;
-      betaflight-configurator.enable = true;
+      betaflight-configurator.enable = false;
       bitwarden.enable = true;
       browsers.enable = true;
       darktable.enable = true;
@@ -68,7 +69,6 @@
       freecad.enable = true;
       git.enable = true;
       home-manager.enable = true;
-      k2pdfopt.enable = true;
       kde-apps.enable = true;
       mpv.enable = true;
       nixvim.enable = true;
@@ -84,7 +84,8 @@
       zellij.enable = true;
     };
 
-    apache.enable = true;
+    alloy.enable = true;
+    apache.enable = false;
     bluetooth.enable = true;
     bolt.enable = true;
     bootloader.enable = true;
@@ -97,7 +98,8 @@
     iperf.enable = true;
     kde.enable = true;
     localization.enable = true;
-    libimobiledevice.enable = true;
+    libvirtd.enable = true;
+    libimobiledevice.enable = false;
     mullvad.enable = true;
     netdata.enable = true;
     networkmanager.enable = true;
@@ -105,6 +107,7 @@
     nixpkgs.enable = true;
     printing.enable = true;
     rdfind.enable = true;
+    scansnap.enable = true;
     sops.enable = true;
     sound.enable = true;
     ssh.enable = true;

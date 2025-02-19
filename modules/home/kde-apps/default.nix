@@ -54,7 +54,6 @@
                     "applications:org.kde.krusader.desktop"
                     "applications:Alacritty.desktop"
                     "applications:firefox.desktop"
-                    "applications:com.super_productivity.SuperProductivity.desktop"
                     "applications:io.github.dweymouth.supersonic.desktop"
                     "applications:obsidian.desktop"
                     "applications:me.proton.Mail.desktop"

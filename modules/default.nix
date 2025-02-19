@@ -5,6 +5,7 @@
     flatpak/bottles/default.nix
     flatpak/calibre/default.nix
     flatpak/deezer/default.nix
+    flatpak/element/default.nix
     flatpak/inkscape/default.nix
     flatpak/jellyfin-player/default.nix
     flatpak/libreoffice/default.nix
@@ -49,6 +50,7 @@
     home/yt-dlp/default.nix
     home/zellij/default.nix
 
+    nixos/alloy/default.nix
     nixos/apache/default.nix
     nixos/bluetooth/default.nix
     nixos/bolt/default.nix
@@ -59,16 +61,18 @@
     nixos/env/default.nix
     nixos/exit-node-routing/default.nix
     nixos/fonts/default.nix
-    nixos/fzf/default.nix
     nixos/fwupd/default.nix
+    nixos/fzf/default.nix
+    nixos/grafana/default.nix
     nixos/immich/default.nix
     nixos/iperf/default.nix
     nixos/kde/default.nix
-    nixos/libvirtd/default.nix
     nixos/libimobiledevice/default.nix
+    nixos/libvirtd/default.nix
     nixos/localization/default.nix
-    nixos/mullvad/default.nix
+    nixos/loki/default.nix
     nixos/moonstore/default.nix
+    nixos/mullvad/default.nix
     nixos/netdata/default.nix
     nixos/networkmanager/default.nix
     nixos/nix/default.nix
@@ -76,7 +80,9 @@
     nixos/nvidia/default.nix
     nixos/podman/default.nix
     nixos/printing/default.nix
+    nixos/prometheus/default.nix
     nixos/rdfind/default.nix
+    nixos/scansnap/default.nix
     nixos/sops/default.nix
     nixos/sound/default.nix
     nixos/ssh/default.nix
