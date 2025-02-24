@@ -50,7 +50,6 @@
   users.users.${userConfig.username}.linger = true;
 
   mine = {
-    alloy.enable = true;
     bolt.enable = true;
     bootloader.enable = true;
     docker.enable = true;
