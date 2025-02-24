@@ -10,7 +10,6 @@
   ];
 
   networking = {
-    firewall.allowedTCPPorts = [ 22 5252 ];
     hostName = "exit-node";
     enableIPv6 = true;
   };
@@ -29,6 +28,7 @@
     networkmanager.enable = true;
     nix.enable = true;
     nixpkgs.enable = true;
+    prometheus-node-exporter.enable = true;
     sops.enable = true;
     ssh.enable = true;
     syncthing.enable = true;
