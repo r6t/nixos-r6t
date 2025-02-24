@@ -32,7 +32,6 @@
     loki.enable = true;
     libvirtd.enable = true;
     moonstore.enable = true;
-    netdata.enable = true;
     networkmanager.enable = true;
     nix.enable = true;
     nixpkgs.enable = true;

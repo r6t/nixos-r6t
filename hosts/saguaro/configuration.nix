@@ -58,7 +58,6 @@
     fzf.enable = true;
     iperf.enable = true;
     localization.enable = true;
-    netdata.enable = true;
     networkmanager.enable = true;
     nix.enable = true;
     nixpkgs.enable = true;

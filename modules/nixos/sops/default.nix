@@ -15,8 +15,6 @@
 
       secrets = {
         "firefox_sync" = { owner = config.users.users.${userConfig.username}.name; };
-        "netdata/cloud/claim_token" = { owner = config.users.users.${userConfig.username}.name; };
-        "netdata/cloud/claim_rooms" = { owner = config.users.users.${userConfig.username}.name; };
         "ollama/apiBase" = { owner = config.users.users.${userConfig.username}.name; };
         "openai/platform_key" = { owner = config.users.users.${userConfig.username}.name; };
         "syncthing/password" = { owner = config.users.users.${userConfig.username}.name; };

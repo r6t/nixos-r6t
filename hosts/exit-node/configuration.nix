@@ -26,7 +26,6 @@
     fwupd.enable = true;
     fzf.enable = true;
     localization.enable = true;
-    netdata.enable = true;
     networkmanager.enable = true;
     nix.enable = true;
     nixpkgs.enable = true;

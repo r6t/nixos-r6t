@@ -100,7 +100,6 @@
     libvirtd.enable = true;
     libimobiledevice.enable = false;
     mullvad.enable = true;
-    netdata.enable = true;
     networkmanager.enable = true;
     nix.enable = true;
     nixpkgs.enable = true;
