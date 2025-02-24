@@ -1,7 +1,17 @@
-{ lib, config, ... }:
+{ lib, config, types, ... }:
 
+let
+  dashboardDir = ./grafana/dashboards;
+in
 {
-  options.mine.grafana.enable = lib.mkEnableOption "enable grafana service";
+  options.mine.grafana = {
+    enable = lib.mkEnableOption "enable grafana service";
+    dashboardDir = lib.mkOption {
+      type = types.path;
+      default = dashboardDir;
+      description = "path to grafana dashboards";
+    };
+  };
 
   config = lib.mkIf config.mine.grafana.enable {
     services.grafana = {
@@ -25,6 +35,12 @@
           secureJsonData.httpHeaderValue1 = "fake";
         }
       ];
+      dashboards.settings.providers = [{
+          name = "r6 nix-managed Dashboards";
+          options.path = config.mine.grafana.dashboardDir;
+          disableDeletion = true;
+          updateIntervalSeconds = 30;
+      }];
     };
   };
 }

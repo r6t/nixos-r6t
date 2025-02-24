@@ -8,16 +8,15 @@
       enable = true;
       port = 9001;
       retentionTime = "30d";
-      # web_external_url = "http://moon:9001/";
       remoteWrite = [{
         url = "http://localhost:9090/api/v1/write";
       }];
       scrapeConfigs = [
         {
-          job_name = "nodes";
+          job_name = "r6-nix-systems";
           honor_labels = true;
           static_configs = [{
-            targets = [ "localhost:9000" ];
+            targets = [ "exit-node:9000" "moon:9000" "mountainball:9000" "saguaro:9000" ];
           }];
         }
       ];
