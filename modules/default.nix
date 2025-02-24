@@ -50,7 +50,6 @@
     home/yt-dlp/default.nix
     home/zellij/default.nix
 
-    nixos/alloy/default.nix
     nixos/apache/default.nix
     nixos/bluetooth/default.nix
     nixos/bolt/default.nix
@@ -81,6 +80,7 @@
     nixos/podman/default.nix
     nixos/printing/default.nix
     nixos/prometheus/default.nix
+    nixos/prometheus-node-exporter/default.nix
     nixos/rdfind/default.nix
     nixos/scansnap/default.nix
     nixos/sops/default.nix

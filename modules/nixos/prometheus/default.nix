@@ -15,19 +15,12 @@
       remoteWrite = [{
         url = "http://localhost:9090/api/v1/write";
       }];
-      exporters = {
-        node = {
-          enable = true;
-          enabledCollectors = [ "systemd" ];
-          port = 9002; # stringified and referenced in target config
-        };
-      };
       scrapeConfigs = [
         {
-          job_name = "alloy_nodes";
+          job_name = "nodes";
           honor_labels = true;
           static_configs = [{
-            targets = [ "localhost:12345" ];
+            targets = [ "localhost:9000" "mountainball:9000" ];
           }];
         }
       ];

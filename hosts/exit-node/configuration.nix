@@ -18,7 +18,6 @@
   system.stateVersion = "23.11";
 
   mine = {
-    alloy.enable = true;
     bolt.enable = true;
     bootloader.enable = true;
     docker.enable = false;

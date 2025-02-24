@@ -44,7 +44,6 @@
   system.stateVersion = "23.11";
 
   mine = {
-    alloy.enable = true;
     bolt.enable = true;
     bootloader.enable = true;
     bridge.enable = true;
@@ -63,6 +62,7 @@
     nixpkgs.enable = true;
     nvidia.enable = true;
     prometheus.enable = true;
+    prometheus-node-exporter.enable = true;
     sops.enable = true;
     ssh.enable = true;
     syncthing.enable = true;
