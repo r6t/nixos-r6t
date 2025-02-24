@@ -117,7 +117,7 @@
     # Enable Tailscale with exit node option
     services.tailscale = {
       enable = true;
-      useRoutingFeatures = "server";
+      useRoutingFeatures = lib.mkForce "server";
     };
 
     # GRO forwarding for exit node
