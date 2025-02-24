@@ -17,7 +17,7 @@
           job_name = "nodes";
           honor_labels = true;
           static_configs = [{
-            targets = [ "localhost:9000" "mountainball:9000" ];
+            targets = [ "localhost:9000" ];
           }];
         }
       ];
