@@ -1,7 +1,7 @@
 { lib, config, ... }:
 
 let
-  dashboardDir = ./dashboards; 
+  dashboardDir = ./dashboards;
 in
 {
   options.mine.grafana = {
@@ -20,7 +20,7 @@ in
         http_addr = "0.0.0.0";
         domain = "localhost";
       };
-      
+
       provision = {
         datasources.settings.datasources = [
           {
@@ -37,7 +37,7 @@ in
             secureJsonData.httpHeaderValue1 = "fake";
           }
         ];
-        
+
         dashboards.settings.providers = [{
           name = "r6 nix-managed Dashboards";
           options.path = "${config.mine.grafana.dashboardDir}";

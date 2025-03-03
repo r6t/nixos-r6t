@@ -9,6 +9,7 @@
     ../../modules/default.nix
   ];
 
+  time.timeZone = "Etc/UTC";
   networking = {
     hostName = "moon";
     enableIPv6 = true;

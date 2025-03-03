@@ -13,39 +13,41 @@
       "type": "row",
       "title": "Host Overview",
       "collapsed": false,
-      "gridPos": {"x": 0, "y": 0, "w": 24, "h": 1}
+      "gridPos": { "x": 0, "y": 0, "w": 24, "h": 1 }
     },
     {
       "id": 2,
       "type": "stat",
       "title": "Host Status",
-      "gridPos": {"x": 0, "y": 1, "w": 24, "h": 2},
+      "gridPos": { "x": 0, "y": 1, "w": 24, "h": 2 },
       "datasource": "Prometheus",
       "options": {
-        "reduceOptions": {"values": false},
+        "reduceOptions": { "values": false },
         "text": {},
         "colorMode": "background",
         "graphMode": "area",
         "justifyMode": "auto"
       },
-      "targets": [{
-        "expr": "count(node_uname_info{job=\"r6-nix-systems\"})",
-        "legendFormat": "Total Hosts",
-        "refId": "A"
-      }]
+      "targets": [
+        {
+          "expr": "count(node_uname_info{job=\"r6-nix-systems\"})",
+          "legendFormat": "Total Hosts",
+          "refId": "A"
+        }
+      ]
     },
     {
       "id": 3,
       "type": "row",
       "title": "CPU & Memory",
       "collapsed": false,
-      "gridPos": {"x": 0, "y": 3, "w": 24, "h": 1}
+      "gridPos": { "x": 0, "y": 3, "w": 24, "h": 1 }
     },
     {
       "id": 4,
       "type": "timeseries",
       "title": "CPU Usage - $instance",
-      "gridPos": {"x": 0, "y": 4, "w": 24, "h": 8},
+      "gridPos": { "x": 0, "y": 4, "w": 24, "h": 8 },
       "repeat": "instance",
       "datasource": "Prometheus",
       "targets": [
@@ -66,15 +68,15 @@
         }
       ],
       "options": {
-        "legend": {"displayMode": "table", "placement": "bottom"},
-        "tooltip": {"mode": "multi", "sort": "descending"}
+        "legend": { "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "multi", "sort": "descending" }
       }
     },
     {
       "id": 5,
       "type": "timeseries",
       "title": "Memory Usage - $instance",
-      "gridPos": {"x": 0, "y": 12, "w": 24, "h": 8},
+      "gridPos": { "x": 0, "y": 12, "w": 24, "h": 8 },
       "repeat": "instance",
       "datasource": "Prometheus",
       "targets": [
@@ -95,7 +97,7 @@
         }
       ],
       "options": {
-        "legend": {"displayMode": "table", "placement": "bottom"},
+        "legend": { "displayMode": "table", "placement": "bottom" },
         "unit": "bytes"
       }
     },
@@ -104,13 +106,13 @@
       "type": "row",
       "title": "Disk & Network",
       "collapsed": false,
-      "gridPos": {"x": 0, "y": 20, "w": 24, "h": 1}
+      "gridPos": { "x": 0, "y": 20, "w": 24, "h": 1 }
     },
     {
       "id": 7,
       "type": "timeseries",
       "title": "Disk Usage - $device ($instance)",
-      "gridPos": {"x": 0, "y": 21, "w": 24, "h": 8},
+      "gridPos": { "x": 0, "y": 21, "w": 24, "h": 8 },
       "repeat": "device",
       "datasource": "Prometheus",
       "targets": [
@@ -126,7 +128,7 @@
         }
       ],
       "options": {
-        "legend": {"displayMode": "table", "placement": "bottom"},
+        "legend": { "displayMode": "table", "placement": "bottom" },
         "unit": "bytes"
       }
     },
@@ -134,7 +136,7 @@
       "id": 8,
       "type": "timeseries",
       "title": "Network Traffic - $device ($instance)",
-      "gridPos": {"x": 0, "y": 29, "w": 24, "h": 8},
+      "gridPos": { "x": 0, "y": 29, "w": 24, "h": 8 },
       "repeat": "device",
       "datasource": "Prometheus",
       "targets": [
@@ -150,7 +152,7 @@
         }
       ],
       "options": {
-        "legend": {"displayMode": "table", "placement": "bottom"},
+        "legend": { "displayMode": "table", "placement": "bottom" },
         "unit": "bps"
       }
     }
@@ -186,4 +188,3 @@
     ]
   }
 }
-

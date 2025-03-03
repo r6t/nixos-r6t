@@ -14,9 +14,15 @@
       wayland-utils
       wl-clipboard
     ];
+    environment.plasma6.excludePackages = with pkgs.kdePackages; [
+      dolphin
+      dolphin-plugins
+    ];
     programs.dconf.enable = true;
     services = {
-      desktopManager.plasma6.enable = true;
+      desktopManager.plasma6 = {
+        enable = true;
+      };
       displayManager = {
         defaultSession = "plasma";
         sddm = {

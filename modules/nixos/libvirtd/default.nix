@@ -7,11 +7,13 @@
 
   config = lib.mkIf config.mine.libvirtd.enable {
     environment.systemPackages = with pkgs; [
+      kvmtool
       virtiofsd
       usbutils
       libusb1
       pkg-config
       bridge-utils
+      qemu
     ];
     virtualisation = {
       libvirtd = {

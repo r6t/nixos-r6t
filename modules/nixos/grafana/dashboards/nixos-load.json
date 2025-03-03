@@ -27,7 +27,7 @@
         },
         {
           "expr": "node_load5{job=\"r6-nix-systems\", instance=\"$instance\"}",
-          "legendFormat": "5m", 
+          "legendFormat": "5m",
           "refId": "B"
         },
         {
@@ -56,4 +56,3 @@
     ]
   }
 }
-

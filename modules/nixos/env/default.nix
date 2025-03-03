@@ -9,7 +9,6 @@
     environment.shells = with pkgs; [ fish ]; # /etc/shells
     # System packages
     environment.systemPackages = with pkgs; [
-      arion
       bat
       cryptsetup
       curl

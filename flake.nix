@@ -15,6 +15,11 @@
       url = "github:gmodena/nix-flatpak";
     };
 
+    nixos-generators = {
+      url = "github:nix-community/nixos-generators";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     nixvim = {
       url = "github:nix-community/nixvim";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -47,7 +52,7 @@
     };
   };
 
-  outputs = { self, nixpkgs, pre-commit-hooks, ... } @inputs:
+  outputs = { self, nixpkgs, nixos-generators, pre-commit-hooks, ... } @inputs:
     let
       userConfig = {
         username = "r6t";
@@ -82,6 +87,20 @@
           specialArgs = { inherit outputs userConfig inputs; };
           modules = [ ./hosts/saguaro/configuration.nix ];
         };
+      };
+
+      packages.aarch64-linux.graviton-ami = nixos-generators.nixosGenerate {
+        system = "aarch64-linux"; # lib.mkForce'ing this was overkill
+        modules = [
+          ./hosts/graviton-ami/configuration.nix
+          {
+            virtualisation.diskSize = 10240; # 10GB root volume
+            services.openssh.enable = true;
+            services.amazon-ssm-agent.enable = true;
+          }
+        ];
+        format = "amazon";
+        specialArgs = { inherit outputs userConfig inputs; };
       };
 
       checks.${system} = {

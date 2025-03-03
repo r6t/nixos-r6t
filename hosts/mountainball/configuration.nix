@@ -11,6 +11,9 @@
   ];
 
   boot.initrd.luks.devices."luks-9fc9c182-0bad-474f-a9bb-ee2e6aa1be50".device = "/dev/disk/by-uuid/9fc9c182-0bad-474f-a9bb-ee2e6aa1be50";
+  boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
+
+  time.timeZone = "America/Los_Angeles";
 
   # troubleshooting external display ddc/ci brighness control
   hardware.i2c.enable = true;

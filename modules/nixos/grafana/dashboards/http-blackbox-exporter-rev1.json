@@ -843,10 +843,7 @@
   "refresh": "1m",
   "schemaVersion": 26,
   "style": "dark",
-  "tags": [
-    "blackbox",
-    "prometheus"
-  ],
+  "tags": ["blackbox", "prometheus"],
   "templating": {
     "list": [
       {

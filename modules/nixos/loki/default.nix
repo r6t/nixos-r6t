@@ -72,9 +72,9 @@
           compactor = {
             working_directory = "/var/lib/loki/compactor";
             compaction_interval = "15m";
-	    #            retention_enabled = true;
-	    #            retention_delete_delay = "2h";
-	    # delete_request_store = "filesystem";
+            #            retention_enabled = true;
+            #            retention_delete_delay = "2h";
+            # delete_request_store = "filesystem";
             # delete_request_store_config = {
             #   directory = "/var/lib/loki/delete_requests";
             # };
