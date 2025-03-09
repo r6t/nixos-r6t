@@ -87,6 +87,11 @@
           specialArgs = { inherit outputs userConfig inputs; };
           modules = [ ./hosts/saguaro/configuration.nix ];
         };
+        # nixos desktop
+        silvertorch = nixpkgs.lib.nixosSystem {
+          specialArgs = { inherit outputs userConfig inputs; };
+          modules = [ ./hosts/silvertorch/configuration.nix ];
+        };
       };
 
       packages.aarch64-linux.graviton-ami = nixos-generators.nixosGenerate {

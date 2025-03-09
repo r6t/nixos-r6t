@@ -124,7 +124,7 @@
                   function()
                     return require('codecompanion.adapters').extend('ollama', {
                       env = {
-                        url = "http://moon.magic.internal:11434",
+                        url = "https://ollama.r6t.io",
                       },
                       parameters = {
                         temperature = 0.8,
