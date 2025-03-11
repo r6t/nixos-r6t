@@ -1,4 +1,4 @@
-{ inputs, ... }:
+{ lib, config, inputs, pkgs, ... }:
 
 {
   imports = [
@@ -15,7 +15,27 @@
     hostName = "silvertorch";
   };
 
-  system.stateVersion = "23.11";
+  xdg.portal = {
+    enable = true;
+    extraPortals = [ pkgs.kdePackages.xdg-desktop-portal-kde ];
+    config.common.default = "kde";
+  };
+
+  environment.systemPackages = with pkgs; [
+    gamescope
+    gamemode
+    mangohud
+  ];
+
+  swapDevices = [
+    { device = "/swapfile";
+      size = 4096; # 4GB swap file - adequate for most desktop uses
+    }
+  ];
+
+ nixpkgs.config.nvidia.acceptLicense = true;
+
+ system.stateVersion = "23.11";
   services.fprintd.enable = false;
 
   mine = {
@@ -78,7 +98,7 @@
     networkmanager.enable = true;
     nix.enable = true;
     nixpkgs.enable = true;
-    nvidia.enable = true;
+    nvidia-open.enable = false;
     printing.enable = true;
     prometheus-node-exporter.enable = true;
     rdfind.enable = true;
@@ -93,4 +113,3 @@
     v4l-utils.enable = true;
   };
 }
-

@@ -1,11 +1,11 @@
 { lib, config, pkgs, ... }: {
 
   options = {
-    mine.nvidia.enable =
-      lib.mkEnableOption "configure nvidia gpu";
+    mine.nvidia-cuda.enable =
+      lib.mkEnableOption "configure nvidia gpu for cuda";
   };
 
-  config = lib.mkIf config.mine.nvidia.enable {
+  config = lib.mkIf config.mine.nvidia-cuda.enable {
 
     nixpkgs.config.nvidia.acceptLicense = true;
     nixpkgs.config.cudaSupport = true;

@@ -36,7 +36,7 @@
     networkmanager.enable = true;
     nix.enable = true;
     nixpkgs.enable = true;
-    nvidia.enable = true;
+    nvidia-cuda.enable = true;
     prometheus.enable = true;
     prometheus-node-exporter.enable = true;
     sops.enable = true;
