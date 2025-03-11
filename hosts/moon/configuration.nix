@@ -13,9 +13,6 @@
   networking = {
     hostName = "moon";
     enableIPv6 = true;
-    firewall = {
-      allowedTCPPorts = [ 22 ];
-    };
   };
 
   system.stateVersion = "23.11";

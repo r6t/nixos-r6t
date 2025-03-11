@@ -20,7 +20,6 @@
   users.users.r6t.extraGroups = [ "i2c" ];
 
   networking = {
-    firewall.allowedTCPPorts = [ 22 5252 ];
     hostName = "mountainball";
     networkmanager.ensureProfiles.profiles."Thunderbolt-Network" = {
       connection = {
