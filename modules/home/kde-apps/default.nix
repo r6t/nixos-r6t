@@ -82,14 +82,6 @@
             shortcuts.launch = "Meta";
           };
 
-          kscreenlocker = {
-            appearance = {
-              alwaysShowClock = true;
-              showMediaControls = true;
-              wallpaper = "${pkgs.kdePackages.plasma-workspace-wallpapers}/share/wallpapers/Kay/contents/images_dark/5120x2880.png";
-            };
-            timeout = 120; # minutes
-          };
 
           panels = [
             {
@@ -263,8 +255,6 @@
             "kdeglobals"."General"."TerminalApplication" = "alacritty";
             "kdeglobals"."General"."TerminalService" = "Alacritty.desktop";
             "kdeglobals"."KDE"."widgetStyle" = "BreezeDark";
-            "kwinrc"."Desktops"."Number" = 2;
-            "kwinrc"."Desktops"."Rows" = 1;
             "kwinrc"."NightColor"."Active" = true;
             "kwinrc"."NightColor"."LatitudeFixed" = 43.96946564885496;
             "kwinrc"."NightColor"."LongitudeFixed" = "-121.12781954887218";
@@ -275,10 +265,6 @@
             "kwinrc"."Windows"."RollOverDesktops" = true;
             "kwinrc"."Xwayland"."Scale" = 2;
             "plasma-localerc"."Formats"."LANG" = "en_US.UTF-8";
-            # mountainball specific
-            "kcminputrc"."Libinput/20547/23623/Ploopy Corporation Ploopy Adept Trackball Mouse"."NaturalScroll" = true;
-            "kcminputrc"."Libinput/20547/23623/Ploopy Corporation Ploopy Adept Trackball Mouse"."PointerAcceleration" = "-0.600";
-            "kcminputrc"."Libinput/2362/628/PIXA3854:00 093A:0274 Touchpad"."NaturalScroll" = true;
           };
           windows.allowWindowsToRememberPositions = true;
         };
