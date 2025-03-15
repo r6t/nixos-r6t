@@ -1,4 +1,4 @@
-{ lib, config, inputs, pkgs, ... }:
+{ inputs, pkgs, ... }:
 
 {
   imports = [
@@ -28,14 +28,15 @@
   ];
 
   swapDevices = [
-    { device = "/swapfile";
+    {
+      device = "/swapfile";
       size = 4096; # 4GB swap file - adequate for most desktop uses
     }
   ];
 
- nixpkgs.config.nvidia.acceptLicense = true;
+  nixpkgs.config.nvidia.acceptLicense = true;
 
- system.stateVersion = "23.11";
+  system.stateVersion = "23.11";
   services.fprintd.enable = false;
 
   mine = {

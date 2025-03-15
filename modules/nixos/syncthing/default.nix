@@ -9,7 +9,6 @@
     services.syncthing = {
       enable = true;
       dataDir = "/home/r6t/icloud";
-      openDefaultPorts = true;
       configDir = "/home/r6t/.config/syncthing";
       overrideDevices = false;
       overrideFolders = false;
