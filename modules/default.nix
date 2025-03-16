@@ -8,6 +8,7 @@
     flatpak/element/default.nix
     flatpak/inkscape/default.nix
     flatpak/jellyfin-player/default.nix
+    flatpak/kamoso/default.nix
     flatpak/libreoffice/default.nix
     flatpak/picard/default.nix
     flatpak/proton-mail/default.nix

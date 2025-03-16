@@ -15,6 +15,46 @@
     hostName = "silvertorch";
   };
 
+  # automatic LUKS decryption
+  boot = {
+    initrd = {
+      # Disable systemd in initrd for simpler setup
+      systemd.enable = false;
+
+      # Include all necessary USB modules early
+      availableKernelModules = [
+        "nvme"
+        "xhci_pci"
+        "ahci"
+        "usbhid"
+        "usb_storage"
+      ];
+
+      # Use imperative mounting with longer delay
+      preLVMCommands = ''
+        # Wait for USB devices to settle
+        sleep 10
+        
+        # Create mount point
+        mkdir -p /key
+        
+        # Try to mount the USB drive
+        mount -t vfat -o ro /dev/disk/by-uuid/CF45-DED3 /key || echo "USB key not found"
+      '';
+
+      # Configure LUKS device with fallback
+      luks.devices."luks-bb43ada7-1451-490c-a783-12b79ade0911" = {
+        device = "/dev/disk/by-uuid/bb43ada7-1451-490c-a783-12b79ade0911";
+        keyFile = "/key/silvertorch-luks-key.bin";
+        fallbackToPassword = true;
+      };
+    };
+  };
+
+
+  # nvidia settings wip
+  boot.kernelParams = [ "reboot=bios" "nowatchdog" ];
+
   xdg.portal = {
     enable = true;
     extraPortals = [ pkgs.kdePackages.xdg-desktop-portal-kde ];
@@ -47,6 +87,7 @@
       element.enable = true;
       inkscape.enable = true;
       jellyfin-player.enable = true;
+      kamoso.enable = true;
       libreoffice.enable = true;
       picard.enable = true;
       proton-mail.enable = true;
@@ -99,7 +140,7 @@
     networkmanager.enable = true;
     nix.enable = true;
     nixpkgs.enable = true;
-    nvidia-open.enable = false;
+    nvidia-open.enable = true;
     printing.enable = true;
     prometheus-node-exporter.enable = true;
     rdfind.enable = true;

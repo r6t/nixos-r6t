@@ -31,6 +31,7 @@
         rar # Krusader support
       ];
 
+
       programs = {
         kate = {
           enable = true;
@@ -79,7 +80,8 @@
             activateWhenTypingOnDesktop = true;
             historyBehavior = "enableSuggestions"; # or disabled or enableAutoComplete
             position = "center";
-            shortcuts.launch = "Meta";
+            # this seems to require a multi-key shortcut: shortcuts.launch = "Meta";
+            # modifierOnlyShortcuts.meta = "org.kde.krunner,/App,,toggleDisplay";
           };
 
 
@@ -139,11 +141,19 @@
               hiding = "none";
             }
           ];
+
           powerdevil = {
-            AC.powerProfile = "performance";
+            AC = {
+              powerProfile = "performance";
+              autoSuspend.action = "nothing";
+              powerButtonAction = "shutDown";
+              turnOffDisplay.idleTimeout = 3600;
+              whenSleepingEnter = "standby";
+            };
             battery.powerProfile = "powerSaving";
           };
           session = {
+            general.askForConfirmationOnLogout = false;
             sessionRestore.restoreOpenApplicationsOnLogin = "startWithEmptySession";
           };
           spectacle = {
@@ -159,6 +169,9 @@
             };
           };
           shortcuts = {
+            "krunner" = {
+              "_launch" = "Meta"; # This sets Meta key to launch KRunner
+            };
             "kmix"."decrease_microphone_volume" = "Microphone Volume Down";
             "kmix"."decrease_volume" = "Volume Down";
             "kmix"."decrease_volume_small" = "Shift+Volume Down";
@@ -247,6 +260,7 @@
             "baloofilerc"."General"."dbVersion" = 2;
             "baloofilerc"."General"."exclude filters" = "*~,*.part,*.o,*.la,*.lo,*.loT,*.moc,moc_*.cpp,qrc_*.cpp,ui_*.h,cmake_install.cmake,CMakeCache.txt,CTestTestfile.cmake,libtool,config.status,confdefs.h,autom4te,conftest,confstat,Makefile.am,*.gcode,.ninja_deps,.ninja_log,build.ninja,*.csproj,*.m4,*.rej,*.gmo,*.pc,*.omf,*.aux,*.tmp,*.po,*.vm*,*.nvram,*.rcore,*.swp,*.swap,lzo,litmain.sh,*.orig,.histfile.*,.xsession-errors*,*.map,*.so,*.a,*.db,*.qrc,*.ini,*.init,*.img,*.vdi,*.vbox*,vbox.log,*.qcow2,*.vmdk,*.vhd,*.vhdx,*.sql,*.sql.gz,*.ytdl,*.tfstate*,*.class,*.pyc,*.pyo,*.elc,*.qmlc,*.jsc,*.fastq,*.fq,*.gb,*.fasta,*.fna,*.gbff,*.faa,po,CVS,.svn,.git,_darcs,.bzr,.hg,CMakeFiles,CMakeTmp,CMakeTmpQmake,.moc,.obj,.pch,.uic,.npm,.yarn,.yarn-cache,__pycache__,node_modules,node_packages,nbproject,.terraform,.venv,venv,core-dumps,lost+found";
             "baloofilerc"."General"."exclude filters version" = 9;
+            "bluedevilglobalrc"."Global"."launchState" = "enable";
             "kded5rc"."Module-browserintegrationreminder"."autoload" = false;
             "kded5rc"."Module-device_automounter"."autoload" = false;
             "kdeglobals"."DirSelect Dialog"."DirSelectDialog Size" = "640,480";
@@ -255,6 +269,8 @@
             "kdeglobals"."General"."TerminalApplication" = "alacritty";
             "kdeglobals"."General"."TerminalService" = "Alacritty.desktop";
             "kdeglobals"."KDE"."widgetStyle" = "BreezeDark";
+            "kwinrc"."Desktops"."Number" = 2;
+            "kwinrc"."Desktops"."Rows" = 1;
             "kwinrc"."NightColor"."Active" = true;
             "kwinrc"."NightColor"."LatitudeFixed" = 43.96946564885496;
             "kwinrc"."NightColor"."LongitudeFixed" = "-121.12781954887218";
