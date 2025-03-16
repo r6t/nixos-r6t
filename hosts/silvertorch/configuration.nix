@@ -15,42 +15,17 @@
     hostName = "silvertorch";
   };
 
-  # automatic LUKS decryption
   boot = {
     initrd = {
-      # Disable systemd in initrd for simpler setup
-      systemd.enable = false;
-
-      # Include all necessary USB modules early
-      availableKernelModules = [
-        "nvme"
-        "xhci_pci"
-        "ahci"
-        "usbhid"
-        "usb_storage"
-      ];
-
-      # Use imperative mounting with longer delay
-      preLVMCommands = ''
-        # Wait for USB devices to settle
-        sleep 10
-        
-        # Create mount point
-        mkdir -p /key
-        
-        # Try to mount the USB drive
-        mount -t vfat -o ro /dev/disk/by-uuid/CF45-DED3 /key || echo "USB key not found"
-      '';
-
-      # Configure LUKS device with fallback
-      luks.devices."luks-bb43ada7-1451-490c-a783-12b79ade0911" = {
-        device = "/dev/disk/by-uuid/bb43ada7-1451-490c-a783-12b79ade0911";
-        keyFile = "/key/silvertorch-luks-key.bin";
-        fallbackToPassword = true;
-      };
+      systemd.enable = true;
     };
   };
 
+  security.tpm2 = {
+    enable = true;
+    pkcs11.enable = true;
+    tctiEnvironment.enable = true;
+  };
 
   # nvidia settings wip
   boot.kernelParams = [ "reboot=bios" "nowatchdog" ];
@@ -70,7 +45,7 @@
   swapDevices = [
     {
       device = "/swapfile";
-      size = 4096; # 4GB swap file - adequate for most desktop uses
+      size = 4096;
     }
   ];
 
@@ -151,6 +126,7 @@
     sshfs.enable = true;
     syncthing.enable = true;
     tailscale.enable = true;
+    tpm.enable = true;
     user.enable = true;
     v4l-utils.enable = true;
   };

@@ -79,8 +79,8 @@
     nixos/nvidia-open/default.nix
     nixos/podman/default.nix
     nixos/printing/default.nix
-    nixos/prometheus/default.nix
     nixos/prometheus-node-exporter/default.nix
+    nixos/prometheus/default.nix
     nixos/rdfind/default.nix
     nixos/scansnap/default.nix
     nixos/sops/default.nix
@@ -90,6 +90,7 @@
     nixos/syncthing/default.nix
     nixos/tailscale/default.nix
     nixos/thunderbay/default.nix
+    nixos/tpm/default.nix
     nixos/user/default.nix
     nixos/v4l-utils/default.nix
     nixos/zsh/default.nix

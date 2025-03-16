@@ -17,7 +17,7 @@
     '';
   };
 
-  time.timeZone = "Etc/UTC";
+  time.timeZone = "America/Los_Angeles";
   networking = {
     hostName = "moon";
     enableIPv6 = true;
