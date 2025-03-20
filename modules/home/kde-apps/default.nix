@@ -45,7 +45,6 @@
               pointSize = 12;
             };
             indent.width = 2;
-            inputMode = "vi";
             tabWidth = 4;
           };
           ui.colorScheme = "Breeze Dark";
@@ -80,8 +79,7 @@
             activateWhenTypingOnDesktop = true;
             historyBehavior = "enableSuggestions"; # or disabled or enableAutoComplete
             position = "center";
-            # this seems to require a multi-key shortcut: shortcuts.launch = "Meta";
-            # modifierOnlyShortcuts.meta = "org.kde.krunner,/App,,toggleDisplay";
+            shortcuts.launch = "Meta";
           };
 
 
@@ -169,9 +167,6 @@
             };
           };
           shortcuts = {
-            "krunner" = {
-              "_launch" = "Meta"; # This sets Meta key to launch KRunner
-            };
             "kmix"."decrease_microphone_volume" = "Microphone Volume Down";
             "kmix"."decrease_volume" = "Volume Down";
             "kmix"."decrease_volume_small" = "Shift+Volume Down";
@@ -238,7 +233,7 @@
             "org_kde_powerdevil"."Toggle Keyboard Backlight" = "Keyboard Light On/Off";
             "org_kde_powerdevil"."Turn Off Screen" = [ ];
             "org_kde_powerdevil"."powerProfile" = [ "Battery" "Meta+B,Battery" "Meta+B,Switch Power Profile" ];
-            "plasmashell"."activate application launcher" = [ "Meta" "Alt+F1,Activate Application Launcher" ];
+            "plasmashell"."activate application launcher" = [ "Alt+F1,Activate Application Launcher" ];
             "plasmashell"."activate task manager entry 1" = "Meta+1";
             "plasmashell"."activate task manager entry 2" = "Meta+2";
             "plasmashell"."activate task manager entry 3" = "Meta+3";
@@ -272,8 +267,8 @@
             "kwinrc"."Desktops"."Number" = 2;
             "kwinrc"."Desktops"."Rows" = 1;
             "kwinrc"."NightColor"."Active" = true;
-            "kwinrc"."NightColor"."LatitudeFixed" = 43.96946564885496;
-            "kwinrc"."NightColor"."LongitudeFixed" = "-121.12781954887218";
+            "kwinrc"."NightColor"."LatitudeFixed" = 43.969;
+            "kwinrc"."NightColor"."LongitudeFixed" = "-121.127";
             "kwinrc"."NightColor"."Mode" = "Location";
             "kwinrc"."Tiling"."padding" = 4;
             "kwinrc"."Windows"."DelayFocusInterval" = 0;
