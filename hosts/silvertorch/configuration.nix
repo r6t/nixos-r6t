@@ -48,12 +48,12 @@
       hideui singleuser,hints,badges
       
       menuentry "NixOS" {
-        loader /EFI/nixos/systemd-bootx64.efi
+        loader /EFI/systemd/systemd-bootx64.efi
         icon /EFI/refind/icons/os_nixos.png
       }
       
       menuentry "Bazzite OS" {
-        loader /EFI/Bazzite/grubx64.efi
+        loader /EFI/BOOT/BOOTX64.EFI
         icon /EFI/refind/icons/os_linux.png
       }
       EOF
