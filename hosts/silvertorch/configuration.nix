@@ -9,38 +9,18 @@
     ../../modules/default.nix
   ];
 
+  environment.systemPackages = with pkgs; [ refind ];
   time.timeZone = "America/Los_Angeles";
 
   networking = {
     hostName = "silvertorch";
   };
 
-  boot = {
-    initrd = {
-      systemd.enable = true;
-    };
-  };
-
-  security.tpm2 = {
-    enable = true;
-    pkcs11.enable = true;
-    tctiEnvironment.enable = true;
-  };
-
-  # nvidia settings wip
-  boot.kernelParams = [ "reboot=bios" "nowatchdog" ];
-
   xdg.portal = {
     enable = true;
     extraPortals = [ pkgs.kdePackages.xdg-desktop-portal-kde ];
     config.common.default = "kde";
   };
-
-  environment.systemPackages = with pkgs; [
-    gamescope
-    gamemode
-    mangohud
-  ];
 
   swapDevices = [
     {
@@ -49,9 +29,52 @@
     }
   ];
 
+  system.activationScripts.refindSetup = {
+    text = ''
+      mkdir -p /boot/EFI/refind
+      cp -r ${pkgs.refind}/share/refind/* /boot/EFI/refind/
+      
+      # Copy only necessary drivers
+      cp ${pkgs.refind}/share/refind/drivers_x64/ext4_x64.efi /boot/EFI/refind/drivers/
+      cp ${pkgs.refind}/share/refind/drivers_x64/btrfs_x64.efi /boot/EFI/refind/drivers/
+      
+      # Create config
+      cat > /boot/EFI/refind/refind.conf <<EOF
+      timeout 3
+      scanfor manual
+      hideui singleuser,hints,badges
+      
+      menuentry "NixOS" {
+        loader /EFI/nixos/systemd-bootx64.efi
+        icon /EFI/refind/icons/os_nixos.png
+      }
+      
+      menuentry "Bazzite OS" {
+        loader /EFI/Bazzite/grubx64.efi
+        icon /EFI/refind/icons/os_linux.png
+      }
+      EOF
+    '';
+    deps = [ ];
+  };
   system.stateVersion = "23.11";
+
+  systemd.services.create-refind-entry = {
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig.Type = "oneshot";
+    script = ''
+      ${pkgs.efibootmgr}/bin/efibootmgr -c \
+        -d /dev/nvme1n1 \
+        -p 1 \
+        -L "rEFInd" \
+        -l '\EFI\refind\refind_x64.efi' \
+        --verbose
+    '';
+  };
+  environment.etc."EFI/refind/refind.conf".source = "/boot/EFI/refind/refind.conf";
   services.fprintd.enable = false;
 
+  # Toggle modules
   mine = {
     flatpak = {
       anki.enable = true;
@@ -100,7 +123,7 @@
     };
 
     bluetooth.enable = true;
-    bootloader.enable = true;
+    bootloader.enable = false;
     czkawka.enable = true;
     docker.enable = true;
     env.enable = true;
