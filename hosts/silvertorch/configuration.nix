@@ -9,7 +9,7 @@
     ../../modules/default.nix
   ];
 
-  environment.systemPackages = with pkgs; [ refind ];
+  environment.systemPackages = with pkgs; [ efibootmgr refind ];
   time.timeZone = "America/Los_Angeles";
 
   networking = {
@@ -31,13 +31,16 @@
 
   system.activationScripts.refindSetup = {
     text = ''
-      mkdir -p /boot/EFI/refind
+      mkdir -p /boot/EFI/refind/drivers
+      mkdir -p /boot/EFI/refind/icons
+      
+      # Copy core files
       cp -r ${pkgs.refind}/share/refind/* /boot/EFI/refind/
       
       # Copy only necessary drivers
       cp ${pkgs.refind}/share/refind/drivers_x64/ext4_x64.efi /boot/EFI/refind/drivers/
       cp ${pkgs.refind}/share/refind/drivers_x64/btrfs_x64.efi /boot/EFI/refind/drivers/
-      
+
       # Create config
       cat > /boot/EFI/refind/refind.conf <<EOF
       timeout 3
@@ -67,8 +70,7 @@
         -d /dev/nvme1n1 \
         -p 1 \
         -L "rEFInd" \
-        -l '\EFI\refind\refind_x64.efi' \
-        --verbose
+        -l '\EFI\refind\refind_x64.efi'
     '';
   };
   environment.etc."EFI/refind/refind.conf".source = "/boot/EFI/refind/refind.conf";
