@@ -49,8 +49,6 @@
     }
   ];
 
-  nixpkgs.config.nvidia.acceptLicense = true;
-
   system.stateVersion = "23.11";
   services.fprintd.enable = false;
 
@@ -116,6 +114,7 @@
     nix.enable = true;
     nixpkgs.enable = true;
     nvidia-open.enable = true;
+    ollama-cuda.enable = true;
     printing.enable = true;
     prometheus-node-exporter.enable = true;
     rdfind.enable = true;

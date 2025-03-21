@@ -156,14 +156,14 @@
           };
           spectacle = {
             shortcuts = {
-              # 234 window monitor region, 567 window monitor region
-              captureActiveWindow = "Meta+Shift+2";
-              captureCurrentMonitor = "Meta+Shift+3";
-              captureRectangularRegion = "Meta+Shift+4";
-              launchWithoutCapturing = "Meta+Shift+1";
-              recordRegion = "Meta+Shift+7";
-              recordScreen = "Meta+Shift+6";
-              recordWindow = "Meta+Shift+5";
+              # Meta + Shift + 234 window monitor region, 567 window monitor region
+              captureActiveWindow = [ "Meta+@" ];
+              captureCurrentMonitor = [ "Meta+#" ];
+              captureRectangularRegion = [ "Meta+$" ];
+              launchWithoutCapturing = [ "Meta+!" ];
+              recordRegion = [ "Meta+&" ];
+              recordScreen = [ "Meta+^" ];
+              recordWindow = [ "Meta+%" ];
             };
           };
           shortcuts = {

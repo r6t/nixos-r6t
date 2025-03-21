@@ -33,14 +33,15 @@
         enable32Bit = true;
       };
       nvidia = {
+        forceFullCompositionPipeline = true;
         modesetting.enable = true;
         open = true;
-        # package = config.boot.kernelPackages.nvidiaPackages.latest;
-        # package = config.boot.kernelPackages.nvidiaPackages.stable;
-        package = config.boot.kernelPackages.nvidiaPackages.production;
+        package = config.boot.kernelPackages.nvidiaPackages.production; # or latest, stable
         nvidiaSettings = true;
-        powerManagement.enable = true;
-        # prime.sync.enable = true;
+        #        powerManagement = {
+        #          enable = true;
+        #	  # finegraned = false;
+        #	};
       };
     };
 
