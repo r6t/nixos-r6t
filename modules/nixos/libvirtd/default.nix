@@ -2,7 +2,7 @@
 
   options = {
     mine.libvirtd.enable =
-      lib.mkEnableOption "enable libvirtd QEMU/KVM virt-manager";
+      lib.mkEnableOption "enable libvirtd, QEMU/KVM, virt-manager";
   };
 
   config = lib.mkIf config.mine.libvirtd.enable {

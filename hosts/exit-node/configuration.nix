@@ -9,7 +9,7 @@
     ../../modules/default.nix
   ];
 
-  time.timeZone = "Etc/UTC";
+  time.timeZone = "America/Los_Angeles";
   networking = {
     hostName = "exit-node";
     enableIPv6 = true;

@@ -2,7 +2,7 @@
 
   options = {
     mine.env.enable =
-      lib.mkEnableOption "enable general utilities";
+      lib.mkEnableOption "enable linux baseline utilities";
   };
 
   config = lib.mkIf config.mine.env.enable {

@@ -9,7 +9,15 @@
     ../../modules/default.nix
   ];
 
-  time.timeZone = "Etc/UTC";
+  # Caddy container passthru to internal monitoring services
+  networking.firewall = {
+    allowedTCPPorts = [ 3000 9001 ]; # Grafana + Prometheus
+    extraCommands = ''
+      iptables -A INPUT -s 172.22.0.0/24 -j ACCEPT
+    '';
+  };
+
+  time.timeZone = "America/Los_Angeles";
   networking = {
     hostName = "moon";
     enableIPv6 = true;

@@ -16,6 +16,7 @@
         enable32Bit = true;
       };
       nvidia = {
+        datacenter.enable = true;
         modesetting.enable = true;
         powerManagement.enable = true; # changed from default false
         open = false;

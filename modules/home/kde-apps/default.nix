@@ -31,6 +31,7 @@
         rar # Krusader support
       ];
 
+
       programs = {
         kate = {
           enable = true;
@@ -44,7 +45,6 @@
               pointSize = 12;
             };
             indent.width = 2;
-            inputMode = "vi";
             tabWidth = 4;
           };
           ui.colorScheme = "Breeze Dark";
@@ -82,14 +82,6 @@
             shortcuts.launch = "Meta";
           };
 
-          kscreenlocker = {
-            appearance = {
-              alwaysShowClock = true;
-              showMediaControls = true;
-              wallpaper = "${pkgs.kdePackages.plasma-workspace-wallpapers}/share/wallpapers/Kay/contents/images_dark/5120x2880.png";
-            };
-            timeout = 120; # minutes
-          };
 
           panels = [
             {
@@ -147,23 +139,31 @@
               hiding = "none";
             }
           ];
+
           powerdevil = {
-            AC.powerProfile = "performance";
+            AC = {
+              powerProfile = "performance";
+              autoSuspend.action = "nothing";
+              powerButtonAction = "shutDown";
+              turnOffDisplay.idleTimeout = 3600;
+              whenSleepingEnter = "standby";
+            };
             battery.powerProfile = "powerSaving";
           };
           session = {
+            general.askForConfirmationOnLogout = false;
             sessionRestore.restoreOpenApplicationsOnLogin = "startWithEmptySession";
           };
           spectacle = {
             shortcuts = {
-              # 234 window monitor region, 567 window monitor region
-              captureActiveWindow = "Meta+Shift+2";
-              captureCurrentMonitor = "Meta+Shift+3";
-              captureRectangularRegion = "Meta+Shift+4";
-              launchWithoutCapturing = "Meta+Shift+1";
-              recordRegion = "Meta+Shift+7";
-              recordScreen = "Meta+Shift+6";
-              recordWindow = "Meta+Shift+5";
+              # Meta + Shift + 234 window monitor region, 567 window monitor region
+              captureActiveWindow = [ "Meta+@" ];
+              captureCurrentMonitor = [ "Meta+#" ];
+              captureRectangularRegion = [ "Meta+$" ];
+              launchWithoutCapturing = [ "Meta+!" ];
+              recordRegion = [ "Meta+&" ];
+              recordScreen = [ "Meta+^" ];
+              recordWindow = [ "Meta+%" ];
             };
           };
           shortcuts = {
@@ -233,7 +233,7 @@
             "org_kde_powerdevil"."Toggle Keyboard Backlight" = "Keyboard Light On/Off";
             "org_kde_powerdevil"."Turn Off Screen" = [ ];
             "org_kde_powerdevil"."powerProfile" = [ "Battery" "Meta+B,Battery" "Meta+B,Switch Power Profile" ];
-            "plasmashell"."activate application launcher" = [ "Meta" "Alt+F1,Activate Application Launcher" ];
+            "plasmashell"."activate application launcher" = [ "Alt+F1,Activate Application Launcher" ];
             "plasmashell"."activate task manager entry 1" = "Meta+1";
             "plasmashell"."activate task manager entry 2" = "Meta+2";
             "plasmashell"."activate task manager entry 3" = "Meta+3";
@@ -255,6 +255,7 @@
             "baloofilerc"."General"."dbVersion" = 2;
             "baloofilerc"."General"."exclude filters" = "*~,*.part,*.o,*.la,*.lo,*.loT,*.moc,moc_*.cpp,qrc_*.cpp,ui_*.h,cmake_install.cmake,CMakeCache.txt,CTestTestfile.cmake,libtool,config.status,confdefs.h,autom4te,conftest,confstat,Makefile.am,*.gcode,.ninja_deps,.ninja_log,build.ninja,*.csproj,*.m4,*.rej,*.gmo,*.pc,*.omf,*.aux,*.tmp,*.po,*.vm*,*.nvram,*.rcore,*.swp,*.swap,lzo,litmain.sh,*.orig,.histfile.*,.xsession-errors*,*.map,*.so,*.a,*.db,*.qrc,*.ini,*.init,*.img,*.vdi,*.vbox*,vbox.log,*.qcow2,*.vmdk,*.vhd,*.vhdx,*.sql,*.sql.gz,*.ytdl,*.tfstate*,*.class,*.pyc,*.pyo,*.elc,*.qmlc,*.jsc,*.fastq,*.fq,*.gb,*.fasta,*.fna,*.gbff,*.faa,po,CVS,.svn,.git,_darcs,.bzr,.hg,CMakeFiles,CMakeTmp,CMakeTmpQmake,.moc,.obj,.pch,.uic,.npm,.yarn,.yarn-cache,__pycache__,node_modules,node_packages,nbproject,.terraform,.venv,venv,core-dumps,lost+found";
             "baloofilerc"."General"."exclude filters version" = 9;
+            "bluedevilglobalrc"."Global"."launchState" = "enable";
             "kded5rc"."Module-browserintegrationreminder"."autoload" = false;
             "kded5rc"."Module-device_automounter"."autoload" = false;
             "kdeglobals"."DirSelect Dialog"."DirSelectDialog Size" = "640,480";
@@ -266,8 +267,8 @@
             "kwinrc"."Desktops"."Number" = 2;
             "kwinrc"."Desktops"."Rows" = 1;
             "kwinrc"."NightColor"."Active" = true;
-            "kwinrc"."NightColor"."LatitudeFixed" = 43.96946564885496;
-            "kwinrc"."NightColor"."LongitudeFixed" = "-121.12781954887218";
+            "kwinrc"."NightColor"."LatitudeFixed" = 43.969;
+            "kwinrc"."NightColor"."LongitudeFixed" = "-121.127";
             "kwinrc"."NightColor"."Mode" = "Location";
             "kwinrc"."Tiling"."padding" = 4;
             "kwinrc"."Windows"."DelayFocusInterval" = 0;
@@ -275,10 +276,6 @@
             "kwinrc"."Windows"."RollOverDesktops" = true;
             "kwinrc"."Xwayland"."Scale" = 2;
             "plasma-localerc"."Formats"."LANG" = "en_US.UTF-8";
-            # mountainball specific
-            "kcminputrc"."Libinput/20547/23623/Ploopy Corporation Ploopy Adept Trackball Mouse"."NaturalScroll" = true;
-            "kcminputrc"."Libinput/20547/23623/Ploopy Corporation Ploopy Adept Trackball Mouse"."PointerAcceleration" = "-0.600";
-            "kcminputrc"."Libinput/2362/628/PIXA3854:00 093A:0274 Touchpad"."NaturalScroll" = true;
           };
           windows.allowWindowsToRememberPositions = true;
         };
