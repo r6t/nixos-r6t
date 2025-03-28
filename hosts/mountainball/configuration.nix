@@ -19,20 +19,6 @@
   hardware.i2c.enable = true;
   users.users.r6t.extraGroups = [ "i2c" ];
 
-  networking = {
-    hostName = "mountainball";
-    networkmanager.ensureProfiles.profiles."Thunderbolt-Network" = {
-      connection = {
-        id = "Thunderbolt Network";
-        type = "ethernet";
-        interface-name = "enp100s0";
-      };
-      ethernet.mtu = 9000;
-      ipv4.method = "auto";
-      ipv6.method = "auto";
-    };
-  };
-
   system.stateVersion = "23.11";
   services.fprintd.enable = false;
 
@@ -85,6 +71,7 @@
       zellij.enable = true;
     };
 
+    alloy.enable = false;
     apache.enable = false;
     bluetooth.enable = true;
     bolt.enable = true;
