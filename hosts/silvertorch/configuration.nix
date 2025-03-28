@@ -103,7 +103,6 @@
       awscli.enable = true;
       bitwarden.enable = true;
       browsers.enable = true;
-      darktable.enable = true;
       drawio.enable = true;
       fish.enable = true;
       fontconfig.enable = true;
@@ -124,6 +123,7 @@
       zellij.enable = true;
     };
 
+    alloy.enable = true;
     bluetooth.enable = true;
     bootloader.enable = false;
     czkawka.enable = true;

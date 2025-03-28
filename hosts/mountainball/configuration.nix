@@ -15,6 +15,9 @@
 
   time.timeZone = "America/Los_Angeles";
 
+  networking = {
+    hostName = "mountainball";
+  };
   # troubleshooting external display ddc/ci brighness control
   hardware.i2c.enable = true;
   users.users.r6t.extraGroups = [ "i2c" ];
@@ -71,7 +74,7 @@
       zellij.enable = true;
     };
 
-    alloy.enable = false;
+    alloy.enable = true;
     apache.enable = false;
     bluetooth.enable = true;
     bolt.enable = true;
