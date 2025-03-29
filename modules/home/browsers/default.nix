@@ -28,15 +28,15 @@
                     { name = "q"; value = "{searchTerms}"; }
                   ];
                 }];
-                iconUpdateURL = "https://searxng.r6t.io/favicon.ico";
+                icon = "https://searxng.r6t.io/favicon.ico";
                 updateInterval = 24 * 60 * 60 * 1000; # Daily
                 definedAliases = [ "@sx" ];
               };
-              "DuckDuckGo".metaData.hidden = false;
-              "Google".metaData.hidden = true;
-              "Amazon.com".metaData.hidden = true;
-              "Bing".metaData.hidden = true;
-              "eBay".metaData.hidden = true;
+              "ddg".metaData.hidden = false;
+              "google".metaData.hidden = true;
+              "amazondotcom-us".metaData.hidden = true;
+              "bing".metaData.hidden = true;
+              "ebay".metaData.hidden = true;
             };
           };
           settings = {

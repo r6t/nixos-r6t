@@ -15,24 +15,11 @@ loki.relabel "journal" {
   }
   rule {
     source_labels = ["__journal__priority"]
+    regex         = "(?P<level>\\d+)"
+    replacement   = "${level}"
     target_label  = "severity"
-    replacement   = {
-      "0" = "emerg",
-      "1" = "alert",
-      "2" = "crit",
-      "3" = "err",
-      "4" = "warning",
-      "5" = "notice",
-      "6" = "info",
-      "7" = "debug",
-    }
+    action        = "replace"
   }
-  # TODO try later
-  # rule {
-  #   source_labels = ["__journal__code_file"]
-  #   regex         = "(.+):\\d+$"  # Extract filename without line numbers
-  #   target_label  = "source_file"
-  # }
 }
 
 loki.source.journal "all" {

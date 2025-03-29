@@ -9,10 +9,11 @@
     services.ollama = {
       enable = true;
       package = pkgs.ollama-cuda;
-      loadModels = [
-        "deepseek-r1:14b"
-        "gemma3:12b"
-      ];
+      # TODO causing errors 2025-03-29
+      #      loadModels = [
+      #        "deepseek-r1:14b"
+      #        "gemma3:12b"
+      #      ];
     };
   };
 }
