@@ -1,4 +1,4 @@
-{ lib, config, pkgs, ... }: {
+{ lib, config, ... }: {
 
   options = {
     mine.bootloader.enable =
@@ -11,6 +11,5 @@
       canTouchEfiVariables = true;
       efiSysMountPoint = "/boot";
     };
-    environment.systemPackages = with pkgs; [ refind ];
   };
 }
