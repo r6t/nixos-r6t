@@ -13,6 +13,7 @@ loki.relabel "journal" {
 
 loki.source.journal "all" {
   forward_to = [loki.write.grafana_loki.receiver]
+  relabel_rules = loki.relabel.journal.rules
 }
 
 loki.write "grafana_loki" {
