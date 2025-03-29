@@ -11,6 +11,7 @@
       enable = true;
       extraPlugins = with pkgs.vimPlugins; [
         oxocarbon-nvim
+        zellij-nvim
       ];
       globals.mapleader = " ";
       colorschemes.oxocarbon.enable = true;
