@@ -106,132 +106,84 @@
 
       devShells.${system} =
         let
-          devShellBasePkgs = with pkgs; [
-            awscli2
-            git
-            nixpkgs-fmt
-          ];
-
+          pkgs = import nixpkgs {
+            inherit system;
+          };
           baseShell = pkgs.mkShell {
-            nativeBuildInputs = devShellBasePkgs ++ [ pkgs.fish ];
-            buildInputs = devShellBasePkgs;
+            nativeBuildInputs = with pkgs; [
+              git
+              nixpkgs-fmt
+              fish
+            ];
+
             shellHook = ''
               ${self.checks.${system}.pre-commit-check.shellHook}
+              export DEVSHELL_NAME="base"
               exec fish
             '';
           };
-          system = "x86_64-linux";
-          pkgs = import nixpkgs { inherit system; };
-          pythonEnv = pkgs.python3.withPackages (ps: [
-            ps.pip
-          ]);
-          flacAnalyzer = pkgs.python3Packages.buildPythonApplication {
-            pname = "flac-analyzer";
-            version = "0.1";
-            format = "pyproject";
-            src = ./scripts;
-            propagatedBuildInputs = [ ];
-          };
+
+          pythonTools = with pkgs; [
+            (python3.withPackages (ps: with ps; [
+              pip
+              black
+              pylint
+              isort
+              boto3
+              troposphere
+              jq
+              yq
+            ]))
+          ];
+
+          nodeTools = with pkgs; [
+            nodejs
+            nodePackages.prettier
+            nodePackages.eslint
+          ];
+
         in
         {
-          default = baseShell.overrideAttrs (oldAttrs: {
-            shellHook = ''
-              export DEVSHELL_NAME="nix"
-              ${oldAttrs.shellHook}
-            '';
-            buildInputs = oldAttrs.buildInputs ++ (with pkgs; [
-              (python3.withPackages (ps: with ps; [
-                pip
-                black
-                pylint
-                isort
-              ]))
+          # Default shell: Nix + Python + Style
+          default = pkgs.mkShell {
+            inputsFrom = [ baseShell ];
+            packages = pythonTools ++ nodeTools ++ (with pkgs; [
               statix
               deadnix
-              nodePackages.prettier
-              nodePackages.eslint
-              nodejs
-              python311Packages.boto3
-              python311Packages.pip
-              python311Packages.troposphere
-              python311Packages.jq
-              python311Packages.yq
             ]);
-          });
 
-          aws = baseShell.overrideAttrs (oldAttrs: {
-            shellHook = ''
-              export AWS_REGION="us-west-2"
-              export AWS_CDK_VERSION="$(cdk --version)"
-              export PIP_PREFIX="$PWD/_pip"
-              export PYTHONPATH="$PIP_PREFIX/${pkgs.python3.sitePackages}:$PYTHONPATH"
-              export PATH="$PIP_PREFIX/bin:$PATH"
-              unset SOURCE_DATE_EPOCH
-              export DEVSHELL_NAME="aws"
-              ${oldAttrs.shellHook}
-            '';
-            buildInputs = oldAttrs.buildInputs ++ (with pkgs; [
-              (python3.withPackages (ps: with ps; [
+            # AWS shell: CDK + base tools
+
+            aws = pkgs.mkShell {
+              inputsFrom = [ baseShell self.devShells.${system}.default ];
+              packages = with pkgs; [
                 awscli2
                 aws-cdk
                 nodejs_20
-                troposphere
-                boto3
-              ]))
-              # nodePackages.aws-cdk
-              nodePackages_latest.aws-cdk
-              nodePackages.prettier
-              nodePackages.eslint
-              nodejs
-              ssm-session-manager-plugin
-            ]);
-          });
+                ssm-session-manager-plugin
+                nodePackages_latest.aws-cdk
+              ];
+              shellHook = ''
+                export DEVSHELL_NAME="aws"
+                ${self.devShells.${system}.default.shellHook}
+              '';
+            };
+          };
 
-          media = baseShell.overrideAttrs (oldAttrs: {
-            shellHook = ''
-              export AWS_REGION="us-west-2"
-              export AWS_CDK_VERSION="$(cdk --version)"
-              export PIP_PREFIX="$PWD/_pip"
-              export PYTHONPATH="$PIP_PREFIX/${pkgs.python3.sitePackages}:$PYTHONPATH"
-              export PATH="$PIP_PREFIX/bin:$PATH"
-              unset SOURCE_DATE_EPOCH
-              export DEVSHELL_NAME="media"
-              ${oldAttrs.shellHook}
-            '';
-            buildInputs = oldAttrs.buildInputs ++ (with pkgs; [
+          # Media shell: Media tools + base
+          media = pkgs.mkShell {
+            inputsFrom = [ baseShell self.devShells.${system}.default ];
+            packages = with pkgs; [
+              yt-dlp
               (python3.withPackages (ps: with ps; [
                 audible-cli
               ]))
-              yt-dlp
-            ]);
-          });
-
-          flac = baseShell.overrideAttrs (oldAttrs: {
+            ];
             shellHook = ''
-                            export AWS_REGION="us-west-2"
-                            export AWS_CDK_VERSION="$(cdk --version)"
-                            export PIP_PREFIX="$PWD/_pip"
-                            export PYTHONPATH="$PIP_PREFIX/${pkgs.python3.sitePackages}:$PYTHONPATH"
-                            export PATH="$PIP_PREFIX/bin:$PATH"
-                            unset SOURCE_DATE_EPOCH
-                            export DEVSHELL_NAME="aws"
-              	      echo "FLAC Analyzer devshell activated."
-                            echo "Run: flac-analyze /path/to/flacs"
-                            ${oldAttrs.shellHook}
+              export DEVSHELL_NAME="media"
+              ${self.devShells.${system}.default.shellHook}
             '';
-            buildInputs = oldAttrs.buildInputs ++ (with pkgs; [
-              (python3.withPackages (ps: with ps; [
-                pythonEnv
-                sox
-                flac
-                flacAnalyzer
-                pip
-                black
-                pylint
-                isort
-              ]))
-            ]);
-          });
+          };
 
         };
     };
