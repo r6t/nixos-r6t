@@ -15,11 +15,6 @@
       url = "github:gmodena/nix-flatpak";
     };
 
-    nixos-generators = {
-      url = "github:nix-community/nixos-generators";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     nixvim = {
       url = "github:nix-community/nixvim";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -52,7 +47,7 @@
     };
   };
 
-  outputs = { self, nixpkgs, nixos-generators, pre-commit-hooks, ... } @inputs:
+  outputs = { self, nixpkgs, pre-commit-hooks, ... } @inputs:
     let
       userConfig = {
         username = "r6t";
@@ -91,20 +86,6 @@
           specialArgs = { inherit outputs userConfig inputs; };
           modules = [ ./hosts/silvertorch/configuration.nix ];
         };
-      };
-
-      packages.aarch64-linux.graviton-ami = nixos-generators.nixosGenerate {
-        system = "aarch64-linux"; # lib.mkForce'ing this was overkill
-        modules = [
-          ./hosts/graviton-ami/configuration.nix
-          {
-            virtualisation.diskSize = 10240; # 10GB root volume
-            services.openssh.enable = true;
-            services.amazon-ssm-agent.enable = true;
-          }
-        ];
-        format = "amazon";
-        specialArgs = { inherit outputs userConfig inputs; };
       };
 
       checks.${system} = {
@@ -159,8 +140,22 @@
               ${oldAttrs.shellHook}
             '';
             buildInputs = oldAttrs.buildInputs ++ (with pkgs; [
+              (python3.withPackages (ps: with ps; [
+                pip
+                black
+                pylint
+                isort
+              ]))
               statix
               deadnix
+              nodePackages.prettier
+              nodePackages.eslint
+              nodejs
+              python311Packages.boto3
+              python311Packages.pip
+              python311Packages.troposphere
+              python311Packages.jq
+              python311Packages.yq
             ]);
           });
 
@@ -182,15 +177,13 @@
                 nodejs_20
                 troposphere
                 boto3
-                pip
-                black
-                pylint
-                isort
               ]))
-              nodePackages.aws-cdk
+              # nodePackages.aws-cdk
+              nodePackages_latest.aws-cdk
               nodePackages.prettier
               nodePackages.eslint
               nodejs
+              ssm-session-manager-plugin
             ]);
           });
 
@@ -208,11 +201,8 @@
             buildInputs = oldAttrs.buildInputs ++ (with pkgs; [
               (python3.withPackages (ps: with ps; [
                 audible-cli
-                pip
-                black
-                pylint
-                isort
               ]))
+              yt-dlp
             ]);
           });
 
@@ -240,10 +230,6 @@
                 pylint
                 isort
               ]))
-              nodePackages.aws-cdk
-              nodePackages.prettier
-              nodePackages.eslint
-              nodejs
             ]);
           });
 

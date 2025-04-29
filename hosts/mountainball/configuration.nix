@@ -10,7 +10,7 @@
   ];
 
   boot.initrd.luks.devices."luks-9fc9c182-0bad-474f-a9bb-ee2e6aa1be50".device = "/dev/disk/by-uuid/9fc9c182-0bad-474f-a9bb-ee2e6aa1be50";
-  boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
+  # boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
 
   time.timeZone = "America/Los_Angeles";
 
@@ -27,7 +27,7 @@
   mine = {
     flatpak = {
       anki.enable = true;
-      bottles.enable = true;
+      bottles.enable = false;
       calibre.enable = true;
       deezer.enable = true;
       element.enable = true;
@@ -66,7 +66,7 @@
       teams-for-linux.enable = true;
       virt-viewer.enable = true;
       webcord.enable = true;
-      yt-dlp.enable = true;
+      yt-dlp.enable = false;
       zellij.enable = true;
     };
 

@@ -22,8 +22,6 @@
     home/alacritty/default.nix
     home/atuin/default.nix
     home/atuin/default.nix
-    home/awscdk/default.nix
-    home/awscli/default.nix
     home/betaflight-configurator/default.nix
     home/bitwarden/default.nix
     home/browsers/default.nix
@@ -42,7 +40,6 @@
     home/obs-studio/default.nix
     home/obsidian/default.nix
     home/protonmail-desktop/default.nix
-    home/python3/default.nix
     home/signal-desktop/default.nix
     home/ssh/default.nix
     home/teams-for-linux/default.nix

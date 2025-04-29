@@ -72,7 +72,6 @@
       ssh.enable = true;
       virt-viewer.enable = true;
       webcord.enable = true;
-      yt-dlp.enable = true;
       zellij.enable = true;
     };
 
