@@ -106,85 +106,71 @@
 
       devShells.${system} =
         let
-          pkgs = import nixpkgs {
-            inherit system;
-          };
-          baseShell = pkgs.mkShell {
-            nativeBuildInputs = with pkgs; [
-              git
-              nixpkgs-fmt
-              fish
-            ];
-
-            shellHook = ''
-              ${self.checks.${system}.pre-commit-check.shellHook}
-              export DEVSHELL_NAME="base"
-              exec fish
-            '';
-          };
-
+          pkgs = import nixpkgs { inherit system; };
+          shellHookHelper = name: ''
+            ${self.checks.${system}.pre-commit-check.shellHook or ""}
+            export DEVSHELL_NAME="${name}"
+            exec fish
+          '';
           pythonTools = with pkgs; [
             (python3.withPackages (ps: with ps; [
               pip
               black
               pylint
               isort
-              boto3
-              troposphere
               jq
               yq
             ]))
           ];
-
           nodeTools = with pkgs; [
             nodejs
             nodePackages.prettier
             nodePackages.eslint
           ];
-
         in
         {
-          # Default shell: Nix + Python + Style
           default = pkgs.mkShell {
-            inputsFrom = [ baseShell ];
-            packages = pythonTools ++ nodeTools ++ (with pkgs; [
-              statix
-              deadnix
-            ]);
-
-            # AWS shell: CDK + base tools
-
-            aws = pkgs.mkShell {
-              inputsFrom = [ baseShell self.devShells.${system}.default ];
-              packages = with pkgs; [
-                awscli2
-                aws-cdk
-                nodejs_20
-                ssm-session-manager-plugin
-                nodePackages_latest.aws-cdk
-              ];
-              shellHook = ''
-                export DEVSHELL_NAME="aws"
-                ${self.devShells.${system}.default.shellHook}
-              '';
-            };
+            PIP_PREFIX = "${self}/_pip";
+            PYTHONPATH = "$PIP_PREFIX/${pkgs.python3.sitePackages}:$PYTHONPATH";
+            nativeBuildInputs = with pkgs; [
+              git
+              nixpkgs-fmt
+              fish
+            ];
+            packages = pythonTools ++ nodeTools ++ (with pkgs;
+              [
+                statix
+                deadnix
+              ]);
+            shellHook = shellHookHelper "nix";
           };
-
-          # Media shell: Media tools + base
+          aws = pkgs.mkShell {
+            AWS_REGION = "us-west-2";
+            inputsFrom = [ self.devShells.${system}.default ];
+            packages = with pkgs; [
+              awscli2
+              aws-cdk
+              nodejs_20
+              ssm-session-manager-plugin
+              nodePackages_latest.aws-cdk
+              (python3.withPackages (ps: with ps; [
+                boto3
+                troposphere
+              ]))
+            ];
+            shellHook = shellHookHelper "aws";
+          };
           media = pkgs.mkShell {
-            inputsFrom = [ baseShell self.devShells.${system}.default ];
+            inputsFrom = [ self.devShells.${system}.default ];
             packages = with pkgs; [
               yt-dlp
               (python3.withPackages (ps: with ps; [
                 audible-cli
               ]))
             ];
-            shellHook = ''
-              export DEVSHELL_NAME="media"
-              ${self.devShells.${system}.default.shellHook}
-            '';
+            shellHook = shellHookHelper "media";
           };
-
         };
+
     };
 }
