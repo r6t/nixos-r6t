@@ -31,11 +31,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    #    sops-ryan = {
-    #      url = "git+https://git-codecommit.us-west-2.amazonaws.com/v1/repos/sops-ryan?ref=main";
-    #      flake = false;
-    #    };
-
     sops-nix = {
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -59,29 +54,29 @@
     in
     {
       # NixOS configuration entrypoint
-      # Available through 'nixos-rebuild --flake .#your-hostname'
+      # Available through 'nixos-rebuild --flake .#hostname'
       nixosConfigurations = {
-        # nixos networking device
+        # network appliance
         exit-node = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit outputs userConfig inputs; };
           modules = [ ./hosts/exit-node/configuration.nix ];
         };
-        # nixos gpu server
+        # gpu server
         moon = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit outputs userConfig inputs; };
           modules = [ ./hosts/moon/configuration.nix ];
         };
-        # nixos laptop
+        # workstation 1 - framework laptop 13 AMD
         mountainball = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit outputs userConfig inputs; };
           modules = [ ./hosts/mountainball/configuration.nix ];
         };
-        # nixos server
+        # main server
         saguaro = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit outputs userConfig inputs; };
           modules = [ ./hosts/saguaro/configuration.nix ];
         };
-        # nixos desktop
+        # workstation 2 - desktop
         silvertorch = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit outputs userConfig inputs; };
           modules = [ ./hosts/silvertorch/configuration.nix ];
@@ -110,8 +105,14 @@
           shellHookHelper = name: ''
             ${self.checks.${system}.pre-commit-check.shellHook or ""}
             export DEVSHELL_NAME="${name}"
-            exec fish
           '';
+          baseTools = with pkgs; [
+            git
+            nixpkgs-fmt
+            fish
+            statix
+            deadnix
+          ];
           pythonTools = with pkgs; [
             (python3.withPackages (ps: with ps; [
               pip
@@ -132,45 +133,65 @@
           default = pkgs.mkShell {
             PIP_PREFIX = "${self}/_pip";
             PYTHONPATH = "$PIP_PREFIX/${pkgs.python3.sitePackages}:$PYTHONPATH";
-            nativeBuildInputs = with pkgs; [
-              git
-              nixpkgs-fmt
-              fish
-            ];
-            packages = pythonTools ++ nodeTools ++ (with pkgs;
-              [
-                statix
-                deadnix
+            nativeBuildInputs = baseTools;
+            packages = pythonTools ++ nodeTools;
+            shellHook = ''
+              ${shellHookHelper "nix"}
+              exec fish
+            '';
+          };
+
+          aws =
+            let
+              pkgs = import nixpkgs {
+                inherit system;
+                overlays = [
+                  (_: prev: {
+                    python3 = prev.python3.override {
+                      packageOverrides = _: python-prev: {
+                        awacs = python-prev.awacs.overridePythonAttrs (_: {
+                          doCheck = false;
+                        });
+                      };
+                    };
+                  })
+                ];
+              };
+            in
+            pkgs.mkShell {
+              AWS_REGION = "us-west-2";
+              nativeBuildInputs = baseTools ++ (with pkgs; [
+                awscli2
+                nodejs_20
+                ssm-session-manager-plugin
+                nodePackages_latest.aws-cdk
               ]);
-            shellHook = shellHookHelper "nix";
-          };
-          aws = pkgs.mkShell {
-            AWS_REGION = "us-west-2";
-            inputsFrom = [ self.devShells.${system}.default ];
-            packages = with pkgs; [
-              awscli2
-              aws-cdk
-              nodejs_20
-              ssm-session-manager-plugin
-              nodePackages_latest.aws-cdk
-              (python3.withPackages (ps: with ps; [
-                boto3
-                troposphere
-              ]))
-            ];
-            shellHook = shellHookHelper "aws";
-          };
+              packages = with pkgs; [
+                (python3.withPackages (ps: with ps; [
+                  boto3
+                  troposphere
+                ]))
+              ];
+              shellHook = ''
+                ${shellHookHelper "aws"}
+                exec fish
+              '';
+            };
+
           media = pkgs.mkShell {
-            inputsFrom = [ self.devShells.${system}.default ];
+            nativeBuildInputs = baseTools;
             packages = with pkgs; [
               yt-dlp
               (python3.withPackages (ps: with ps; [
                 audible-cli
               ]))
             ];
-            shellHook = shellHookHelper "media";
+            shellHook = ''
+              ${shellHookHelper "media"}
+              exec fish
+            '';
           };
         };
-
     };
 }
+
