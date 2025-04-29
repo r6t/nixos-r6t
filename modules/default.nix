@@ -36,15 +36,16 @@
     home/home-manager/default.nix
     home/k2pdfopt/default.nix
     home/kde-apps/default.nix
+    home/libvirtd/default.nix
     home/mpv/default.nix
     home/nixvim/default.nix
-    home/obsidian/default.nix
     home/obs-studio/default.nix
+    home/obsidian/default.nix
     home/protonmail-desktop/default.nix
     home/python3/default.nix
     home/signal-desktop/default.nix
     home/ssh/default.nix
-    home/libvirtd/default.nix
+    home/teams-for-linux/default.nix
     home/virt-viewer/default.nix
     home/webcord/default.nix
     home/yt-dlp/default.nix

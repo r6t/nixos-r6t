@@ -52,12 +52,10 @@
     user.enable = true;
 
     home = {
-      awscli.enable = true;
       fish.enable = true;
       git.enable = true;
       home-manager.enable = true;
       nixvim.enable = true;
-      python3.enable = true;
     };
   };
 }

@@ -18,7 +18,9 @@
     virtualisation = {
       libvirtd = {
         enable = true;
-        qemu.ovmf.enable = true;
+        qemu = {
+          ovmf.enable = true;
+        };
       };
     };
     users.users.${userConfig.username}.extraGroups = [ "libvirtd" "plugdev" "dialout" ];

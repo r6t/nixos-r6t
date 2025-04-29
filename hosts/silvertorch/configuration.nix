@@ -55,8 +55,6 @@
     home = {
       alacritty.enable = true;
       atuin.enable = true;
-      awscdk.enable = true;
-      awscli.enable = true;
       bitwarden.enable = true;
       browsers.enable = true;
       drawio.enable = true;
@@ -70,7 +68,6 @@
       nixvim.enable = true;
       obsidian.enable = true;
       obs-studio.enable = true;
-      python3.enable = true;
       signal-desktop.enable = true;
       ssh.enable = true;
       virt-viewer.enable = true;

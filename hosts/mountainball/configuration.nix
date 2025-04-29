@@ -1,5 +1,4 @@
 { inputs, ... }:
-
 {
   imports = [
     inputs.home-manager.nixosModules.home-manager
@@ -48,9 +47,6 @@
     home = {
       alacritty.enable = true;
       atuin.enable = true;
-      awscdk.enable = true;
-      awscli.enable = true;
-      betaflight-configurator.enable = false;
       bitwarden.enable = true;
       browsers.enable = true;
       darktable.enable = true;
@@ -65,9 +61,9 @@
       nixvim.enable = true;
       obsidian.enable = true;
       obs-studio.enable = true;
-      python3.enable = true;
       signal-desktop.enable = true;
       ssh.enable = true;
+      teams-for-linux.enable = true;
       virt-viewer.enable = true;
       webcord.enable = true;
       yt-dlp.enable = true;
@@ -75,7 +71,6 @@
     };
 
     alloy.enable = true;
-    apache.enable = false;
     bluetooth.enable = true;
     bolt.enable = true;
     bootloader.enable = true;
@@ -89,7 +84,6 @@
     kde.enable = true;
     localization.enable = true;
     libvirtd.enable = true;
-    libimobiledevice.enable = false;
     mullvad.enable = true;
     networkmanager.enable = true;
     nix.enable = true;

@@ -52,7 +52,6 @@
       git.enable = true;
       home-manager.enable = true;
       nixvim.enable = true;
-      python3.enable = true;
       zellij.enable = true;
     };
   };

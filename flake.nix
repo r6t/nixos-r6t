@@ -61,7 +61,6 @@
       inherit (self) outputs;
       inherit (nixpkgs) lib;
       system = "x86_64-linux";
-      pkgs = nixpkgs.legacyPackages.${system};
     in
     {
       # NixOS configuration entrypoint
@@ -140,6 +139,18 @@
               exec fish
             '';
           };
+          system = "x86_64-linux";
+          pkgs = import nixpkgs { inherit system; };
+          pythonEnv = pkgs.python3.withPackages (ps: [
+            ps.pip
+          ]);
+          flacAnalyzer = pkgs.python3Packages.buildPythonApplication {
+            pname = "flac-analyzer";
+            version = "0.1";
+            format = "pyproject";
+            src = ./scripts;
+            propagatedBuildInputs = [ ];
+          };
         in
         {
           default = baseShell.overrideAttrs (oldAttrs: {
@@ -166,6 +177,9 @@
             '';
             buildInputs = oldAttrs.buildInputs ++ (with pkgs; [
               (python3.withPackages (ps: with ps; [
+                awscli2
+                aws-cdk
+                nodejs_20
                 troposphere
                 boto3
                 pip
@@ -179,6 +193,60 @@
               nodejs
             ]);
           });
+
+          media = baseShell.overrideAttrs (oldAttrs: {
+            shellHook = ''
+              export AWS_REGION="us-west-2"
+              export AWS_CDK_VERSION="$(cdk --version)"
+              export PIP_PREFIX="$PWD/_pip"
+              export PYTHONPATH="$PIP_PREFIX/${pkgs.python3.sitePackages}:$PYTHONPATH"
+              export PATH="$PIP_PREFIX/bin:$PATH"
+              unset SOURCE_DATE_EPOCH
+              export DEVSHELL_NAME="media"
+              ${oldAttrs.shellHook}
+            '';
+            buildInputs = oldAttrs.buildInputs ++ (with pkgs; [
+              (python3.withPackages (ps: with ps; [
+                audible-cli
+                pip
+                black
+                pylint
+                isort
+              ]))
+            ]);
+          });
+
+          flac = baseShell.overrideAttrs (oldAttrs: {
+            shellHook = ''
+                            export AWS_REGION="us-west-2"
+                            export AWS_CDK_VERSION="$(cdk --version)"
+                            export PIP_PREFIX="$PWD/_pip"
+                            export PYTHONPATH="$PIP_PREFIX/${pkgs.python3.sitePackages}:$PYTHONPATH"
+                            export PATH="$PIP_PREFIX/bin:$PATH"
+                            unset SOURCE_DATE_EPOCH
+                            export DEVSHELL_NAME="aws"
+              	      echo "FLAC Analyzer devshell activated."
+                            echo "Run: flac-analyze /path/to/flacs"
+                            ${oldAttrs.shellHook}
+            '';
+            buildInputs = oldAttrs.buildInputs ++ (with pkgs; [
+              (python3.withPackages (ps: with ps; [
+                pythonEnv
+                sox
+                flac
+                flacAnalyzer
+                pip
+                black
+                pylint
+                isort
+              ]))
+              nodePackages.aws-cdk
+              nodePackages.prettier
+              nodePackages.eslint
+              nodejs
+            ]);
+          });
+
         };
     };
 }

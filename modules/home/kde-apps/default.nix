@@ -82,6 +82,13 @@
             shortcuts.launch = "Meta";
           };
 
+          kscreenlocker = {
+            appearance = {
+              wallpaper = "${pkgs.kdePackages.plasma-workspace-wallpapers}/share/wallpapers/Kay/contents/images_dark/5120x2880.png";
+            };
+            passwordRequired = true;
+            passwordRequiredDelay = 9;
+          };
 
           panels = [
             {
