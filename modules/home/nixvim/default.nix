@@ -10,10 +10,15 @@
       defaultEditor = true;
       enable = true;
       extraPlugins = with pkgs.vimPlugins; [
+        direnv-vim
         oxocarbon-nvim
         zellij-nvim
       ];
-      globals.mapleader = " ";
+      globals = {
+        mapleader = " ";
+        direnv_auto = 1;
+        direnv_silent_load = 0;
+      };
       colorschemes.oxocarbon.enable = true;
       highlight.ExtraWhitespace.bg = "red";
       keymaps = [

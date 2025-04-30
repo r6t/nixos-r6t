@@ -65,6 +65,7 @@
       ssh.enable = true;
       teams-for-linux.enable = true;
       virt-viewer.enable = true;
+      vscodium.enable = true;
       webcord.enable = true;
       yt-dlp.enable = false;
       zellij.enable = true;
@@ -76,6 +77,7 @@
     bootloader.enable = true;
     czkawka.enable = true;
     docker.enable = true;
+    direnv.enable = true;
     env.enable = true;
     fonts.enable = true;
     fwupd.enable = true;

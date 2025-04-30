@@ -53,30 +53,23 @@
       system = "x86_64-linux";
     in
     {
-      # NixOS configuration entrypoint
-      # Available through 'nixos-rebuild --flake .#hostname'
       nixosConfigurations = {
-        # network appliance
         exit-node = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit outputs userConfig inputs; };
           modules = [ ./hosts/exit-node/configuration.nix ];
         };
-        # gpu server
         moon = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit outputs userConfig inputs; };
           modules = [ ./hosts/moon/configuration.nix ];
         };
-        # workstation 1 - framework laptop 13 AMD
         mountainball = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit outputs userConfig inputs; };
           modules = [ ./hosts/mountainball/configuration.nix ];
         };
-        # main server
         saguaro = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit outputs userConfig inputs; };
           modules = [ ./hosts/saguaro/configuration.nix ];
         };
-        # workstation 2 - desktop
         silvertorch = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit outputs userConfig inputs; };
           modules = [ ./hosts/silvertorch/configuration.nix ];
@@ -149,8 +142,8 @@
                   (_: prev: {
                     python3 = prev.python3.override {
                       packageOverrides = _: python-prev: {
-                        awacs = python-prev.awacs.overridePythonAttrs (_: {
-                          doCheck = false;
+                        awacs = python-prev.awacs.overridePythonAttrs (old: {
+                          checkInputs = (old.checkInputs or [ ]) ++ [ python-prev.pytest ];
                         });
                       };
                     };
