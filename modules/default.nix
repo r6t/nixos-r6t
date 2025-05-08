@@ -19,8 +19,8 @@
     flatpak/supersonic/default.nix
     flatpak/zoom/default.nix
 
+    home/aider/default.nix
     home/alacritty/default.nix
-    home/atuin/default.nix
     home/atuin/default.nix
     home/betaflight-configurator/default.nix
     home/bitwarden/default.nix
@@ -47,6 +47,7 @@
     home/vscodium/default.nix
     home/webcord/default.nix
     home/yt-dlp/default.nix
+    home/zed-editor/default.nix
     home/zellij/default.nix
 
     nixos/alloy/default.nix
@@ -77,6 +78,7 @@
     nixos/nixpkgs/default.nix
     nixos/nvidia-cuda/default.nix
     nixos/nvidia-open/default.nix
+    nixos/ollama/default.nix
     nixos/ollama-cuda/default.nix
     nixos/podman/default.nix
     nixos/printing/default.nix

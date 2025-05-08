@@ -105,6 +105,7 @@
               { name = "luasnip"; }
               { name = "buffer"; }
               { name = "path"; }
+              { name = "codecompanion"; }
             ];
             mapping = {
               "<CR>" = "cmp.mapping.confirm({ select = true })";
@@ -124,6 +125,12 @@
         codecompanion = {
           enable = true;
           settings = {
+            tools = {
+              enable = true;
+              files.enable = true;
+              workspace.enable = true;
+              codebase.enable = true;
+            };
             adapters = {
               ollama = {
                 __raw = ''

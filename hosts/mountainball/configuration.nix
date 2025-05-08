@@ -45,6 +45,7 @@
     };
 
     home = {
+      aider.enable = true;
       alacritty.enable = true;
       atuin.enable = true;
       bitwarden.enable = true;
@@ -68,6 +69,7 @@
       vscodium.enable = true;
       webcord.enable = true;
       yt-dlp.enable = false;
+      zed-editor.enable = true;
       zellij.enable = true;
     };
 
@@ -85,11 +87,16 @@
     iperf.enable = true;
     kde.enable = true;
     localization.enable = true;
-    libvirtd.enable = true;
+    libvirtd = {
+      enable = true;
+      enableDesktop = true;
+      cpuVendor = "amd";
+    };
     mullvad.enable = true;
     networkmanager.enable = true;
     nix.enable = true;
     nixpkgs.enable = true;
+    ollama.enable = true;
     printing.enable = true;
     prometheus-node-exporter.enable = true;
     rdfind.enable = true;
@@ -104,4 +111,3 @@
     v4l-utils.enable = true;
   };
 }
-

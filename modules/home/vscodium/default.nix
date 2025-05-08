@@ -11,13 +11,23 @@
       package = pkgs.vscodium;
       profiles.default = {
         extensions = with pkgs.vscode-extensions; [
+          bbenoist.nix
           continue.continue
           ms-python.python
+          ms-python.isort
           pylyzer.pylyzer
           mkhl.direnv
+          # redhat.vscode-yaml
           vscodevim.vim
           yzhang.markdown-all-in-one
         ];
+        userSettings = {
+          "editor.fontFamily" = "Hack Nerd Font, Noto Color Emoji";
+          "editor.fontSize" = 14;
+          "window.titleBarStyle" = "custom";
+          "merge-conflict.autoNavigateNextConflict.enabled" = true;
+          "redhat.telemetry.enabled" = false;
+        };
       };
     };
   };

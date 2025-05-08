@@ -2,3 +2,4 @@ result
 result/
 *.json
 .pre-commit-config.yaml
+.aider*
