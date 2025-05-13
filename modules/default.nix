@@ -47,7 +47,6 @@
     home/vscodium/default.nix
     home/webcord/default.nix
     home/yt-dlp/default.nix
-    home/zed-editor/default.nix
     home/zellij/default.nix
 
     nixos/alloy/default.nix

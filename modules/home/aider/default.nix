@@ -6,6 +6,12 @@
   };
 
   config = lib.mkIf config.mine.home.aider.enable {
-    home-manager.users.${userConfig.username}.home.packages = with pkgs; [ aider-chat-with-playwright ];
+    home-manager.users.${userConfig.username}.home = {
+      packages = with pkgs; [ aider-chat-with-playwright ];
+      file.".aider.conf.yml".source = ./aider.conf.yml;
+      sessionVariables = {
+        OLLAMA_API_BASE = "https://ollama.r6t.io";
+      };
+    };
   };
 }

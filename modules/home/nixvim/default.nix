@@ -22,43 +22,6 @@
       colorschemes.oxocarbon.enable = true;
       highlight.ExtraWhitespace.bg = "red";
       keymaps = [
-        # codecompanion
-        {
-          mode = [ "n" "v" ];
-          key = "<leader>aa";
-          action = "<cmd>CodeCompanionActions<CR>";
-          options = {
-            desc = "CodeCompanion actions";
-            silent = true;
-          };
-        }
-        {
-          mode = [ "n" "v" ];
-          key = "<leader>ac";
-          action = "<cmd>CodeCompanionChat Toggle<CR>";
-          options = {
-            desc = "Toggle CodeCompanion chat";
-            silent = true;
-          };
-        }
-        {
-          mode = "v";
-          key = "<leader>as";
-          action = "<cmd>CodeCompanionChat Add<CR>";
-          options = {
-            desc = "Send selection to chat";
-            silent = true;
-          };
-        }
-        {
-          mode = "n";
-          key = "<leader>ai";
-          action = "<cmd>CodeCompanion<CR>";
-          options = {
-            desc = "Inline assistant";
-            silent = true;
-          };
-        }
         # oil
         {
           action = "<cmd>Oil<CR>";
@@ -74,6 +37,7 @@
           key = "<leader>fg";
         }
         {
+
           action = "<cmd>Telescope buffers<CR>";
           key = "<leader>fb";
         }
@@ -96,6 +60,19 @@
         signcolumn = "yes:1";
       };
       plugins = {
+        avante = {
+          enable = true;
+          settings = {
+            provider = "ollama";
+            behaviour = {
+              enable_cursor_planning_mode = true;
+            };
+            ollama = {
+              endpoint = "https://ollama.r6t.io";
+              model = "llama3.1:latest";
+            };
+          };
+        };
         cmp = {
           enable = true;
           autoEnableSources = true;
@@ -105,7 +82,7 @@
               { name = "luasnip"; }
               { name = "buffer"; }
               { name = "path"; }
-              { name = "codecompanion"; }
+              { name = "avante"; }
             ];
             mapping = {
               "<CR>" = "cmp.mapping.confirm({ select = true })";
@@ -122,81 +99,6 @@
         cmp-nvim-lsp.enable = true;
         cmp-buffer.enable = true;
         cmp-path.enable = true;
-        codecompanion = {
-          enable = true;
-          settings = {
-            tools = {
-              enable = true;
-              files.enable = true;
-              workspace.enable = true;
-              codebase.enable = true;
-            };
-            adapters = {
-              ollama = {
-                __raw = ''
-                  function()
-                    return require('codecompanion.adapters').extend('ollama', {
-                      env = {
-                        url = "https://ollama.r6t.io",
-                      },
-                      parameters = {
-                        temperature = 0.8,
-                        top_k = 40,
-                        top_p = 0.7,
-                        repeat_penalty = 1.1,
-                        num_ctx = 32768,
-                        stream = true,
-                      },
-                      schema = {
-                        model = {
-                          default = "qwen2.5-coder:14b",
-                        },
-                      }
-                    })
-                  end
-                '';
-              };
-            };
-            opts = {
-              log_level = "TRACE";
-              send_code = true;
-              use_default_actions = true;
-              use_default_prompts = true;
-              display = {
-                action_palette = {
-                  provider = "telescope";
-                };
-                completion = {
-                  provider = "nvim-cmp";
-                };
-                command_palette = {
-                  provider = "telescope";
-                };
-                chat = {
-                  window = {
-                    width = 0.4; # 40% of screen width
-                    border = "rounded";
-                  };
-                };
-              };
-              actions = {
-                auto_import = true;
-                auto_format = true;
-              };
-            };
-            strategies = {
-              agent = {
-                adapter = "ollama";
-              };
-              chat = {
-                adapter = "ollama";
-              };
-              inline = {
-                adapter = "ollama";
-              };
-            };
-          };
-        };
         conform-nvim = {
           enable = true;
           settings = {

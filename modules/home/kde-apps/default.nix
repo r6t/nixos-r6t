@@ -33,12 +33,24 @@
 
 
       programs = {
+        elisa = {
+          enable = true;
+          appearance = {
+            defaultFilesViewPath = "/home/r6t/music/sync";
+            defaultView = "allAlbums";
+          };
+          indexer = {
+            ratingsStyle = "favourites";
+          };
+        };
+
         kate = {
           enable = true;
           editor = {
             brackets = {
               automaticallyAddClosing = true;
               flashMatching = true;
+              highlightMatching = true;
             };
             font = {
               family = "Hack Nerd";
@@ -67,12 +79,6 @@
         };
 
         plasma = {
-          workspace = {
-            colorScheme = "BreezeDark";
-            theme = "breeze-dark";
-            lookAndFeel = "org.kde.breezedark.desktop";
-            wallpaper = "${pkgs.kdePackages.plasma-workspace-wallpapers}/share/wallpapers/Kay/contents/images_dark/5120x2880.png";
-          };
           enable = true;
           overrideConfig = true;
           krunner = {
@@ -80,6 +86,13 @@
             historyBehavior = "enableSuggestions"; # or disabled or enableAutoComplete
             position = "center";
             shortcuts.launch = "Meta";
+          };
+
+          workspace = {
+            colorScheme = "BreezeDark";
+            theme = "breeze-dark";
+            lookAndFeel = "org.kde.breezedark.desktop";
+            wallpaper = "${pkgs.kdePackages.plasma-workspace-wallpapers}/share/wallpapers/Kay/contents/images_dark/5120x2880.png";
           };
 
           kscreenlocker = {
@@ -154,7 +167,6 @@
               turnOffDisplay.idleTimeout = 3600;
               whenSleepingEnter = "standby";
             };
-            battery.powerProfile = "powerSaving";
           };
           session = {
             general.askForConfirmationOnLogout = false;
