@@ -44,7 +44,6 @@
     home/ssh/default.nix
     home/teams-for-linux/default.nix
     home/virt-viewer/default.nix
-    home/vscodium/default.nix
     home/webcord/default.nix
     home/yt-dlp/default.nix
     home/zellij/default.nix

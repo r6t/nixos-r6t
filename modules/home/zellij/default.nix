@@ -7,11 +7,14 @@
 
   config = lib.mkIf config.mine.home.zellij.enable {
     home-manager.users.${userConfig.username}.programs.zellij = {
+      attachExistingSession = true;
       enable = true;
       enableFishIntegration = true;
       settings = {
-        simplified_ui = false;
+        show_startup_tips = false;
+        simplified_ui = true;
         default_shell = "fish";
+        default_layout = "compact";
         pane_frames = false;
         copy_command = "wl-copy";
         scrollback_editor = "nvim";
@@ -35,7 +38,7 @@
           bright_magenta = "#ff7eb6";
           bright_cyan = "#3ddbd9";
           bright_white = "#ffffff";
-          orange = "#ffdab9"; # zellij threw an error requiring orange, this isn't part of oxocarbon
+          orange = "#ffdab9";
         };
       };
     };

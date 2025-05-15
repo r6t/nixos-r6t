@@ -202,20 +202,22 @@
             "ksmserver"."Reboot Without Confirmation" = "none,,Reboot Without Confirmation";
             "ksmserver"."Shut Down" = "none,,Shut Down";
             "kwin"."Activate Window Demanding Attention" = "Meta+Ctrl+A";
+            "kwin"."Edit Tiles" = "Meta+Shift+T";
             "kwin"."Overview" = "Meta+W";
-            "kwin"."Show Desktop" = "Meta+D";
+            "kwin"."Grid View" = "Meta+G";
+            "kwin"."Show Desktop" = "none";
             "kwin"."Switch One Desktop Down" = "Meta+Ctrl+Down";
             "kwin"."Switch One Desktop Up" = "Meta+Ctrl+Up";
-            "kwin"."Switch One Desktop to the Left" = "Meta+Ctrl+Left";
+            "kwin"."Switch One Desktop to the Left" = "Meta+H";
             "kwin"."Switch One Desktop to the Right" = "Meta+Ctrl+Right";
             "kwin"."Switch Window Down" = "Meta+Alt+Down";
             "kwin"."Switch Window Left" = "Meta+Alt+Left";
             "kwin"."Switch Window Right" = "Meta+Alt+Right";
             "kwin"."Switch Window Up" = "Meta+Alt+Up";
-            "kwin"."Walk Through Windows" = "Alt+Tab";
             "kwin"."Walk Through Windows (Reverse)" = "Alt+Shift+Tab";
-            "kwin"."Walk Through Windows of Current Application" = "Alt+`";
             "kwin"."Walk Through Windows of Current Application (Reverse)" = "Alt+~";
+            "kwin"."Walk Through Windows of Current Application" = "Alt+`";
+            "kwin"."Walk Through Windows" = "Alt+Tab";
             "kwin"."Window Close" = "Alt+F4";
             "kwin"."Window Maximize" = "Meta+PgUp";
             "kwin"."Window Minimize" = "Meta+PgDown";
@@ -265,8 +267,9 @@
             "plasmashell"."clear-history" = "none,,Clear Clipboard History";
             "plasmashell"."clipboard_action" = "Meta+Ctrl+X";
             "plasmashell"."cycle-panels" = "Meta+Alt+P";
-            "plasmashell"."manage activities" = "Meta+Q";
-            "plasmashell"."stop current activity" = "Meta+S";
+            "plasmashell"."manage activities" = "none";
+            "plasmashell"."stop current activity" = "none";
+            "services/org.kde.kscreen.desktop"."ShowOSD" = "Meta+D";
           };
           configFile = {
             # global plasma settings

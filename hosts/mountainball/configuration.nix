@@ -66,7 +66,6 @@
       ssh.enable = true;
       teams-for-linux.enable = true;
       virt-viewer.enable = true;
-      vscodium.enable = false;
       webcord.enable = true;
       yt-dlp.enable = false;
       zellij.enable = true;

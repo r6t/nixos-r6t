@@ -10,6 +10,8 @@
       packages = with pkgs; [ aider-chat-with-playwright ];
       file.".aider.conf.yml".source = ./aider.conf.yml;
       sessionVariables = {
+        AIDER_AUTO_ACCEPT_ARCHITECT = "false";
+        AIDER_EDIT_FORMAT = "diff";
         OLLAMA_API_BASE = "https://ollama.r6t.io";
       };
     };
