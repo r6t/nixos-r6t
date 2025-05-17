@@ -100,11 +100,21 @@
             export DEVSHELL_NAME="${name}"
           '';
           baseTools = with pkgs; [
-            git
+            # linters
+            alejandra
+            rubyfmt
+            stylua
+            yamlfmt
             nixpkgs-fmt
-            fish
             statix
             deadnix
+            # media
+            viu
+            chafa
+            ueberzugpp
+            # tools
+            tree-sitter
+
           ];
           pythonTools = with pkgs; [
             (python3.withPackages (ps: with ps; [

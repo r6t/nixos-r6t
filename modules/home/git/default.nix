@@ -8,7 +8,11 @@
   config = lib.mkIf config.mine.home.git.enable {
     home-manager.users.${userConfig.username} = {
       home = {
-        packages = with pkgs; [ pre-commit ];
+        packages = with pkgs; [
+          pre-commit
+          gh
+          glab
+        ];
       };
       programs.git = {
         enable = true;

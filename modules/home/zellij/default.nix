@@ -19,6 +19,27 @@
         copy_command = "wl-copy";
         scrollback_editor = "nvim";
         theme = "oxocarbon";
+        keybinds = {
+          unbind = [ "Ctrl g" "Ctrl p" "Ctrl n" "Ctrl t" "Ctrl s" "Ctrl o" "Ctrl m" ];
+          normal = {
+            "bind \"Super z\"" = { SwitchToMode = "locked"; };
+            "bind \"Super p\"" = { SwitchToMode = "pane"; };
+            "bind \"Super n\"" = { SwitchToMode = "resize"; };
+            "bind \"Super t\"" = { SwitchToMode = "tab"; };
+            "bind \"Super s\"" = { SwitchToMode = "scroll"; };
+            "bind \"Super o\"" = { SwitchToMode = "session"; };
+            "bind \"Super m\"" = { SwitchToMode = "move"; };
+            "bind \"Alt n\"" = { NewPane = ""; };
+            "bind \"Alt h\"" = { MoveFocus = "Left"; };
+            "bind \"Alt l\"" = { MoveFocus = "Right"; };
+            "bind \"Alt j\"" = { MoveFocus = "Down"; };
+            "bind \"Alt k\"" = { MoveFocus = "Up"; };
+          };
+          locked = {
+            "bind \"Super z\"" = { SwitchToMode = "normal"; };
+          };
+        };
+
         themes.oxocarbon = {
           fg = "#ffffff";
           bg = "#161616";

@@ -9,6 +9,9 @@
     home-manager.users.${userConfig.username}.programs.alacritty = {
       enable = true;
       settings = {
+        window = {
+          decorations = "none";
+        };
         terminal.shell = {
           program = "zellij";
           args = [ "-l" "welcome" ];

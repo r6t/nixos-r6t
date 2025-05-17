@@ -18,18 +18,19 @@
       ];
 
       extraConfigLua = ''
-        if vim.lsp.config then
-          vim.lsp.config('*', {
-            capabilities = require('blink.cmp').get_lsp_capabilities(),
-          })
-        end
+                if vim.lsp.config then
+                  vim.lsp.config('*', {
+                    capabilities = require('blink.cmp').get_lsp_capabilities(),
+                  })
+                end
 
-        -- Fix for zellij.nvim health check
-        vim.health = vim.health or {}
-        vim.health.report_start = vim.health.report_start or function() end
-        vim.health.report_ok = vim.health.report_ok or function() end
-        vim.health.report_warn = vim.health.report_warn or function() end
-        vim.health.report_error = vim.health.report_error or function() end
+                -- Fix for zellij.nvim health check
+                vim.health = vim.health or {}
+                vim.health.report_start = vim.health.report_start or function() end
+                vim.health.report_ok = vim.health.report_ok or function() end
+                vim.health.report_warn = vim.health.report_warn or function() end
+                vim.health.report_error = vim.health.report_error or function() end
+        	vim.health.report_info = vim.health.report_info or function() end
       '';
 
       globals = {
@@ -109,6 +110,15 @@
               nerd_font_variant = "normal";
               use_nvim_cmp_as_default = true;
             };
+            cmdline = {
+              enabled = true;
+              keymap = { preset = "inherit"; };
+              completion = {
+                list.selection.preselect = false;
+                menu = { auto_show = true; };
+                ghost_text = { enabled = true; };
+              };
+            };
             completion = {
               menu.border = "rounded";
               accept = {
@@ -179,8 +189,6 @@
               nix = [ "alejandra" ];
               python = [ "black" ];
               ruby = [ "rubyfmt" ];
-              terraform = [ "tofu_fmt" ];
-              tf = [ "tofu_fmt" ];
               yaml = [ "yamlfmt" ];
             };
           };
