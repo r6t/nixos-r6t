@@ -1,7 +1,6 @@
 { ... }: {
 
   imports = [
-    home/awscli/default.nix
     home/fish/default.nix
     home/git/default.nix
     home/nixvim/default.nix

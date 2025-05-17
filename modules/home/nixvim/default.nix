@@ -23,6 +23,13 @@
             capabilities = require('blink.cmp').get_lsp_capabilities(),
           })
         end
+
+        -- Fix for zellij.nvim health check
+        vim.health = vim.health or {}
+        vim.health.report_start = vim.health.report_start or function() end
+        vim.health.report_ok = vim.health.report_ok or function() end
+        vim.health.report_warn = vim.health.report_warn or function() end
+        vim.health.report_error = vim.health.report_error or function() end
       '';
 
       globals = {

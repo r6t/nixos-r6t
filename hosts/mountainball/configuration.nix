@@ -27,7 +27,6 @@
   mine = {
     flatpak = {
       anki.enable = true;
-      bottles.enable = false;
       calibre.enable = true;
       deezer.enable = true;
       element.enable = true;
@@ -38,8 +37,6 @@
       proton-mail.enable = true;
       protonup-qt.enable = true;
       remmina.enable = true;
-      retroarch.enable = true;
-      steam.enable = true;
       supersonic.enable = true;
       zoom.enable = true;
     };
@@ -67,7 +64,6 @@
       teams-for-linux.enable = true;
       virt-viewer.enable = true;
       webcord.enable = true;
-      yt-dlp.enable = false;
       zellij.enable = true;
     };
 
@@ -94,7 +90,6 @@
     networkmanager.enable = true;
     nix.enable = true;
     nixpkgs.enable = true;
-    ollama.enable = true;
     printing.enable = true;
     prometheus-node-exporter.enable = true;
     rdfind.enable = true;

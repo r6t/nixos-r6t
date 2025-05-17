@@ -21,7 +21,6 @@
     alloy.enable = true;
     bolt.enable = true;
     bootloader.enable = true;
-    docker.enable = false;
     env.enable = true;
     exit-node-routing.enable = true;
     fwupd.enable = true;
@@ -38,7 +37,6 @@
     user.enable = true;
 
     home = {
-      awscli.enable = true;
       fish.enable = true;
       git.enable = true;
       home-manager.enable = true;
