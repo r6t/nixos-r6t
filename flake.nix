@@ -141,7 +141,11 @@
             packages = pythonTools ++ nodeTools;
             shellHook = ''
               ${shellHookHelper "nix"}
-              exec fish
+              if command -v fish >/dev/null; then
+                exec fish
+              else
+                echo "Warning: fish not found, falling back to bash"
+              fi
             '';
           };
 
@@ -176,9 +180,14 @@
                   troposphere
                 ]))
               ];
+              shell = "${pkgs.fish}/bin/fish";
               shellHook = ''
                 ${shellHookHelper "aws"}
-                exec fish
+                if command -v fish >/dev/null; then
+                  exec fish
+                else
+                  echo "Warning: fish not found, falling back to bash"
+                fi
               '';
             };
 
@@ -190,9 +199,14 @@
                 audible-cli
               ]))
             ];
+            shell = "${pkgs.fish}/bin/fish";
             shellHook = ''
               ${shellHookHelper "media"}
-              exec fish
+              if command -v fish >/dev/null; then
+                exec fish
+              else
+                echo "Warning: fish not found, falling back to bash"
+              fi
             '';
           };
         };
