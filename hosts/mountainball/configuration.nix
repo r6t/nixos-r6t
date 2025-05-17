@@ -10,19 +10,23 @@
   ];
 
   boot.initrd.luks.devices."luks-9fc9c182-0bad-474f-a9bb-ee2e6aa1be50".device = "/dev/disk/by-uuid/9fc9c182-0bad-474f-a9bb-ee2e6aa1be50";
-  # boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
 
   time.timeZone = "America/Los_Angeles";
 
-  networking = {
-    hostName = "mountainball";
-  };
+  networking.hostName = "mountainball";
+
   # troubleshooting external display ddc/ci brighness control
   hardware.i2c.enable = true;
   users.users.r6t.extraGroups = [ "i2c" ];
 
-  system.stateVersion = "23.11";
+  sops = {
+    defaultSopsFile = "/home/r6t/git/sops-ryan/secrets.yaml";
+    age.keyFile = "/home/r6t/.config/sops/age/keys.txt";
+    validateSopsFiles = false;
+  };
+
   services.fprintd.enable = false;
+  system.stateVersion = "23.11";
 
   mine = {
     flatpak = {
