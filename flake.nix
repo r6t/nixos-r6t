@@ -100,6 +100,7 @@
             export DEVSHELL_NAME="${name}"
           '';
           baseTools = with pkgs; [
+            fish
             # linters
             alejandra
             rubyfmt
