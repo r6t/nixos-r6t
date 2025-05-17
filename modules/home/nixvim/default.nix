@@ -10,10 +10,21 @@
       defaultEditor = true;
       enable = true;
       extraPlugins = with pkgs.vimPlugins; [
+        blink-cmp-avante
         direnv-vim
         oxocarbon-nvim
         zellij-nvim
+        nvim-lspconfig
       ];
+
+      extraConfigLua = ''
+        if vim.lsp.config then
+          vim.lsp.config('*', {
+            capabilities = require('blink.cmp').get_lsp_capabilities(),
+          })
+        end
+      '';
+
       globals = {
         mapleader = " ";
         direnv_auto = 1;
@@ -22,6 +33,12 @@
       colorschemes.oxocarbon.enable = true;
       highlight.ExtraWhitespace.bg = "red";
       keymaps = [
+        # lsp
+        {
+          action = "<cmd>LspInfo<CR>";
+          key = "<leader>li";
+          options.desc = "LSP Info";
+        }
         # oil
         {
           action = "<cmd>Oil<CR>";
@@ -71,34 +88,78 @@
               endpoint = "https://ollama.r6t.io";
               model = "llama3.1:latest";
             };
-          };
-        };
-        cmp = {
-          enable = true;
-          autoEnableSources = true;
-          settings = {
-            sources = [
-              { name = "nvim_lsp"; }
-              { name = "luasnip"; }
-              { name = "buffer"; }
-              { name = "path"; }
-              { name = "avante"; }
-            ];
-            mapping = {
-              "<CR>" = "cmp.mapping.confirm({ select = true })";
-              "<Down>" = "cmp.mapping(cmp.mapping.select_next_item(), {'i', 's'})";
-              "<Up>" = "cmp.mapping(cmp.mapping.select_prev_item(), {'i', 's'})";
-              "<Tab>" = "cmp.mapping(cmp.mapping.select_next_item(), {'i', 's'})";
-              "<S-Tab>" = "cmp.mapping(cmp.mapping.select_prev_item(), {'i', 's'})";
-              "<C-d>" = "cmp.mapping.scroll_docs(-4)";
-              "<C-f>" = "cmp.mapping.scroll_docs(4)";
-              "<C-Space>" = "cmp.mapping.complete()";
+            selector = {
+              provider = "fzf_lua";
+              provider_opts = { };
             };
           };
         };
-        cmp-nvim-lsp.enable = true;
-        cmp-buffer.enable = true;
-        cmp-path.enable = true;
+        blink-cmp = {
+          enable = true;
+          setupLspCapabilities = true;
+          settings = {
+            appearance = {
+              nerd_font_variant = "normal";
+              use_nvim_cmp_as_default = true;
+            };
+            completion = {
+              menu.border = "rounded";
+              accept = {
+                auto_brackets = {
+                  enabled = true;
+                  semantic_token_resolution = {
+                    enabled = false;
+                  };
+                };
+              };
+              documentation = {
+                auto_show = true;
+                window.border = "rounded";
+              };
+            };
+            sources = {
+              default = [
+                "lsp"
+                "buffer"
+                "path"
+                "snippets"
+                "git"
+                "avante_commands"
+                "avante_mentions"
+                "avante_files"
+              ];
+              providers = {
+                buffer = {
+                  enabled = true;
+                  score_offset = 0;
+                };
+                lsp = {
+                  name = "LSP";
+                  enabled = true;
+                  score_offset = 10;
+                };
+                git = {
+                  module = "blink-cmp-git";
+                  name = "Git";
+                };
+                avante_commands = {
+                  name = "avante_commands";
+                  module = "blink.compat.source";
+                };
+                avante_mentions = {
+                  name = "avante_mentions";
+                  module = "blink.compat.source";
+                };
+                avante_files = {
+                  name = "avante_files";
+                  module = "blink.compat.source";
+                };
+              };
+            };
+          };
+        };
+        blink-cmp-git.enable = true;
+        blink-compat.enable = true;
         conform-nvim = {
           enable = true;
           settings = {
@@ -117,11 +178,13 @@
             };
           };
         };
+        lspkind.enable = true;
         dressing.enable = true;
         fugitive.enable = true;
+        fzf-lua.enable = true;
         git-conflict.enable = true;
         lualine.enable = true;
-        luasnip.enable = true;
+        luasnip.enable = false;
         lsp = {
           enable = true;
           servers = {
@@ -138,8 +201,21 @@
                 formatting.command = [ "nixpkgs-fmt" ];
               };
             };
-            pylsp = {
+            pyright = {
               enable = true;
+              settings = {
+                python = {
+                  analysis = {
+                    typeCheckingMode = "basic";
+                    autoSearchPaths = true;
+                    useLibraryCodeForTypes = true;
+                    diagnosticMode = "workspace";
+                  };
+                };
+              };
+            };
+            pylsp = {
+              enable = false;
               settings.plugins = {
                 black.enabled = true;
                 flake8.enabled = false;
