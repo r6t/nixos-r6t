@@ -128,7 +128,7 @@
                       "applications:obsidian.desktop" # 4
                       "applications:io.github.dweymouth.supersonic.desktop" # 5
                       "applications:me.proton.Mail.desktop" # 6
-                      "applications:signal-desktop.desktop" # 7
+                      "applications:signal.desktop" # 7
                       "applications:im.riot.Riot.desktop" # 8
                     ];
                   };
