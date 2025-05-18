@@ -14,27 +14,13 @@
         owner = userConfig.username;
       };
     };
+
     home-manager.users.${userConfig.username} = {
-      systemd.user.services.set-session-secrets = {
-        Unit = {
-          Description = "Export SOPS secrets as session environment variables";
-          After = [ "graphical-session.target" ];
-        };
-        Service = {
-          Type = "oneshot";
-          ExecStart = ''
-            ${pkgs.bash}/bin/bash -c '${lib.escapeShellArg ''
-              mkdir -p "$HOME/.config/environment.d"
-              echo "BEDROCK_KEYS=$(cat /run/secrets/BEDROCK_KEYS)" > "$HOME/.config/environment.d/90-sops-env.conf"
-              echo "GH_TOKEN=$(cat /run/secrets/GH_TOKEN)" >> "$HOME/.config/environment.d/90-sops-env.conf"
-            ''}'
-          '';
-          RemainAfterExit = true;
-        };
-        Install = {
-          WantedBy = [ "default.target" ];
-        };
+      home.file.".config/fish/conf.d/90-vim-sops-secrets.fish" = {
+        text = builtins.readFile ./setVimSessionVars.fish;
+        executable = true;
       };
+
       programs.nixvim = {
         defaultEditor = true;
         enable = true;

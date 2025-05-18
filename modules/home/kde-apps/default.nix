@@ -204,7 +204,7 @@
             "kwin"."Activate Window Demanding Attention" = "Meta+Ctrl+A";
             "kwin"."Edit Tiles" = "Meta+Shift+T";
             "kwin"."Overview" = "Meta+W";
-            "kwin"."Grid View" = "Meta+G";
+            "kwin"."Grid View" = "Meta+E";
             "kwin"."Show Desktop" = "none";
             "kwin"."Switch One Desktop Down" = "Meta+Ctrl+Down";
             "kwin"."Switch One Desktop Up" = "Meta+Ctrl+Up";
