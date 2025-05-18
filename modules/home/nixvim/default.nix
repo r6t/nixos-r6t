@@ -16,9 +16,27 @@
     };
 
     home-manager.users.${userConfig.username} = {
-      home.file.".config/fish/conf.d/90-vim-sops-secrets.fish" = {
-        text = builtins.readFile ./setVimSessionVars.fish;
-        executable = true;
+      home = {
+        file.".config/fish/conf.d/90-vim-sops-secrets.fish" = {
+          text = builtins.readFile ./setVimSessionVars.fish;
+          executable = true;
+        };
+        packages = with pkgs; [
+          # linters
+          alejandra
+          rubyfmt
+          stylua
+          yamlfmt
+          nixpkgs-fmt
+          statix
+          deadnix
+          # media
+          viu
+          chafa
+          ueberzugpp
+          # tools
+          tree-sitter
+        ];
       };
 
       programs.nixvim = {

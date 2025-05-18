@@ -101,21 +101,6 @@
           '';
           baseTools = with pkgs; [
             fish
-            # linters
-            alejandra
-            rubyfmt
-            stylua
-            yamlfmt
-            nixpkgs-fmt
-            statix
-            deadnix
-            # media
-            viu
-            chafa
-            ueberzugpp
-            # tools
-            tree-sitter
-
           ];
           pythonTools = with pkgs; [
             (python3.withPackages (ps: with ps; [
