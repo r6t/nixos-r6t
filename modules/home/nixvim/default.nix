@@ -33,7 +33,6 @@
           # media
           viu
           chafa
-          ueberzugpp
           # tools
           tree-sitter
         ];

@@ -19,12 +19,6 @@
   hardware.i2c.enable = true;
   users.users.r6t.extraGroups = [ "i2c" ];
 
-  sops = {
-    defaultSopsFile = "/home/r6t/git/sops-ryan/secrets.yaml";
-    age.keyFile = "/home/r6t/.config/sops/age/keys.txt";
-    validateSopsFiles = false;
-  };
-
   services.fprintd.enable = false;
   system.stateVersion = "23.11";
 

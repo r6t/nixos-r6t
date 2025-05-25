@@ -35,6 +35,7 @@
     fwupd.enable = true;
     fzf.enable = true;
     grafana.enable = true;
+    karakeep.enable = true;
     localization.enable = true;
     loki.enable = true;
     libvirtd.enable = true;

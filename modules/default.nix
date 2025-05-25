@@ -64,6 +64,7 @@
     nixos/grafana/default.nix
     nixos/immich/default.nix
     nixos/iperf/default.nix
+    nixos/karakeep/default.nix
     nixos/kde/default.nix
     nixos/libimobiledevice/default.nix
     nixos/libvirtd/default.nix
