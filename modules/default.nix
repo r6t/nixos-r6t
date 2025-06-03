@@ -63,6 +63,7 @@
     nixos/fzf/default.nix
     nixos/grafana/default.nix
     nixos/immich/default.nix
+    nixos/incus/default.nix
     nixos/iperf/default.nix
     nixos/karakeep/default.nix
     nixos/kde/default.nix

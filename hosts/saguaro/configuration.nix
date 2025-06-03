@@ -14,6 +14,12 @@
     hostName = "saguaro";
   };
 
+  sops = {
+    defaultSopsFile = "/home/r6t/git/sops-ryan/secrets.yaml";
+    age.keyFile = "/home/r6t/.config/sops/age/keys.txt";
+    validateSopsFiles = false;
+  };
+
   system.stateVersion = "23.11";
 
   users.users.${userConfig.username}.linger = true;
@@ -26,6 +32,7 @@
     env.enable = true;
     fwupd.enable = true;
     fzf.enable = true;
+    incus.enable = true;
     iperf.enable = true;
     localization.enable = true;
     networkmanager.enable = true;
