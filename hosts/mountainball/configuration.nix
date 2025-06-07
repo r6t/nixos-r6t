@@ -87,7 +87,6 @@
     mullvad.enable = true;
     networkmanager.enable = true;
     nix.enable = true;
-    nixpkgs.enable = true;
     printing.enable = true;
     prometheus-node-exporter.enable = true;
     rdfind.enable = true;

@@ -18,14 +18,20 @@ in
       serviceConfig = {
         Type = "oneshot";
         ExecStart = pkgs.writeShellScript "karakeep-gen-env" ''
-                    set -euo pipefail
-                    mkdir -p /etc/karakeep
-                    cat > ${oidcEnvFile} <<EOF
-          OAUTH_CLIENT_ID=$(cat /run/secrets/karakeep/oidc_client_id)
-          OAUTH_CLIENT_SECRET=$(cat /run/secrets/karakeep/oidc_client_secret)
-          OAUTH_REDIRECT_URL=$(cat /run/secrets/karakeep/oidc_redirect_url)
-          EOF
-                    chmod 600 ${oidcEnvFile}
+                              set -euo pipefail
+                              mkdir -p /etc/karakeep
+                              cat > ${oidcEnvFile} <<EOF
+                    OAUTH_CLIENT_ID=$(cat /run/secrets/karakeep/oidc_client_id)
+                    OAUTH_CLIENT_SECRET=$(cat /run/secrets/karakeep/oidc_client_secret)
+                    OAUTH_REDIRECT_URL=$(cat /run/secrets/karakeep/oidc_redirect_url)
+                    NEXTAUTH_URL=https://keep.r6t.io
+          	  OAUTH_WELLKNOWN_URL=https://pid.r6t.io/.well-known/openid-configuration
+          	  OAUTH_PROVIDER_NAME=Pocket-ID
+          	  DISABLE_PASSWORD_AUTH=true
+          	  # DISABLE_SIGNUPS=true reenable later
+          	  DISABLE_SIGNUPS=false
+                    EOF
+                              chmod 600 ${oidcEnvFile}
         '';
       };
     };
@@ -33,13 +39,7 @@ in
     services.karakeep = {
       enable = true;
       environmentFile = oidcEnvFile;
-      extraEnvironment = {
-        NEXTAUTH_URL = "https://keep.r6t.io";
-        OAUTH_WELLKNOWN_URL = "https://pid.r6t.io/.well-known/openid-configuration";
-        OAUTH_PROVIDER_NAME = "Pocket-ID";
-        DISABLE_PASSWORD_AUTH = "true";
-        DISABLE_SIGNUPS = "true";
-      };
+      extraEnvironment = { };
     };
   };
 }

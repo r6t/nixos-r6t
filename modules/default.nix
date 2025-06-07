@@ -54,6 +54,7 @@
     nixos/bolt/default.nix
     nixos/bootloader/default.nix
     nixos/bridge/default.nix
+    nixos/caddy/default.nix
     nixos/czkawka/default.nix
     nixos/docker/default.nix
     nixos/env/default.nix
@@ -75,11 +76,10 @@
     nixos/mullvad/default.nix
     nixos/networkmanager/default.nix
     nixos/nix/default.nix
-    nixos/nixpkgs/default.nix
     nixos/nvidia-cuda/default.nix
     nixos/nvidia-open/default.nix
     nixos/ollama/default.nix
-    nixos/ollama-cuda/default.nix
+    nixos/llm/default.nix
     nixos/podman/default.nix
     nixos/printing/default.nix
     nixos/prometheus-node-exporter/default.nix
@@ -94,6 +94,7 @@
     nixos/tailscale/default.nix
     nixos/thunderbay/default.nix
     nixos/tpm/default.nix
+    nixos/uptime-kuma/default.nix
     nixos/user/default.nix
     nixos/v4l-utils/default.nix
     nixos/direnv/default.nix

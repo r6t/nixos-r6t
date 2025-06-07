@@ -37,7 +37,6 @@
     localization.enable = true;
     networkmanager.enable = true;
     nix.enable = true;
-    nixpkgs.enable = true;
     prometheus-node-exporter.enable = true;
     sops.enable = true;
     ssh.enable = true;
