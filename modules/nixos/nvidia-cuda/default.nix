@@ -7,8 +7,6 @@
 
   config = lib.mkIf config.mine.nvidia-cuda.enable {
 
-    nixpkgs.config.nvidia.acceptLicense = true;
-    nixpkgs.config.cudaSupport = true;
     environment.systemPackages = with pkgs; [ cudatoolkit libva ];
     hardware = {
       graphics = {
@@ -16,14 +14,15 @@
         enable32Bit = true;
       };
       nvidia = {
-        datacenter.enable = true;
-        modesetting.enable = true;
-        powerManagement.enable = true; # changed from default false
+        package = config.boot.kernelPackages.nvidiaPackages.stable;
+        modesetting.enable = false;
+        powerManagement.enable = true;
         open = false;
-        nvidiaSettings = true;
+        nvidiaSettings = false;
       };
       nvidia-container-toolkit.enable = true;
     };
+    services.xserver.videoDrivers = [ "nvidia" ];
   };
 }
 

@@ -1,4 +1,4 @@
-{ inputs, ... }:
+{ lib, inputs, ... }:
 
 {
   imports = [
@@ -9,18 +9,28 @@
     ../../modules/default.nix
   ];
 
-  # Caddy container passthru to internal monitoring services
-  networking.firewall = {
-    allowedTCPPorts = [ 3000 9001 ]; # Grafana + Prometheus
-    extraCommands = ''
-      iptables -A INPUT -s 172.22.0.0/24 -j ACCEPT
-    '';
-  };
-
   time.timeZone = "America/Los_Angeles";
   networking = {
     hostName = "moon";
     enableIPv6 = true;
+  };
+
+  networking = {
+    useDHCP = lib.mkDefault true;
+    networkmanager.enable = false;
+    useNetworkd = false;
+    bridges.br1 = {
+      interfaces = [ "enp0s13f0u4" ];
+    };
+
+    interfaces = {
+      enp0s13f0u4.useDHCP = false;
+      enp89s0.useDHCP = true;
+      br1.useDHCP = true;
+    };
+
+    # Allow DHCP on bridge interface
+    dhcpcd.denyInterfaces = [ "enp0s*" "wl*" ]; # Permit br1
   };
 
   system.stateVersion = "23.11";
@@ -29,19 +39,22 @@
     alloy.enable = true;
     bolt.enable = true;
     bootloader.enable = true;
-    bridge.enable = true;
-    docker.enable = true;
+    bridge.enable = false;
+    caddy.enable = true;
     env.enable = true;
     fwupd.enable = true;
     fzf.enable = true;
     grafana.enable = true;
+    immich.enable = true;
+    incus.enable = true;
+    karakeep.enable = true;
     localization.enable = true;
     loki.enable = true;
-    libvirtd.enable = true;
+    libvirtd.enable = false;
+    llm.enable = true;
     moonstore.enable = true;
-    networkmanager.enable = true;
+    networkmanager.enable = false;
     nix.enable = true;
-    nixpkgs.enable = true;
     nvidia-cuda.enable = true;
     prometheus.enable = true;
     prometheus-node-exporter.enable = true;
@@ -49,6 +62,7 @@
     ssh.enable = true;
     syncthing.enable = true;
     tailscale.enable = true;
+    uptime-kuma.enable = true;
     user.enable = true;
 
     home = {

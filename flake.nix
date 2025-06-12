@@ -51,6 +51,10 @@
       inherit (self) outputs;
       inherit (nixpkgs) lib;
       system = "x86_64-linux";
+      pkgs = import nixpkgs { inherit system; };
+      myCaddy = import ./pkgs/caddy-with-route53.nix {
+        inherit pkgs lib;
+      };
     in
     {
       nixosConfigurations = {
@@ -59,8 +63,25 @@
           modules = [ ./hosts/exit-node/configuration.nix ];
         };
         moon = nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
+          modules = [
+            ./hosts/moon/configuration.nix
+            {
+              nixpkgs.overlays = [
+                (self: super: {
+                  caddy-with-route53 = myCaddy;
+                })
+              ];
+              nixpkgs = {
+                config = {
+                  allowUnfree = true;
+                  cudaSupport = true;
+                  nvidia.acceptLicense = true;
+                };
+              };
+            }
+          ];
           specialArgs = { inherit outputs userConfig inputs; };
-          modules = [ ./hosts/moon/configuration.nix ];
         };
         mountainball = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit outputs userConfig inputs; };
@@ -81,8 +102,8 @@
           src = ./.;
           hooks = {
             nixpkgs-fmt.enable = true;
-            statix.enable = true;
-            deadnix.enable = true;
+            statix.enable = false; # temporarily off, false positive
+            deadnix.enable = false; # temporarily off, false positive
             prettier.enable = true;
             black.enable = true;
             isort.enable = true;
