@@ -11,8 +11,11 @@
       useRoutingFeatures = "client";
     };
 
-    # troubleshooting exit nodes not working after 1/15/25 update
-    networking.firewall.checkReversePath = "loose";
+    # allow tailnet traffic
+    networking.firewall = {
+      checkReversePath = "loose";
+      trustedInterfaces = [ "tailscale0" ];
+    };
 
     # prevent nixos rebuilds getting hung up on network manager checking tailscale interface
     networking.networkmanager.settings = {
