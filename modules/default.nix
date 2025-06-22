@@ -66,6 +66,7 @@
     nixos/immich/default.nix
     nixos/incus/default.nix
     nixos/iperf/default.nix
+    nixos/jellyfin/default.nix
     nixos/karakeep/default.nix
     nixos/kde/default.nix
     nixos/libimobiledevice/default.nix

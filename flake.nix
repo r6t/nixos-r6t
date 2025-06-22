@@ -20,6 +20,8 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    nixos-generators.url = "github:nix-community/nixos-generators";
+
     plasma-manager = {
       url = "github:nix-community/plasma-manager";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -42,7 +44,7 @@
     };
   };
 
-  outputs = { self, nixpkgs, pre-commit-hooks, ... } @inputs:
+  outputs = { self, nixos-generators, nixpkgs, pre-commit-hooks, ... } @inputs:
     let
       userConfig = {
         username = "r6t";
@@ -112,6 +114,33 @@
           modules = [ ./hosts/silvertorch/configuration.nix ];
         };
       };
+      packages.${system} = {
+	#  caddy = nixos-generators.nixosGenerate {
+      	#    inherit system;
+      	#    format = "lxc";
+      	#    modules = [ ./containers/caddy.nix ];
+      	#           specialArgs = { inherit outputs userConfig inputs; };
+      	#         };
+        jellyfin = nixos-generators.nixosGenerate {
+          inherit system;
+          format = "lxc";
+          modules = [ ./containers/jellyfin.nix ];
+          specialArgs = { inherit outputs userConfig inputs; };
+        };
+        jellyfin-metadata = nixos-generators.nixosGenerate {
+          inherit system;
+          format = "lxc-metadata";
+          modules = [ ./containers/jellyfin.nix ];
+          specialArgs = { inherit outputs userConfig inputs; };
+        };
+      };
+	# r6-tailnet-base = nixos-generators.nixosGenerate {
+       	#   inherit system;
+       	#   format = "lxc";
+       	#   modules = [ ./containers/r6-tailnet-base.nix ];
+       	#          specialArgs = { inherit outputs userConfig inputs; };
+       	#        };
+       	#      };
 
       checks.${system} = {
         pre-commit-check = pre-commit-hooks.lib.${system}.run {
