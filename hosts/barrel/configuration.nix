@@ -1,4 +1,4 @@
-{ inputs, lib, ... }:
+{ inputs, lib, pkgs, ... }:
 
 {
   imports = [
@@ -32,12 +32,30 @@
   systemd.services.docker = {
     # Wait for storage pool availability before starting docker...
     requires = [ 
-      "mnt-thunderbay-2TB\\x2dE.mount"
       "mnt-thunderbay-4TB\\x2dB.mount"
       "mnt-thunderbay-8TB\\x2dA.mount"
       "mnt-thunderbay-8TB\\x2dC.mount"
       "mnt-thunderbay-8TB\\x2dD.mount"
     ];
+  };
+
+  systemd.mounts = [
+    {
+      # Nix will generate name 'mnt-thunderbay-2TB\x2dE.mount'
+      what     = "/mnt/barrelstore/tbay2TB-E";
+      where    = "/mnt/thunderbay/2TB-E";
+      type     = "none";
+      options  = "bind";
+      requires = [ "mnt-barrelstore.mount" ];
+      before   = [ "docker.service" "incus.service" ];
+      wantedBy = [ "multi-user.target" ];
+    }
+  ];
+
+  # Temporary old docker settings. The module had some personal bare-metal specifics and is changing to be used in LXC + AMI builds too. I plan to eventually run everything that's been running in docker containers on a linux host (aka homelab services) in individual LXCs instead.
+  virtualisation.docker = {
+    data-root = "/home/r6t/docker-root/";
+    fixed-cidr-v6 = "fdcb:ab14:ad77::/64";
   };
 
   # Onboard NIC for NixOS, 5Gb NIC for Incus bridge
@@ -77,6 +95,7 @@
 
     alloy.enable = true;
     bootloader.enable = true;
+    caddy.enable = false;
     docker.enable = true;
     env.enable = true;
     fwupd.enable = true;
@@ -113,11 +132,11 @@
        keyFile    = "/mnt/thunderkey/8tbb";
        mountPoint = "/mnt/thunderbay/8TB-D";
      };
-     thunderbayE = {
-       device     = "/dev/disk/by-uuid/544de6c8-1332-47d2-a38f-ed67d4db46e4";
-       keyFile    = "/mnt/thunderkey/2tbf";
-       mountPoint = "/mnt/thunderbay/2TB-E";
-     }; 
+      # thunderbayE = {
+      #   device     = "/dev/disk/by-uuid/544de6c8-1332-47d2-a38f-ed67d4db46e4";
+      #   keyFile    = "/mnt/thunderkey/2tbf";
+      #   mountPoint = "/mnt/thunderbay/2TB-E";
+      # }; 
     };
 
     nix.enable = true;

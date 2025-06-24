@@ -34,12 +34,6 @@
       dataDir = config.mine.jellyfin.dataDir;
       cacheDir = config.mine.jellyfin.cacheDir;
       configDir = config.mine.jellyfin.configDir;
-      paths = {
-        log   = config.mine.jellyfin.logDir;
-        data  = config.mine.jellyfin.dataDir;
-        cache = config.mine.jellyfin.cacheDir;
-        config = config.mine.jellyfin.configDir;
-      };
     };
     environment.systemPackages = [
       pkgs.jellyfin

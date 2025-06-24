@@ -3,8 +3,8 @@
     acme_dns route53
 }
 
-loki.r6t.io {
-    reverse_proxy 127.0.0.1:3030
+jellyfin.r6t.io {
+    reverse_proxy 127.0.0.1:8096
     tls {
         dns route53
     }
@@ -19,34 +19,6 @@ ollama.r6t.io {
 
 immich.r6t.io {
     reverse_proxy 127.0.0.1:2283
-    tls {
-        dns route53
-    }
-}
-
-keep.r6t.io {
-    reverse_proxy 127.0.0.1:3000
-    tls {
-        dns route53
-    }
-}
-
-grafana.r6t.io {
-    reverse_proxy 127.0.0.1:3099
-    tls {
-        dns route53
-    }
-}
-
-prometheus.r6t.io {
-    reverse_proxy 127.0.0.1:9001
-    tls {
-        dns route53
-    }
-}
-
-uptime.r6t.io {
-    reverse_proxy 127.0.0.1:3001
     tls {
         dns route53
     }

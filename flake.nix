@@ -115,12 +115,18 @@
         };
       };
       packages.${system} = {
-	#  caddy = nixos-generators.nixosGenerate {
-      	#    inherit system;
-      	#    format = "lxc";
-      	#    modules = [ ./containers/caddy.nix ];
-      	#           specialArgs = { inherit outputs userConfig inputs; };
-      	#         };
+	caddy = nixos-generators.nixosGenerate {
+      	  inherit system;
+      	  format = "lxc";
+      	  modules = [ ./containers/caddy.nix ];
+      	  specialArgs = { inherit outputs userConfig inputs; };
+      	};
+	caddy-metadata = nixos-generators.nixosGenerate {
+      	  inherit system;
+      	  format = "lxc-metadata";
+      	  modules = [ ./containers/caddy.nix ];
+      	  specialArgs = { inherit outputs userConfig inputs; };
+      	};
         jellyfin = nixos-generators.nixosGenerate {
           inherit system;
           format = "lxc";
