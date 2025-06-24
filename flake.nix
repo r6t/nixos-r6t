@@ -20,7 +20,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    nixos-generators.url = "github:nix-community/nixos-generators";
+    nixos-generators = {
+      url = "github:nix-community/nixos-generators";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     plasma-manager = {
       url = "github:nix-community/plasma-manager";
@@ -59,6 +62,7 @@
       };
     in
     {
+      # Bare-metal hosts
       nixosConfigurations = {
         barrel = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit outputs userConfig inputs; };
@@ -80,74 +84,53 @@
           specialArgs = { inherit outputs userConfig inputs; };
           modules = [ ./hosts/exit-node/configuration.nix ];
         };
-        moon = nixpkgs.lib.nixosSystem {
-          system = "x86_64-linux";
-          modules = [
-            ./hosts/moon/configuration.nix
-            {
-              nixpkgs.overlays = [
-                (self: super: {
-                  caddy-with-route53 = myCaddy;
-                })
-              ];
-              nixpkgs = {
-                config = {
-                  allowUnfree = true;
-                  cudaSupport = true;
-                  nvidia.acceptLicense = true;
-                };
-              };
-            }
-          ];
-          specialArgs = { inherit outputs userConfig inputs; };
-        };
         mountainball = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit outputs userConfig inputs; };
           modules = [ ./hosts/mountainball/configuration.nix ];
         };
-        saguaro = nixpkgs.lib.nixosSystem {
-          specialArgs = { inherit outputs userConfig inputs; };
-          modules = [ ./hosts/saguaro/configuration.nix ];
-        };
-        silvertorch = nixpkgs.lib.nixosSystem {
-          specialArgs = { inherit outputs userConfig inputs; };
-          modules = [ ./hosts/silvertorch/configuration.nix ];
-        };
       };
+
+      # Container and cloud images
       packages.${system} = {
-	caddy = nixos-generators.nixosGenerate {
+	#	caddy = nixos-generators.nixosGenerate {
+	#      	  inherit system;
+	#      	  format = "lxc";
+	#      	  modules = [ ./containers/caddy.nix ];
+	#      	  specialArgs = { inherit outputs userConfig inputs; };
+	#      	};
+	#	caddy-metadata = nixos-generators.nixosGenerate {
+	#      	  inherit system;
+	#      	  format = "lxc-metadata";
+	#      	  modules = [ ./containers/caddy.nix ];
+	#      	  specialArgs = { inherit outputs userConfig inputs; };
+	#      	};
+	docker = nixos-generators.nixosGenerate {
       	  inherit system;
       	  format = "lxc";
-      	  modules = [ ./containers/caddy.nix ];
+      	  modules = [ ./containers/docker.nix ];
       	  specialArgs = { inherit outputs userConfig inputs; };
       	};
-	caddy-metadata = nixos-generators.nixosGenerate {
-      	  inherit system;
-      	  format = "lxc-metadata";
-      	  modules = [ ./containers/caddy.nix ];
-      	  specialArgs = { inherit outputs userConfig inputs; };
-      	};
-        jellyfin = nixos-generators.nixosGenerate {
-          inherit system;
-          format = "lxc";
-          modules = [ ./containers/jellyfin.nix ];
-          specialArgs = { inherit outputs userConfig inputs; };
-        };
-        jellyfin-metadata = nixos-generators.nixosGenerate {
-          inherit system;
-          format = "lxc-metadata";
-          modules = [ ./containers/jellyfin.nix ];
-          specialArgs = { inherit outputs userConfig inputs; };
-        };
+	dockerMetadata = nixos-generators.nixosGenerate {
+	  inherit system;
+	  format = "lxc-metadata";
+	  modules = [ ./containers/docker.nix ];
+	  specialArgs = { inherit outputs userConfig inputs; };
+	};
+	#        jellyfin = nixos-generators.nixosGenerate {
+	#          inherit system;
+	#          format = "lxc";
+	#          modules = [ ./containers/jellyfin.nix ];
+	#          specialArgs = { inherit outputs userConfig inputs; };
+	#        };
+	#        jellyfin-metadata = nixos-generators.nixosGenerate {
+	#          inherit system;
+	#          format = "lxc-metadata";
+	#          modules = [ ./containers/jellyfin.nix ];
+	#          specialArgs = { inherit outputs userConfig inputs; };
+	#        };
       };
-	# r6-tailnet-base = nixos-generators.nixosGenerate {
-       	#   inherit system;
-       	#   format = "lxc";
-       	#   modules = [ ./containers/r6-tailnet-base.nix ];
-       	#          specialArgs = { inherit outputs userConfig inputs; };
-       	#        };
-       	#      };
 
+      # Pre-commit
       checks.${system} = {
         pre-commit-check = pre-commit-hooks.lib.${system}.run {
           src = ./.;
@@ -164,6 +147,7 @@
         };
       };
 
+      # Shells
       devShells.${system} =
         let
           pkgs = import nixpkgs { inherit system; };

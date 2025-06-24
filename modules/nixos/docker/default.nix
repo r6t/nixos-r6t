@@ -11,7 +11,6 @@
       autoPrune.enable = true;
       daemon.settings = {
         experimental = true;
-        ipv6 = true;
       };
       enable = true;
       enableOnBoot = true;

@@ -30,7 +30,7 @@
   };
 
   systemd.services.docker = {
-    # Wait for storage pool availability before starting docker...
+    # Wait for storage pool availability before starting docker.
     requires = [ 
       "mnt-thunderbay-4TB\\x2dB.mount"
       "mnt-thunderbay-8TB\\x2dA.mount"
@@ -39,6 +39,7 @@
     ];
   };
 
+  # Storage path patch for old workloads... I need more NVME slots!
   systemd.mounts = [
     {
       # Nix will generate name 'mnt-thunderbay-2TB\x2dE.mount'
@@ -54,6 +55,7 @@
 
   # Temporary old docker settings. The module had some personal bare-metal specifics and is changing to be used in LXC + AMI builds too. I plan to eventually run everything that's been running in docker containers on a linux host (aka homelab services) in individual LXCs instead.
   virtualisation.docker.daemon.settings = {
+    ipv6 = true;
     data-root = "/home/r6t/docker-root/";
     fixed-cidr-v6 = "fdcb:ab14:ad77::/64";
   };
