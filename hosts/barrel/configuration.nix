@@ -53,7 +53,7 @@
   ];
 
   # Temporary old docker settings. The module had some personal bare-metal specifics and is changing to be used in LXC + AMI builds too. I plan to eventually run everything that's been running in docker containers on a linux host (aka homelab services) in individual LXCs instead.
-  virtualisation.docker = {
+  virtualisation.docker.daemon.settings = {
     data-root = "/home/r6t/docker-root/";
     fixed-cidr-v6 = "fdcb:ab14:ad77::/64";
   };
