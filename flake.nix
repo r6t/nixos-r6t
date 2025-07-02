@@ -65,6 +65,22 @@
       };
 
       nixosConfigurations = {
+        barrel = nixpkgs.lib.nixosSystem {
+          specialArgs = { inherit outputs userConfig inputs; };
+          system = "x86_64-linux";
+          modules = [
+            ./hosts/barrel/configuration.nix
+            {
+              nixpkgs = {
+                config = {
+                  allowUnfree = true;
+                  cudaSupport = true;
+                  nvidia.acceptLicense = true;
+                };
+              };
+            }
+          ];
+        };
         exit-node = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit outputs userConfig inputs; };
           modules = [ ./hosts/exit-node/configuration.nix ];

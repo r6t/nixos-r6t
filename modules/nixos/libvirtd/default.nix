@@ -43,8 +43,8 @@ in
         ];
         kernelModules = [ "vfio_pci" "vfio" "vfio_iommu_type1" ]
           ++ (if cfg.cpuVendor == "intel"
-        then [ "kvm-intel" ]
-        else [ "kvm-amd" ]);
+        then [ "kvm" "kvm-intel" ]
+        else [ "kvm" "kvm-amd" ]);
       };
 
       users.users.r6t.extraGroups = [ "libvirtd" "kvm" ];

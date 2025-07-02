@@ -8,6 +8,7 @@
 
   config = lib.mkIf config.mine.docker.enable {
     virtualisation.docker = {
+
       autoPrune.enable = true;
       daemon.settings = {
         experimental = true;
