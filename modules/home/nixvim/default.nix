@@ -120,17 +120,18 @@
           avante = {
             enable = true;
             settings = {
-              provider = "ollama";
-              behaviour = {
-                enable_cursor_planning_mode = true;
-              };
-              ollama = {
-                endpoint = "https://ollama.r6t.io";
-                model = "llama3.1:latest";
+              providers = {
+                ollama = {
+                  model = "llama3.1:latest";
+                  endpoint = "https://ollama.r6t.io";
+                };
               };
               selector = {
                 provider = "fzf_lua";
                 provider_opts = { };
+              };
+              behaviour = {
+                enable_cursor_planning_mode = true;
               };
             };
           };

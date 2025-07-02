@@ -2,7 +2,8 @@
 
 let
   cfg = config.mine.mountLuksStore;
-in {
+in
+{
   options.mine.mountLuksStore = lib.mkOption {
     type = lib.types.attrsOf (lib.types.submodule {
       options = {
@@ -29,11 +30,11 @@ in {
       };
       config = { };
     });
-    default     = {};
+    default = { };
     description = "Declare additional LUKS-encrypted stores to unlock post-boot via systemd";
   };
 
-  config = lib.mkIf (cfg != {}) {
+  config = lib.mkIf (cfg != { }) {
     # 1) Emit /etc/crypttab entries
     environment.etc."crypttab".text = lib.concatStringsSep "\n" (
       lib.mapAttrsToList (name: store: "${name} ${store.device} ${store.keyFile} luks,nofail") cfg
@@ -43,18 +44,23 @@ in {
     systemd.tmpfiles.rules = lib.mapAttrsToList (name: store: "d ${store.mountPoint} 0755 root root -") cfg;
 
     # 3) Declare mounts in fileSystems
-    fileSystems = lib.foldl' (acc: st: acc // {
-      "${st.mountPoint}" = {
-        device  = "/dev/mapper/${st.name}";
-        fsType  = st.fsType;
-        options = st.fsOptions;
-      };
-    }) {} (lib.mapAttrsToList (name: store: {
-      name       = name;
-      mountPoint = store.mountPoint;
-      fsType     = store.fsType;
-      fsOptions  = store.fsOptions;
-    }) cfg);
+    fileSystems = lib.foldl'
+      (acc: st: acc // {
+        "${st.mountPoint}" = {
+          device = "/dev/mapper/${st.name}";
+          fsType = st.fsType;
+          options = st.fsOptions;
+        };
+      })
+      { }
+      (lib.mapAttrsToList
+        (name: store: {
+          name = name;
+          mountPoint = store.mountPoint;
+          fsType = store.fsType;
+          fsOptions = store.fsOptions;
+        })
+        cfg);
   };
 }
 
