@@ -24,6 +24,7 @@
             init = { defaultBranch = "main"; };
             pull = { rebase = false; };
           };
+          pull.ff = "only";
           credential = {
             helper = "!aws codecommit credential-helper $@";
             UseHttpPath = true;

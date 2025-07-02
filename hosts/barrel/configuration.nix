@@ -24,14 +24,14 @@
     "d /mnt/thunderkey 0755 root root -"
   ];
   fileSystems."/mnt/thunderkey" = {
-    device  = "/dev/disk/by-label/thunderkey";
-    fsType  = "ext4";
+    device = "/dev/disk/by-label/thunderkey";
+    fsType = "ext4";
     options = [ "noatime" ];
   };
 
   systemd.services.docker = {
     # Wait for storage pool availability before starting docker.
-    requires = [ 
+    requires = [
       "mnt-thunderbay-4TB\\x2dB.mount"
       "mnt-thunderbay-8TB\\x2dA.mount"
       "mnt-thunderbay-8TB\\x2dC.mount"
@@ -43,12 +43,12 @@
   systemd.mounts = [
     {
       # Nix will generate name 'mnt-thunderbay-2TB\x2dE.mount'
-      what     = "/mnt/barrelstore/tbay2TB-E";
-      where    = "/mnt/thunderbay/2TB-E";
-      type     = "none";
-      options  = "bind";
+      what = "/mnt/barrelstore/tbay2TB-E";
+      where = "/mnt/thunderbay/2TB-E";
+      type = "none";
+      options = "bind";
       requires = [ "mnt-barrelstore.mount" ];
-      before   = [ "docker.service" "incus.service" ];
+      before = [ "docker.service" "incus.service" ];
       wantedBy = [ "multi-user.target" ];
     }
   ];
@@ -111,29 +111,29 @@
       barrelstore = {
         device = "/dev/disk/by-uuid/f6425279-658b-49bd-8c3a-1645b5936182";
         keyFile = "/root/barrelstore.key";
-	mountPoint = "/mnt/barrelstore";
+        mountPoint = "/mnt/barrelstore";
       };
       # drives from Thunderbay
-     thunderbayA = {  
-       device     = "/dev/disk/by-uuid/3c429d84-386d-4272-8739-7bd2dcde1159";
-       keyFile    = "/mnt/thunderkey/8tba";
-       mountPoint = "/mnt/thunderbay/8TB-A";
-     };
-     thunderbayB = {
-       device     = "/dev/disk/by-uuid/b214dac6-7a73-4e53-9f89-b1ae82c0c625";
-       keyFile    = "/mnt/thunderkey/4tbe";
-       mountPoint = "/mnt/thunderbay/4TB-B";
-     };
-     thunderbayC = {
-       device     = "/dev/disk/by-uuid/cb067a1e-147b-4052-b561-e2c16c31dd0e";
-       keyFile    = "/mnt/thunderkey/8tbd";
-       mountPoint = "/mnt/thunderbay/8TB-C";
-     };
-     thunderbayD = {
-       device     = "/dev/disk/by-uuid/5b66a482-036d-4a76-8cec-6ad15fe2360c";
-       keyFile    = "/mnt/thunderkey/8tbb";
-       mountPoint = "/mnt/thunderbay/8TB-D";
-     };
+      thunderbayA = {
+        device = "/dev/disk/by-uuid/3c429d84-386d-4272-8739-7bd2dcde1159";
+        keyFile = "/mnt/thunderkey/8tba";
+        mountPoint = "/mnt/thunderbay/8TB-A";
+      };
+      thunderbayB = {
+        device = "/dev/disk/by-uuid/b214dac6-7a73-4e53-9f89-b1ae82c0c625";
+        keyFile = "/mnt/thunderkey/4tbe";
+        mountPoint = "/mnt/thunderbay/4TB-B";
+      };
+      thunderbayC = {
+        device = "/dev/disk/by-uuid/cb067a1e-147b-4052-b561-e2c16c31dd0e";
+        keyFile = "/mnt/thunderkey/8tbd";
+        mountPoint = "/mnt/thunderbay/8TB-C";
+      };
+      thunderbayD = {
+        device = "/dev/disk/by-uuid/5b66a482-036d-4a76-8cec-6ad15fe2360c";
+        keyFile = "/mnt/thunderkey/8tbb";
+        mountPoint = "/mnt/thunderbay/8TB-D";
+      };
       # thunderbayE = {
       #   device     = "/dev/disk/by-uuid/544de6c8-1332-47d2-a38f-ed67d4db46e4";
       #   keyFile    = "/mnt/thunderkey/2tbf";

@@ -18,21 +18,21 @@
     networking = {
       defaultGateway = {
         address = "192.168.6.1";
-        interface = "eno1";
+        interface = "eth0";
       };
       defaultGateway6 = {
         address = "fe80::ae1f:6bff:fe65:6849";
-        interface = "eno1";
+        interface = "eth0";
       };
       # nameserver for initial connections, /etc/resolv.conf gets overridden by tailscale service
       nameservers = [ "192.168.6.1" ];
       # Static interface configuration
       interfaces = {
-        eno1 = {
+        eth0 = {
           useDHCP = false;
           ipv4 = {
             addresses = [{
-              address = "192.168.6.4";
+              address = "192.168.6.14";
               prefixLength = 24;
             }];
             routes = [
@@ -110,7 +110,7 @@
       nat = {
         enable = true;
         externalInterface = "wg0";
-        internalInterfaces = [ "tailscale0" "eno1" ];
+        internalInterfaces = [ "tailscale0" "eth0" ];
       };
     };
 

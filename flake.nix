@@ -92,42 +92,54 @@
 
       # Container and cloud images
       packages.${system} = {
-	#	caddy = nixos-generators.nixosGenerate {
-	#      	  inherit system;
-	#      	  format = "lxc";
-	#      	  modules = [ ./containers/caddy.nix ];
-	#      	  specialArgs = { inherit outputs userConfig inputs; };
-	#      	};
-	#	caddy-metadata = nixos-generators.nixosGenerate {
-	#      	  inherit system;
-	#      	  format = "lxc-metadata";
-	#      	  modules = [ ./containers/caddy.nix ];
-	#      	  specialArgs = { inherit outputs userConfig inputs; };
-	#      	};
-	docker = nixos-generators.nixosGenerate {
-      	  inherit system;
-      	  format = "lxc";
-      	  modules = [ ./containers/docker.nix ];
-      	  specialArgs = { inherit outputs userConfig inputs; };
-      	};
-	dockerMetadata = nixos-generators.nixosGenerate {
-	  inherit system;
-	  format = "lxc-metadata";
-	  modules = [ ./containers/docker.nix ];
-	  specialArgs = { inherit outputs userConfig inputs; };
-	};
-	#        jellyfin = nixos-generators.nixosGenerate {
-	#          inherit system;
-	#          format = "lxc";
-	#          modules = [ ./containers/jellyfin.nix ];
-	#          specialArgs = { inherit outputs userConfig inputs; };
-	#        };
-	#        jellyfin-metadata = nixos-generators.nixosGenerate {
-	#          inherit system;
-	#          format = "lxc-metadata";
-	#          modules = [ ./containers/jellyfin.nix ];
-	#          specialArgs = { inherit outputs userConfig inputs; };
-	#        };
+        #	caddy = nixos-generators.nixosGenerate {
+        #      	  inherit system;
+        #      	  format = "lxc";
+        #      	  modules = [ ./containers/caddy.nix ];
+        #      	  specialArgs = { inherit outputs userConfig inputs; };
+        #      	};
+        #	caddy-metadata = nixos-generators.nixosGenerate {
+        #      	  inherit system;
+        #      	  format = "lxc-metadata";
+        #      	  modules = [ ./containers/caddy.nix ];
+        #      	  specialArgs = { inherit outputs userConfig inputs; };
+        #      	};
+        docker = nixos-generators.nixosGenerate {
+          inherit system;
+          format = "lxc";
+          modules = [ ./containers/docker.nix ];
+          specialArgs = { inherit outputs userConfig inputs; };
+        };
+        dockerMetadata = nixos-generators.nixosGenerate {
+          inherit system;
+          format = "lxc-metadata";
+          modules = [ ./containers/docker.nix ];
+          specialArgs = { inherit outputs userConfig inputs; };
+        };
+        exitNodeRouting = nixos-generators.nixosGenerate {
+          inherit system;
+          format = "lxc";
+          modules = [ ./containers/exit-node-routing.nix ];
+          specialArgs = { inherit outputs userConfig inputs; };
+        };
+        exitNodeRoutingMetadata = nixos-generators.nixosGenerate {
+          inherit system;
+          format = "lxc-metadata";
+          modules = [ ./containers/exit-node-routing.nix ];
+          specialArgs = { inherit outputs userConfig inputs; };
+        };
+        #        jellyfin = nixos-generators.nixosGenerate {
+        #          inherit system;
+        #          format = "lxc";
+        #          modules = [ ./containers/jellyfin.nix ];
+        #          specialArgs = { inherit outputs userConfig inputs; };
+        #        };
+        #        jellyfin-metadata = nixos-generators.nixosGenerate {
+        #          inherit system;
+        #          format = "lxc-metadata";
+        #          modules = [ ./containers/jellyfin.nix ];
+        #          specialArgs = { inherit outputs userConfig inputs; };
+        #        };
       };
 
       # Pre-commit

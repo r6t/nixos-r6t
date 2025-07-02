@@ -12,7 +12,7 @@ in
     virtualisation = {
       ${svc} = {
         enable = true;
-	agent.enable = false;
+        agent.enable = false;
         ui.enable = true;
       };
       libvirtd.enable = true;
@@ -32,7 +32,7 @@ in
     networking = {
       nftables.enable = true;
       firewall = {
-	# enable = true;
+        # enable = true;
         checkReversePath = "loose";
         allowPing = true;
       };
