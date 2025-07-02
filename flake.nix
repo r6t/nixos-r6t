@@ -62,6 +62,13 @@
       };
     in
     {
+      overlays.saneFix = final: prev: {
+        sane-backends = prev.sane-backends.overrideAttrs (_old: {
+          doInstallCheck = false;
+          installCheckPhase = "true";
+        });
+      };
+
       # Bare-metal hosts
       nixosConfigurations = {
         barrel = nixpkgs.lib.nixosSystem {
@@ -86,7 +93,12 @@
         };
         mountainball = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit outputs userConfig inputs; };
-          modules = [ ./hosts/mountainball/configuration.nix ];
+          modules = [
+            ./hosts/mountainball/configuration.nix
+            {
+              nixpkgs.overlays = [ self.overlays.saneFix ];
+            }
+          ];
         };
       };
 

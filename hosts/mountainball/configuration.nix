@@ -57,6 +57,7 @@
       nixvim.enable = true;
       obsidian.enable = true;
       obs-studio.enable = true;
+      orca-slicer.enable = true;
       signal-desktop.enable = true;
       ssh.enable = true;
       teams-for-linux.enable = true;
