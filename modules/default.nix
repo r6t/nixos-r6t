@@ -39,6 +39,7 @@
     home/nixvim/default.nix
     home/obs-studio/default.nix
     home/obsidian/default.nix
+    home/orca-slicer/default.nix
     home/protonmail-desktop/default.nix
     home/signal-desktop/default.nix
     home/ssh/default.nix

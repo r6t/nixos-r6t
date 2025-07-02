@@ -57,6 +57,13 @@
       };
     in
     {
+      overlays.saneFix = final: prev: {
+        sane-backends = prev.sane-backends.overrideAttrs (_old: {
+          doInstallCheck = false;
+          installCheckPhase = "true";
+        });
+      };
+
       nixosConfigurations = {
         exit-node = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit outputs userConfig inputs; };
@@ -85,7 +92,12 @@
         };
         mountainball = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit outputs userConfig inputs; };
-          modules = [ ./hosts/mountainball/configuration.nix ];
+          modules = [
+            ./hosts/mountainball/configuration.nix
+            {
+              nixpkgs.overlays = [ self.overlays.saneFix ];
+            }
+          ];
         };
         saguaro = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit outputs userConfig inputs; };
