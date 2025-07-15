@@ -49,6 +49,7 @@
     home/yt-dlp/default.nix
     home/zellij/default.nix
 
+    nixos/adb/default.nix
     nixos/alloy/default.nix
     nixos/apache/default.nix
     nixos/bluetooth/default.nix

@@ -66,6 +66,7 @@
       zellij.enable = true;
     };
 
+    adb.enable = true;
     alloy.enable = true;
     bluetooth.enable = true;
     bolt.enable = true;

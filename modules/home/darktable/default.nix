@@ -10,7 +10,10 @@ in
 
   config = lib.mkIf cfg.enable {
     home-manager.users.${userConfig.username} = {
-      home.packages = with pkgs; [ darktable ];
+      home.packages = with pkgs; [
+        darktable
+        sqlite-interactive # sqlite3 required for darktable maintenance scripts
+      ];
       xdg.configFile."darktable/darktablerc".source = dotfiles/${config.networking.hostName}.darktablerc;
     };
   };

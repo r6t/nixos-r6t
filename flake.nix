@@ -116,6 +116,12 @@
         #      	  modules = [ ./containers/caddy.nix ];
         #      	  specialArgs = { inherit outputs userConfig inputs; };
         #      	};
+        headscale = nixos-generators.nixosGenerate {
+          inherit system;
+          format = "amazon";
+          modules = [ ./containers/headscale.nix ];
+          specialArgs = { inherit outputs userConfig inputs; };
+        };
         docker = nixos-generators.nixosGenerate {
           inherit system;
           format = "lxc";

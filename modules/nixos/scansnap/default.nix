@@ -13,6 +13,7 @@
     };
 
     environment.systemPackages = with pkgs; [
+      libtiff
       imagemagick
       ocrmypdf
       (writeScriptBin "scansnap-front" ''
