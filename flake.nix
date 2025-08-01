@@ -71,32 +71,21 @@
 
       # Bare-metal hosts
       nixosConfigurations = {
-        barrel = nixpkgs.lib.nixosSystem {
-          specialArgs = { inherit outputs userConfig inputs; };
-          system = "x86_64-linux";
-          modules = [
-            ./hosts/barrel/configuration.nix
-            {
-              nixpkgs = {
-                config = {
-                  allowUnfree = true;
-                  cudaSupport = true;
-                  nvidia.acceptLicense = true;
-                };
-              };
-            }
-          ];
-        };
-        exit-node = nixpkgs.lib.nixosSystem {
-          specialArgs = { inherit outputs userConfig inputs; };
-          modules = [ ./hosts/exit-node/configuration.nix ];
-        };
         mountainball = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit outputs userConfig inputs; };
           modules = [
             ./hosts/mountainball/configuration.nix
             {
-              nixpkgs.overlays = [ self.overlays.saneFix ];
+              nixpkgs = {
+                overlays = [ self.overlays.saneFix ];
+                config = {
+                  allowUnfree = true;
+                  # workaround until https://github.com/NixOS/nixpkgs/pull/429473 is merged
+                  permittedInsecurePackages = [
+                    "libsoup-2.74.3"
+                  ];
+                };
+              };
             }
           ];
         };
@@ -268,6 +257,7 @@
               yt-dlp
               (python3.withPackages (ps: with ps; [
                 audible-cli
+                qobuz-dl
               ]))
             ];
             shell = "${pkgs.fish}/bin/fish";

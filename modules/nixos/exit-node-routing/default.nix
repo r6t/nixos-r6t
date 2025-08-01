@@ -84,7 +84,7 @@
         wg0 = {
           address = [ "10.69.81.138/32" "fc00:bbbb:bbbb:bb01::6:5189/128" ];
           listenPort = 51820;
-          privateKeyFile = "/home/r6t/mullvad.key";
+          privateKeyFile = "/root/mullvad.key";
           peers = [
             {
               publicKey = "4ke8ZSsroiI6Sp23OBbMAU6yQmdF3xU2N8CyzQXE/Qw=";

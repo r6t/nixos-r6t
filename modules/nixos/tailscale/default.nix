@@ -8,7 +8,7 @@
   config = lib.mkIf config.mine.tailscale.enable {
     services.tailscale = {
       enable = true;
-      useRoutingFeatures = "client";
+      useRoutingFeatures = "client"; # exit-node module mkForces this value = "server"
     };
 
     # allow tailnet traffic
