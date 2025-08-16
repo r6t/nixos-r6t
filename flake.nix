@@ -71,6 +71,22 @@
 
       # Bare-metal hosts
       nixosConfigurations = {
+        crown = nixpkgs.lib.nixosSystem {
+          specialArgs = { inherit outputs userConfig inputs; };
+          system = "x86_64-linux";
+          modules = [
+            ./hosts/crown/configuration.nix
+            {
+              nixpkgs = {
+                config = {
+                  allowUnfree = true;
+                  cudaSupport = true;
+                  nvidia.acceptLicense = true;
+                };
+              };
+            }
+          ];
+        };
         mountainball = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit outputs userConfig inputs; };
           modules = [
@@ -93,18 +109,6 @@
 
       # Container and cloud images
       packages.${system} = {
-        #	caddy = nixos-generators.nixosGenerate {
-        #      	  inherit system;
-        #      	  format = "lxc";
-        #      	  modules = [ ./containers/caddy.nix ];
-        #      	  specialArgs = { inherit outputs userConfig inputs; };
-        #      	};
-        #	caddy-metadata = nixos-generators.nixosGenerate {
-        #      	  inherit system;
-        #      	  format = "lxc-metadata";
-        #      	  modules = [ ./containers/caddy.nix ];
-        #      	  specialArgs = { inherit outputs userConfig inputs; };
-        #      	};
         headscale = nixos-generators.nixosGenerate {
           inherit system;
           format = "amazon";
@@ -123,30 +127,18 @@
           modules = [ ./containers/docker.nix ];
           specialArgs = { inherit outputs userConfig inputs; };
         };
-        exitNodeRouting = nixos-generators.nixosGenerate {
+        tailnetExit = nixos-generators.nixosGenerate {
           inherit system;
           format = "lxc";
-          modules = [ ./containers/exit-node-routing.nix ];
+          modules = [ ./containers/tailnet-exit.nix ];
           specialArgs = { inherit outputs userConfig inputs; };
         };
-        exitNodeRoutingMetadata = nixos-generators.nixosGenerate {
+        tailnetExitMetadata = nixos-generators.nixosGenerate {
           inherit system;
           format = "lxc-metadata";
-          modules = [ ./containers/exit-node-routing.nix ];
+          modules = [ ./containers/tailnet-exit.nix ];
           specialArgs = { inherit outputs userConfig inputs; };
         };
-        #        jellyfin = nixos-generators.nixosGenerate {
-        #          inherit system;
-        #          format = "lxc";
-        #          modules = [ ./containers/jellyfin.nix ];
-        #          specialArgs = { inherit outputs userConfig inputs; };
-        #        };
-        #        jellyfin-metadata = nixos-generators.nixosGenerate {
-        #          inherit system;
-        #          format = "lxc-metadata";
-        #          modules = [ ./containers/jellyfin.nix ];
-        #          specialArgs = { inherit outputs userConfig inputs; };
-        #        };
       };
 
       # Pre-commit

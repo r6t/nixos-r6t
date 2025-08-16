@@ -2,18 +2,27 @@
 
   options = {
     mine.ollama.enable =
-      lib.mkEnableOption "enable ollama with models loaded";
+      lib.mkEnableOption "enable ollama + webui for nvidia/cuda with models loaded";
   };
 
   config = lib.mkIf config.mine.ollama.enable {
     services.ollama = {
       enable = true;
-      package = pkgs.ollama;
+      host = "0.0.0.0"; # default port tcp/11434
+      openFirewall = true; # temp for LAN access. Tailscale source traffic always allowed.
+      package = pkgs.ollama-cuda;
+      acceleration = "cuda";
       # TODO causing errors 2025-03-29
       #      loadModels = [
       #        "deepseek-r1:14b"
       #        "gemma3:12b"
       #      ];
+    };
+    services.open-webui = {
+      enable = true;
+      host = "0.0.0.0"; # default port tcp/8080
+      openFirewall = true; # temp for LAN access. Tailscale source traffic always allowed.
+      # stateDir = "/blah";
     };
   };
 }

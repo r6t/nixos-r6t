@@ -3,22 +3,8 @@
     acme_dns route53
 }
 
-jellyfin.r6t.io {
-    reverse_proxy 127.0.0.1:8096
-    tls {
-        dns route53
-    }
-}
-
-ollama.r6t.io {
-    reverse_proxy 127.0.0.1:11434
-    tls {
-        dns route53
-    }
-}
-
-immich.r6t.io {
-    reverse_proxy 127.0.0.1:2283
+audiobookshelf.r6t.io {
+    reverse_proxy 192.168.6.97:13378
     tls {
         dns route53
     }

@@ -33,6 +33,7 @@
       unzip
       usbutils
       wget
+      wireguard-tools
       zip
     ];
   };

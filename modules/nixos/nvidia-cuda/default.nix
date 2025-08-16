@@ -14,13 +14,20 @@
         enable32Bit = true;
       };
       nvidia = {
-        package = config.boot.kernelPackages.nvidiaPackages.stable;
-        modesetting.enable = false;
-        powerManagement.enable = true;
-        open = false;
+        package = config.boot.kernelPackages.nvidiaPackages.production; # or latest, stable
+        modesetting.enable = true;
+        powerManagement.enable = false;
+        open = true;
         nvidiaSettings = false;
       };
       nvidia-container-toolkit.enable = true;
+    };
+    nixpkgs = {
+      config = {
+        allowUnfree = true;
+        cudaSupport = true;
+        nvidia.acceptLicense = true;
+      };
     };
     services.xserver.videoDrivers = [ "nvidia" ];
   };

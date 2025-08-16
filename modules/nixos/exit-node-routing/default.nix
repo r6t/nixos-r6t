@@ -14,6 +14,8 @@
       };
     };
 
+    environment.systemPackages = with pkgs; [ iperf nettools ];
+
     # Static networking to keep things managed
     networking = {
       defaultGateway = {

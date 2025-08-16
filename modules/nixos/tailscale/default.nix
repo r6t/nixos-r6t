@@ -3,17 +3,17 @@
   options = {
     mine.tailscale.enable =
       lib.mkEnableOption "enable and configure tailscale+exit node client";
+    # prob going to delete this module and just manage tailscale in host def alongside networking
   };
 
   config = lib.mkIf config.mine.tailscale.enable {
     services.tailscale = {
       enable = true;
-      useRoutingFeatures = "client"; # exit-node module mkForces this value = "server"
+      #      useRoutingFeatures = "client"; # exit-node module mkForces this value = "server"
     };
 
     # allow tailnet traffic
     networking.firewall = {
-      checkReversePath = "loose";
       trustedInterfaces = [ "tailscale0" ];
     };
 
