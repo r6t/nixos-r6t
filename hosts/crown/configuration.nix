@@ -42,35 +42,26 @@
     };
   };
 
-  # Update your networking section in configuration.nix
   networking = {
     nftables.enable = true;
     enableIPv6 = true;
     useNetworkd = true;
     hostName = "crown";
-
     useDHCP = false;
     dhcpcd.enable = false;
 
     bridges = {
-      br1 = {
-        interfaces = [ "enp1s0" ];
-        rstp = false;
-      };
+      br1 = { interfaces = [ "enp1s0" ]; };
     };
 
     interfaces = {
-      enp1s0.useDHCP = false; # Bridge member
-      enp1s0d1.useDHCP = true; # Management interface
-      br1 = {
-        useDHCP = false;
-      };
-
-      # Physical interfaces for passthrough
+      enp1s0.useDHCP = false; # Bridge port
       enp5s0.useDHCP = false;
       enp6s0.useDHCP = false;
       enp7s0.useDHCP = false;
       enp9s0.useDHCP = false;
+      enp1s0d1.useDHCP = true; # Primary host interface gets DHCP
+      br1.useDHCP = false; # 10G bridge for incus
     };
 
     defaultGateway = {
@@ -79,9 +70,6 @@
       metric = 100;
     };
 
-    nameservers = [ "192.168.6.1" "1.1.1.1" "8.8.8.8" ];
-
-    # Enhanced firewall with explicit bridge forwarding
     firewall = {
       enable = true;
       checkReversePath = false;
@@ -107,20 +95,28 @@
         iifname "br1" oifname "tailscale0" accept comment "Containers to Tailscale"
       '';
     };
+
+    boot.kernel.sysctl = {
+      "net.ipv4.ip_forward" = 1;
+      # "net.bridge.bridge-nf-call-iptables" = 0; # Disable bridge netfilter
+      # "net.bridge.bridge-nf-call-arptables" = 0; # Allow direct L2 forwarding
+      # "net.bridge.bridge-nf-call-ip6tables" = 0;
+      "net.ipv6.conf.all.forwarding" = 1;
+      "net.ipv6.conf.default.forwarding" = 1;
+    };
+
+    # Disable problematic wait-online service
+    systemd.services.systemd-networkd-wait-online.enable = lib.mkForce false;
+    nameservers = [ "192.168.6.1" ];
   };
 
+  # Enable packet forwarding for containers
   boot.kernel.sysctl = {
     "net.ipv4.ip_forward" = 1;
-    # "net.bridge.bridge-nf-call-iptables" = 0; # Disable bridge netfilter
-    # "net.bridge.bridge-nf-call-arptables" = 0; # Allow direct L2 forwarding
-    # "net.bridge.bridge-nf-call-ip6tables" = 0;
     "net.ipv6.conf.all.forwarding" = 1;
-    "net.ipv6.conf.default.forwarding" = 1;
   };
 
-  # Disable problematic wait-online service
-  systemd.services.systemd-networkd-wait-online.enable = lib.mkForce false;
-
+  # File systems
   fileSystems."/mnt/thunderkey" = {
     device = "/dev/disk/by-label/thunderkey";
     fsType = "ext4";

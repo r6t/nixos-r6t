@@ -162,6 +162,45 @@
       devShells.${system} =
         let
           pkgs = import nixpkgs { inherit system; };
+          pick_1_6_0 = pkgs.python3.pkgs.buildPythonPackage rec {
+            pname = "pick";
+            version = "1.6.0";
+
+            src = pkgs.fetchPypi {
+              inherit pname version;
+              hash = "sha256-Kv1GyJtQIxHTuDHs7hoA6Kv4kq1elubLr5PxcrKa4cU=";
+            };
+            pyproject = true;
+            build-system = with pkgs.python3.pkgs; [
+              poetry-core
+            ];
+          };
+          qobuz-dl = pkgs.python3.pkgs.buildPythonApplication rec {
+            pname = "qobuz-dl";
+            version = "0.9.9.10";
+            format = "pyproject";
+            src = pkgs.fetchPypi {
+              inherit pname version;
+              hash = "sha256-q7TUl3scg+isoLB0xJvJLCtvJU7O+ogMlftt0O73qb4=";
+            };
+            nativeBuildInputs = with pkgs.python3.pkgs; [
+              setuptools
+              wheel
+            ];
+            propagatedBuildInputs = with pkgs.python3.pkgs; [
+              requests
+              pycryptodome
+              mutagen
+              rich
+              itunespy
+              pathvalidate
+              tqdm
+              pick_1_6_0
+              beautifulsoup4
+              colorama
+            ];
+          };
+
           shellHookHelper = name: ''
             ${self.checks.${system}.pre-commit-check.shellHook or ""}
             export DEVSHELL_NAME="${name}"
@@ -200,7 +239,6 @@
               fi
             '';
           };
-
           aws =
             let
               pkgs = import nixpkgs {
@@ -242,14 +280,13 @@
                 fi
               '';
             };
-
           media = pkgs.mkShell {
             nativeBuildInputs = baseTools;
             packages = with pkgs; [
               yt-dlp
+              qobuz-dl
               (python3.withPackages (ps: with ps; [
                 audible-cli
-                qobuz-dl
               ]))
             ];
             shell = "${pkgs.fish}/bin/fish";
@@ -263,6 +300,7 @@
             '';
           };
         };
+
     };
 }
 
