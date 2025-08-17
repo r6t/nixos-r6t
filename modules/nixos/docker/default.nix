@@ -3,14 +3,10 @@
 
   options = {
     mine.docker.enable =
-      lib.mkEnableOption "enable docker in LXC";
+      lib.mkEnableOption "enable docker, used inside LXC";
   };
 
   config = lib.mkIf config.mine.docker.enable {
-    # rootless leftover? 
-    # boot.kernel.sysctl = {
-    #   "net.ipv4.ip_unprivileged_port_start" = 80;
-    # };
     virtualisation.docker = {
       autoPrune.enable = true;
       daemon.settings = {

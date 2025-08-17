@@ -56,12 +56,12 @@
 
     interfaces = {
       enp1s0.useDHCP = false; # Bridge port
-      enp5s0.useDHCP = false;
-      enp6s0.useDHCP = false;
-      enp7s0.useDHCP = false;
-      enp9s0.useDHCP = false;
+      enp5s0.useDHCP = false; # 2.5G Incus hardware passthrough
+      enp6s0.useDHCP = false; # 2.5G Incus hardware passthrough
+      enp7s0.useDHCP = false; # 2.5G Incus hardware passthrough
+      enp9s0.useDHCP = false; # 2.5G Incus hardware passthrough
       enp1s0d1.useDHCP = true; # Primary host interface gets DHCP
-      br1.useDHCP = false; # 10G bridge for incus
+      br1.useDHCP = false; # 10G bridge for Incus
     };
 
     defaultGateway = {
@@ -69,6 +69,8 @@
       interface = "enp1s0d1";
       metric = 100;
     };
+
+    nameservers = [ "192.168.6.1" ];
 
     firewall = {
       enable = true;
@@ -95,25 +97,16 @@
         iifname "br1" oifname "tailscale0" accept comment "Containers to Tailscale"
       '';
     };
-
-    boot.kernel.sysctl = {
-      "net.ipv4.ip_forward" = 1;
-      # "net.bridge.bridge-nf-call-iptables" = 0; # Disable bridge netfilter
-      # "net.bridge.bridge-nf-call-arptables" = 0; # Allow direct L2 forwarding
-      # "net.bridge.bridge-nf-call-ip6tables" = 0;
-      "net.ipv6.conf.all.forwarding" = 1;
-      "net.ipv6.conf.default.forwarding" = 1;
-    };
-
-    # Disable problematic wait-online service
-    systemd.services.systemd-networkd-wait-online.enable = lib.mkForce false;
-    nameservers = [ "192.168.6.1" ];
   };
+
+  # Disable problematic wait-online service
+  systemd.services.systemd-networkd-wait-online.enable = lib.mkForce false;
 
   # Enable packet forwarding for containers
   boot.kernel.sysctl = {
     "net.ipv4.ip_forward" = 1;
     "net.ipv6.conf.all.forwarding" = 1;
+    # maybe overkill "net.ipv6.conf.default.forwarding" = 1;
   };
 
   # File systems
@@ -141,14 +134,11 @@
     alloy.enable = false;
     bolt.enable = true;
     bootloader.enable = true;
-    caddy.enable = false;
-    docker.enable = false;
     env.enable = true;
     fwupd.enable = true;
     fzf.enable = true;
     iperf.enable = true;
     incus.enable = true;
-    libvirtd.enable = false;
     localization.enable = true;
 
     mountLuksStore = {

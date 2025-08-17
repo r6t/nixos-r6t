@@ -34,7 +34,6 @@
     home/home-manager/default.nix
     home/k2pdfopt/default.nix
     home/kde-apps/default.nix
-    home/libvirtd/default.nix
     home/mpv/default.nix
     home/nixvim/default.nix
     home/obs-studio/default.nix
@@ -56,7 +55,6 @@
     nixos/bolt/default.nix
     nixos/bootloader/default.nix
     nixos/bridge/default.nix
-    nixos/caddy/default.nix
     nixos/czkawka/default.nix
     nixos/docker/default.nix
     nixos/env/default.nix
@@ -72,7 +70,6 @@
     nixos/karakeep/default.nix
     nixos/kde/default.nix
     nixos/libimobiledevice/default.nix
-    nixos/libvirtd/default.nix
     nixos/localization/default.nix
     nixos/loki/default.nix
     nixos/moonstore/default.nix
