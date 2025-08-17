@@ -1,52 +1,41 @@
 {
   description = "r6t nixos systems configuration flake";
-
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-
     home-manager = {
       url = "github:nix-community/home-manager/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
     hardware.url = "github:nixos/nixos-hardware";
-
     nix-flatpak = {
       url = "github:gmodena/nix-flatpak";
     };
-
     nixvim = {
       url = "github:nix-community/nixvim";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
     nixos-generators = {
       url = "github:nix-community/nixos-generators";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
     plasma-manager = {
       url = "github:nix-community/plasma-manager";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.home-manager.follows = "home-manager";
     };
-
     pre-commit-hooks = {
       url = "github:cachix/pre-commit-hooks.nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
     sops-nix = {
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
     ssh-keys = {
       url = "https://github.com/r6t.keys";
       flake = false;
     };
   };
-
   outputs = { self, nixos-generators, nixpkgs, pre-commit-hooks, ... } @inputs:
     let
       userConfig = {
@@ -57,9 +46,6 @@
       inherit (nixpkgs) lib;
       system = "x86_64-linux";
       pkgs = import nixpkgs { inherit system; };
-      myCaddy = import ./pkgs/caddy-with-route53.nix {
-        inherit pkgs lib;
-      };
     in
     {
       overlays.saneFix = final: prev: {
@@ -68,7 +54,6 @@
           installCheckPhase = "true";
         });
       };
-
       # Bare-metal hosts
       nixosConfigurations = {
         crown = nixpkgs.lib.nixosSystem {
@@ -96,7 +81,7 @@
                 overlays = [ self.overlays.saneFix ];
                 config = {
                   allowUnfree = true;
-                  # workaround until https://github.com/NixOS/nixpkgs/pull/429473 is merged
+                  # workaround until [https://github.com/NixOS/nixpkgs/pull/429473](https://github.com/NixOS/nixpkgs/pull/429473) is merged
                   permittedInsecurePackages = [
                     "libsoup-2.74.3"
                   ];
@@ -106,7 +91,6 @@
           ];
         };
       };
-
       # Container and cloud images
       packages.${system} = {
         headscale = nixos-generators.nixosGenerate {
@@ -140,7 +124,6 @@
           specialArgs = { inherit outputs userConfig inputs; };
         };
       };
-
       # Pre-commit
       checks.${system} = {
         pre-commit-check = pre-commit-hooks.lib.${system}.run {
@@ -157,150 +140,8 @@
           };
         };
       };
-
-      # Shells
-      devShells.${system} =
-        let
-          pkgs = import nixpkgs { inherit system; };
-          pick_1_6_0 = pkgs.python3.pkgs.buildPythonPackage rec {
-            pname = "pick";
-            version = "1.6.0";
-
-            src = pkgs.fetchPypi {
-              inherit pname version;
-              hash = "sha256-Kv1GyJtQIxHTuDHs7hoA6Kv4kq1elubLr5PxcrKa4cU=";
-            };
-            pyproject = true;
-            build-system = with pkgs.python3.pkgs; [
-              poetry-core
-            ];
-          };
-          qobuz-dl = pkgs.python3.pkgs.buildPythonApplication rec {
-            pname = "qobuz-dl";
-            version = "0.9.9.10";
-            format = "pyproject";
-            src = pkgs.fetchPypi {
-              inherit pname version;
-              hash = "sha256-q7TUl3scg+isoLB0xJvJLCtvJU7O+ogMlftt0O73qb4=";
-            };
-            nativeBuildInputs = with pkgs.python3.pkgs; [
-              setuptools
-              wheel
-            ];
-            propagatedBuildInputs = with pkgs.python3.pkgs; [
-              requests
-              pycryptodome
-              mutagen
-              rich
-              itunespy
-              pathvalidate
-              tqdm
-              pick_1_6_0
-              beautifulsoup4
-              colorama
-            ];
-          };
-
-          shellHookHelper = name: ''
-            ${self.checks.${system}.pre-commit-check.shellHook or ""}
-            export DEVSHELL_NAME="${name}"
-          '';
-          baseTools = with pkgs; [
-            fish
-          ];
-          pythonTools = with pkgs; [
-            (python3.withPackages (ps: with ps; [
-              pip
-              black
-              pylint
-              isort
-              jq
-              yq
-            ]))
-          ];
-          nodeTools = with pkgs; [
-            nodejs
-            nodePackages.prettier
-            nodePackages.eslint
-          ];
-        in
-        {
-          default = pkgs.mkShell {
-            PIP_PREFIX = "${self}/_pip";
-            PYTHONPATH = "$PIP_PREFIX/${pkgs.python3.sitePackages}:$PYTHONPATH";
-            nativeBuildInputs = baseTools;
-            packages = pythonTools ++ nodeTools;
-            shellHook = ''
-              ${shellHookHelper "nix"}
-              if command -v fish >/dev/null; then
-                exec fish
-              else
-                echo "Warning: fish not found, falling back to bash"
-              fi
-            '';
-          };
-          aws =
-            let
-              pkgs = import nixpkgs {
-                inherit system;
-                overlays = [
-                  (_: prev: {
-                    python3 = prev.python3.override {
-                      packageOverrides = _: python-prev: {
-                        awacs = python-prev.awacs.overridePythonAttrs (old: {
-                          checkInputs = (old.checkInputs or [ ]) ++ [ python-prev.pytest ];
-                        });
-                      };
-                    };
-                  })
-                ];
-              };
-            in
-            pkgs.mkShell {
-              AWS_REGION = "us-west-2";
-              nativeBuildInputs = baseTools ++ (with pkgs; [
-                awscli2
-                nodejs_20
-                ssm-session-manager-plugin
-                nodePackages_latest.aws-cdk
-              ]);
-              packages = with pkgs; [
-                (python3.withPackages (ps: with ps; [
-                  boto3
-                  troposphere
-                ]))
-              ];
-              shell = "${pkgs.fish}/bin/fish";
-              shellHook = ''
-                ${shellHookHelper "aws"}
-                if command -v fish >/dev/null; then
-                  exec fish
-                else
-                  echo "Warning: fish not found, falling back to bash"
-                fi
-              '';
-            };
-          media = pkgs.mkShell {
-            nativeBuildInputs = baseTools;
-            packages = with pkgs; [
-              yt-dlp
-              qobuz-dl
-              (python3.withPackages (ps: with ps; [
-                audible-cli
-              ]))
-            ];
-            shell = "${pkgs.fish}/bin/fish";
-            shellHook = ''
-              ${shellHookHelper "media"}
-              if command -v fish >/dev/null; then
-                exec fish
-              else
-                echo "Warning: fish not found, falling back to bash"
-              fi
-            '';
-          };
-        };
-
+      # Shells are now imported from their own file
+      devShells.${system} = import ./devshells.nix { inherit pkgs self; };
     };
 }
 
