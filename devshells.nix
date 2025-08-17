@@ -2,6 +2,7 @@
 
 let
   # --- Custom Package Definitions ---
+
   pick_1_6_0 = pkgs.python3.pkgs.buildPythonPackage rec {
     pname = "pick";
     version = "1.6.0";
@@ -41,14 +42,8 @@ let
     ];
   };
 
-  # --- Shell Helper Definitions ---
-  shellHookHelper = name: ''
-    ${self.checks.${pkgs.system}.pre-commit-check.shellHook or ""}
-    export DEVSHELL_NAME="${name}"
-  '';
-  baseTools = with pkgs; [
-    fish
-  ];
+  # --- Shared Tool Definitions ---
+  baseTools = with pkgs; [ fish ];
   pythonTools = with pkgs; [
     (python3.withPackages (ps: with ps; [
       pip
@@ -65,27 +60,33 @@ let
     nodePackages.eslint
   ];
 
+  # --- Shell Helper Function ---
+
+  mkShell = { name, extraPackages ? [ ] }:
+    pkgs.mkShell {
+      nativeBuildInputs = baseTools ++ [ pkgs.python3Packages.pip ];
+      packages = pythonTools ++ nodeTools ++ extraPackages;
+      shellHook = ''
+        ${self.checks.${pkgs.system}.pre-commit-check.shellHook or ""}
+        export DEVSHELL_NAME="${name}"
+        
+        if command -v fish >/dev/null; then
+          exec fish
+        else
+          echo "Warning: fish not found, falling back to bash"
+        fi
+      '';
+    };
+
 in
 {
-  default = pkgs.mkShell {
-    PIP_PREFIX = "${self}/_pip";
-    PYTHONPATH = "$PIP_PREFIX/${pkgs.python3.sitePackages}:$PYTHONPATH";
-    nativeBuildInputs = baseTools;
-    packages = pythonTools ++ nodeTools;
-    shellHook = ''
-      ${shellHookHelper "nix"}
-      if command -v fish >/dev/null; then
-        exec fish
-      else
-        echo "Warning: fish not found, falling back to bash"
-      fi
-    '';
-  };
+  # --- Shell Definitions ---
+
+  default = mkShell { name = "nix"; };
 
   aws =
     let
-      # This 'pkgs' shadows the one from the outer scope, which is fine.
-      pkgs = import pkgs.nixpkgs {
+      pkgsWithOverlay = import pkgs.nixpkgs {
         inherit (pkgs) system;
         overlays = [
           (_: prev: {
@@ -107,8 +108,8 @@ in
         nodejs_20
         ssm-session-manager-plugin
         nodePackages_latest.aws-cdk
-      ]);
-      packages = with pkgs; [
+      ]) ++ [ pkgs.python3Packages.pip ];
+      packages = with pkgsWithOverlay; [
         (python3.withPackages (ps: with ps; [
           boto3
           troposphere
@@ -116,7 +117,9 @@ in
       ];
       shell = "${pkgs.fish}/bin/fish";
       shellHook = ''
-        ${shellHookHelper "aws"}
+        ${self.checks.${pkgs.system}.pre-commit-check.shellHook or ""}
+        export DEVSHELL_NAME="aws"
+        
         if command -v fish >/dev/null; then
           exec fish
         else
@@ -125,24 +128,15 @@ in
       '';
     };
 
-  media = pkgs.mkShell {
-    nativeBuildInputs = baseTools;
-    packages = with pkgs; [
+  media = mkShell {
+    name = "media";
+    extraPackages = with pkgs; [
       yt-dlp
       qobuz-dl
       (python3.withPackages (ps: with ps; [
         audible-cli
       ]))
     ];
-    shell = "${pkgs.fish}/bin/fish";
-    shellHook = ''
-      ${shellHookHelper "media"}
-      if command -v fish >/dev/null; then
-        exec fish
-      else
-        echo "Warning: fish not found, falling back to bash"
-      fi
-    '';
   };
 }
 
