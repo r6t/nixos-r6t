@@ -11,6 +11,9 @@
     environment.systemPackages = with pkgs; [
       fishPlugins.fzf-fish
       fishPlugins.forgit
+      bat
+      lsd
+      ripgrep
     ];
     programs = {
       fish.enable = true;
@@ -67,12 +70,12 @@
         };
 
         nrs = {
-          description = "Run nixos-rebuild switch for the current host.";
+          description = "Run nixos-rebuild switch --flake for the current host.";
           body = ''
             set flake_path "/home/r6t/git/nixos-r6t"
             set current_hostname (hostname)
-            echo "Attempting to rebuild for host: $current_hostname"
-            echo "Executing: sudo nixos-rebuild switch --flake '$flake_path#$current_hostname'"
+            echo "🔧 nixos-rebuild for: $current_hostname"
+            echo "⌨️ sudo nixos-rebuild switch --flake '$flake_path#$current_hostname'"
             sudo nixos-rebuild switch --flake "$flake_path#$current_hostname"
           '';
         };
