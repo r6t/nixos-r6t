@@ -15,7 +15,7 @@ in
       r6t = {
         isNormalUser = true;
         openssh.authorizedKeys.keyFiles = [ ssh-keys.outPath ];
-        extraGroups = [ "docker" "input" "networkmanager" "wheel" ];
+        extraGroups = [ "docker" "input" "incus" "networkmanager" "wheel" ];
         shell = pkgs.fish;
       };
       root = {

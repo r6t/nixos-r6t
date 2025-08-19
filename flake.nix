@@ -111,6 +111,18 @@
           modules = [ ./containers/docker.nix ];
           specialArgs = { inherit outputs userConfig inputs; };
         };
+        immich = nixos-generators.nixosGenerate {
+          inherit system;
+          format = "lxc";
+          modules = [ ./containers/immich.nix ];
+          specialArgs = { inherit outputs userConfig inputs; };
+        };
+        immichMetadata = nixos-generators.nixosGenerate {
+          inherit system;
+          format = "lxc-metadata";
+          modules = [ ./containers/immich.nix ];
+          specialArgs = { inherit outputs userConfig inputs; };
+        };
         tailnetExit = nixos-generators.nixosGenerate {
           inherit system;
           format = "lxc";
@@ -140,7 +152,7 @@
           };
         };
       };
-      # Shells are now imported from their own file
+      # Devshells managed in dedicated file
       devShells.${system} = import ./devshells.nix { inherit pkgs self; };
     };
 }

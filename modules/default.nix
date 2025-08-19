@@ -78,10 +78,8 @@
     nixos/networkmanager/default.nix
     nixos/nix/default.nix
     nixos/nvidia-cuda/default.nix
-    nixos/nvidia-open/default.nix
     nixos/ollama/default.nix
     nixos/llm/default.nix
-    nixos/podman/default.nix
     nixos/printing/default.nix
     nixos/prometheus-node-exporter/default.nix
     nixos/prometheus/default.nix

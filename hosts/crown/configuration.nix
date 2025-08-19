@@ -138,7 +138,18 @@
     fwupd.enable = true;
     fzf.enable = true;
     iperf.enable = true;
-    incus.enable = true;
+
+    incus = {
+      enable = true;
+      stagedSecrets = {
+        "pocket_id" = {
+          "admin_password" = config.sops.secrets."pocket_id/admin_password".path;
+          "admin_user" = config.sops.secrets."pocket_id/admin_user".path;
+          "https_endpoint" = config.sops.secrets."pocket_id/https_endpoint".path;
+        };
+      };
+    };
+
     localization.enable = true;
 
     mountLuksStore = {

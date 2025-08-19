@@ -38,7 +38,6 @@
 
   # 2. Enable systemd-resolved. We do NOT need any extraConfig.
   # NixOS defaults will correctly set up the stub resolver on 127.0.0.53
-  # and create the appropriate /etc/resolv.conf symlink.
   services.resolved.enable = true;
 
   # bolt this back down after lxcs are stable
@@ -50,11 +49,15 @@
   networking.useDHCP = false;
   networking.interfaces = { };
 
-  # 4. Keep cloud-init configuration minimal.
+  # keep cloud-init configuration minimal.
   services.cloud-init = {
     enable = true;
     network.enable = true;
     settings.datasource_list = [ "NoCloud" ];
   };
+
+  # Default shell: fish
+  programs.fish.enable = true;
+  users.users.root.shell = pkgs.fish;
 }
 
