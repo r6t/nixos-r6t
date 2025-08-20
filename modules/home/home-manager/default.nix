@@ -12,7 +12,7 @@
       extraSpecialArgs = { inherit userConfig; };
       backupFileExtension = "replacedbyhomemanager";
       sharedModules = [
-        inputs.nixvim.homeManagerModules.nixvim
+        inputs.nixvim.homeModules.nixvim
         inputs.plasma-manager.homeManagerModules.plasma-manager
         inputs.nix-flatpak.homeManagerModules.nix-flatpak
       ];

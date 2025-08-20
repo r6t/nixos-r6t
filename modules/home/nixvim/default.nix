@@ -167,6 +167,15 @@
                   window.border = "rounded";
                 };
               };
+              formatting = {
+                format = ''
+                  require("lspkind").cmp_format({
+                    mode = "symbol_text",
+                    maxwidth = 50,
+                    ellipsis_char = "...",
+                  })
+                '';
+              };
               sources = {
                 default = [
                   "lsp"
@@ -226,7 +235,10 @@
               };
             };
           };
-          lspkind.enable = true;
+          lspkind = {
+            enable = true;
+            cmp.enable = false;
+          };
           dressing.enable = true;
           fugitive.enable = true;
           fzf-lua.enable = true;
