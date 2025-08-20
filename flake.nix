@@ -123,6 +123,18 @@
           modules = [ ./containers/immich.nix ];
           specialArgs = { inherit outputs userConfig inputs; };
         };
+        llm = nixos-generators.nixosGenerate {
+          inherit system;
+          format = "lxc";
+          modules = [ ./containers/llm.nix ];
+          specialArgs = { inherit outputs userConfig inputs; };
+        };
+        llmMetadata = nixos-generators.nixosGenerate {
+          inherit system;
+          format = "lxc-metadata";
+          modules = [ ./containers/llm.nix ];
+          specialArgs = { inherit outputs userConfig inputs; };
+        };
         tailnetExit = nixos-generators.nixosGenerate {
           inherit system;
           format = "lxc";

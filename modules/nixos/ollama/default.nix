@@ -9,20 +9,19 @@
     services.ollama = {
       enable = true;
       host = "0.0.0.0"; # default port tcp/11434
-      openFirewall = true; # temp for LAN access. Tailscale source traffic always allowed.
       package = pkgs.ollama-cuda;
       acceleration = "cuda";
       # TODO causing errors 2025-03-29
-      #      loadModels = [
-      #        "deepseek-r1:14b"
-      #        "gemma3:12b"
-      #      ];
+      loadModels = [
+        "deepseek-r1:14b"
+        "deepseek-r1:8b"
+        "gemma3:12b"
+      ];
     };
     services.open-webui = {
       enable = true;
       host = "0.0.0.0"; # default port tcp/8080
-      openFirewall = true; # temp for LAN access. Tailscale source traffic always allowed.
-      # stateDir = "/blah";
+      # stateDir = "/var/lib/open-webui"; # default value
     };
   };
 }

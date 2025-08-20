@@ -6,18 +6,18 @@
 
   services.tailscale = {
     enable = true;
-    useRoutingFeatures = "both";
+    useRoutingFeatures = "server";
   };
 
-  boot.kernel.sysctl = {
-    "net.ipv4.ip_forward" = 1;
-    "net.ipv6.conf.all.forwarding" = 1;
-    "net.ipv6.conf.default.forwarding" = 1;
-  };
+  # maybe useRoutingFeatures=server does everything?
+  # boot.kernel.sysctl = {
+  #   "net.ipv4.ip_forward" = 1;
+  #   "net.ipv6.conf.all.forwarding" = 1;
+  #   "net.ipv6.conf.default.forwarding" = 1;
+  # };
 
   networking = {
     hostName = "exit-node-lxc";
-    enableIPv6 = true;
     firewall = {
       trustedInterfaces = [ "tailscale0" ];
     };
