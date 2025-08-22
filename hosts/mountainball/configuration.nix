@@ -81,11 +81,6 @@
     iperf.enable = true;
     kde.enable = true;
     localization.enable = true;
-    libvirtd = {
-      enable = true;
-      enableDesktop = true;
-      cpuVendor = "amd";
-    };
     mullvad.enable = true;
     networkmanager.enable = true;
     nix.enable = true;

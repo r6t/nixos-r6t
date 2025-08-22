@@ -28,7 +28,7 @@
   # long builds (nvidia lxcs) impacted general service availability
   nix.settings.use-cgroups = true;
   systemd.services.nix-daemon.serviceConfig = {
-    # Limit CPU usage to 50% for 16 cores
+    # Limit CPU usage to 50% for 16 vCPU
     CPUQuota = "800%";
   };
 
@@ -85,7 +85,6 @@
       checkReversePath = false;
       allowedTCPPorts = [ 22 ];
       trustedInterfaces = [ "br1" "tailscale0" ];
-
       extraInputRules = ''
         tcp dport 22 accept comment "SSH access"
         iifname "tailscale0" accept comment "Tailscale network"

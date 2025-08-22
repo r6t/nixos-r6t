@@ -177,7 +177,7 @@
         };
       };
       # Devshells managed in dedicated file
-      devShells.${system} = import ./devshells.nix { inherit pkgs self; };
+      devShells.${system} = import ./devshells.nix { inherit pkgs self nixpkgs; };
     };
 }
 

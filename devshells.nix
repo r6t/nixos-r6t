@@ -1,4 +1,4 @@
-{ pkgs, self, ... }:
+{ pkgs, self, nixpkgs, ... }:
 
 let
   # --- Custom Package Definitions ---
@@ -86,7 +86,7 @@ in
 
   aws =
     let
-      pkgsWithOverlay = import pkgs.nixpkgs {
+      pkgsWithOverlay = import nixpkgs {
         inherit (pkgs) system;
         overlays = [
           (_: prev: {
