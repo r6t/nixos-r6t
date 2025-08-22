@@ -16,7 +16,7 @@
           job_name = "r6-nix-systems";
           honor_labels = true;
           static_configs = [{
-            targets = [ "exit-node:9000" "moon:9000" "mountainball:9000" "saguaro:9000" ];
+            targets = [ "crown:9000" "mountainball:9000" ];
           }];
         }
       ];

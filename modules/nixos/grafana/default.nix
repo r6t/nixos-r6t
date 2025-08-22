@@ -19,27 +19,27 @@ in
     services.grafana = {
       enable = true;
       settings = {
-        auth = {
-          oauth_auto_login = true;
-          signout_redirect_url = "https://pid.r6t.io/";
-        };
-
-        "auth.basic" = {
-          enabled = false;
-        };
-        "auth.generic_oauth" = {
-          enabled = true;
-          name = "Pocket-ID";
-          allow_sign_up = true;
-          scopes = "openid email profile";
-          auth_url = "https://pid.r6t.io/authorize";
-          token_url = "https://pid.r6t.io/api/oidc/token";
-          api_url = "https://pid.r6t.io/api/oidc/userinfo";
-          # Optional/advanced:
-          # login_attribute_path = "email";
-          # role_attribute_path = "contains(groups[*], 'admin') && 'Admin' || 'Viewer'";
-          # allow_assign_grafana_admin = false;
-        };
+        #        auth = {
+        #          oauth_auto_login = true;
+        #          signout_redirect_url = "https://pid.r6t.io/";
+        #        };
+        #
+        #        "auth.basic" = {
+        #          enabled = false;
+        #        };
+        #        "auth.generic_oauth" = {
+        #          enabled = true;
+        #          name = "Pocket-ID";
+        #          allow_sign_up = true;
+        #          scopes = "openid email profile";
+        #          auth_url = "https://pid.r6t.io/authorize";
+        #          token_url = "https://pid.r6t.io/api/oidc/token";
+        #          api_url = "https://pid.r6t.io/api/oidc/userinfo";
+        #          # Optional/advanced:
+        #          # login_attribute_path = "email";
+        #          # role_attribute_path = "contains(groups[*], 'admin') && 'Admin' || 'Viewer'";
+        #          # allow_assign_grafana_admin = false;
+        #        };
 
         server = {
           http_addr = "0.0.0.0";

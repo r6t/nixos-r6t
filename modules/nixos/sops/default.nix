@@ -22,6 +22,7 @@
         "pocket_id/admin_password" = { owner = config.users.users.${userConfig.username}.name; };
         "pocket_id/admin_user" = { owner = config.users.users.${userConfig.username}.name; };
         "pocket_id/https_endpoint" = { owner = config.users.users.${userConfig.username}.name; };
+        "headscale/join_tailnet" = { owner = config.users.users.${userConfig.username}.name; };
         "immich/db_password" = { owner = config.users.users.${userConfig.username}.name; };
         "immich/oidc_client_id" = { owner = config.users.users.${userConfig.username}.name; };
         "immich/oidc_client_secret" = { owner = config.users.users.${userConfig.username}.name; };

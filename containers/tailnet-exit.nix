@@ -1,25 +1,35 @@
-{ config, pkgs, lib, userConfig, ... }:
+{ pkgs, lib, ... }:
 {
   imports = [
     ./r6-lxc-base.nix
   ];
 
-  services.tailscale = {
-    enable = true;
-    useRoutingFeatures = "server";
-  };
-
-  # maybe useRoutingFeatures=server does everything?
-  # boot.kernel.sysctl = {
-  #   "net.ipv4.ip_forward" = 1;
-  #   "net.ipv6.conf.all.forwarding" = 1;
-  #   "net.ipv6.conf.default.forwarding" = 1;
-  # };
-
   networking = {
     hostName = "exit-node-lxc";
-    firewall = {
-      trustedInterfaces = [ "tailscale0" ];
+    firewall.checkReversePath = "loose";
+  };
+
+  services = {
+    networkd-dispatcher = {
+      enable = true;
+      rules."50-tailscale" = {
+        onState = [ "routable" ];
+        # GRO forwarding for exit node
+        # https://tailscale.com/kb/1320/performance-best-practices#ethtool-configuration
+        script = ''
+          ${lib.getExe pkgs.ethtool} -K eth0 rx-udp-gro-forwarding on rx-gro-list off
+        '';
+      };
+    };
+    tailscale = {
+      enable = true;
+      useRoutingFeatures = "server";
     };
   };
+
+  systemd.services.tailscaled = {
+    wants = [ "network-online.target" ];
+    after = [ "network-online.target" ];
+  };
 }
+

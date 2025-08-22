@@ -135,6 +135,18 @@
           modules = [ ./containers/llm.nix ];
           specialArgs = { inherit outputs userConfig inputs; };
         };
+        monitoring = nixos-generators.nixosGenerate {
+          inherit system;
+          format = "lxc";
+          modules = [ ./containers/monitoring.nix ];
+          specialArgs = { inherit outputs userConfig inputs; };
+        };
+        monitoringMetadata = nixos-generators.nixosGenerate {
+          inherit system;
+          format = "lxc-metadata";
+          modules = [ ./containers/monitoring.nix ];
+          specialArgs = { inherit outputs userConfig inputs; };
+        };
         tailnetExit = nixos-generators.nixosGenerate {
           inherit system;
           format = "lxc";

@@ -1,4 +1,4 @@
-{ config, pkgs, lib, modulesPath, ... }:
+{ pkgs, modulesPath, ... }:
 {
   imports = [
     "${modulesPath}/virtualisation/lxc-container.nix"
@@ -12,13 +12,16 @@
     cloud-init
     curl
     dig
+    ethtool
     fd
     git
     git-remote-codecommit
     gnumake
+    iproute2
     lshw
     neovim
     netcat
+    nettools
     nmap
     openssl
     pciutils
@@ -40,9 +43,8 @@
   # NixOS defaults will correctly set up the stub resolver on 127.0.0.53
   services.resolved.enable = true;
 
-  # bolt this back down after lxcs are stable
-  networking.firewall.enable = false;
-
+  services.tailscale.enable = true;
+  networking.firewall.trustedInterfaces = [ "tailscale0" ];
   # 3. Clean up conflicting settings. These are no longer needed.
   networking.resolvconf.enable = false;
   networking.useHostResolvConf = false;

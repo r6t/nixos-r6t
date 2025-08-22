@@ -31,7 +31,7 @@
         l = "lsd -l";
         ll = "lsd -la";
         lt = "lsd --tree";
-        cat = "bat";
+        cat = "bat --paging never";
         grep = "rg";
         ".." = "cd ..";
         "..." = "cd ../..";

@@ -11,17 +11,18 @@
       host = "0.0.0.0"; # default port tcp/11434
       package = pkgs.ollama-cuda;
       acceleration = "cuda";
-      # TODO causing errors 2025-03-29
       loadModels = [
         "deepseek-r1:14b"
         "deepseek-r1:8b"
+        "qwen2.5-coder:14b"
+        "qwen2.5-coder:8b"
         "gemma3:12b"
       ];
     };
     services.open-webui = {
       enable = true;
+      environmentFile = "/var/lib/oi.env";
       host = "0.0.0.0"; # default port tcp/8080
-      # stateDir = "/var/lib/open-webui"; # default value
     };
   };
 }

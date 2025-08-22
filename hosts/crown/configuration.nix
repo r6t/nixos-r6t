@@ -24,6 +24,14 @@
     domains = [ "~." ];
   };
 
+  # CPU limit nix-daemon on this system
+  # long builds (nvidia lxcs) impacted general service availability
+  nix.settings.use-cgroups = true;
+  systemd.services.nix-daemon.serviceConfig = {
+    # Limit CPU usage to 50% for 16 cores
+    CPUQuota = "800%";
+  };
+
   # SOPS for secrets management
   sops = {
     defaultSopsFile = "/home/r6t/git/sops-ryan/secrets.yaml";
@@ -142,10 +150,8 @@
     incus = {
       enable = true;
       stagedSecrets = {
-        "pocket_id" = {
-          "admin_password" = config.sops.secrets."pocket_id/admin_password".path;
-          "admin_user" = config.sops.secrets."pocket_id/admin_user".path;
-          "https_endpoint" = config.sops.secrets."pocket_id/https_endpoint".path;
+        "headscale" = {
+          "join_tailnet" = config.sops.secrets."headscale/join_tailnet".path;
         };
       };
     };
