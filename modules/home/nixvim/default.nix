@@ -50,19 +50,29 @@
         ];
 
         extraConfigLua = ''
-                  if vim.lsp.config then
-                    vim.lsp.config('*', {
-                      capabilities = require('blink.cmp').get_lsp_capabilities(),
-                    })
-                  end
+          -- Configure blink-cmp formatting with lspkind
+          require('blink.cmp').setup({
+            appearance = {
+              use_nvim_cmp_as_default = true,
+            },
+            completion = {
+              formatting = {
+                format = require("lspkind").cmp_format({
+                  mode = "symbol_text",
+                  maxwidth = 50,
+                  ellipsis_char = "...",
+                }),
+              },
+            },
+          })
 
-                  -- Fix for zellij.nvim health check
-                  vim.health = vim.health or {}
-                  vim.health.report_start = vim.health.report_start or function() end
-                  vim.health.report_ok = vim.health.report_ok or function() end
-                  vim.health.report_warn = vim.health.report_warn or function() end
-                  vim.health.report_error = vim.health.report_error or function() end
-          	vim.health.report_info = vim.health.report_info or function() end
+          -- Fix for zellij.nvim health check
+          vim.health = vim.health or {}
+          vim.health.report_start = vim.health.report_start or function() end
+          vim.health.report_ok = vim.health.report_ok or function() end
+          vim.health.report_warn = vim.health.report_warn or function() end
+          vim.health.report_error = vim.health.report_error or function() end
+          vim.health.report_info = vim.health.report_info or function() end
         '';
 
         globals = {
@@ -157,24 +167,13 @@
                 accept = {
                   auto_brackets = {
                     enabled = true;
-                    semantic_token_resolution = {
-                      enabled = false;
-                    };
+                    semantic_token_resolution.enabled = false;
                   };
                 };
                 documentation = {
                   auto_show = true;
                   window.border = "rounded";
                 };
-              };
-              formatting = {
-                format = ''
-                  require("lspkind").cmp_format({
-                    mode = "symbol_text",
-                    maxwidth = 50,
-                    ellipsis_char = "...",
-                  })
-                '';
               };
               sources = {
                 default = [
@@ -244,7 +243,7 @@
           fzf-lua.enable = true;
           git-conflict.enable = true;
           lualine.enable = true;
-          luasnip.enable = false;
+          luasnip.enable = true;
           lsp = {
             enable = true;
             servers = {

@@ -49,14 +49,14 @@
     in
     {
       overlays = {
-        saneFix = prev: {
-          sane-backends = prev.sane-backends.overrideAttrs (_old: {
+        # prepended _ means deadnix will ignore structurally required but unused argument
+        saneFix = _final: prev: {
+          sane-backends = prev.sane-backends.overrideAttrs (_oldAttrs: {
             doInstallCheck = false;
             installCheckPhase = "true";
           });
         };
       };
-
       # Bare-metal hosts
       nixosConfigurations = {
         crown = nixpkgs.lib.nixosSystem {
