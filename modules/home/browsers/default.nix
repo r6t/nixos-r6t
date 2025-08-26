@@ -30,13 +30,35 @@
                 }];
                 icon = "https://searxng.r6t.io/favicon.ico";
                 updateInterval = 24 * 60 * 60 * 1000; # Daily
-                definedAliases = [ "@sx" ];
+                definedAliases = [ "@s" ];
+              };
+              "Nix Options" = {
+                urls = [{
+                  template = "https://search.nixos.org/options?channel=unstable";
+                  params = [
+                    { name = "q"; value = "{searchTerms}"; }
+                  ];
+                }];
+                icon = "https://searh.nixos.org/favicon.png";
+                updateInterval = 24 * 60 * 60 * 1000; # Daily
+                definedAliases = [ "@no" ];
+              };
+              "Nix Packages" = {
+                urls = [{
+                  template = "https://search.nixos.org/packages?channel=unstable";
+                  params = [
+                    { name = "q"; value = "{searchTerms}"; }
+                  ];
+                }];
+                icon = "https://searh.nixos.org/favicon.png";
+                updateInterval = 24 * 60 * 60 * 1000; # Daily
+                definedAliases = [ "@np" ];
               };
               "ddg".metaData.hidden = false;
               "google".metaData.hidden = true;
-              "amazondotcom-us".metaData.hidden = true;
+              "amazondotcom-us".metaData.hidden = false;
               "bing".metaData.hidden = true;
-              "ebay".metaData.hidden = true;
+              "ebay".metaData.hidden = false;
             };
           };
           settings = {

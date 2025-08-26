@@ -55,6 +55,7 @@
     nixos/bolt/default.nix
     nixos/bootloader/default.nix
     nixos/bridge/default.nix
+    nixos/caddy/default.nix
     nixos/czkawka/default.nix
     nixos/docker/default.nix
     nixos/env/default.nix

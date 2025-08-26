@@ -48,12 +48,15 @@
       pkgs = import nixpkgs { inherit system; };
     in
     {
-      overlays.saneFix = final: prev: {
-        sane-backends = prev.sane-backends.overrideAttrs (_old: {
-          doInstallCheck = false;
-          installCheckPhase = "true";
-        });
+      overlays = {
+        saneFix = final: prev: {
+          sane-backends = prev.sane-backends.overrideAttrs (_old: {
+            doInstallCheck = false;
+            installCheckPhase = "true";
+          });
+        };
       };
+
       # Bare-metal hosts
       nixosConfigurations = {
         crown = nixpkgs.lib.nixosSystem {
@@ -93,12 +96,12 @@
       };
       # Container and cloud images
       packages.${system} = {
-        headscale = nixos-generators.nixosGenerate {
-          inherit system;
-          format = "amazon";
-          modules = [ ./containers/headscale.nix ];
-          specialArgs = { inherit outputs userConfig inputs; };
-        };
+        # headscale = nixos-generators.nixosGenerate {
+        #   inherit system;
+        #   format = "amazon";
+        #   modules = [ ./containers/headscale.nix ];
+        #   specialArgs = { inherit outputs userConfig inputs; };
+        # };
         docker = nixos-generators.nixosGenerate {
           inherit system;
           format = "lxc";
@@ -109,6 +112,18 @@
           inherit system;
           format = "lxc-metadata";
           modules = [ ./containers/docker.nix ];
+          specialArgs = { inherit outputs userConfig inputs; };
+        };
+        headscale = nixos-generators.nixosGenerate {
+          inherit system;
+          format = "lxc";
+          modules = [ ./containers/headscale.nix ];
+          specialArgs = { inherit outputs userConfig inputs; };
+        };
+        headscaleMetadata = nixos-generators.nixosGenerate {
+          inherit system;
+          format = "lxc-metadata";
+          modules = [ ./containers/headscale.nix ];
           specialArgs = { inherit outputs userConfig inputs; };
         };
         immich = nixos-generators.nixosGenerate {
@@ -166,8 +181,8 @@
           src = ./.;
           hooks = {
             nixpkgs-fmt.enable = true;
-            statix.enable = false; # temporarily off, false positive
-            deadnix.enable = false; # temporarily off, false positive
+            statix.enable = true; # temporarily off, false positive
+            deadnix.enable = true; # temporarily off, false positive
             prettier.enable = true;
             black.enable = true;
             isort.enable = true;

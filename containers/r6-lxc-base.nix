@@ -35,30 +35,30 @@
 
   mine.localization.enable = true;
 
-  # 1. Enable systemd-networkd to receive network info from cloud-init.
   systemd.network.enable = true;
-  networking.useNetworkd = true;
 
-  # 2. Enable systemd-resolved. We do NOT need any extraConfig.
-  # NixOS defaults will correctly set up the stub resolver on 127.0.0.53
-  services.resolved.enable = true;
-
-  services.tailscale.enable = true;
-  networking.firewall.trustedInterfaces = [ "tailscale0" ];
-  # 3. Clean up conflicting settings. These are no longer needed.
-  networking.resolvconf.enable = false;
-  networking.useHostResolvConf = false;
-  networking.useDHCP = false;
-  networking.interfaces = { };
-
-  # keep cloud-init configuration minimal.
-  services.cloud-init = {
-    enable = true;
-    network.enable = true;
-    settings.datasource_list = [ "NoCloud" ];
+  networking = {
+    firewall.trustedInterfaces = [ "tailscale0" ];
+    resolvconf.enable = false;
+    useHostResolvConf = false;
+    useDHCP = false;
+    useNetworkd = true;
+    interfaces = { };
+    extraHosts = ''
+      192.168.6.9 headscale.r6t.io
+    '';
   };
 
-  # Default shell: fish
+  services = {
+    cloud-init = {
+      enable = true;
+      network.enable = true;
+      settings.datasource_list = [ "NoCloud" ];
+    };
+    tailscale.enable = true;
+    resolved.enable = true;
+  };
+
   programs.fish.enable = true;
   users.users.root.shell = pkgs.fish;
 }

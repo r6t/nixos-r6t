@@ -11,6 +11,7 @@
 
   boot.kernelParams = [ "kvm-amd" "kvm" "reboot=efi" ];
   boot.kernelModules = [ "kvm-amd" "kvm" ];
+  boot.supportedFilesystems = [ "zfs" ];
 
   time.timeZone = "America/Los_Angeles";
   system.stateVersion = "23.11";
@@ -51,6 +52,7 @@
   };
 
   networking = {
+    hostId = "5f3e2c0a";
     nftables.enable = true;
     enableIPv6 = true;
     useNetworkd = true;
@@ -149,6 +151,10 @@
     incus = {
       enable = true;
       stagedSecrets = {
+        "grafana" = {
+          "oidc_client_id" = config.sops.secrets."grafana/oidc_client_id".path;
+          "oidc_client_secret" = config.sops.secrets."grafana/oidc_client_secret".path;
+        };
         "headscale" = {
           "join_tailnet" = config.sops.secrets."headscale/join_tailnet".path;
         };
