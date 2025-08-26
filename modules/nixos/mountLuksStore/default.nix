@@ -1,4 +1,4 @@
-{ lib, config, pkgs, ... }:
+{ lib, config, ... }:
 
 let
   cfg = config.mine.mountLuksStore;
@@ -41,24 +41,22 @@ in
     );
 
     # 2) Create each mount point directory
-    systemd.tmpfiles.rules = lib.mapAttrsToList (name: store: "d ${store.mountPoint} 0755 root root -") cfg;
+    systemd.tmpfiles.rules = lib.mapAttrsToList (store: "d ${store.mountPoint} 0755 root root -") cfg;
 
     # 3) Declare mounts in fileSystems
     fileSystems = lib.foldl'
       (acc: st: acc // {
         "${st.mountPoint}" = {
           device = "/dev/mapper/${st.name}";
-          fsType = st.fsType;
+          inherit (st) fsType;
           options = st.fsOptions;
         };
       })
       { }
       (lib.mapAttrsToList
         (name: store: {
-          name = name;
-          mountPoint = store.mountPoint;
-          fsType = store.fsType;
-          fsOptions = store.fsOptions;
+          inherit name;
+          inherit (store) mountPoint fsType fsOptions;
         })
         cfg);
   };

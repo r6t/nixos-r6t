@@ -1,4 +1,4 @@
-{ inputs, lib, userConfig, pkgs, config, ... }:
+{ inputs, lib, config, ... }:
 
 {
   imports = [
@@ -9,29 +9,32 @@
     ../../modules/default.nix
   ];
 
-  boot.kernelParams = [ "kvm-amd" "kvm" "reboot=efi" ];
-  boot.kernelModules = [ "kvm-amd" "kvm" ];
-  boot.supportedFilesystems = [ "zfs" ];
+  boot = {
+    kernelParams = [ "kvm-amd" "kvm" "reboot=efi" ];
+    kernelModules = [ "kvm-amd" "kvm" ];
+    supportedFilesystems = [ "zfs" ];
+    # Enable packet forwarding for containers
+    kernel.sysctl = {
+      "net.ipv4.ip_forward" = 1;
+      "net.ipv6.conf.all.forwarding" = 1;
+      # maybe overkill "net.ipv6.conf.default.forwarding" = 1;
+    };
+  };
 
   time.timeZone = "America/Los_Angeles";
   system.stateVersion = "23.11";
 
-  services.journald.extraConfig = "SystemMaxUse=500M";
-
-  # Host DNS configuration
-  services.resolved = {
-    enable = true;
-    fallbackDns = [ "1.1.1.1" "8.8.8.8" ];
-    domains = [ "~." ];
+  services = {
+    journald.extraConfig = "SystemMaxUse=500M";
+    resolved = {
+      enable = true;
+      domains = [ "~." ];
+    };
   };
 
   # CPU limit nix-daemon on this system
   # long builds (nvidia lxcs) impacted general service availability
   nix.settings.use-cgroups = true;
-  systemd.services.nix-daemon.serviceConfig = {
-    # Limit CPU usage to 50% for 16 vCPU
-    CPUQuota = "800%";
-  };
 
   # SOPS for secrets management
   sops = {
@@ -40,83 +43,88 @@
     validateSopsFiles = false;
   };
 
-  # Reserve NIC device IDs
-  systemd.network = {
-    enable = true;
-    links = {
-      "10-enp5s0" = { matchConfig.Path = "pci-0000:05:00.0"; linkConfig.Name = "enp5s0"; };
-      "10-enp6s0" = { matchConfig.Path = "pci-0000:06:00.0"; linkConfig.Name = "enp6s0"; };
-      "10-enp7s0" = { matchConfig.Path = "pci-0000:07:00.0"; linkConfig.Name = "enp7s0"; };
-      "10-enp8s0" = { matchConfig.Path = "pci-0000:09:00.0"; linkConfig.Name = "enp8s0"; };
+  systemd = {
+    tmpfiles.rules = [
+      "d /mnt/thunderbay 0755 root root -"
+      "d /mnt/thunderkey 0755 root root -"
+    ];
+    services = {
+      systemd-networkd-wait-online.enable = lib.mkForce false;
+      nix-daemon.serviceConfig = {
+        # Limit CPU usage to 50% for 16 vCPU
+        CPUQuota = "800%";
+      };
     };
-  };
-
-  networking = {
-    hostId = "5f3e2c0a";
-    nftables.enable = true;
-    enableIPv6 = true;
-    useNetworkd = true;
-    hostName = "crown";
-    useDHCP = false;
-    dhcpcd.enable = false;
-
-    bridges = {
-      br1 = { interfaces = [ "enp1s0" ]; };
-    };
-
-    interfaces = {
-      enp1s0.useDHCP = false; # Bridge port
-      enp5s0.useDHCP = false; # 2.5G Incus hardware passthrough
-      enp6s0.useDHCP = false; # 2.5G Incus hardware passthrough
-      enp7s0.useDHCP = false; # 2.5G Incus hardware passthrough
-      enp9s0.useDHCP = false; # 2.5G Incus hardware passthrough
-      enp1s0d1.useDHCP = true; # Primary host interface gets DHCP
-      br1.useDHCP = false; # 10G bridge for Incus
-    };
-
-    defaultGateway = {
-      address = "192.168.6.1";
-      interface = "enp1s0d1";
-      metric = 100;
-    };
-
-    nameservers = [ "192.168.6.1" ];
-
-    firewall = {
+    # Reserve NIC device IDs
+    network = {
       enable = true;
-      checkReversePath = false;
-      allowedTCPPorts = [ 22 ];
-      trustedInterfaces = [ "br1" "tailscale0" ];
-      extraInputRules = ''
-        tcp dport 22 accept comment "SSH access"
-        iifname "tailscale0" accept comment "Tailscale network"
-        ip protocol icmp accept comment "Allow ICMP"
-      '';
+      links = {
+        "10-enp5s0" = { matchConfig.Path = "pci-0000:05:00.0"; linkConfig.Name = "enp5s0"; };
+        "10-enp6s0" = { matchConfig.Path = "pci-0000:06:00.0"; linkConfig.Name = "enp6s0"; };
+        "10-enp7s0" = { matchConfig.Path = "pci-0000:07:00.0"; linkConfig.Name = "enp7s0"; };
+        "10-enp8s0" = { matchConfig.Path = "pci-0000:09:00.0"; linkConfig.Name = "enp8s0"; };
+      };
+    };
 
-      extraForwardRules = ''
-        # CRITICAL: Explicit bridge forwarding rules
-        iifname "br1" oifname "enp1s0d1" accept comment "Bridge to physical interface"
-        iifname "enp1s0d1" oifname "br1" ct state { established, related } accept comment "Return traffic to bridge"
+    networking = {
+      hostId = "5f3e2c0a";
+      nftables.enable = true;
+      enableIPv6 = true;
+      useNetworkd = true;
+      hostName = "crown";
+      useDHCP = false;
+      dhcpcd.enable = false;
+
+      bridges = {
+        br1 = { interfaces = [ "enp1s0" ]; };
+      };
+
+      interfaces = {
+        enp1s0.useDHCP = false; # Bridge port
+        enp5s0.useDHCP = false; # 2.5G Incus hardware passthrough
+        enp6s0.useDHCP = false; # 2.5G Incus hardware passthrough
+        enp7s0.useDHCP = false; # 2.5G Incus hardware passthrough
+        enp9s0.useDHCP = false; # 2.5G Incus hardware passthrough
+        enp1s0d1.useDHCP = true; # Primary host interface gets DHCP
+        br1.useDHCP = false; # 10G bridge for Incus
+      };
+
+      defaultGateway = {
+        address = "192.168.6.1";
+        interface = "enp1s0d1";
+        metric = 100;
+      };
+
+      nameservers = [ "192.168.6.1" ];
+
+      firewall = {
+        enable = true;
+        checkReversePath = false;
+        allowedTCPPorts = [ 22 ];
+        trustedInterfaces = [ "br1" "tailscale0" ];
+        extraInputRules = ''
+          tcp dport 22 accept comment "SSH access"
+          iifname "tailscale0" accept comment "Tailscale network"
+          ip protocol icmp accept comment "Allow ICMP"
+        '';
+
+        extraForwardRules = ''
+          # CRITICAL: Explicit bridge forwarding rules
+          iifname "br1" oifname "enp1s0d1" accept comment "Bridge to physical interface"
+          iifname "enp1s0d1" oifname "br1" ct state { established, related } accept comment "Return traffic to bridge"
         
-        # Allow inter-bridge traffic
-        iifname "br1" oifname "br1" accept comment "Bridge internal forwarding"
+          # Allow inter-bridge traffic
+          iifname "br1" oifname "br1" accept comment "Bridge internal forwarding"
         
-        # Tailscale forwarding
-        iifname "tailscale0" oifname "br1" accept comment "Tailscale to containers"
-        iifname "br1" oifname "tailscale0" accept comment "Containers to Tailscale"
-      '';
+          # Tailscale forwarding
+          iifname "tailscale0" oifname "br1" accept comment "Tailscale to containers"
+          iifname "br1" oifname "tailscale0" accept comment "Containers to Tailscale"
+        '';
+      };
     };
   };
 
-  # Disable problematic wait-online service
-  systemd.services.systemd-networkd-wait-online.enable = lib.mkForce false;
 
-  # Enable packet forwarding for containers
-  boot.kernel.sysctl = {
-    "net.ipv4.ip_forward" = 1;
-    "net.ipv6.conf.all.forwarding" = 1;
-    # maybe overkill "net.ipv6.conf.default.forwarding" = 1;
-  };
 
   # File systems
   fileSystems."/mnt/thunderkey" = {
@@ -125,10 +133,6 @@
     options = [ "noatime" ];
   };
 
-  systemd.tmpfiles.rules = [
-    "d /mnt/thunderbay 0755 root root -"
-    "d /mnt/thunderkey 0755 root root -"
-  ];
 
   mine = {
     home = {

@@ -13,7 +13,7 @@ in
         name = "stagedSecretsOption";
         # This function tells Nix how to combine multiple `stagedSecrets` blocks.
         # It takes a list of definitions and recursively merges them.
-        merge = loc: defs: lib.foldl lib.recursiveUpdate { } (map (d: d.value) defs);
+        merge = defs: lib.foldl lib.recursiveUpdate { } (map (d: d.value) defs);
       };
       description = ''
         Top-level attribute key is the container name (e.g., "pocket-id"),

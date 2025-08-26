@@ -1,4 +1,4 @@
-{ lib, config, pkgs, ... }:
+{ lib, config, ... }:
 
 let
   envFile = "/etc/immich/env/oidc.env";

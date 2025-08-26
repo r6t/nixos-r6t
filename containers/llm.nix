@@ -1,4 +1,3 @@
-{ config, pkgs, lib, ... }:
 {
   imports = [
     ./r6-lxc-base.nix
@@ -14,19 +13,19 @@
   };
 
   nixpkgs.overlays = [
-    (final: prev: {
-      python3Packages = prev.python3Packages.overrideScope (pyfinal: pyprev: {
-        einops = pyprev.einops.overridePythonAttrs (old: {
+    (prev: {
+      python3Packages = prev.python3Packages.overrideScope (pyprev: {
+        einops = pyprev.einops.overridePythonAttrs {
           checkPhase = ''
             echo "Skipping einops tests due to persistent image build failures."
           '';
-        });
+        };
 
-        chromadb = pyprev.chromadb.overridePythonAttrs (oldAttrs: {
+        chromadb = pyprev.chromadb.overridePythonAttrs {
           checkPhase = ''
             echo "Skipping chromadb tests due to pytest-xdist parallel error."
           '';
-        });
+        };
       });
     })
   ];

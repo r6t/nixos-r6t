@@ -1,8 +1,5 @@
 { lib, config, ... }:
 
-let
-  wiredIfc = "enp89s0";
-in
 {
   options = {
     mine.bridge.enable =

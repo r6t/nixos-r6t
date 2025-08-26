@@ -2,7 +2,6 @@
 
 let
   dashboardDir = ./dashboards;
-  grafanaIni = ./grafana.ini;
 in
 {
   options.mine.grafana = {
@@ -15,7 +14,6 @@ in
   };
 
   config = lib.mkIf config.mine.grafana.enable {
-    #    environment.etc."grafana/grafana.ini".source = grafanaIni;
     services.grafana = {
       enable = true;
       settings = {

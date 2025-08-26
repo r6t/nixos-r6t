@@ -2,23 +2,23 @@
 
 let
   # As of Aug 2025, Route 53 plugin is not compatible with latest Caddy
-  caddy-overlay = self: super: {
-    caddy = super.caddy.overrideAttrs (oldAttrs: rec {
+  caddy-overlay = super: {
+    caddy = super.caddy.overrideAttrs rec {
       version = "2.9.1";
       src = super.fetchFromGitHub {
         owner = "caddyserver";
         repo = "caddy";
         rev = "v${version}";
       };
-    });
+    };
   };
 
   # Re-import nixpkgs using the path from the existing pkgs set.
   # This creates a new, local package set with the overlay applied.
   pkgs-with-caddy-override = import pkgs.path {
     # maintain consistency with parent-level pkgs
-    config = config.nixpkgs.config;
-    system = pkgs.system;
+    inherit (config.nixpkgs) config;
+    inherit (pkgs) system;
     # apply overlay
     overlays = [ caddy-overlay ];
   };
@@ -39,7 +39,7 @@ in
   config = lib.mkIf config.mine.caddy.enable {
     services.caddy = {
       enable = true;
-      configFile = config.mine.caddy.configFile;
+      inherit (config.mine.caddy) configFile;
       environmentFile = "/etc/caddy/caddy.env";
       package = pkgs-with-caddy-override.caddy.withPlugins {
         # Check if Caddy version workaround still necessary when updating

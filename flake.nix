@@ -49,7 +49,7 @@
     in
     {
       overlays = {
-        saneFix = final: prev: {
+        saneFix = prev: {
           sane-backends = prev.sane-backends.overrideAttrs (_old: {
             doInstallCheck = false;
             installCheckPhase = "true";
@@ -181,8 +181,8 @@
           src = ./.;
           hooks = {
             nixpkgs-fmt.enable = true;
-            statix.enable = true; # temporarily off, false positive
-            deadnix.enable = true; # temporarily off, false positive
+            statix.enable = true;
+            deadnix.enable = true;
             prettier.enable = true;
             black.enable = true;
             isort.enable = true;

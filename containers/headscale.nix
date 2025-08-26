@@ -1,4 +1,3 @@
-{ pkgs, lib, ... }:
 {
   imports = [
     ./r6-lxc-base.nix
