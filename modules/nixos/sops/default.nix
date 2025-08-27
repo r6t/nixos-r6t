@@ -12,6 +12,7 @@
       defaultSopsFile = "/home/${userConfig.username}/git/sops-ryan/secrets.yaml";
       defaultSopsFormat = "yaml";
       age.keyFile = "/home/${userConfig.username}/.config/sops/age/keys.txt";
+      validateSopsFiles = false;
 
       secrets = {
         "firefox_sync" = { owner = config.users.users.${userConfig.username}.name; };
@@ -42,8 +43,6 @@
         "syncthing/machine_id/silvertorch" = { owner = config.users.users.${userConfig.username}.name; };
         "syncthing/machine_id/saguaro" = { owner = config.users.users.${userConfig.username}.name; };
       };
-
-      validateSopsFiles = false;
     };
   };
 

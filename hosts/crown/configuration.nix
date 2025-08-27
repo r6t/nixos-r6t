@@ -20,26 +20,10 @@
     supportedFilesystems = [ "zfs" ];
   };
 
-  time.timeZone = "America/Los_Angeles";
-  system.stateVersion = "23.11";
-
-  services = {
-    journald.extraConfig = "SystemMaxUse=500M";
-    resolved = {
-      enable = true;
-      domains = [ "~." ];
-    };
-  };
-
-  # CPU limit nix-daemon on this system
-  # long builds (nvidia lxcs) impacted general service availability
-  nix.settings.use-cgroups = true;
-
-  # SOPS for secrets management
-  sops = {
-    defaultSopsFile = "/home/r6t/git/sops-ryan/secrets.yaml";
-    age.keyFile = "/home/r6t/.config/sops/age/keys.txt";
-    validateSopsFiles = false;
+  fileSystems."/mnt/thunderkey" = {
+    device = "/dev/disk/by-label/thunderkey";
+    fsType = "ext4";
+    options = [ "noatime" ];
   };
 
   networking = {
@@ -98,6 +82,23 @@
       '';
     };
   };
+
+  # CPU limit nix-daemon on this system
+  # long builds (nvidia lxcs) impacted general service availability
+  nix.settings.use-cgroups = true;
+
+  time.timeZone = "America/Los_Angeles";
+
+  services = {
+    journald.extraConfig = "SystemMaxUse=500M";
+    resolved = {
+      enable = true;
+      domains = [ "~." ];
+    };
+  };
+
+  system.stateVersion = "23.11";
+
   systemd = {
     tmpfiles.rules = [
       "d /mnt/thunderbay 0755 root root -"
@@ -120,19 +121,9 @@
         "10-enp8s0" = { matchConfig.Path = "pci-0000:09:00.0"; linkConfig.Name = "enp8s0"; };
       };
     };
-
   };
 
-
-
-  # File systems
-  fileSystems."/mnt/thunderkey" = {
-    device = "/dev/disk/by-label/thunderkey";
-    fsType = "ext4";
-    options = [ "noatime" ];
-  };
-
-
+  # modules/
   mine = {
     home = {
       atuin.enable = true;

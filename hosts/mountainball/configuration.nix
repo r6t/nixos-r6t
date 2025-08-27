@@ -9,19 +9,19 @@
     ../../modules/default.nix
   ];
 
-  # boot.initrd.luks.devices."luks-9fc9c182-0bad-474f-a9bb-ee2e6aa1be50".device = "/dev/disk/by-uuid/9fc9c182-0bad-474f-a9bb-ee2e6aa1be50";
-
-  time.timeZone = "America/Los_Angeles";
-
-  networking.hostName = "mountainball";
-
   # troubleshooting external display ddc/ci brighness control
   hardware.i2c.enable = true;
   users.users.r6t.extraGroups = [ "i2c" ];
 
+  networking.hostName = "mountainball";
+
   services.fprintd.enable = false;
+
   system.stateVersion = "23.11";
 
+  time.timeZone = "America/Los_Angeles";
+
+  # modules
   mine = {
     flatpak = {
       anki.enable = true;
@@ -40,7 +40,7 @@
     };
 
     home = {
-      aider.enable = false; # tree-sitter com
+      aider.enable = false; # broken until updated for new tree-sitter
       alacritty.enable = true;
       atuin.enable = true;
       bitwarden.enable = true;
@@ -55,8 +55,8 @@
       kde-apps.enable = true;
       mpv.enable = true;
       nixvim.enable = true;
-      obsidian.enable = true;
       obs-studio.enable = true;
+      obsidian.enable = true;
       orca-slicer.enable = true;
       signal-desktop.enable = true;
       ssh.enable = true;
@@ -72,8 +72,8 @@
     bolt.enable = true;
     bootloader.enable = true;
     czkawka.enable = true;
-    docker.enable = true;
     direnv.enable = true;
+    docker.enable = true;
     env.enable = true;
     fonts.enable = true;
     fwupd.enable = true;
