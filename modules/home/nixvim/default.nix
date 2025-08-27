@@ -47,6 +47,42 @@
         ];
 
         extraConfigLua = ''
+          -- Set default provider on startup (avoids vertex default)
+          vim.api.nvim_create_autocmd("VimEnter", {
+            callback = function()
+              vim.defer_fn(function()
+                -- Switch to qwen-coder as default
+                vim.cmd("AvanteSwitchProvider qwen-coder")
+                -- Visual confirmation
+                vim.notify("Avante: Default provider set to Qwen 2.5 Coder 7B @ ollama", vim.log.levels.INFO, {
+                  title = "Avante.nvim",
+                  timeout = 2000,
+                })
+              end, 500)
+            end,
+          })
+
+          -- Provider switching function with visual feedback
+          local function switch_provider_with_feedback(provider, display_name)
+            return function()
+              vim.cmd("AvanteSwitchProvider " .. provider)
+              vim.notify("Switched to: " .. display_name, vim.log.levels.INFO, {
+                title = "Avante Provider",
+                timeout = 1500,
+              })
+            end
+          end
+
+          -- Create provider switching commands with feedback
+          vim.api.nvim_create_user_command("AvanteQwen7B", 
+            switch_provider_with_feedback("qwen-coder", "Qwen 2.5 Coder 7B on ollama"), {})
+          vim.api.nvim_create_user_command("AvanteQwen14B", 
+            switch_provider_with_feedback("qwen-coder-14b", "Qwen 2.5 Coder 14B on ollama"), {})
+          vim.api.nvim_create_user_command("AvanteDeepSeek", 
+            switch_provider_with_feedback("deepseek-r1-14b", "DeepSeek R1 14B on ollama"), {})
+          vim.api.nvim_create_user_command("AvanteClaude", 
+            switch_provider_with_feedback("bedrock-claude", "Claude Sonnet 4 on AWS Bedrock"), {})
+
           -- Configure blink-cmp formatting with lspkind
           require('blink.cmp').setup({
             appearance = {
@@ -62,6 +98,7 @@
               },
             },
           })
+
           -- Fix for zellij.nvim health check
           vim.health = vim.health or {}
           vim.health.report_start = vim.health.report_start or function() end
@@ -78,8 +115,9 @@
         };
         colorschemes.oxocarbon.enable = true;
         highlight.ExtraWhitespace.bg = "red";
+
         keymaps = [
-          # uffer navigation
+          # Buffer navigation
           {
             action = "<cmd>bnext<CR>";
             key = "<leader>bn";
@@ -90,7 +128,8 @@
             key = "<leader>bp";
             options.desc = "Previous buffer";
           }
-          # lsp
+
+          # LSP
           {
             action = "<cmd>LspInfo<CR>";
             key = "<leader>li";
@@ -106,30 +145,77 @@
             key = "gr";
             options.desc = "Find references";
           }
-          # oil
+
+          # File navigation
           {
             action = "<cmd>Oil<CR>";
             key = "<leader>-";
+            options.desc = "Open Oil file manager";
           }
-          # telescope
+
+          # Telescope
           {
             action = "<cmd>Telescope find_files<CR>";
             key = "<leader>ff";
+            options.desc = "Find files";
           }
           {
             action = "<cmd>Telescope live_grep<CR>";
             key = "<leader>fg";
+            options.desc = "Live grep";
           }
           {
-
             action = "<cmd>Telescope buffers<CR>";
             key = "<leader>fb";
+            options.desc = "Find buffers";
           }
           {
             action = "<cmd>Telescope help_tags<CR>";
             key = "<leader>fh";
+            options.desc = "Help tags";
+          }
+
+          # Avante Provider Switching with Visual Feedback
+          {
+            action = "<cmd>AvanteQwen7B<CR>";
+            key = "<leader>a1";
+            options.desc = "Switch to Qwen 2.5 Coder 7B @ ollama";
+          }
+          {
+            action = "<cmd>AvanteQwen14B<CR>";
+            key = "<leader>a2";
+            options.desc = "Switch to Qwen 2.5 Coder 14B @ ollama";
+          }
+          {
+            action = "<cmd>AvanteDeepSeek<CR>";
+            key = "<leader>a3";
+            options.desc = "Switch to DeepSeek R1 14B @ ollama";
+          }
+          {
+            action = "<cmd>AvanteClaude<CR>";
+            key = "<leader>a4";
+            options.desc = "Switch to Claude Sonnet 4 @ AWS Bedrock";
+          }
+
+          # Avante core functions
+          {
+            action = "<cmd>AvanteAsk<CR>";
+            key = "<leader>aa";
+            options.desc = "Ask Avante";
+          }
+          {
+            action = "<cmd>AvanteToggle<CR>";
+            key = "<leader>at";
+            options.desc = "Toggle Avante sidebar";
+          }
+          {
+            action = "<cmd>AvanteEdit<CR>";
+            key = "<leader>ae";
+            options.desc = "Edit with Avante";
+            mode = [ "n" "v" ];
           }
         ];
+
         opts = {
           updatetime = 100;
           number = true;
@@ -143,33 +229,67 @@
           smartcase = true;
           signcolumn = "yes:1";
         };
+
         plugins = {
           avante = {
             enable = true;
             settings = {
-              provider = "ollama";
-              auto_suggestions_provider = "ollama";
+              provider = "qwen-coder"; # Default provider - qwen 7b
+
               providers = {
-                ollama = {
-                  model = "qwen2.5-coder:7b";
+                qwen-coder = {
+                  __inherited_from = "ollama";
                   endpoint = "https://ollama.r6t.io";
+                  model = "qwen2.5-coder:7b";
+                  extra_request_body = {
+                    options = {
+                      temperature = 0.7;
+                      keep_alive = "5m";
+                    };
+                  };
                 };
-                bedrock = {
+                qwen-coder-14b = {
+                  __inherited_from = "ollama";
+                  endpoint = "https://ollama.r6t.io";
+                  model = "qwen2.5-coder:14b";
+                  extra_request_body = {
+                    options = {
+                      temperature = 0.7;
+                      keep_alive = "5m";
+                    };
+                  };
+                };
+                deepseek-r1-14b = {
+                  __inherited_from = "ollama";
+                  endpoint = "https://ollama.r6t.io";
+                  model = "deepseek-r1:14b";
+                  extra_request_body = {
+                    options = {
+                      temperature = 0.7;
+                      keep_alive = "5m";
+                    };
+                  };
+                };
+                bedrock-claude = {
+                  __inherited_from = "bedrock";
                   model = "anthropic.claude-sonnet-4-20250514-v1:0";
+                  extra_request_body = { };
                 };
               };
+
               behaviour = {
                 auto_suggestions = false;
                 support_paste_from_clipboard = true;
                 enable_cursor_planning_mode = true;
               };
-              disabled_tools = [ ];
+
               selector = {
                 provider = "fzf_lua";
                 provider_opts = { };
               };
             };
           };
+
           blink-cmp = {
             enable = true;
             setupLspCapabilities = true;
@@ -236,6 +356,7 @@
               };
             };
           };
+
           blink-compat.enable = true;
           conform-nvim = {
             enable = true;
@@ -253,9 +374,11 @@
               };
             };
           };
+
           lspkind = {
             enable = true;
-            cmp.enable = false; # not blink-cmp
+            # not blink-cmp
+            cmp.enable = false;
           };
           dressing.enable = true;
           fugitive.enable = true;
@@ -263,6 +386,7 @@
           git-conflict.enable = true;
           lualine.enable = true;
           luasnip.enable = true;
+
           lsp = {
             enable = true;
             servers = {
@@ -311,6 +435,7 @@
               yamlls.enable = true;
             };
           };
+
           none-ls.sources.formatting.black.enable = true;
           oil.enable = true;
           telescope.enable = true;
@@ -332,3 +457,4 @@
     };
   };
 }
+
