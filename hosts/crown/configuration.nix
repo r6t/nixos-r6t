@@ -1,4 +1,4 @@
-{ inputs, lib, config, ... }:
+{ inputs, lib, ... }:
 
 {
   imports = [
@@ -10,15 +10,14 @@
   ];
 
   boot = {
-    kernelParams = [ "kvm-amd" "kvm" "reboot=efi" ];
-    kernelModules = [ "kvm-amd" "kvm" ];
-    supportedFilesystems = [ "zfs" ];
     # Enable packet forwarding for containers
     kernel.sysctl = {
       "net.ipv4.ip_forward" = 1;
       "net.ipv6.conf.all.forwarding" = 1;
-      # maybe overkill "net.ipv6.conf.default.forwarding" = 1;
     };
+    kernelModules = [ "kvm-amd" "kvm" ];
+    kernelParams = [ "kvm-amd" "kvm" "reboot=efi" ];
+    supportedFilesystems = [ "zfs" ];
   };
 
   time.timeZone = "America/Los_Angeles";
@@ -43,6 +42,62 @@
     validateSopsFiles = false;
   };
 
+  networking = {
+    hostId = "5f3e2c0a";
+    nftables.enable = true;
+    enableIPv6 = true;
+    useNetworkd = true;
+    hostName = "crown";
+    useDHCP = false;
+    dhcpcd.enable = false;
+
+    bridges = {
+      br1 = { interfaces = [ "enp1s0" ]; };
+    };
+
+    interfaces = {
+      enp1s0.useDHCP = false; # Bridge port
+      enp5s0.useDHCP = false; # 2.5G Incus hardware passthrough
+      enp6s0.useDHCP = false; # 2.5G Incus hardware passthrough
+      enp7s0.useDHCP = false; # 2.5G Incus hardware passthrough
+      enp9s0.useDHCP = false; # 2.5G Incus hardware passthrough
+      enp1s0d1.useDHCP = true; # Primary host interface gets DHCP
+      br1.useDHCP = false; # 10G bridge for Incus
+    };
+
+    defaultGateway = {
+      address = "192.168.6.1";
+      interface = "enp1s0d1";
+      metric = 100;
+    };
+
+    nameservers = [ "192.168.6.1" ];
+
+    firewall = {
+      enable = true;
+      checkReversePath = false;
+      allowedTCPPorts = [ 22 ];
+      trustedInterfaces = [ "br1" "tailscale0" ];
+      extraInputRules = ''
+        tcp dport 22 accept comment "SSH access"
+        iifname "tailscale0" accept comment "Tailscale network"
+        ip protocol icmp accept comment "Allow ICMP"
+      '';
+
+      extraForwardRules = ''
+        # CRITICAL: Explicit bridge forwarding rules
+        iifname "br1" oifname "enp1s0d1" accept comment "Bridge to physical interface"
+        iifname "enp1s0d1" oifname "br1" ct state { established, related } accept comment "Return traffic to bridge"
+      
+        # Allow inter-bridge traffic
+        iifname "br1" oifname "br1" accept comment "Bridge internal forwarding"
+      
+        # Tailscale forwarding
+        iifname "tailscale0" oifname "br1" accept comment "Tailscale to containers"
+        iifname "br1" oifname "tailscale0" accept comment "Containers to Tailscale"
+      '';
+    };
+  };
   systemd = {
     tmpfiles.rules = [
       "d /mnt/thunderbay 0755 root root -"
@@ -66,62 +121,6 @@
       };
     };
 
-    networking = {
-      hostId = "5f3e2c0a";
-      nftables.enable = true;
-      enableIPv6 = true;
-      useNetworkd = true;
-      hostName = "crown";
-      useDHCP = false;
-      dhcpcd.enable = false;
-
-      bridges = {
-        br1 = { interfaces = [ "enp1s0" ]; };
-      };
-
-      interfaces = {
-        enp1s0.useDHCP = false; # Bridge port
-        enp5s0.useDHCP = false; # 2.5G Incus hardware passthrough
-        enp6s0.useDHCP = false; # 2.5G Incus hardware passthrough
-        enp7s0.useDHCP = false; # 2.5G Incus hardware passthrough
-        enp9s0.useDHCP = false; # 2.5G Incus hardware passthrough
-        enp1s0d1.useDHCP = true; # Primary host interface gets DHCP
-        br1.useDHCP = false; # 10G bridge for Incus
-      };
-
-      defaultGateway = {
-        address = "192.168.6.1";
-        interface = "enp1s0d1";
-        metric = 100;
-      };
-
-      nameservers = [ "192.168.6.1" ];
-
-      firewall = {
-        enable = true;
-        checkReversePath = false;
-        allowedTCPPorts = [ 22 ];
-        trustedInterfaces = [ "br1" "tailscale0" ];
-        extraInputRules = ''
-          tcp dport 22 accept comment "SSH access"
-          iifname "tailscale0" accept comment "Tailscale network"
-          ip protocol icmp accept comment "Allow ICMP"
-        '';
-
-        extraForwardRules = ''
-          # CRITICAL: Explicit bridge forwarding rules
-          iifname "br1" oifname "enp1s0d1" accept comment "Bridge to physical interface"
-          iifname "enp1s0d1" oifname "br1" ct state { established, related } accept comment "Return traffic to bridge"
-        
-          # Allow inter-bridge traffic
-          iifname "br1" oifname "br1" accept comment "Bridge internal forwarding"
-        
-          # Tailscale forwarding
-          iifname "tailscale0" oifname "br1" accept comment "Tailscale to containers"
-          iifname "br1" oifname "tailscale0" accept comment "Containers to Tailscale"
-        '';
-      };
-    };
   };
 
 
@@ -151,20 +150,7 @@
     fwupd.enable = true;
     fzf.enable = true;
     iperf.enable = true;
-
-    incus = {
-      enable = true;
-      stagedSecrets = {
-        "grafana" = {
-          "oidc_client_id" = config.sops.secrets."grafana/oidc_client_id".path;
-          "oidc_client_secret" = config.sops.secrets."grafana/oidc_client_secret".path;
-        };
-        "headscale" = {
-          "join_tailnet" = config.sops.secrets."headscale/join_tailnet".path;
-        };
-      };
-    };
-
+    incus.enable = true;
     localization.enable = true;
 
     mountLuksStore = {
@@ -186,4 +172,3 @@
     user.enable = true;
   };
 }
-

@@ -41,7 +41,7 @@ in
     );
 
     # 2) Create each mount point directory
-    systemd.tmpfiles.rules = lib.mapAttrsToList (store: "d ${store.mountPoint} 0755 root root -") cfg;
+    systemd.tmpfiles.rules = lib.mapAttrsToList (_: store: "d ${store.mountPoint} 0755 root root -") cfg;
 
     # 3) Declare mounts in fileSystems
     fileSystems = lib.foldl'
@@ -61,4 +61,3 @@ in
         cfg);
   };
 }
-
