@@ -1,4 +1,4 @@
-{ lib, config, ... }:
+{ lib, config, userConfig, ... }:
 
 {
   options = {
@@ -18,6 +18,19 @@
       settings.gui = {
         user = "r6t";
         password = "$2a$10$uXPwWF.DUVjwRg0BNQ9bbOHAvlr3.KHU1qDRGa4Oontm8gS1kzHre";
+      };
+    };
+
+    # set secrets
+    sops.secrets = {
+      "syncthing/password" = lib.mkIf config.mine.sops.enable {
+        owner = config.users.users.${userConfig.username}.name;
+      };
+      "syncthing/machine_id/crown" = lib.mkIf config.mine.sops.enable {
+        owner = config.users.users.${userConfig.username}.name;
+      };
+      "syncthing/machine_id/mountainball" = lib.mkIf config.mine.sops.enable {
+        owner = config.users.users.${userConfig.username}.name;
       };
     };
   };

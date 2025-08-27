@@ -7,6 +7,11 @@
 
   config = lib.mkIf config.mine.home.browsers.enable {
 
+    # set secrets
+    sops.secrets."firefox_sync" = lib.mkIf config.mine.sops.enable {
+      owner = config.users.users.${userConfig.username}.name;
+    };
+
     home-manager.users.${userConfig.username} = {
       home.packages = with pkgs; [
         brave
