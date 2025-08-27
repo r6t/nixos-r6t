@@ -56,6 +56,21 @@
             installCheckPhase = "true";
           });
         };
+        osmGpsMapFix = final: prev: {
+          osm-gps-map = prev.osm-gps-map.overrideAttrs (oldAttrs: {
+            nativeBuildInputs = (oldAttrs.nativeBuildInputs or [ ]) ++ [ final.automake final.autoconf ];
+            preBuild = ''
+              # Create symlinks for version-specific tools that the build expects
+              mkdir -p $TMPDIR/bin
+              ln -sf ${final.automake}/bin/aclocal $TMPDIR/bin/aclocal-1.16
+              ln -sf ${final.automake}/bin/automake $TMPDIR/bin/automake-1.16
+              ln -sf ${final.autoconf}/bin/autoconf $TMPDIR/bin/autoconf-2.71
+              ln -sf ${final.autoconf}/bin/autoheader $TMPDIR/bin/autoheader-2.71
+              ln -sf ${final.autoconf}/bin/autoreconf $TMPDIR/bin/autoreconf-2.71
+              export PATH="$TMPDIR/bin:$PATH"
+            '';
+          });
+        };
       };
       # Bare-metal hosts
       nixosConfigurations = {
@@ -81,7 +96,7 @@
             ./hosts/mountainball/configuration.nix
             {
               nixpkgs = {
-                overlays = [ self.overlays.saneFix ];
+                overlays = [ self.overlays.saneFix self.overlays.osmGpsMapFix ];
                 config = {
                   allowUnfree = true;
                   # workaround until [https://github.com/NixOS/nixpkgs/pull/429473](https://github.com/NixOS/nixpkgs/pull/429473) is merged
@@ -96,12 +111,6 @@
       };
       # Container and cloud images
       packages.${system} = {
-        # headscale = nixos-generators.nixosGenerate {
-        #   inherit system;
-        #   format = "amazon";
-        #   modules = [ ./containers/headscale.nix ];
-        #   specialArgs = { inherit outputs userConfig inputs; };
-        # };
         docker = nixos-generators.nixosGenerate {
           inherit system;
           format = "lxc";
@@ -181,8 +190,19 @@
           src = ./.;
           hooks = {
             nixpkgs-fmt.enable = true;
-            statix.enable = true;
-            deadnix.enable = true;
+            statix = {
+              enable = true;
+              settings = {
+                ignore = [
+                  "hosts/crown/hardware-configuration.nix"
+                  "hosts/mountainball/hardware-configuration.nix"
+                ];
+              };
+            };
+            deadnix = {
+              enable = true;
+              excludes = [ ".*hardware-configuration\\.nix$" ];
+            };
             prettier.enable = true;
             black.enable = true;
             isort.enable = true;

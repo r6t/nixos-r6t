@@ -10,9 +10,6 @@
       "BEDROCK_KEYS" = {
         owner = userConfig.username;
       };
-      "GH_TOKEN" = {
-        owner = userConfig.username;
-      };
     };
 
     home-manager.users.${userConfig.username} = {
@@ -24,12 +21,12 @@
         packages = with pkgs; [
           # linters
           alejandra
+          deadnix
+          nixpkgs-fmt
           rubyfmt
           stylua
-          yamlfmt
-          nixpkgs-fmt
           statix
-          deadnix
+          yamlfmt
           # media
           viu
           chafa
@@ -65,7 +62,6 @@
               },
             },
           })
-
           -- Fix for zellij.nvim health check
           vim.health = vim.health or {}
           vim.health.report_start = vim.health.report_start or function() end
@@ -83,11 +79,32 @@
         colorschemes.oxocarbon.enable = true;
         highlight.ExtraWhitespace.bg = "red";
         keymaps = [
+          # uffer navigation
+          {
+            action = "<cmd>bnext<CR>";
+            key = "<leader>bn";
+            options.desc = "Next buffer";
+          }
+          {
+            action = "<cmd>bprevious<CR>";
+            key = "<leader>bp";
+            options.desc = "Previous buffer";
+          }
           # lsp
           {
             action = "<cmd>LspInfo<CR>";
             key = "<leader>li";
             options.desc = "LSP Info";
+          }
+          {
+            action = "<cmd>lua vim.lsp.buf.definition()<CR>";
+            key = "gd";
+            options.desc = "Go to definition";
+          }
+          {
+            action = "<cmd>lua vim.lsp.buf.references()<CR>";
+            key = "gr";
+            options.desc = "Find references";
           }
           # oil
           {
@@ -130,18 +147,26 @@
           avante = {
             enable = true;
             settings = {
+              provider = "ollama";
+              auto_suggestions_provider = "ollama";
               providers = {
                 ollama = {
-                  model = "llama3.1:latest";
+                  model = "qwen2.5-coder:7b";
                   endpoint = "https://ollama.r6t.io";
                 };
+                bedrock = {
+                  model = "anthropic.claude-sonnet-4-20250514-v1:0";
+                };
               };
+              behaviour = {
+                auto_suggestions = false;
+                support_paste_from_clipboard = true;
+                enable_cursor_planning_mode = true;
+              };
+              disabled_tools = [ ];
               selector = {
                 provider = "fzf_lua";
                 provider_opts = { };
-              };
-              behaviour = {
-                enable_cursor_planning_mode = true;
               };
             };
           };
@@ -181,7 +206,6 @@
                   "buffer"
                   "path"
                   "snippets"
-                  "git"
                   "avante_commands"
                   "avante_mentions"
                   "avante_files"
@@ -195,10 +219,6 @@
                     name = "LSP";
                     enabled = true;
                     score_offset = 10;
-                  };
-                  git = {
-                    module = "blink-cmp-git";
-                    name = "Git";
                   };
                   avante_commands = {
                     name = "avante_commands";
@@ -216,7 +236,6 @@
               };
             };
           };
-          blink-cmp-git.enable = true;
           blink-compat.enable = true;
           conform-nvim = {
             enable = true;
@@ -236,7 +255,7 @@
           };
           lspkind = {
             enable = true;
-            cmp.enable = false;
+            cmp.enable = false; # not blink-cmp
           };
           dressing.enable = true;
           fugitive.enable = true;

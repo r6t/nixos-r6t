@@ -6,7 +6,10 @@
   };
 
   config = lib.mkIf config.mine.bootloader.enable {
-    boot.loader.systemd-boot.enable = true;
+    boot.loader.systemd-boot = {
+      enable = true;
+      configurationLimit = 10;
+    };
     boot.loader.efi = {
       canTouchEfiVariables = true;
       efiSysMountPoint = "/boot";

@@ -15,7 +15,7 @@
         "deepseek-r1:14b"
         "deepseek-r1:8b"
         "qwen2.5-coder:14b"
-        "qwen2.5-coder:8b"
+        "qwen2.5-coder:7b"
         "gemma3:12b"
       ];
     };
