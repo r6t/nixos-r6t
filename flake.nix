@@ -109,7 +109,7 @@
           ];
         };
       };
-      # Container and cloud images
+      # Container and images
       packages.${system} = {
         docker = nixos-generators.nixosGenerate {
           inherit system;
@@ -121,6 +121,18 @@
           inherit system;
           format = "lxc-metadata";
           modules = [ ./containers/docker.nix ];
+          specialArgs = { inherit outputs userConfig inputs; };
+        };
+        dns = nixos-generators.nixosGenerate {
+          inherit system;
+          format = "lxc";
+          modules = [ ./containers/dns.nix ];
+          specialArgs = { inherit outputs userConfig inputs; };
+        };
+        dnsMetadata = nixos-generators.nixosGenerate {
+          inherit system;
+          format = "lxc-metadata";
+          modules = [ ./containers/dns.nix ];
           specialArgs = { inherit outputs userConfig inputs; };
         };
         headscale = nixos-generators.nixosGenerate {

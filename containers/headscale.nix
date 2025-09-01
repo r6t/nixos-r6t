@@ -1,6 +1,7 @@
 {
   imports = [
     ./r6-lxc-base.nix
+    ./r6-lxc-nextdns-add-on.nix
     ../modules/nixos/caddy/default.nix
   ];
 
@@ -20,11 +21,11 @@
       settings = {
         server_url = "https://headscale.r6t.io";
         dns.base_domain = "r6.internal";
-        dns.nameservers.global = [ "192.168.6.1" ];
+        dns.override_local_dns = false;
       };
     };
   };
 
+  # enable caddy in front of headscale
   mine.caddy.enable = true;
 }
-
