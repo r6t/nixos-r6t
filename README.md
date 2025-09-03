@@ -26,6 +26,7 @@ incus image import metadata.tar.xz root.tar.xz --alias <container name>
 .
 ├── .github                  # GitHub Actions workflow to lint code upon push to main
 ├── .pre-commit-config.yaml  # Nix store symlink generated upon devshell activation, target file is managed by [this flake][1]
+├── containers               # LXC image definitions
 ├── devshells.nix            # Devshell declarations in a dedicated file to keep flake.nix tidy
 ├── flake.lock               # Input version control, managed by nix flake command
 ├── flake.nix                # Inputs (sources) and outputs (system configurations, devshells)
