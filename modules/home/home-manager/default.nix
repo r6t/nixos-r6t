@@ -13,7 +13,7 @@
       backupFileExtension = "replacedbyhomemanager";
       sharedModules = [
         inputs.nixvim.homeModules.nixvim
-        inputs.plasma-manager.homeManagerModules.plasma-manager
+        inputs.plasma-manager.homeModules.plasma-manager
         inputs.nix-flatpak.homeManagerModules.nix-flatpak
       ];
       users.${userConfig.username} = {

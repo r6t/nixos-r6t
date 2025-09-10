@@ -44,8 +44,7 @@
   mine.localization.enable = true;
 
   networking = {
-    # allow tailnet ingress
-    firewall.trustedInterfaces = [ "tailscale0" ];
+    firewall.enable = true;
     useDHCP = false;
     useNetworkd = false;
     nameservers = lib.mkDefault [ "127.0.0.1" ];
@@ -59,7 +58,6 @@
       settings.datasource_list = [ "NoCloud" ];
     };
 
-    tailscale.enable = true;
 
     # dnsmasq gets port 53
     resolved.enable = lib.mkForce false;

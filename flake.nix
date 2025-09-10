@@ -159,16 +159,16 @@
           modules = [ ./containers/immich.nix ];
           specialArgs = { inherit outputs userConfig inputs; };
         };
-        llm = nixos-generators.nixosGenerate {
+        ollama = nixos-generators.nixosGenerate {
           inherit system;
           format = "lxc";
-          modules = [ ./containers/llm.nix ];
+          modules = [ ./containers/ollama.nix ];
           specialArgs = { inherit outputs userConfig inputs; };
         };
-        llmMetadata = nixos-generators.nixosGenerate {
+        ollamaMetadata = nixos-generators.nixosGenerate {
           inherit system;
           format = "lxc-metadata";
-          modules = [ ./containers/llm.nix ];
+          modules = [ ./containers/ollama.nix ];
           specialArgs = { inherit outputs userConfig inputs; };
         };
         monitoring = nixos-generators.nixosGenerate {

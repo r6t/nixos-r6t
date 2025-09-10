@@ -9,8 +9,6 @@
 
   networking.hostName = "llm";
 
-  # include docker for running open-webui alongside ollama
-  # open-webui via nixpkgs (stable + unstable branches) builds go haywire 
   mine = {
     nvidia-cuda.enable = true;
     ollama.enable = true;

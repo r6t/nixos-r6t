@@ -80,7 +80,6 @@
     nixos/nix/default.nix
     nixos/nvidia-cuda/default.nix
     nixos/ollama/default.nix
-    nixos/llm/default.nix
     nixos/printing/default.nix
     nixos/prometheus-node-exporter/default.nix
     nixos/prometheus/default.nix

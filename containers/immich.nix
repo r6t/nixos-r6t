@@ -13,5 +13,10 @@
     nvidia-cuda.enable = true;
   };
 
+  nixpkgs.overlays = [
+    (_final: prev: {
+      onnxruntime = prev.onnxruntime.override { cudaSupport = true; };
+    })
+  ];
 }
 

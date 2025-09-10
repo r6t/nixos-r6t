@@ -8,7 +8,7 @@
       enable = true;
       configuration =
         let
-          retentionDays = 7;
+          retentionDays = 30;
         in
         {
           auth_enabled = false;

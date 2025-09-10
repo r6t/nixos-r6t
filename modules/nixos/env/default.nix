@@ -19,6 +19,7 @@
       git-remote-codecommit
       gnumake
       home-manager
+      htop
       inetutils
       lshw
       neovim

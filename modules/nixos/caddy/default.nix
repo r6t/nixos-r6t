@@ -2,7 +2,7 @@
 
 let
   # As of Aug 2025, Route 53 plugin is not compatible with latest Caddy
-  caddy-overlay = super: {
+  caddy-overlay = _final: super: {
     caddy = super.caddy.overrideAttrs rec {
       version = "2.9.1";
       src = super.fetchFromGitHub {
@@ -28,7 +28,6 @@ in
   options.mine.caddy.enable =
     lib.mkEnableOption "enable caddy webserver";
 
-  # I'm only running Caddy in LXCs where I map a persistent Caddyfile
   options.mine.caddy.configFile =
     lib.mkOption {
       type = lib.types.str;
