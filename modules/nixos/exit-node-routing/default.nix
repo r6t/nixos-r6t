@@ -81,8 +81,7 @@
         };
       };
 
-      # Firewall configuration using nftables
-      nftables.enable = true;
+      nftables.enable = false;
 
       firewall = {
         enable = true;
@@ -121,9 +120,13 @@
     };
 
     # Wait for network stability
+    # use iptables - nftables seems to have stability issues in LXC
     systemd.services.tailscaled = {
       after = [ "network-online.target" ];
       wants = [ "network-online.target" ];
+      environment = {
+        TS_DEBUG_FIREWALL_MODE = "iptables";
+      };
       serviceConfig = {
         ExecStartPre = "${pkgs.coreutils}/bin/sleep 5";
       };
