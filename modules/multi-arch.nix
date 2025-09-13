@@ -4,7 +4,6 @@
     home/fish/default.nix
     home/git/default.nix
     home/nixvim/default.nix
-    home/python3/default.nix
     home/ssh/default.nix
     home/zellij/default.nix
 

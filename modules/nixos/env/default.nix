@@ -27,6 +27,7 @@
       nmap
       openssl
       pciutils
+      python314
       ripgrep
       sops
       tmux
