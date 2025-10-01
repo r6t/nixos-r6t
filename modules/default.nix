@@ -2,21 +2,14 @@
 
   imports = [
     flatpak/anki/default.nix
-    flatpak/bottles/default.nix
     flatpak/calibre/default.nix
-    flatpak/deezer/default.nix
     flatpak/element/default.nix
     flatpak/inkscape/default.nix
-    flatpak/jellyfin-player/default.nix
     flatpak/kamoso/default.nix
     flatpak/libreoffice/default.nix
     flatpak/picard/default.nix
     flatpak/proton-mail/default.nix
-    flatpak/protonup-qt/default.nix
     flatpak/remmina/default.nix
-    flatpak/retroarch/default.nix
-    flatpak/steam/default.nix
-    flatpak/supersonic/default.nix
     flatpak/zoom/default.nix
 
     home/aider/default.nix
