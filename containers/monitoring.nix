@@ -1,12 +1,14 @@
 {
   imports = [
     ./r6-lxc-base.nix
+    ./r6-lxc-mullvad-dns-add-on.nix
     ../modules/nixos/alloy/default.nix
     ../modules/nixos/grafana/default.nix
     ../modules/nixos/iperf/default.nix
     ../modules/nixos/loki/default.nix
     ../modules/nixos/prometheus/default.nix
     ../modules/nixos/prometheus-node-exporter/default.nix
+    ../modules/nixos/tailscale/default.nix
   ];
 
   networking.hostName = "monitoring";
@@ -18,6 +20,6 @@
     loki.enable = true;
     prometheus.enable = true;
     prometheus-node-exporter.enable = true;
+    tailscale.enable = true;
   };
 }
-

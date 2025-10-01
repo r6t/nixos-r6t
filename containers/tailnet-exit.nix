@@ -6,6 +6,5 @@
   ];
 
   mine.exit-node-routing.enable = true;
-
 }
 

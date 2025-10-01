@@ -10,8 +10,9 @@
   ];
 
   # troubleshooting external display ddc/ci brighness control
-  hardware.i2c.enable = true;
-  users.users.r6t.extraGroups = [ "i2c" ];
+  # maybe not needed any longer?
+  # hardware.i2c.enable = true;
+  # users.users.r6t.extraGroups = [ "i2c" ];
 
   networking.hostName = "mountainball";
 
@@ -66,7 +67,7 @@
       zellij.enable = true;
     };
 
-    adb.enable = true;
+    adb.enable = false;
     alloy.enable = true;
     bluetooth.enable = true;
     bolt.enable = true;

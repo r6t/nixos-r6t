@@ -19,6 +19,7 @@ in
       settings = {
         server = {
           http_addr = "0.0.0.0";
+          http_port = 3099;
           domain = "grafana.r6t.io";
           root_url = "https://grafana.r6t.io";
           enforce_domain = true;
@@ -44,30 +45,30 @@ in
           allow_assign_grafana_admin = true;
         };
       };
-      #      provision = {
-      #        datasources.settings.datasources = [
-      #          {
-      #            name = "Prometheus";
-      #            type = "prometheus";
-      #            url = "http://localhost:9001";
-      #            isDefault = true;
-      #          }
-      #          {
-      #            name = "Loki";
-      #            type = "loki";
-      #            url = "http://localhost:3030";
-      #            jsonData.httpHeaderName1 = "X-Scope-OrgID";
-      #            secureJsonData.httpHeaderValue1 = "fake";
-      #          }
-      #        ];
-      #
-      #        dashboards.settings.providers = [{
-      #          name = "r6 nix-managed Dashboards";
-      #          options.path = "${config.mine.grafana.dashboardDir}";
-      #          disableDeletion = true;
-      #          updateIntervalSeconds = 30;
-      #        }];
-      #      };
+      provision = {
+        datasources.settings.datasources = [
+          {
+            name = "Prometheus";
+            type = "prometheus";
+            url = "http://localhost:9001";
+            isDefault = true;
+          }
+          {
+            name = "Loki";
+            type = "loki";
+            url = "http://localhost:3030";
+            jsonData.httpHeaderName1 = "X-Scope-OrgID";
+            secureJsonData.httpHeaderValue1 = "fake";
+          }
+        ];
+
+        dashboards.settings.providers = [{
+          name = "r6 nix-managed Dashboards";
+          options.path = "${config.mine.grafana.dashboardDir}";
+          disableDeletion = true;
+          updateIntervalSeconds = 30;
+        }];
+      };
     };
   };
 }

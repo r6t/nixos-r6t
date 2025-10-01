@@ -76,11 +76,16 @@
 
         # Local overrides (hairpin NAT avoidance)
         address = [
+          # specific overrides
           "/headscale.r6t.io/192.168.6.9"
+          "/homeassistant.r6t.io/100.64.0.8"
           "/t2.r6t.io/192.168.6.9"
           "/t6.r6t.io/192.168.6.9"
           "/t7.r6t.io/192.168.6.9"
           "/t8.r6t.io/192.168.6.9"
+
+          # wildcard so app LXCs hit host caddy
+          "/r6t.io/192.168.6.10"
         ];
 
         # needs 127.0.0.1#53 DNS to be provided

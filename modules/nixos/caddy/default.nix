@@ -43,7 +43,9 @@ in
       package = pkgs-with-caddy-override.caddy.withPlugins {
         # Check if Caddy version workaround still necessary when updating
         plugins = [ "github.com/caddy-dns/route53@v1.5.1" ];
-        hash = "sha256-dTj2ZG8ip0a9Z5YP7sLdW4gwC0yREGFOXQgPwGWUkm0=";
+        # hash = "sha256-dTj2ZG8ip0a9Z5YP7sLdW4gwC0yREGFOXQgPwGWUkm0=";
+        # swapped 250925
+        hash = "sha256-9GC116t2z6xpux71vTGq0I6jMIJxo60VsMnF/mchcpo=";
       };
     };
   };

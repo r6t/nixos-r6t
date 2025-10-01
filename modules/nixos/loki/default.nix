@@ -85,6 +85,7 @@
     systemd.tmpfiles.rules = [
       "d /var/lib/loki 0755 loki loki - -"
       "d /var/lib/loki/tsdb-active 0755 loki loki - -"
+      "d /var/lib/loki/tsdb-active/uploader 0755 loki loki - -"
       "d /var/lib/loki/tsdb-cache 0755 loki loki - -"
       "d /var/lib/loki/compactor 0755 loki loki - -"
       "d /var/lib/loki/chunks 0755 loki loki - -"

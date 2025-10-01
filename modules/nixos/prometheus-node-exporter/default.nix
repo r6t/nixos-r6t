@@ -9,7 +9,7 @@
     services.prometheus.exporters.node = {
       enable = true;
       port = 9000;
-      enabledCollectors = [ "systemd" ];
+      enabledCollectors = [ "systemd" "processes" ];
       extraFlags = [ "--collector.ethtool" "--collector.tcpstat" ];
     };
   };
