@@ -57,6 +57,7 @@
     nixos/bridge/default.nix
     nixos/caddy/default.nix
     nixos/czkawka/default.nix
+    nixos/direnv/default.nix
     nixos/docker/default.nix
     nixos/env/default.nix
     nixos/exit-node-routing/default.nix
@@ -80,6 +81,7 @@
     nixos/nix/default.nix
     nixos/nvidia-cuda/default.nix
     nixos/ollama/default.nix
+    nixos/pinchflat/default.nix
     nixos/printing/default.nix
     nixos/prometheus-node-exporter/default.nix
     nixos/prometheus/default.nix
@@ -96,6 +98,5 @@
     nixos/uptime-kuma/default.nix
     nixos/user/default.nix
     nixos/v4l-utils/default.nix
-    nixos/direnv/default.nix
   ];
 }

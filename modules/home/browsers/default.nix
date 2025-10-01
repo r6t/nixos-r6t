@@ -41,7 +41,7 @@
                 urls = [{
                   template = "https://search.nixos.org/options?channel=unstable";
                   params = [
-                    { name = "q"; value = "{searchTerms}"; }
+                    { name = "query"; value = "{searchTerms}"; }
                   ];
                 }];
                 icon = "https://searh.nixos.org/favicon.png";
@@ -52,7 +52,7 @@
                 urls = [{
                   template = "https://search.nixos.org/packages?channel=unstable";
                   params = [
-                    { name = "q"; value = "{searchTerms}"; }
+                    { name = "query"; value = "{searchTerms}"; }
                   ];
                 }];
                 icon = "https://searh.nixos.org/favicon.png";

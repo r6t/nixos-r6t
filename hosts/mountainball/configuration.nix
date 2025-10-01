@@ -27,16 +27,12 @@
     flatpak = {
       anki.enable = true;
       calibre.enable = true;
-      deezer.enable = true;
       element.enable = true;
       inkscape.enable = true;
-      jellyfin-player.enable = true;
       libreoffice.enable = true;
       picard.enable = true;
       proton-mail.enable = true;
-      protonup-qt.enable = true;
       remmina.enable = true;
-      supersonic.enable = true;
       zoom.enable = true;
     };
 
@@ -86,6 +82,7 @@
     networkmanager.enable = true;
     nix.enable = true;
     printing.enable = true;
+    pinchflat.enable = true;
     prometheus-node-exporter.enable = true;
     rdfind.enable = true;
     scansnap.enable = true;
