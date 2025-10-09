@@ -5,3 +5,4 @@ result/*
 result*/*
 .pre-commit-config.yaml
 .aider*
+README.html
