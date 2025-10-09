@@ -2,35 +2,14 @@
   description = "r6t nixos systems configuration flake";
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    home-manager = {
-      url = "github:nix-community/home-manager/master";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    home-manager.url = "github:nix-community/home-manager/master";
     hardware.url = "github:nixos/nixos-hardware";
-    nix-flatpak = {
-      url = "github:gmodena/nix-flatpak";
-    };
-    nixvim = {
-      url = "github:nix-community/nixvim";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    nixos-generators = {
-      url = "github:nix-community/nixos-generators";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    plasma-manager = {
-      url = "github:nix-community/plasma-manager";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.home-manager.follows = "home-manager";
-    };
-    pre-commit-hooks = {
-      url = "github:cachix/pre-commit-hooks.nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    sops-nix = {
-      url = "github:Mic92/sops-nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    nix-flatpak.url = "github:gmodena/nix-flatpak";
+    nixvim.url = "github:nix-community/nixvim";
+    nixos-generators.url = "github:nix-community/nixos-generators";
+    plasma-manager.url = "github:nix-community/plasma-manager";
+    pre-commit-hooks.url = "github:cachix/pre-commit-hooks.nix";
+    sops-nix.url = "github:Mic92/sops-nix";
     ssh-keys = {
       url = "https://github.com/r6t.keys";
       flake = false;
@@ -43,39 +22,14 @@
         homeDirectory = "/home/r6t";
       };
       inherit (self) outputs;
-      inherit (nixpkgs) lib;
       system = "x86_64-linux";
       pkgs = import nixpkgs { inherit system; };
     in
     {
-      overlays = {
-        # prepended _ means deadnix will ignore structurally required but unused argument
-        saneFix = _final: prev: {
-          sane-backends = prev.sane-backends.overrideAttrs (_oldAttrs: {
-            doInstallCheck = false;
-            installCheckPhase = "true";
-          });
-        };
-        osmGpsMapFix = final: prev: {
-          osm-gps-map = prev.osm-gps-map.overrideAttrs (oldAttrs: {
-            nativeBuildInputs = (oldAttrs.nativeBuildInputs or [ ]) ++ [ final.automake final.autoconf ];
-            preBuild = ''
-              # Create symlinks for version-specific tools that the build expects
-              mkdir -p $TMPDIR/bin
-              ln -sf ${final.automake}/bin/aclocal $TMPDIR/bin/aclocal-1.16
-              ln -sf ${final.automake}/bin/automake $TMPDIR/bin/automake-1.16
-              ln -sf ${final.autoconf}/bin/autoconf $TMPDIR/bin/autoconf-2.71
-              ln -sf ${final.autoconf}/bin/autoheader $TMPDIR/bin/autoheader-2.71
-              ln -sf ${final.autoconf}/bin/autoreconf $TMPDIR/bin/autoreconf-2.71
-              export PATH="$TMPDIR/bin:$PATH"
-            '';
-          });
-        };
-      };
       # Bare-metal hosts
       nixosConfigurations = {
         crown = nixpkgs.lib.nixosSystem {
-          specialArgs = { inherit outputs userConfig inputs; };
+          specialArgs = { inherit userConfig inputs outputs; };
           system = "x86_64-linux";
           modules = [
             ./hosts/crown/configuration.nix
@@ -91,20 +45,11 @@
           ];
         };
         mountainball = nixpkgs.lib.nixosSystem {
-          specialArgs = { inherit outputs userConfig inputs; };
+          specialArgs = { inherit userConfig inputs outputs; };
           modules = [
             ./hosts/mountainball/configuration.nix
             {
-              nixpkgs = {
-                overlays = [ self.overlays.saneFix self.overlays.osmGpsMapFix ];
-                config = {
-                  allowUnfree = true;
-                  # workaround until [https://github.com/NixOS/nixpkgs/pull/429473](https://github.com/NixOS/nixpkgs/pull/429473) is merged
-                  permittedInsecurePackages = [
-                    "libsoup-2.74.3"
-                  ];
-                };
-              };
+              nixpkgs.config.allowUnfree = true;
             }
           ];
         };

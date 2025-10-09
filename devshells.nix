@@ -3,6 +3,12 @@
 let
   # --- Custom Package Definitions ---
 
+  # allow crush unfree license
+  pkgsWithCrushUnfree = import nixpkgs {
+    inherit (pkgs) system;
+    config.allowUnfreePredicate = pkg: builtins.elem (pkgs.lib.getName pkg) [ "crush" ];
+  };
+
   pick_1_6_0 = pkgs.python3.pkgs.buildPythonPackage rec {
     pname = "pick";
     version = "1.6.0";
@@ -43,7 +49,11 @@ let
   };
 
   # --- Shared Tool Definitions ---
-  baseTools = with pkgs; [ fish ];
+  baseTools = with pkgsWithCrushUnfree; [
+    aider-chat-full
+    crush
+    fish
+  ];
   pythonTools = with pkgs; [
     (python3.withPackages (ps: with ps; [
       pip

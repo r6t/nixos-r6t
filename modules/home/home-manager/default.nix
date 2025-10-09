@@ -23,14 +23,6 @@
         };
         # Nicely reload system units when changing configs
         systemd.user.startServices = "sd-switch";
-        xdg.desktopEntries.focus-at-will = {
-          name = "FocusAtWill web";
-          exec = "firefox --new-window https://focusatwill.com";
-          terminal = false;
-          icon = "internet-radio";
-          type = "Application";
-          categories = [ "Audio" "Music" ];
-        };
       };
     };
   };

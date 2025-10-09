@@ -9,10 +9,12 @@
   config = lib.mkIf config.mine.home.fish.enable {
 
     environment.systemPackages = with pkgs; [
-      fishPlugins.fzf-fish
-      fishPlugins.forgit
       bat
+      fishPlugins.forgit
+      fishPlugins.fzf-fish
       lsd
+      pandoc
+      pay-respects
       ripgrep
     ];
     programs = {
@@ -32,7 +34,7 @@
         ll = "lsd -la";
         lt = "lsd --tree";
         cat = "bat --paging never";
-        grep = "rg";
+        # grep = "rg";
         ".." = "cd ..";
         "..." = "cd ../..";
         "nvf" = "nvim $(fzf -m --preview='bat --color=always {}')";
@@ -110,7 +112,9 @@
       };
 
       interactiveShellInit = ''
-        fish_add_path $HOME/.nix-profile/bin
+        	set -x _PR_DISABLE_AI 1
+        	pay-respects fish --alias | source
+                fish_add_path $HOME/.nix-profile/bin
       '';
     };
   };

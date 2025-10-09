@@ -26,10 +26,6 @@
               foreground = "CellBackground";
               background = "#ee5396";
             };
-            # footer_bar = {
-            #   background = "#262626";
-            #   foreground = "#ffffff";
-            # };
           };
           normal = {
             black = "#262626";

@@ -16,7 +16,12 @@ in
       acceleration = "cuda";
       host = "0.0.0.0";
       port = ollamaPort;
-      loadModels = [ "llama3:8b" ];
+      loadModels = [
+        "llama3.1:8b"
+        "gemma3:12b"
+        "qwen2.5-coder:14b"
+        "qwen3:14b"
+      ];
     };
   };
 }

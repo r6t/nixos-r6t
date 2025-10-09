@@ -18,6 +18,7 @@
     home/betaflight-configurator/default.nix
     home/bitwarden/default.nix
     home/browsers/default.nix
+    home/crush/default.nix
     home/darktable/default.nix
     home/drawio/default.nix
     home/fish/default.nix
@@ -25,8 +26,10 @@
     home/freecad/default.nix
     home/git/default.nix
     home/home-manager/default.nix
+    home/hyprland/default.nix
     home/k2pdfopt/default.nix
     home/kde-apps/default.nix
+    home/mako/default.nix
     home/mpv/default.nix
     home/nixvim/default.nix
     home/obs-studio/default.nix
@@ -50,6 +53,7 @@
     nixos/bridge/default.nix
     nixos/caddy/default.nix
     nixos/czkawka/default.nix
+    nixos/ddc-i2c/default.nix
     nixos/direnv/default.nix
     nixos/docker/default.nix
     nixos/env/default.nix
@@ -58,6 +62,7 @@
     nixos/fwupd/default.nix
     nixos/fzf/default.nix
     nixos/grafana/default.nix
+    nixos/hypr/default.nix
     nixos/immich/default.nix
     nixos/incus/default.nix
     nixos/iperf/default.nix
@@ -72,6 +77,7 @@
     nixos/mullvad/default.nix
     nixos/networkmanager/default.nix
     nixos/nix/default.nix
+    nixos/npm/default.nix
     nixos/nvidia-cuda/default.nix
     nixos/ollama/default.nix
     nixos/pinchflat/default.nix

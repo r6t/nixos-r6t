@@ -9,11 +9,6 @@
     ../../modules/default.nix
   ];
 
-  # troubleshooting external display ddc/ci brighness control
-  # maybe not needed any longer?
-  # hardware.i2c.enable = true;
-  # users.users.r6t.extraGroups = [ "i2c" ];
-
   networking.hostName = "mountainball";
 
   services.fprintd.enable = false;
@@ -37,11 +32,12 @@
     };
 
     home = {
-      aider.enable = false; # broken until updated for new tree-sitter
+      aider.enable = true;
       alacritty.enable = true;
       atuin.enable = true;
       bitwarden.enable = true;
       browsers.enable = true;
+      crush.enable = true; # this just sets app config file. see devshells.nix 
       darktable.enable = true;
       drawio.enable = true;
       fish.enable = true;
@@ -49,7 +45,9 @@
       freecad.enable = true;
       git.enable = true;
       home-manager.enable = true;
+      hyprland.enable = false;
       kde-apps.enable = true;
+      mako.enable = false;
       mpv.enable = true;
       nixvim.enable = true;
       obs-studio.enable = true;
@@ -63,29 +61,30 @@
       zellij.enable = true;
     };
 
-    adb.enable = false;
     alloy.enable = true;
     bluetooth.enable = true;
     bolt.enable = true;
     bootloader.enable = true;
     czkawka.enable = true;
     direnv.enable = true;
+    ddc-i2c.enable = true;
     docker.enable = true;
     env.enable = true;
     fonts.enable = true;
     fwupd.enable = true;
     fzf.enable = true;
+    hypr.enable = false;
     iperf.enable = true;
     kde.enable = true;
     localization.enable = true;
     mullvad.enable = true;
     networkmanager.enable = true;
     nix.enable = true;
+    npm.enable = true;
     printing.enable = true;
     pinchflat.enable = true;
     prometheus-node-exporter.enable = true;
     rdfind.enable = true;
-    scansnap.enable = true;
     sops.enable = true;
     sound.enable = true;
     ssh.enable = true;

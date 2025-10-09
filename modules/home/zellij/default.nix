@@ -11,9 +11,11 @@
         source = ./custom-compact-top.kdl;
       };
       programs.zellij = {
-        attachExistingSession = true;
+        # does nothing and throws a warning when enableFishIntegration = false
+        attachExistingSession = false;
         enable = true;
-        enableFishIntegration = true;
+        # possible compat issues with latest fish
+        enableFishIntegration = false;
         settings = {
           show_startup_tips = false;
           simplified_ui = true;

@@ -6,6 +6,8 @@
   };
 
   config = lib.mkIf config.mine.bluetooth.enable {
+    # blueman disabled as long as hyprland isn't in use
+    services.blueman.enable = false;
     hardware.bluetooth = {
       enable = true;
       powerOnBoot = true;
