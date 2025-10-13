@@ -1,6 +1,4 @@
-### [❄️ Flake](https://www.youtube.com/watch?v=JCeYq72Sko0) for managing personal [NixOS](https://nixos.org/) systems
-
-### Systems
+### [Flake](https://www.youtube.com/watch?v=JCeYq72Sko0) for managing personal [NixOS](https://nixos.org/) systems
 
 ![](./nixos-r6t-flake.drawio.svg)
 
