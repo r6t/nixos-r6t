@@ -16,6 +16,7 @@ in
       acceleration = "cuda";
       host = "0.0.0.0";
       port = ollamaPort;
+      # default store: /var/lib/ollama/models
       loadModels = [
         "llama3.1:8b"
         "gemma3:12b"

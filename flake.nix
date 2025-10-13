@@ -2,11 +2,15 @@
   description = "r6t nixos systems configuration flake";
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    # nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable-small";
     home-manager.url = "github:nix-community/home-manager/master";
     hardware.url = "github:nixos/nixos-hardware";
     nix-flatpak.url = "github:gmodena/nix-flatpak";
     nixvim.url = "github:nix-community/nixvim";
-    nixos-generators.url = "github:nix-community/nixos-generators";
+    nixos-generators = {
+      url = "github:nix-community/nixos-generators";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     plasma-manager.url = "github:nix-community/plasma-manager";
     pre-commit-hooks.url = "github:cachix/pre-commit-hooks.nix";
     sops-nix.url = "github:Mic92/sops-nix";

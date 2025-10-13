@@ -75,11 +75,13 @@
     nixos/moonstore/default.nix
     nixos/mountLuksStore/default.nix
     nixos/mullvad/default.nix
+    nixos/n8n/default.nix
     nixos/networkmanager/default.nix
     nixos/nix/default.nix
     nixos/npm/default.nix
     nixos/nvidia-cuda/default.nix
     nixos/ollama/default.nix
+    nixos/open-webui/default.nix
     nixos/pinchflat/default.nix
     nixos/printing/default.nix
     nixos/prometheus-node-exporter/default.nix
