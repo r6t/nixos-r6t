@@ -16,9 +16,11 @@
       };
       programs.git = {
         enable = true;
-        userName = "r6t";
-        userEmail = "git@r6t.io";
-        extraConfig = {
+        settings = {
+          user = {
+            name = "r6t";
+            email = "git@r6t.io";
+          };
           core = {
             editor = "nvim";
             init = { defaultBranch = "main"; };

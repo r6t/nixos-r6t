@@ -13,6 +13,7 @@
       cryptsetup
       curl
       dig
+      ethtool
       fd
       ffmpeg
       git

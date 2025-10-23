@@ -97,6 +97,7 @@
     nixos/thunderbay/default.nix
     nixos/tpm/default.nix
     nixos/uptime-kuma/default.nix
+    nixos/usb4-sfp/default.nix
     nixos/user/default.nix
     nixos/v4l-utils/default.nix
   ];

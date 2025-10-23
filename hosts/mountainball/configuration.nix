@@ -91,6 +91,7 @@
     sshfs.enable = true;
     syncthing.enable = true;
     tailscale.enable = true;
+    usb4-sfp.enable = true;
     user.enable = true;
     v4l-utils.enable = true;
   };
