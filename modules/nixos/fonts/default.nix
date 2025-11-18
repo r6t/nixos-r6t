@@ -9,7 +9,7 @@
     fonts = {
       fontDir.enable = true;
       packages = with pkgs; [
-        noto-fonts-emoji
+        noto-fonts-color-emoji
         font-awesome
         hack-font
         nerd-fonts.hack

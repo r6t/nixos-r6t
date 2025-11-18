@@ -9,7 +9,7 @@
     environment.systemPackages = with pkgs; [
       aha
       clinfo
-      glxinfo
+      mesa-demos
       vulkan-tools
       wayland-utils
       wl-clipboard

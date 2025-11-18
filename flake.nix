@@ -2,23 +2,32 @@
   description = "r6t nixos systems configuration flake";
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    # nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable-small";
-    home-manager.url = "github:nix-community/home-manager/master";
+    home-manager = {
+      url = "github:nix-community/home-manager/master";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     hardware.url = "github:nixos/nixos-hardware";
     nix-flatpak.url = "github:gmodena/nix-flatpak";
-    nixvim.url = "github:nix-community/nixvim";
+    nixvim = {
+      url = "github:nix-community/nixvim";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     nixos-generators = {
       url = "github:nix-community/nixos-generators";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     plasma-manager.url = "github:nix-community/plasma-manager";
     pre-commit-hooks.url = "github:cachix/pre-commit-hooks.nix";
-    sops-nix.url = "github:Mic92/sops-nix";
+    sops-nix = {
+      url = "github:Mic92/sops-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     ssh-keys = {
       url = "https://github.com/r6t.keys";
       flake = false;
     };
   };
+
   outputs = { self, nixos-generators, nixpkgs, pre-commit-hooks, ... } @inputs:
     let
       userConfig = {
@@ -27,23 +36,19 @@
       };
       inherit (self) outputs;
       system = "x86_64-linux";
-      pkgs = import nixpkgs { inherit system; };
     in
     {
       # Bare-metal hosts
       nixosConfigurations = {
         crown = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit userConfig inputs outputs; };
-          system = "x86_64-linux";
           modules = [
             ./hosts/crown/configuration.nix
             {
-              nixpkgs = {
-                config = {
-                  allowUnfree = true;
-                  cudaSupport = true;
-                  nvidia.acceptLicense = true;
-                };
+              nixpkgs.config = {
+                allowUnfree = true;
+                cudaSupport = true;
+                nvidia.acceptLicense = true;
               };
             }
           ];
@@ -53,12 +58,17 @@
           modules = [
             ./hosts/mountainball/configuration.nix
             {
-              nixpkgs.config.allowUnfree = true;
+              nixpkgs.config = {
+                allowUnfree = true;
+                # temporary allow recent EOL
+                permittedInsecurePackages = [ "electron-36.9.5" ];
+              };
             }
           ];
         };
       };
-      # Container and images
+
+      # Container images
       packages.${system} = {
         docker = nixos-generators.nixosGenerate {
           inherit system;
@@ -145,6 +155,7 @@
           specialArgs = { inherit outputs userConfig inputs; };
         };
       };
+
       # Pre-commit
       checks.${system} = {
         pre-commit-check = pre-commit-hooks.lib.${system}.run {
@@ -172,8 +183,12 @@
           };
         };
       };
+
       # Devshells managed in dedicated file
-      devShells.${system} = import ./devshells.nix { inherit pkgs self nixpkgs; };
+      devShells.${system} = import ./devshells.nix {
+        pkgs = import nixpkgs { inherit system; };
+        inherit self nixpkgs;
+      };
     };
 }
 

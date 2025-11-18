@@ -29,28 +29,27 @@
       enable = true;
 
       shellAliases = {
+        ".." = "cd ..";
+        "..." = "cd ../..";
+        bat = "bat --paging never";
         ls = "lsd";
         l = "lsd -l";
         ll = "lsd -la";
         lt = "lsd --tree";
-        cat = "bat --paging never";
-        # grep = "rg";
-        ".." = "cd ..";
-        "..." = "cd ../..";
-        "nvf" = "nvim $(fzf -m --preview='bat --color=always {}')";
-        "Git" = "git status";
-        "Gd" = "git diff";
-        "Gds" = "git diff --staged";
       };
 
       shellAbbrs = {
+        cat = "bat";
         g = "git";
         ga = "git add";
+        gb = "git branch";
         gc = "git commit";
+        gd = "git diff";
+        gds = "git diff --staged";
+        gg = "git status";
+        gl = "git log --oneline --graph --decorate";
         gp = "git push";
         gs = "git status";
-        gb = "git branch";
-        gl = "git log --oneline --graph --decorate";
       };
 
       functions = {
@@ -112,9 +111,9 @@
       };
 
       interactiveShellInit = ''
-        	set -x _PR_DISABLE_AI 1
-        	pay-respects fish --alias | source
-                fish_add_path $HOME/.nix-profile/bin
+                	set -x _PR_DISABLE_AI 1
+        		pay-respects fish --alias | source
+                        fish_add_path $HOME/.nix-profile/bin
       '';
     };
   };

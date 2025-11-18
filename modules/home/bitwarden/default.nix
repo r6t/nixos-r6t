@@ -6,6 +6,6 @@
   };
 
   config = lib.mkIf config.mine.home.bitwarden.enable {
-    home-manager.users.${userConfig.username}.home.packages = with pkgs; [ bitwarden ];
+    home-manager.users.${userConfig.username}.home.packages = with pkgs; [ bitwarden-desktop ];
   };
 }

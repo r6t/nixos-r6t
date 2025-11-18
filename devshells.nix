@@ -2,13 +2,6 @@
 
 let
   # --- Custom Package Definitions ---
-
-  # allow crush unfree license
-  pkgsWithCrushUnfree = import nixpkgs {
-    inherit (pkgs) system;
-    config.allowUnfreePredicate = pkg: builtins.elem (pkgs.lib.getName pkg) [ "crush" ];
-  };
-
   pick_1_6_0 = pkgs.python3.pkgs.buildPythonPackage rec {
     pname = "pick";
     version = "1.6.0";
@@ -49,9 +42,7 @@ let
   };
 
   # --- Shared Tool Definitions ---
-  baseTools = with pkgsWithCrushUnfree; [
-    aider-chat-full
-    crush
+  baseTools = with pkgs; [
     fish
   ];
   pythonTools = with pkgs; [
@@ -77,7 +68,7 @@ let
       nativeBuildInputs = baseTools ++ [ pkgs.python3Packages.pip ];
       packages = pythonTools ++ nodeTools ++ extraPackages;
       shellHook = ''
-        ${self.checks.${pkgs.system}.pre-commit-check.shellHook or ""}
+        ${self.checks.${pkgs.stdenv.hostPlatform.system}.pre-commit-check.shellHook or ""}
         export DEVSHELL_NAME="${name}"
         
         if command -v fish >/dev/null; then
@@ -97,7 +88,7 @@ in
   aws =
     let
       pkgsWithOverlay = import nixpkgs {
-        inherit (pkgs) system;
+        inherit (pkgs.stdenv.hostPlatform) system;
         overlays = [
           (_: prev: {
             python3 = prev.python3.override {
@@ -127,9 +118,9 @@ in
       ];
       shell = "${pkgs.fish}/bin/fish";
       shellHook = ''
-        ${self.checks.${pkgs.system}.pre-commit-check.shellHook or ""}
+        ${self.checks.${pkgs.stdenv.hostPlatform.system}.pre-commit-check.shellHook or ""}
         export DEVSHELL_NAME="aws"
-        
+
         if command -v fish >/dev/null; then
           exec fish
         else

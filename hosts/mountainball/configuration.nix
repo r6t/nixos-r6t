@@ -37,7 +37,6 @@
       atuin.enable = true;
       bitwarden.enable = true;
       browsers.enable = true;
-      crush.enable = true; # this just sets app config file. see devshells.nix 
       darktable.enable = true;
       drawio.enable = true;
       fish.enable = true;
@@ -94,5 +93,6 @@
     usb4-sfp.enable = true;
     user.enable = true;
     v4l-utils.enable = true;
+    zola.enable = true;
   };
 }

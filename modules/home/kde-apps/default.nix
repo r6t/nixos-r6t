@@ -295,6 +295,7 @@
             "kwinrc"."NightColor"."LatitudeFixed" = 43.969;
             "kwinrc"."NightColor"."LongitudeFixed" = "-121.127";
             "kwinrc"."NightColor"."Mode" = "Location";
+            "kwinrc"."WindowActions"."Wheel" = "changeOpacity";
             "kwinrc"."Windows"."DelayFocusInterval" = 0;
             "kwinrc"."Windows"."FocusPolicy" = "FocusFollowsMouse";
             "kwinrc"."Windows"."RollOverDesktops" = true;

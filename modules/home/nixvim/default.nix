@@ -32,7 +32,6 @@
           alejandra
           deadnix
           nixpkgs-fmt
-          rubyfmt
           stylua
           statix
           yamlfmt
@@ -53,38 +52,38 @@
           direnv-vim
           opencode-nvim
           oxocarbon-nvim
-          snacks-nvim # for opencode functionality
+          snacks-nvim
           zellij-nvim
           nvim-lspconfig
         ];
 
         extraConfigLua = ''
-                    -- Configure opencode.nvim
-                    vim.g.opencode_opts = {
-                      -- Enable auto-reload of buffers when opencode makes changes
-                      auto_reload = true,
-            
-          	    -- DO NOT auto-register cmp sources - causes ipairs error with nixvim
-                      auto_register_cmp_sources = false,
-            
-                      -- Define custom prompts (optional)
-                      prompts = {
-                        explain = { prompt = "Explain @this and its context" },
-                        optimize = { prompt = "Optimize @this for performance and readability" },
-                        document = { prompt = "Add comments documenting @this" },
-                        test = { prompt = "Add tests for @this" },
-                        review = { prompt = "Review @this for correctness and readability" },
-                        fix = { prompt = "Fix @diagnostics" },
-                      },
-                    }
-          
-                    -- Fix for zellij.nvim health check
-                    vim.health = vim.health or {}
-                    vim.health.report_start = vim.health.report_start or function() end
-                    vim.health.report_ok = vim.health.report_ok or function() end
-                    vim.health.report_warn = vim.health.report_warn or function() end
-                    vim.health.report_error = vim.health.report_error or function() end
-                    vim.health.report_info = vim.health.report_info or function() end
+          -- Configure opencode.nvim
+          vim.g.opencode_opts = {
+            -- Enable auto-reload of buffers when opencode makes changes
+            auto_reload = true,
+
+            -- DO NOT auto-register cmp sources - causes ipairs error with nixvim
+            auto_register_cmp_sources = false,
+
+            -- Define custom prompts (optional)
+            prompts = {
+              explain = { prompt = "Explain @this and its context" },
+              optimize = { prompt = "Optimize @this for performance and readability" },
+              document = { prompt = "Add comments documenting @this" },
+              test = { prompt = "Add tests for @this" },
+              review = { prompt = "Review @this for correctness and readability" },
+              fix = { prompt = "Fix @diagnostics" },
+            },
+          }
+
+          -- Fix for zellij.nvim health check
+          vim.health = vim.health or {}
+          vim.health.report_start = vim.health.report_start or function() end
+          vim.health.report_ok = vim.health.report_ok or function() end
+          vim.health.report_warn = vim.health.report_warn or function() end
+          vim.health.report_error = vim.health.report_error or function() end
+          vim.health.report_info = vim.health.report_info or function() end
         '';
         globals = {
           mapleader = " ";
@@ -114,7 +113,7 @@
             options.desc = "Git status";
           }
           {
-            action = "<cmd>Git blameCR>";
+            action = "<cmd>Git blame<CR>";
             key = "<leader>gb";
             options.desc = "Git blame";
           }
@@ -151,12 +150,22 @@
             key = "<leader>le";
             options.desc = "Show all diagnostics";
           }
+          {
+            action = "<cmd>lua vim.diagnostic.goto_next()<CR>";
+            key = "<leader>en";
+            options.desc = "Next diagnostic";
+          }
+          {
+            action = "<cmd>lua vim.diagnostic.goto_prev()<CR>";
+            key = "<leader>ep";
+            options.desc = "Previous diagnostic";
+          }
 
           # File navigation
           {
             action = "<cmd>Oil<CR>";
             key = "<leader>-";
-            options.desc = "Open Oil file manager";
+            options.desc = "File navigation";
           }
 
           # OpenCode
@@ -323,7 +332,6 @@
                 markdown = [ "prettier" ];
                 nix = [ "alejandra" ];
                 python = [ "isort" "black" ];
-                ruby = [ "rubyfmt" ];
                 yaml = [ "yamlfmt" ];
               };
             };
@@ -339,7 +347,6 @@
           fzf-lua.enable = true;
           git-conflict.enable = true;
           lualine.enable = true;
-          luasnip.enable = true;
 
           lsp = {
             enable = true;
@@ -357,6 +364,8 @@
                   formatting.command = [ "nixpkgs-fmt" ];
                 };
               };
+              html.enable = true;
+              cssls.enable = true;
               pyright = {
                 enable = true;
                 settings = {
@@ -382,6 +391,7 @@
               };
               picker = {
                 enabled = true;
+                layout = "telescope";
               };
               terminal = {
                 enabled = true;
@@ -390,7 +400,6 @@
           };
 
           oil.enable = true;
-          telescope.enable = false;
           treesitter = {
             enable = true;
             folding = false;
