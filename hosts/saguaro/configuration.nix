@@ -110,7 +110,10 @@
         # Bind to interfaces as they come up (timing fix)
         bind-dynamic = true;
 
-        # DHCP Configuration
+        # Explicit DNS listening addresses
+        listen-address = [ "127.0.0.1" "192.168.6.1" ];
+
+        # DHCP only on LAN interface
         interface = "enp4s0";
         dhcp-range = "192.168.6.11,192.168.6.89,12h";
         dhcp-option = [
