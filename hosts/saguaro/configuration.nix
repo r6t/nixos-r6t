@@ -13,7 +13,8 @@
     kernel.sysctl = {
       # Router essentials
       "net.ipv4.conf.all.forwarding" = 1;
-      "net.ipv6.conf.all.forwarding" = 1;
+      # Disable IPv6 forwarding
+      "net.ipv6.conf.all.forwarding" = 0;
 
       # Security hardening
       "net.ipv4.conf.all.rp_filter" = 1;
@@ -29,107 +30,98 @@
   networking = {
     # hostId = "5f3e2c0a";
     enableIPv6 = false;
-    nat.enable = false;
+    nat.enable = true;
     useNetworkd = true;
     hostName = "saguaro";
     dhcpcd.enable = false;
 
     interfaces = {
-      # 10G Thunderbolt interface connects to switch
-      LAN.useDHCP = false;
+      # 10G Thunderbolt interface connects to switch (LAN)
+      enp4s0.useDHCP = false;
       # WAN interface gets DHCP from ISP
-      enp2s0 = {
-        useDHCP = true;
-      };
-      # NUC expansion NIC passed through to Home Assistant OS VM
-      enp3s0.useDHCP = true;
+      enp101s0.useDHCP = true;
     };
 
     firewall = {
       enable = true;
       checkReversePath = false;
       allowedTCPPorts = [ 22 443 ];
-#      trustedInterfaces = [ "br1" "tailscale0" ];
+      #      trustedInterfaces = [ "br1" "tailscale0" ];
     };
     nftables = {
       enable = true;
-#      ruleset = ''
-#        table inet filter {
-#          # Flow offloading for performance
-#          flowtable f {
-#            hook ingress priority 0;
-#            devices = { wan0, lan0 };
-#          }
-#
-#          chain input {
-#            type filter hook input priority filter; policy drop;
-#            
-#            # Loopback always allowed
-#            iifname "lo" accept
-#            
-#            # Established/related from anywhere
-#            ct state { established, related } accept
-#            ct state invalid drop
-#            
-#            # ICMP for diagnostics
-#            ip protocol icmp accept
-#            ip6 nexthdr icmpv6 accept
-#            
-#            # SSH from LAN + Tailscale only
-#            iifname { "lan0", "tailscale0" } tcp dport 22 accept
-#            
-#            # Headscale from WAN (HTTPS only)
-#            iifname "wan0" tcp dport 443 ct state new accept
-#            
-#            # DNS from LAN + incusbr0
-#            iifname { "lan0", "incusbr0" } tcp dport 53 accept
-#            iifname { "lan0", "incusbr0" } udp dport 53 accept
-#            
-#            # DHCP from LAN + incusbr0
-#            iifname { "lan0", "incusbr0" } udp dport 67 accept
-#            
-#            # Caddy from Tailscale + LAN ONLY (not WAN, not incusbr0)
-#            iifname { "tailscale0", "lan0" } tcp dport { 80, 443 } accept
-#            
-#            # Log dropped packets (debugging)
-#            # limit rate 5/minute log prefix "INPUT DROP: "
-#          }
-#
-#          chain forward {
-#            type filter hook forward priority filter; policy drop;
-#            
-#            # Flow offload established connections
-#            ip protocol { tcp, udp } flow offload @f
-#            
-#            ct state { established, related } accept
-#            ct state invalid drop
-#            
-#            # LAN -> WAN
-#            iifname "lan0" oifname "wan0" accept
-#            
-#            # Tailscale -> LAN (for accessing services over 10G)
-#            iifname "tailscale0" oifname "lan0" accept
-#            
-#            # Incus VMs/containers -> WAN (but NOT to router services)
-#            iifname "incusbr0" oifname "wan0" accept
-#            
-#            # Block incusbr0 -> router host access (defense in depth)
-#            iifname "incusbr0" oifname { "lan0", "tailscale0" } drop
-#            
-#            # Log dropped forwards (debugging)
-#            # limit rate 5/minute log prefix "FORWARD DROP: "
-#          }
-#        }
-#
-#        table ip nat {
-#          chain postrouting {
-#            type nat hook postrouting priority srcnat; policy accept;
-#            
-#            # Masquerade LAN + Incus traffic going to WAN
-#            oifname "wan0" masquerade
-#          }
-#        }
-#      '';
+      ruleset = ''
+        table inet filter {
+          # Flow offloading for performance
+          flowtable f {
+            hook ingress priority 0;
+            devices = { enp101s0, enp4s0 };
+          }
+
+          chain input {
+            type filter hook input priority 0; policy drop;
+
+            # Loopback always allowed
+            iifname "lo" accept
+
+            # Established/related from anywhere
+            ct state { established, related } accept
+            ct state invalid drop
+
+            # ICMP for diagnostics
+            ip protocol icmp accept
+
+            # SSH from LAN + Tailscale only
+            iifname { "enp4s0", "tailscale0" } tcp dport 22 accept
+
+            # Headscale from WAN (HTTPS only)
+            iifname "enp101s0" tcp dport 443 ct state new accept
+
+            # DNS from LAN
+            iifname "enp4s0" tcp dport 53 accept
+            iifname "enp4s0" udp dport 53 accept
+
+            # DHCP from LAN
+            iifname "enp4s0" udp dport 67 accept
+
+            # Caddy from Tailscale + LAN ONLY (not WAN, not incusbr0)
+            iifname { "tailscale0", "enp4s0" } tcp dport { 80, 443 } accept
+
+            # Log dropped packets (debugging)
+            # limit rate 5/minute log prefix "INPUT DROP: "
+          }
+
+          chain forward {
+            type filter hook forward priority 0; policy drop;
+
+            # Flow offload established connections
+            ip protocol { tcp, udp } flow offload @f
+
+            ct state { established, related } accept
+            ct state invalid drop
+
+            # LAN -> WAN
+            iifname "enp4s0" oifname "enp101s0" accept
+
+            # Tailscale -> LAN (for accessing services over 10G)
+            iifname "tailscale0" oifname "enp4s0" accept
+
+
+
+            # Log dropped forwards (debugging)
+            # limit rate 5/minute log prefix "FORWARD DROP: "
+          }
+        }
+
+        table ip nat {
+          chain postrouting {
+            type nat hook postrouting priority 100; policy accept;
+
+            # Masquerade LAN traffic going to WAN
+            oifname "enp101s0" masquerade
+          }
+        }
+      '';
     };
   };
 
@@ -139,9 +131,15 @@
 
   services = {
     journald.extraConfig = "SystemMaxUse=500M";
-    resolved = {
+    dnsmasq = {
       enable = true;
-      domains = [ "~." ];
+      settings = {
+        interface = "enp4s0";
+        dhcp-range = "192.168.6.11,192.168.6.89,12h";
+        dhcp-option = "option:router,192.168.6.1";
+        # MAC reservations outside range, e.g.:
+        # dhcp-host = "aa:bb:cc:dd:ee:ff,192.168.6.90";
+      };
     };
   };
 
@@ -181,40 +179,33 @@
         CPUQuota = "800%";
       };
     };
-    # Reserve NIC device IDs
-    #    network = {
-    #      enable = true;
-    #      # WAN interface - DHCP from ISP
-    #      networks."10-wan" = {
-    #        matchConfig.Name = "enp3s0";  # Your first 2.5G NIC
-    #        networkConfig = {
-    #          DHCP = "ipv4";
-    #          IPv6AcceptRA = true;
-    #        };
-    #        linkConfig.RequiredForOnline = "routable";
-    #      };
-    #      
-    #      # LAN interface - 10G to rack switch
-    #      networks."20-lan" = {
-    #        matchConfig.Name = "enp3s0";  # Your 10G NIC
-    #        address = [ "192.168.6.1/24" ];
-    #        networkConfig = {
-    #          DHCPServer = true;
-    #          IPv6SendRA = true;
-    #        };
-    #        dhcpServerConfig = {
-    #          PoolOffset = 100;
-    #          PoolSize = 100;
-    #          DNS = [ "192.168.6.1" ];
-    #        };
-    #      };
-    #      
-    #      # Incus bridge (created by incus, just configure here)
-    #      networks."30-incus" = {
-    #        matchConfig.Name = "incusbr0";
-    #        address = [ "10.0.100.1/24" ];
-    #      };
-    #    };
+    network = {
+      enable = true;
+      # WAN interface - DHCP from ISP
+      networks."10-wan" = {
+        matchConfig.Name = "enp101s0";
+        networkConfig = {
+          DHCP = "ipv4";
+        };
+        linkConfig.RequiredForOnline = "routable";
+      };
+
+      # LAN interface - 10G to rack switch
+      networks."20-lan" = {
+        matchConfig.Name = "enp4s0";
+        address = [ "192.168.6.1/24" ];
+        networkConfig = {
+          DHCPServer = true;
+        };
+        dhcpServerConfig = {
+          PoolOffset = 11;
+          PoolSize = 79; # 11-89
+          DNS = [ "192.168.6.1" ];
+        };
+      };
+
+
+    };
 
     #      "10-enp5s0" = { matchConfig.Path = "pci-0000:05:00.0"; linkConfig.Name = "enp5s0"; };
     #      "10-enp6s0" = { matchConfig.Path = "pci-0000:06:00.0"; linkConfig.Name = "enp6s0"; };
@@ -241,6 +232,7 @@
     env.enable = true;
     fwupd.enable = true;
     fzf.enable = true;
+    headscale.enable = true;
     iperf.enable = true;
     incus.enable = true;
     localization.enable = true;
