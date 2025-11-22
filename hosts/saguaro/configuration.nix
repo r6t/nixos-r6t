@@ -178,85 +178,42 @@
         };
       };
     };
-    tailscale-udp-gro = {
-      description = "Enable UDP GRO forwarding for Tailscale on Mellanox interfaces";
-      after = [ "network.target" ];
-      wantedBy = [ "multi-user.target" ];
-      script = ''
-        ${pkgs.ethtool}/bin/ethtool -K enp1s0d1 rx-udp-gro-forwarding on rx-gro-list off || true
-        ${pkgs.ethtool}/bin/ethtool -K br1 rx-udp-gro-forwarding on rx-gro-list off || true
-      '';
-      serviceConfig = {
-        Type = "oneshot";
-        RemainAfterExit = true;
-      };
-    };
+    #      "10-enp5s0" = { matchConfig.Path = "pci-0000:05:00.0"; linkConfig.Name = "enp5s0"; };
+    #      "10-enp6s0" = { matchConfig.Path = "pci-0000:06:00.0"; linkConfig.Name = "enp6s0"; };
+    #      "10-enp7s0" = { matchConfig.Path = "pci-0000:07:00.0"; linkConfig.Name = "enp7s0"; };
+    #      "10-enp8s0" = { matchConfig.Path = "pci-0000:09:00.0"; linkConfig.Name = "enp8s0"; };
   };
-};
-network = {
-enable = true;
-# WAN interface - DHCP from ISP
-networks."10-wan" = {
-matchConfig.Name = "enp101s0";
-networkConfig = {
-DHCP = "ipv4";
-};
-linkConfig.RequiredForOnline = "routable";
-};
-
-# LAN interface - 10G to rack switch
-networks."20-lan" = {
-matchConfig.Name = "enp4s0";
-address = [ "192.168.6.1/24" ];
-networkConfig = {
-DHCPServer = true;
-};
-dhcpServerConfig = {
-PoolOffset = 11;
-PoolSize = 79; # 11-89
-DNS = [ "192.168.6.1" ];
-};
-};
 
 
-};
+  # modules/
+  mine = {
+    home = {
+      atuin.enable = true;
+      fish.enable = true;
+      git.enable = true;
+      home-manager.enable = true;
+      nixvim.enable = true;
+      ssh.enable = true;
+    };
 
-#      "10-enp5s0" = { matchConfig.Path = "pci-0000:05:00.0"; linkConfig.Name = "enp5s0"; };
-#      "10-enp6s0" = { matchConfig.Path = "pci-0000:06:00.0"; linkConfig.Name = "enp6s0"; };
-#      "10-enp7s0" = { matchConfig.Path = "pci-0000:07:00.0"; linkConfig.Name = "enp7s0"; };
-#      "10-enp8s0" = { matchConfig.Path = "pci-0000:09:00.0"; linkConfig.Name = "enp8s0"; };
-};
-
-
-# modules/
-mine = {
-home = {
-atuin.enable = true;
-fish.enable = true;
-git.enable = true;
-home-manager.enable = true;
-nixvim.enable = true;
-ssh.enable = true;
-};
-
-alloy.enable = true;
-bolt.enable = true;
-bootloader.enable = true;
-caddy.enable = true;
-env.enable = true;
-fwupd.enable = true;
-fzf.enable = true;
-headscale.enable = true;
-iperf.enable = true;
-incus.enable = true;
-localization.enable = true;
-nix.enable = true;
-rdfind.enable = true;
-sops.enable = true;
-ssh.enable = true;
-sshfs.enable = true;
-syncthing.enable = true;
-tailscale.enable = true;
-user.enable = true;
-};
+    alloy.enable = true;
+    bolt.enable = true;
+    bootloader.enable = true;
+    caddy.enable = true;
+    env.enable = true;
+    fwupd.enable = true;
+    fzf.enable = true;
+    headscale.enable = true;
+    iperf.enable = true;
+    incus.enable = true;
+    localization.enable = true;
+    nix.enable = true;
+    rdfind.enable = true;
+    sops.enable = true;
+    ssh.enable = true;
+    sshfs.enable = true;
+    syncthing.enable = true;
+    tailscale.enable = true;
+    user.enable = true;
+  };
 }
