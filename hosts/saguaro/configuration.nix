@@ -30,10 +30,11 @@
   networking = {
     # hostId = "5f3e2c0a";
     enableIPv6 = false;
-    nat.enable = true;
+    nat.enable = false;
     useNetworkd = true;
     hostName = "saguaro";
     dhcpcd.enable = false;
+    nameservers = [ "127.0.0.1" ];
 
     interfaces = {
       # 10G Thunderbolt interface connects to switch (LAN)
@@ -99,15 +100,48 @@
 
   services = {
     journald.extraConfig = "SystemMaxUse=500M";
+
+    resolved.enable = lib.mkForce false;
+
     dnsmasq = {
       enable = true;
+      resolveLocalQueries = false;
       settings = {
+        # DHCP Configuration
         interface = "enp4s0";
         dhcp-range = "192.168.6.11,192.168.6.89,12h";
-        dhcp-option = "option:router,192.168.6.1";
-        # MAC reservations outside range, e.g.:
-        # dhcp-host = "aa:bb:cc:dd:ee:ff,192.168.6.90";
+        dhcp-option = [
+          "option:router,192.168.6.1"
+          "option:dns-server,192.168.6.1"
+        ];
+
+        # DNS Configuration
+        no-resolv = true;
+        no-poll = true;
+        cache-size = 10000;
+        no-negcache = true;
+        dns-forward-max = 1500;
+        domain-needed = true;
+
+        # Local DNS overrides (hairpin NAT avoidance)
+        address = import ./dns-overrides.nix;
+
+        # Upstream DNS - NextDNS
+        server = [ "127.0.0.1#5353" ];
+
+        # MAC/IP reservations
+        dhcp-host = import ./ip-reservations.nix;
       };
+    };
+
+    nextdns = {
+      enable = true;
+      arguments = [
+        "-config-file"
+        "/mnt/nextdns.conf"
+        "-listen"
+        "127.0.0.1:5353"
+      ];
     };
   };
 
@@ -157,14 +191,6 @@
       networks."20-lan" = {
         matchConfig.Name = "enp4s0";
         address = [ "192.168.6.1/24" ];
-        networkConfig = {
-          DHCPServer = true;
-        };
-        dhcpServerConfig = {
-          PoolOffset = 11;
-          PoolSize = 79; # 11-89
-          DNS = [ "192.168.6.1" ];
-        };
       };
     };
     #      "10-enp5s0" = { matchConfig.Path = "pci-0000:05:00.0"; linkConfig.Name = "enp5s0"; };
