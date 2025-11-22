@@ -152,29 +152,29 @@
           RemainAfterExit = true;
         };
       };
-      network = {
-        enable = true;
-        # WAN interface - DHCP from ISP
-        networks."10-wan" = {
-          matchConfig.Name = "enp101s0";
-          networkConfig = {
-            DHCP = "ipv4";
-          };
-          linkConfig.RequiredForOnline = "routable";
+    };
+    network = {
+      enable = true;
+      # WAN interface - DHCP from ISP
+      networks."10-wan" = {
+        matchConfig.Name = "enp101s0";
+        networkConfig = {
+          DHCP = "ipv4";
         };
+        linkConfig.RequiredForOnline = "routable";
+      };
 
-        # LAN interface - 10G to rack switch
-        networks."20-lan" = {
-          matchConfig.Name = "enp4s0";
-          address = [ "192.168.6.1/24" ];
-          networkConfig = {
-            DHCPServer = true;
-          };
-          dhcpServerConfig = {
-            PoolOffset = 11;
-            PoolSize = 79; # 11-89
-            DNS = [ "192.168.6.1" ];
-          };
+      # LAN interface - 10G to rack switch
+      networks."20-lan" = {
+        matchConfig.Name = "enp4s0";
+        address = [ "192.168.6.1/24" ];
+        networkConfig = {
+          DHCPServer = true;
+        };
+        dhcpServerConfig = {
+          PoolOffset = 11;
+          PoolSize = 79; # 11-89
+          DNS = [ "192.168.6.1" ];
         };
       };
     };
