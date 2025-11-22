@@ -17,7 +17,7 @@
       "net.ipv6.conf.all.forwarding" = 0;
 
       # Security hardening
-      "net.ipv4.conf.all.rp_filter" = 1;
+      "net.ipv4.conf.all.rp_filter" = 2; # Loose mode for router/DHCP compatibility
       "net.ipv4.conf.all.accept_source_route" = 0;
       "net.ipv4.icmp_echo_ignore_broadcasts" = 1;
       "net.ipv4.conf.all.log_martians" = 1;
@@ -212,9 +212,6 @@
           DNS = [ "192.168.6.1" ];
           EmitRouter = true;
         };
-
-        # MAC/IP reservations from external file
-        dhcpServerStaticLeases = import ./ip-reservations.nix;
       };
     };
     #      "10-enp5s0" = { matchConfig.Path = "pci-0000:05:00.0"; linkConfig.Name = "enp5s0"; };
