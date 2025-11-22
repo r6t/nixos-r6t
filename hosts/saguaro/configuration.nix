@@ -203,7 +203,6 @@
     env.enable = true;
     fwupd.enable = true;
     fzf.enable = true;
-    headscale.enable = true;
     iperf.enable = true;
     incus.enable = true;
     localization.enable = true;
