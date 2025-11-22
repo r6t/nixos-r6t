@@ -52,11 +52,6 @@
       enable = true;
       ruleset = ''
         table inet filter {
-          # Flow offloading for performance
-          flowtable f {
-            hook ingress priority 0;
-            devices = { enp101s0, enp4s0 };
-          }
           chain input {
             type filter hook input priority 0; policy drop;
             # Loopback always allowed
@@ -75,23 +70,17 @@
             iifname "enp4s0" udp dport 53 accept
             # DHCP from LAN
             iifname "enp4s0" udp dport 67 accept
-            # Caddy from Tailscale + LAN ONLY (not WAN, not incusbr0)
+            # Caddy from Tailscale + LAN ONLY
             iifname { "tailscale0", "enp4s0" } tcp dport { 80, 443 } accept
-            # Log dropped packets (debugging)
-            # limit rate 5/minute log prefix "INPUT DROP: "
           }
           chain forward {
             type filter hook forward priority 0; policy drop;
-            # Flow offload established connections
-            ip protocol { tcp, udp } flow offload @f
             ct state { established, related } accept
             ct state invalid drop
             # LAN -> WAN
             iifname "enp4s0" oifname "enp101s0" accept
             # Tailscale -> LAN (for accessing services over 10G)
             iifname "tailscale0" oifname "enp4s0" accept
-            # Log dropped forwards (debugging)
-            # limit rate 5/minute log prefix "FORWARD DROP: "
           }
         }
         table ip nat {
