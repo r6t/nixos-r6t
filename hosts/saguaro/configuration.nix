@@ -204,6 +204,10 @@
       networks."20-lan" = {
         matchConfig.Name = "enp4s0";
         address = [ "192.168.6.1/24" ];
+
+        # Force interface UP and configured even without link/carrier
+        networkConfig.ConfigureWithoutCarrier = true;
+        linkConfig.ActivationPolicy = "always-up";
       };
     };
     #      "10-enp5s0" = { matchConfig.Path = "pci-0000:05:00.0"; linkConfig.Name = "enp5s0"; };
