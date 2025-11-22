@@ -174,6 +174,7 @@
                 ignore = [
                   "hosts/crown/hardware-configuration.nix"
                   "hosts/mountainball/hardware-configuration.nix"
+                  "hosts/saguaro/configuration.nix"
                 ];
               };
             };
