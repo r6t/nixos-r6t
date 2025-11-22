@@ -31,6 +31,7 @@
       python314
       ripgrep
       sops
+      tcpdump
       tmux
       tree
       unzip

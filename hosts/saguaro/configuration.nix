@@ -74,6 +74,10 @@
             # Caddy from Tailscale + LAN ONLY
             iifname { "tailscale0", "enp4s0" } tcp dport { 80, 443 } accept
           }
+          chain output {
+            type filter hook output priority 0; policy accept;
+            # Allow all output from router (DHCP responses, DNS responses, updates, etc.)
+          }
           chain forward {
             type filter hook forward priority 0; policy drop;
             ct state { established, related } accept
