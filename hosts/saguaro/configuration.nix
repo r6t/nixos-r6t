@@ -107,6 +107,9 @@
       enable = true;
       resolveLocalQueries = false;
       settings = {
+        # Bind to interfaces as they come up (timing fix)
+        bind-dynamic = true;
+
         # DHCP Configuration
         interface = "enp4s0";
         dhcp-range = "192.168.6.11,192.168.6.89,12h";
@@ -162,6 +165,13 @@
       nix-daemon.serviceConfig = {
         CPUQuota = "800%";
       };
+
+      # Ensure dnsmasq waits for network to be configured
+      dnsmasq = {
+        after = [ "systemd-networkd.service" ];
+        wants = [ "systemd-networkd.service" ];
+      };
+
       tailscale-udp-gro = {
         description = "Enable UDP GRO forwarding for Tailscale on Mellanox interfaces";
         after = [ "network.target" ];
