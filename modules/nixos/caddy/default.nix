@@ -17,7 +17,8 @@
       inherit (config.mine.caddy) configFile;
       package = pkgs.caddy.withPlugins {
         plugins = [ "github.com/caddy-dns/route53@v1.6.0-beta.2" ];
-        hash = "sha256-Xw9HVYcy4n/R+9uBY0ty1YvpR3NqUwWNE2MooepjkSA=";
+        # hash = "sha256-Xw9HVYcy4n/R+9uBY0ty1YvpR3NqUwWNE2MooepjkSA=";
+        hash = "sha256-4u+26crPiPxaQ5Rjg7xEi7O/4/bdwcqKcaR3W9nTp90=";
       };
     };
   };

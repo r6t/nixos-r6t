@@ -66,6 +66,12 @@
             }
           ];
         };
+        saguaro = nixpkgs.lib.nixosSystem {
+          specialArgs = { inherit userConfig inputs outputs; };
+          modules = [
+            ./hosts/saguaro/configuration.nix
+          ];
+        };
       };
 
       # Container images

@@ -4,6 +4,7 @@
   imports = [
     inputs.home-manager.nixosModules.home-manager
     inputs.sops-nix.nixosModules.sops
+    inputs.nix-flatpak.nixosModules.nix-flatpak
     ./hardware-configuration.nix
     ../../modules/default.nix
   ];
@@ -48,87 +49,87 @@
       enable = true;
       checkReversePath = false;
       allowedTCPPorts = [ 22 443 ];
-      trustedInterfaces = [ "br1" "tailscale0" ];
+#      trustedInterfaces = [ "br1" "tailscale0" ];
     };
     nftables = {
       enable = true;
-      ruleset = ''
-        table inet filter {
-          # Flow offloading for performance
-          flowtable f {
-            hook ingress priority 0;
-            devices = { wan0, lan0 };
-          }
-
-          chain input {
-            type filter hook input priority filter; policy drop;
-            
-            # Loopback always allowed
-            iifname "lo" accept
-            
-            # Established/related from anywhere
-            ct state { established, related } accept
-            ct state invalid drop
-            
-            # ICMP for diagnostics
-            ip protocol icmp accept
-            ip6 nexthdr icmpv6 accept
-            
-            # SSH from LAN + Tailscale only
-            iifname { "lan0", "tailscale0" } tcp dport 22 accept
-            
-            # Headscale from WAN (HTTPS only)
-            iifname "wan0" tcp dport 443 ct state new accept
-            
-            # DNS from LAN + incusbr0
-            iifname { "lan0", "incusbr0" } tcp dport 53 accept
-            iifname { "lan0", "incusbr0" } udp dport 53 accept
-            
-            # DHCP from LAN + incusbr0
-            iifname { "lan0", "incusbr0" } udp dport 67 accept
-            
-            # Caddy from Tailscale + LAN ONLY (not WAN, not incusbr0)
-            iifname { "tailscale0", "lan0" } tcp dport { 80, 443 } accept
-            
-            # Log dropped packets (debugging)
-            # limit rate 5/minute log prefix "INPUT DROP: "
-          }
-
-          chain forward {
-            type filter hook forward priority filter; policy drop;
-            
-            # Flow offload established connections
-            ip protocol { tcp, udp } flow offload @f
-            
-            ct state { established, related } accept
-            ct state invalid drop
-            
-            # LAN -> WAN
-            iifname "lan0" oifname "wan0" accept
-            
-            # Tailscale -> LAN (for accessing services over 10G)
-            iifname "tailscale0" oifname "lan0" accept
-            
-            # Incus VMs/containers -> WAN (but NOT to router services)
-            iifname "incusbr0" oifname "wan0" accept
-            
-            # Block incusbr0 -> router host access (defense in depth)
-            iifname "incusbr0" oifname { "lan0", "tailscale0" } drop
-            
-            # Log dropped forwards (debugging)
-            # limit rate 5/minute log prefix "FORWARD DROP: "
-          }
-        }
-
-        table ip nat {
-          chain postrouting {
-            type nat hook postrouting priority srcnat; policy accept;
-            
-            # Masquerade LAN + Incus traffic going to WAN
-            oifname "wan0" masquerade
-          }
-        }
-      '';
+#      ruleset = ''
+#        table inet filter {
+#          # Flow offloading for performance
+#          flowtable f {
+#            hook ingress priority 0;
+#            devices = { wan0, lan0 };
+#          }
+#
+#          chain input {
+#            type filter hook input priority filter; policy drop;
+#            
+#            # Loopback always allowed
+#            iifname "lo" accept
+#            
+#            # Established/related from anywhere
+#            ct state { established, related } accept
+#            ct state invalid drop
+#            
+#            # ICMP for diagnostics
+#            ip protocol icmp accept
+#            ip6 nexthdr icmpv6 accept
+#            
+#            # SSH from LAN + Tailscale only
+#            iifname { "lan0", "tailscale0" } tcp dport 22 accept
+#            
+#            # Headscale from WAN (HTTPS only)
+#            iifname "wan0" tcp dport 443 ct state new accept
+#            
+#            # DNS from LAN + incusbr0
+#            iifname { "lan0", "incusbr0" } tcp dport 53 accept
+#            iifname { "lan0", "incusbr0" } udp dport 53 accept
+#            
+#            # DHCP from LAN + incusbr0
+#            iifname { "lan0", "incusbr0" } udp dport 67 accept
+#            
+#            # Caddy from Tailscale + LAN ONLY (not WAN, not incusbr0)
+#            iifname { "tailscale0", "lan0" } tcp dport { 80, 443 } accept
+#            
+#            # Log dropped packets (debugging)
+#            # limit rate 5/minute log prefix "INPUT DROP: "
+#          }
+#
+#          chain forward {
+#            type filter hook forward priority filter; policy drop;
+#            
+#            # Flow offload established connections
+#            ip protocol { tcp, udp } flow offload @f
+#            
+#            ct state { established, related } accept
+#            ct state invalid drop
+#            
+#            # LAN -> WAN
+#            iifname "lan0" oifname "wan0" accept
+#            
+#            # Tailscale -> LAN (for accessing services over 10G)
+#            iifname "tailscale0" oifname "lan0" accept
+#            
+#            # Incus VMs/containers -> WAN (but NOT to router services)
+#            iifname "incusbr0" oifname "wan0" accept
+#            
+#            # Block incusbr0 -> router host access (defense in depth)
+#            iifname "incusbr0" oifname { "lan0", "tailscale0" } drop
+#            
+#            # Log dropped forwards (debugging)
+#            # limit rate 5/minute log prefix "FORWARD DROP: "
+#          }
+#        }
+#
+#        table ip nat {
+#          chain postrouting {
+#            type nat hook postrouting priority srcnat; policy accept;
+#            
+#            # Masquerade LAN + Incus traffic going to WAN
+#            oifname "wan0" masquerade
+#          }
+#        }
+#      '';
     };
   };
 
