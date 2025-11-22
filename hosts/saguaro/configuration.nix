@@ -113,15 +113,7 @@
         # Explicit DNS listening addresses
         listen-address = [ "127.0.0.1" "192.168.6.1" ];
 
-        # DHCP only on LAN interface
-        interface = "enp4s0";
-        dhcp-range = "192.168.6.11,192.168.6.89,12h";
-        dhcp-option = [
-          "option:router,192.168.6.1"
-          "option:dns-server,192.168.6.1"
-        ];
-
-        # DNS Configuration
+        # DNS Configuration only (DHCP handled by systemd-networkd)
         no-resolv = true;
         no-poll = true;
         cache-size = 10000;
@@ -134,9 +126,6 @@
 
         # Upstream DNS - NextDNS
         server = [ "127.0.0.1#5353" ];
-
-        # MAC/IP reservations
-        dhcp-host = import ./ip-reservations.nix;
       };
     };
 
@@ -206,8 +195,22 @@
         address = [ "192.168.6.1/24" ];
 
         # Force interface UP and configured even without link/carrier
-        networkConfig.ConfigureWithoutCarrier = true;
+        networkConfig = {
+          ConfigureWithoutCarrier = true;
+          DHCPServer = true;
+        };
         linkConfig.ActivationPolicy = "always-up";
+
+        # DHCP Server Configuration
+        dhcpServerConfig = {
+          PoolOffset = 11;
+          PoolSize = 79; # 11-89
+          DNS = [ "192.168.6.1" ];
+          EmitRouter = true;
+        };
+
+        # MAC/IP reservations from external file
+        dhcpServerStaticLeases = import ./ip-reservations.nix;
       };
     };
     #      "10-enp5s0" = { matchConfig.Path = "pci-0000:05:00.0"; linkConfig.Name = "enp5s0"; };
