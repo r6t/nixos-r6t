@@ -1,4 +1,4 @@
-{ inputs, lib, pkgs, ... }:
+{ inputs, lib, ... }:
 
 {
   imports = [
@@ -21,16 +21,6 @@
       "net.ipv4.conf.all.accept_source_route" = 0;
       "net.ipv4.icmp_echo_ignore_broadcasts" = 1;
       "net.ipv4.conf.all.log_martians" = 1;
-
-      # Performance tuning for router workload
-      "net.core.netdev_max_backlog" = 5000;
-      "net.core.rmem_max" = 134217728; # 128MB
-      "net.core.wmem_max" = 134217728; # 128MB
-      "net.ipv4.tcp_rmem" = "4096 87380 67108864"; # min default max
-      "net.ipv4.tcp_wmem" = "4096 65536 67108864";
-      "net.ipv4.tcp_congestion_control" = "bbr"; # Google BBR
-      "net.core.default_qdisc" = "fq"; # Fair queue for BBR
-      "net.netfilter.nf_conntrack_max" = 262144; # Increased conntrack table
     };
     # Enable IOMMU for NIC passthrough to Home Assistant
     kernelParams = [ "intel_iommu=on" "iommu=pt" ];
@@ -63,9 +53,6 @@
       enable = true;
       ruleset = ''
         table inet filter {
-          # Note: flowtable added at runtime via systemd service (see nftables-flowtable.service)
-          # This avoids build-time validation errors when interfaces don't exist yet
-
           chain input {
             type filter hook input priority 0; policy drop;
             # Loopback always allowed
@@ -93,9 +80,6 @@
           }
           chain forward {
             type filter hook forward priority 0; policy drop;
-            
-            # Note: hardware flow offload rule added at runtime via nftables-flowtable.service
-            
             ct state { established, related } accept
             ct state invalid drop
             # LAN -> WAN
@@ -182,57 +166,6 @@
       dnsmasq = {
         after = [ "systemd-networkd.service" ];
         wants = [ "systemd-networkd.service" ];
-      };
-
-      # Add nftables flowtable at runtime for hardware flow offloading
-      nftables-flowtable = {
-        description = "Add nftables flowtable for hardware offloading";
-        after = [ "nftables.service" "systemd-networkd.service" ];
-        requires = [ "nftables.service" "systemd-networkd.service" ];
-        wantedBy = [ "multi-user.target" ];
-
-        script = ''
-          # Wait for interfaces to be fully available
-          ${pkgs.coreutils}/bin/sleep 3
-          
-          # Verify interfaces exist before adding flowtable
-          if [ -e /sys/class/net/enp101s0 ] && [ -e /sys/class/net/enp4s0 ]; then
-            # Add flowtable to existing inet filter table
-            ${pkgs.nftables}/bin/nft add flowtable inet filter f '{ hook ingress priority 0; devices = { enp101s0, enp4s0 }; }' || true
-            
-            # Add flow add rules for TCP and UDP (must be separate, can't use sets with flow add)
-            ${pkgs.nftables}/bin/nft insert rule inet filter forward position 0 ip protocol tcp flow add @f || true
-            ${pkgs.nftables}/bin/nft insert rule inet filter forward position 1 ip protocol udp flow add @f || true
-          fi
-        '';
-
-        serviceConfig = {
-          Type = "oneshot";
-          RemainAfterExit = true;
-        };
-      };
-
-      nic-optimizations = {
-        description = "Enable NIC hardware offloading and Tailscale UDP GRO";
-        after = [ "network-pre.target" ];
-        before = [ "network.target" ];
-        wantedBy = [ "multi-user.target" ];
-        script = ''
-          # Enable hardware offloads on 10G LAN interface (Thunderbolt)
-          ${pkgs.ethtool}/bin/ethtool -K enp4s0 rx on tx on sg on tso on gso on gro on || true
-          
-          # Enable hardware offloads on WAN interface
-          ${pkgs.ethtool}/bin/ethtool -K enp101s0 rx on tx on sg on tso on gso on gro on || true
-          
-          # Tailscale UDP GRO for exit node performance
-          # https://tailscale.com/kb/1320/performance-best-practices
-          ${pkgs.ethtool}/bin/ethtool -K enp4s0 rx-udp-gro-forwarding on rx-gro-list off || true
-          ${pkgs.ethtool}/bin/ethtool -K enp101s0 rx-udp-gro-forwarding on rx-gro-list off || true
-        '';
-        serviceConfig = {
-          Type = "oneshot";
-          RemainAfterExit = true;
-        };
       };
     };
     network = {
