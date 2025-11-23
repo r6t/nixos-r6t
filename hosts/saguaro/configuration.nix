@@ -46,8 +46,9 @@
     firewall = {
       enable = false; # Disabled - using nftables instead
       checkReversePath = false;
+      # 8384 for syncthing temp
       # 8443 for incus temporarily
-      allowedTCPPorts = [ 22 443 8443 ];
+      allowedTCPPorts = [ 22 443 8384 8443 ];
       #      trustedInterfaces = [ "br1" "tailscale0" ];
     };
     nftables = {

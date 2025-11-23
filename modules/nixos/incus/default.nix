@@ -23,16 +23,6 @@ in
       extraGroups = [ "incus-admin" ];
     };
 
-    systemd.services.${svc} = {
-      # Wait for storage pool before starting incus...
-      requires = [ "mnt-crownstore.mount" ];
-      after = [ "mnt-crownstore.mount" ];
-      serviceConfig = {
-        # ... and double check that it's there
-        ExecStartPre = "${pkgs.coreutils}/bin/test -d /mnt/crownstore/incus";
-      };
-    };
-
     # set secrets
     sops.secrets = {
       "caddy/headscale/aws_access_key_id" = lib.mkIf config.mine.sops.enable {

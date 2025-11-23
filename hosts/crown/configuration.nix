@@ -105,6 +105,16 @@
       "L /etc/caddy/caddy.env - - - - /mnt/crownstore/Sync/app-config/caddy/crown.caddy.env"
     ];
     services = {
+      # Incus storage managment
+      incus = {
+        # Wait for storage pool before starting incus...
+        requires = [ "mnt-crownstore.mount" ];
+        after = [ "mnt-crownstore.mount" ];
+        serviceConfig = {
+          # ... and double check that it's there
+          ExecStartPre = "${pkgs.coreutils}/bin/test -d /mnt/crownstore/incus";
+        };
+      };
       systemd-networkd-wait-online.enable = lib.mkForce false;
       nix-daemon.serviceConfig = {
         # Limit CPU usage to 50% for 16 vCPU
@@ -112,6 +122,7 @@
         CPUQuota = "800%";
       };
     };
+
   };
 
   # modules/
