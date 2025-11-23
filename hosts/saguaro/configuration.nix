@@ -57,6 +57,8 @@
             type filter hook input priority 0; policy drop;
             # Loopback always allowed
             iifname "lo" accept
+            # DHCP from LAN (before conntrack - DHCP packets are often marked invalid)
+            iifname "enp4s0" udp dport 67 accept
             # Established/related from anywhere
             ct state { established, related } accept
             ct state invalid drop
@@ -69,8 +71,6 @@
             # DNS from LAN
             iifname "enp4s0" tcp dport 53 accept
             iifname "enp4s0" udp dport 53 accept
-            # DHCP from LAN
-            iifname "enp4s0" udp dport 67 accept
             # Caddy from Tailscale + LAN ONLY
             iifname { "tailscale0", "enp4s0" } tcp dport { 80, 443 } accept
           }
