@@ -21,6 +21,16 @@
       "net.ipv4.conf.all.accept_source_route" = 0;
       "net.ipv4.icmp_echo_ignore_broadcasts" = 1;
       "net.ipv4.conf.all.log_martians" = 1;
+
+      # Performance tuning for router workload
+      "net.core.netdev_max_backlog" = 5000;
+      "net.core.rmem_max" = 134217728; # 128MB
+      "net.core.wmem_max" = 134217728; # 128MB
+      "net.ipv4.tcp_rmem" = "4096 87380 67108864"; # min default max
+      "net.ipv4.tcp_wmem" = "4096 65536 67108864";
+      "net.ipv4.tcp_congestion_control" = "bbr"; # Google BBR
+      "net.core.default_qdisc" = "fq"; # Fair queue for BBR
+      "net.netfilter.nf_conntrack_max" = 262144; # Increased conntrack table
     };
     # Enable IOMMU for NIC passthrough to Home Assistant
     kernelParams = [ "intel_iommu=on" "iommu=pt" ];
@@ -53,6 +63,12 @@
       enable = true;
       ruleset = ''
         table inet filter {
+          # Hardware flow offloading for performance
+          flowtable f {
+            hook ingress priority 0;
+            devices = { enp101s0, enp4s0 };
+          }
+
           chain input {
             type filter hook input priority 0; policy drop;
             # Loopback always allowed
@@ -80,6 +96,10 @@
           }
           chain forward {
             type filter hook forward priority 0; policy drop;
+            
+            # Offload established TCP/UDP flows to hardware
+            ip protocol { tcp, udp } flow offload @f
+            
             ct state { established, related } accept
             ct state invalid drop
             # LAN -> WAN
@@ -168,13 +188,22 @@
         wants = [ "systemd-networkd.service" ];
       };
 
-      tailscale-udp-gro = {
-        description = "Enable UDP GRO forwarding for Tailscale on Mellanox interfaces";
-        after = [ "network.target" ];
+      nic-optimizations = {
+        description = "Enable NIC hardware offloading and Tailscale UDP GRO";
+        after = [ "network-pre.target" ];
+        before = [ "network.target" ];
         wantedBy = [ "multi-user.target" ];
         script = ''
-          ${pkgs.ethtool}/bin/ethtool -K enp1s0d1 rx-udp-gro-forwarding on rx-gro-list off || true
-          ${pkgs.ethtool}/bin/ethtool -K br1 rx-udp-gro-forwarding on rx-gro-list off || true
+          # Enable hardware offloads on 10G LAN interface (Thunderbolt)
+          ${pkgs.ethtool}/bin/ethtool -K enp4s0 rx on tx on sg on tso on gso on gro on || true
+          
+          # Enable hardware offloads on WAN interface
+          ${pkgs.ethtool}/bin/ethtool -K enp101s0 rx on tx on sg on tso on gso on gro on || true
+          
+          # Tailscale UDP GRO for exit node performance
+          # https://tailscale.com/kb/1320/performance-best-practices
+          ${pkgs.ethtool}/bin/ethtool -K enp4s0 rx-udp-gro-forwarding on rx-gro-list off || true
+          ${pkgs.ethtool}/bin/ethtool -K enp101s0 rx-udp-gro-forwarding on rx-gro-list off || true
         '';
         serviceConfig = {
           Type = "oneshot";
