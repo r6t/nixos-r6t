@@ -189,20 +189,26 @@
         description = "Add nftables flowtable for hardware offloading";
         after = [ "nftables.service" "network-online.target" ];
         wants = [ "network-online.target" ];
+        requires = [ "nftables.service" ];
         wantedBy = [ "multi-user.target" ];
 
         script = ''
+          # Wait for nftables to be fully ready
+          ${pkgs.coreutils}/bin/sleep 2
+          
           # Add flowtable to existing inet filter table
-          ${pkgs.nftables}/bin/nft add flowtable inet filter f '{ hook ingress priority 0; devices = { enp101s0, enp4s0 }; }' 2>/dev/null || true
+          ${pkgs.nftables}/bin/nft add flowtable inet filter f '{ hook ingress priority 0; devices = { enp101s0, enp4s0 }; }' || true
           
           # Add flow add rules for TCP and UDP (must be separate, can't use sets with flow add)
-          ${pkgs.nftables}/bin/nft insert rule inet filter forward position 0 ip protocol tcp flow add @f 2>/dev/null || true
-          ${pkgs.nftables}/bin/nft insert rule inet filter forward position 1 ip protocol udp flow add @f 2>/dev/null || true
+          ${pkgs.nftables}/bin/nft insert rule inet filter forward position 0 ip protocol tcp flow add @f || true
+          ${pkgs.nftables}/bin/nft insert rule inet filter forward position 1 ip protocol udp flow add @f || true
         '';
 
         serviceConfig = {
           Type = "oneshot";
           RemainAfterExit = true;
+          Restart = "on-failure";
+          RestartSec = "5s";
         };
       };
 
