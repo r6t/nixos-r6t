@@ -44,7 +44,7 @@
     };
 
     firewall = {
-      enable = true;
+      enable = false; # Disabled - using nftables instead
       checkReversePath = false;
       allowedTCPPorts = [ 22 443 ];
       #      trustedInterfaces = [ "br1" "tailscale0" ];
@@ -202,8 +202,12 @@
         networkConfig = {
           ConfigureWithoutCarrier = true;
           DHCPServer = true;
+          LinkLocalAddressing = "ipv4";
         };
-        linkConfig.ActivationPolicy = "always-up";
+        linkConfig = {
+          ActivationPolicy = "always-up";
+          ARP = true;
+        };
 
         # DHCP Server Configuration
         dhcpServerConfig = {
