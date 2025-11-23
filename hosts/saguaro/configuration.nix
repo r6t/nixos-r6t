@@ -187,28 +187,28 @@
       # Add nftables flowtable at runtime for hardware flow offloading
       nftables-flowtable = {
         description = "Add nftables flowtable for hardware offloading";
-        after = [ "nftables.service" "network-online.target" ];
-        wants = [ "network-online.target" ];
-        requires = [ "nftables.service" ];
+        after = [ "nftables.service" "systemd-networkd.service" ];
+        requires = [ "nftables.service" "systemd-networkd.service" ];
         wantedBy = [ "multi-user.target" ];
 
         script = ''
-          # Wait for nftables to be fully ready
-          ${pkgs.coreutils}/bin/sleep 2
+          # Wait for interfaces to be fully available
+          ${pkgs.coreutils}/bin/sleep 3
           
-          # Add flowtable to existing inet filter table
-          ${pkgs.nftables}/bin/nft add flowtable inet filter f '{ hook ingress priority 0; devices = { enp101s0, enp4s0 }; }' || true
-          
-          # Add flow add rules for TCP and UDP (must be separate, can't use sets with flow add)
-          ${pkgs.nftables}/bin/nft insert rule inet filter forward position 0 ip protocol tcp flow add @f || true
-          ${pkgs.nftables}/bin/nft insert rule inet filter forward position 1 ip protocol udp flow add @f || true
+          # Verify interfaces exist before adding flowtable
+          if [ -e /sys/class/net/enp101s0 ] && [ -e /sys/class/net/enp4s0 ]; then
+            # Add flowtable to existing inet filter table
+            ${pkgs.nftables}/bin/nft add flowtable inet filter f '{ hook ingress priority 0; devices = { enp101s0, enp4s0 }; }' || true
+            
+            # Add flow add rules for TCP and UDP (must be separate, can't use sets with flow add)
+            ${pkgs.nftables}/bin/nft insert rule inet filter forward position 0 ip protocol tcp flow add @f || true
+            ${pkgs.nftables}/bin/nft insert rule inet filter forward position 1 ip protocol udp flow add @f || true
+          fi
         '';
 
         serviceConfig = {
           Type = "oneshot";
           RemainAfterExit = true;
-          Restart = "on-failure";
-          RestartSec = "5s";
         };
       };
 
