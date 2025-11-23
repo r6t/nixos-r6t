@@ -41,19 +41,13 @@
     interfaces = {
       enp1s0.useDHCP = false; # Bridge interface
       enp1s0d1 = {
-        useDHCP = true; # Primary host interface picks up DHCP reservation
+        useDHCP = true; # Primary host 10G interface picks up DHCP reservation
       };
-      enp5s0.useDHCP = false; # 2.5G Incus hardware passthrough
-      enp6s0.useDHCP = false; # 2.5G Incus hardware passthrough
-      enp7s0.useDHCP = false; # 2.5G Incus hardware passthrough
-      enp8s0.useDHCP = false; # 2.5G Incus hardware passthrough
-      br1.useDHCP = false; # 10G bridge for Incus
-    };
-
-    defaultGateway = {
-      address = "192.168.6.1";
-      interface = "enp1s0d1";
-      metric = 100;
+      enp5s0.useDHCP = false; # 2.5G unused
+      enp6s0.useDHCP = false; # 2.5G unused
+      enp7s0.useDHCP = false; # 2.5G unused
+      enp8s0.useDHCP = false; # 2.5G unused
+      br1.useDHCP = true; # 10G bridge for Incus
     };
 
     firewall = {
@@ -118,18 +112,7 @@
         CPUQuota = "800%";
       };
     };
-    # Reserve NIC device IDs
-    network = {
-      enable = true;
-      links = {
-        "10-enp5s0" = { matchConfig.Path = "pci-0000:05:00.0"; linkConfig.Name = "enp5s0"; };
-        "10-enp6s0" = { matchConfig.Path = "pci-0000:06:00.0"; linkConfig.Name = "enp6s0"; };
-        "10-enp7s0" = { matchConfig.Path = "pci-0000:07:00.0"; linkConfig.Name = "enp7s0"; };
-        "10-enp8s0" = { matchConfig.Path = "pci-0000:09:00.0"; linkConfig.Name = "enp8s0"; };
-      };
-    };
   };
-
 
   # modules/
   mine = {
@@ -170,5 +153,6 @@
     syncthing.enable = true;
     tailscale.enable = true;
     user.enable = true;
+    zfs-hdd-pool.enable = true;
   };
 }
