@@ -37,8 +37,8 @@
     nameservers = [ "127.0.0.1" ];
 
     interfaces = {
-      # 10G Thunderbolt interface connects to switch (LAN)
-      enp4s0.useDHCP = false;
+      # Intel I225-V NIC for LAN (2.5G)
+      enp100s0.useDHCP = false;
       # WAN interface gets DHCP from ISP
       enp101s0.useDHCP = true;
     };
@@ -58,21 +58,21 @@
             # Loopback always allowed
             iifname "lo" accept
             # DHCP from LAN (before conntrack - DHCP packets are often marked invalid)
-            iifname "enp4s0" udp dport 67 accept
+            iifname "enp100s0" udp dport 67 accept
             # Established/related from anywhere
             ct state { established, related } accept
             ct state invalid drop
             # ICMP for diagnostics
             ip protocol icmp accept
             # SSH from LAN + Tailscale only
-            iifname { "enp4s0", "tailscale0" } tcp dport 22 accept
+            iifname { "enp100s0", "tailscale0" } tcp dport 22 accept
             # Headscale from WAN (HTTPS only)
             iifname "enp101s0" tcp dport 443 ct state new accept
             # DNS from LAN
-            iifname "enp4s0" tcp dport 53 accept
-            iifname "enp4s0" udp dport 53 accept
+            iifname "enp100s0" tcp dport 53 accept
+            iifname "enp100s0" udp dport 53 accept
             # Caddy from Tailscale + LAN ONLY
-            iifname { "tailscale0", "enp4s0" } tcp dport { 80, 443 } accept
+            iifname { "tailscale0", "enp100s0" } tcp dport { 80, 443 } accept
           }
           chain output {
             type filter hook output priority 0; policy accept;
@@ -83,9 +83,9 @@
             ct state { established, related } accept
             ct state invalid drop
             # LAN -> WAN
-            iifname "enp4s0" oifname "enp101s0" accept
-            # Tailscale -> LAN (for accessing services over 10G)
-            iifname "tailscale0" oifname "enp4s0" accept
+            iifname "enp100s0" oifname "enp101s0" accept
+            # Tailscale -> LAN
+            iifname "tailscale0" oifname "enp100s0" accept
           }
         }
         table ip nat {
@@ -116,6 +116,9 @@
 
         # Explicit DNS listening addresses
         listen-address = [ "127.0.0.1" "192.168.6.1" ];
+
+        # DHCP only on LAN interface
+        interface = "enp100s0";
 
         # DNS Configuration only (DHCP handled by systemd-networkd)
         no-resolv = true;
@@ -179,9 +182,9 @@
         linkConfig.RequiredForOnline = "routable";
       };
 
-      # LAN interface - 10G to rack switch
+      # LAN interface - Intel I225-V 2.5G NIC
       networks."20-lan" = {
-        matchConfig.Name = "enp4s0";
+        matchConfig.Name = "enp100s0";
         address = [ "192.168.6.1/24" ];
 
         # Force interface UP and configured even without link/carrier
