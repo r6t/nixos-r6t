@@ -63,11 +63,8 @@
       enable = true;
       ruleset = ''
         table inet filter {
-          # Hardware flow offloading for performance
-          flowtable f {
-            hook ingress priority 0;
-            devices = { enp101s0, enp4s0 };
-          }
+          # Note: flowtable added at runtime via systemd service (see nftables-flowtable.service)
+          # This avoids build-time validation errors when interfaces don't exist yet
 
           chain input {
             type filter hook input priority 0; policy drop;
@@ -97,8 +94,7 @@
           chain forward {
             type filter hook forward priority 0; policy drop;
             
-            # Offload established TCP/UDP flows to hardware
-            ip protocol { tcp, udp } flow offload @f
+            # Note: hardware flow offload rule added at runtime via nftables-flowtable.service
             
             ct state { established, related } accept
             ct state invalid drop
@@ -186,6 +182,27 @@
       dnsmasq = {
         after = [ "systemd-networkd.service" ];
         wants = [ "systemd-networkd.service" ];
+      };
+
+      # Add nftables flowtable at runtime for hardware flow offloading
+      nftables-flowtable = {
+        description = "Add nftables flowtable for hardware offloading";
+        after = [ "nftables.service" "network-online.target" ];
+        wants = [ "network-online.target" ];
+        wantedBy = [ "multi-user.target" ];
+
+        script = ''
+          # Add flowtable to existing inet filter table
+          ${pkgs.nftables}/bin/nft add flowtable inet filter f '{ hook ingress priority 0; devices = { enp101s0, enp4s0 }; }' 2>/dev/null || true
+          
+          # Add flow offload rule at the beginning of forward chain
+          ${pkgs.nftables}/bin/nft insert rule inet filter forward position 0 ip protocol { tcp, udp } flow offload @f 2>/dev/null || true
+        '';
+
+        serviceConfig = {
+          Type = "oneshot";
+          RemainAfterExit = true;
+        };
       };
 
       nic-optimizations = {
