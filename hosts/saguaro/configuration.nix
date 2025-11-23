@@ -37,7 +37,7 @@
     nameservers = [ "127.0.0.1" ];
 
     interfaces = {
-      # Intel I225-V NIC for LAN (2.5G)
+      # Intel I225-V NIC for router LAN (2.5G)
       enp100s0.useDHCP = false;
       # WAN interface gets DHCP from ISP
       enp101s0.useDHCP = true;
@@ -46,7 +46,8 @@
     firewall = {
       enable = false; # Disabled - using nftables instead
       checkReversePath = false;
-      allowedTCPPorts = [ 22 443 ];
+      # 8443 for incus temporarily
+      allowedTCPPorts = [ 22 443 8443 ];
       #      trustedInterfaces = [ "br1" "tailscale0" ];
     };
     nftables = {
