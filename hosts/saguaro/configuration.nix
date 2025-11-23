@@ -196,7 +196,8 @@
           ${pkgs.nftables}/bin/nft add flowtable inet filter f '{ hook ingress priority 0; devices = { enp101s0, enp4s0 }; }' 2>/dev/null || true
           
           # Add flow offload rule at the beginning of forward chain
-          ${pkgs.nftables}/bin/nft insert rule inet filter forward position 0 ip protocol { tcp, udp } flow offload @f 2>/dev/null || true
+          # Use meta l4proto for proper nftables syntax
+          ${pkgs.nftables}/bin/nft insert rule inet filter forward position 0 meta l4proto { tcp, udp } flow offload @f 2>/dev/null || true
         '';
 
         serviceConfig = {
