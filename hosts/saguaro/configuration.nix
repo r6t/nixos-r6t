@@ -72,6 +72,10 @@
             # DNS from LAN
             iifname "enp100s0" tcp dport 53 accept
             iifname "enp100s0" udp dport 53 accept
+            # Syncthing from LAN
+            iifname "enp100s0" tcp dport 8384 accept
+            # Incus from LAN
+            iifname "enp100s0" tcp dport 8443 accept
             # Caddy from Tailscale + LAN ONLY
             iifname { "tailscale0", "enp100s0" } tcp dport { 80, 443 } accept
           }
