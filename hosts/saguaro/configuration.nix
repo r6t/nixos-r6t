@@ -174,27 +174,6 @@
         requires = [ "mnt-kingston240.mount" ];
       };
 
-      # Monitoring services - wait for LUKS mount
-      alloy = {
-        after = [ "mnt-kingston240.mount" ];
-        requires = [ "mnt-kingston240.mount" ];
-      };
-
-      grafana = {
-        after = [ "mnt-kingston240.mount" ];
-        requires = [ "mnt-kingston240.mount" ];
-      };
-
-      loki = {
-        after = [ "mnt-kingston240.mount" ];
-        requires = [ "mnt-kingston240.mount" ];
-      };
-
-      prometheus = {
-        after = [ "mnt-kingston240.mount" ];
-        requires = [ "mnt-kingston240.mount" ];
-      };
-
       # Network stack services - depend on systemd-networkd
       dnsmasq = {
         after = [ "systemd-networkd.service" ];

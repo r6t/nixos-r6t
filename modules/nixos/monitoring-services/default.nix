@@ -283,7 +283,8 @@ in
       services =
         let
           # Determine mount unit name from dataDir path
-          mountUnit = lib.strings.removePrefix "/" (lib.strings.replaceStrings [ "/" ] [ "-" ] cfg.dataDir) + ".mount";
+          # Example: /mnt/kingston240 -> mnt-kingston240.mount
+          mountUnit = (lib.strings.replaceStrings [ "/" ] [ "-" ] (lib.strings.removePrefix "/" cfg.dataDir)) + ".mount";
           # Check if dataDir is not in /var/lib (which would need a mount dependency)
           needsMountDependency = !(lib.hasPrefix "/var/lib" cfg.dataDir);
           mountDependency = lib.optionalAttrs needsMountDependency {
