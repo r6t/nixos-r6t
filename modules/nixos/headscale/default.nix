@@ -1,4 +1,4 @@
-{ lib, config, ... }:
+{ lib, config, userConfig, ... }:
 
 let
   cfg = config.mine.headscale;
@@ -39,5 +39,7 @@ in
     };
     mine.caddy.enable = cfg.enableCaddy;
     networking.firewall.allowedTCPPorts = lib.mkIf cfg.enableCaddy [ 443 ];
+
+    users.users.${userConfig.username}.extraGroups = [ "headscale" ];
   };
 }
