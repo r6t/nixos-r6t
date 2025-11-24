@@ -161,9 +161,9 @@
   system.stateVersion = "23.11";
 
   systemd = {
-    tmpfiles.rules = [
-    ];
+    tmpfiles.rules = [ ];
     services = {
+      # Storage-dependent services - wait for LUKS mount
       caddy = {
         after = [ "mnt-kingston240.mount" ];
         requires = [ "mnt-kingston240.mount" ];
@@ -174,38 +174,7 @@
         requires = [ "mnt-kingston240.mount" ];
       };
 
-      headscale = {
-        after = [ "caddy.service" ];
-        requires = [ "caddy.service" ];
-      };
-
-      tailscale = {
-        after = [ "dnsmasq.service" "caddy.service" "headscale.service" ];
-        wants = [ "dnsmasq.service" "caddy.service" "headscale.service" ];
-      };
-
-      syncthing = {
-        after = [ "tailscale.service" ];
-        requires = [ "tailscale.service" ];
-      };
-
-      router-services-check = {
-        description = "Check that all router services are running";
-        after = [ "caddy.service" "incus.service" "headscale.service" "syncthing.service" "nextdns.service" "dnsmasq.service" "nftables.service" ];
-        requires = [ "caddy.service" "incus.service" "headscale.service" "syncthing.service" "nextdns.service" "dnsmasq.service" "nftables.service" ];
-        serviceConfig = {
-          Type = "oneshot";
-          ExecStart = "${pkgs.systemd}/bin/systemctl is-active caddy incus headscale syncthing nextdns dnsmasq nftables";
-          RemainAfterExit = true;
-        };
-      };
-
-      systemd-networkd-wait-online.enable = lib.mkForce false;
-      nix-daemon.serviceConfig = {
-        CPUQuota = "800%";
-      };
-
-      # Ensure dnsmasq waits for network to be configured
+      # Network stack services - depend on systemd-networkd
       dnsmasq = {
         after = [ "systemd-networkd.service" ];
         wants = [ "systemd-networkd.service" ];
@@ -219,6 +188,43 @@
       nftables = {
         after = [ "systemd-networkd.service" ];
         requires = [ "systemd-networkd.service" ];
+      };
+
+      # Headscale depends on caddy for TLS termination
+      headscale = {
+        after = [ "caddy.service" ];
+        requires = [ "caddy.service" ];
+      };
+
+      # Tailscale depends on control plane being ready
+      tailscale = {
+        after = [ "dnsmasq.service" "caddy.service" "headscale.service" ];
+        wants = [ "dnsmasq.service" "caddy.service" "headscale.service" ];
+      };
+
+      # Syncthing depends on tailscale for connectivity
+      syncthing = {
+        after = [ "tailscale.service" ];
+        wants = [ "tailscale.service" ];
+      };
+
+      # Router health check service
+      router-services-check = {
+        description = "Check that all router services are running";
+        after = [ "caddy.service" "incus.service" "headscale.service" "syncthing.service" "nextdns.service" "dnsmasq.service" "nftables.service" ];
+        requires = [ "caddy.service" "incus.service" "headscale.service" "syncthing.service" "nextdns.service" "dnsmasq.service" "nftables.service" ];
+        wantedBy = [ "multi-user.target" ];
+        serviceConfig = {
+          Type = "oneshot";
+          ExecStart = "${pkgs.systemd}/bin/systemctl is-active caddy incus headscale syncthing nextdns dnsmasq nftables";
+          RemainAfterExit = true;
+        };
+      };
+
+      # System configuration
+      systemd-networkd-wait-online.enable = lib.mkForce false;
+      nix-daemon.serviceConfig = {
+        CPUQuota = "800%";
       };
     };
     network = {
