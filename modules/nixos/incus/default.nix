@@ -1,4 +1,4 @@
-{ lib, config, pkgs, userConfig, ... }:
+{ lib, config, userConfig, ... }:
 
 let
   svc = "incus";

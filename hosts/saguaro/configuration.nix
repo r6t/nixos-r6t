@@ -41,14 +41,17 @@
       enp100s0.useDHCP = false;
       # WAN interface gets DHCP from ISP
       enp101s0.useDHCP = true;
+      # USB NIC for VM
+      enp0s13f0u3c2.useDHCP = false;
     };
 
     firewall = {
       enable = false; # Disabled - using nftables instead
       checkReversePath = false;
+      # 8123 for home assistant
       # 8384 for syncthing temp
       # 8443 for incus temporarily
-      allowedTCPPorts = [ 22 443 8384 8443 ];
+      allowedTCPPorts = [ 22 443 8123 8384 8443 ];
       #      trustedInterfaces = [ "br1" "tailscale0" ];
     };
     nftables = {
@@ -59,7 +62,7 @@
             type filter hook input priority 0; policy drop;
             # Loopback always allowed
             iifname "lo" accept
-            # DHCP from LAN (before conntrack - DHCP packets are often marked invalid)
+            # DHCP from LAN (before conntrack)
             iifname "enp100s0" udp dport 67 accept
             # Established/related from anywhere
             ct state { established, related } accept
@@ -73,6 +76,8 @@
             # DNS from LAN
             iifname "enp100s0" tcp dport 53 accept
             iifname "enp100s0" udp dport 53 accept
+            # Home Assistant from LAN
+            iifname "enp100s0" tcp dport 8123 accept
             # Syncthing from LAN
             iifname "enp100s0" tcp dport { 8384, 22000 } accept
             # Incus from LAN
