@@ -162,10 +162,44 @@
 
   systemd = {
     tmpfiles.rules = [
-      "L /etc/caddy/Caddyfile - - - - /mnt/kingston240/caddy/Caddyfile"
-      "L /etc/caddy/caddy.env - - - - /mnt/kingston240/caddy/caddy.env"
     ];
     services = {
+      caddy = {
+        after = [ "mnt-kingston240.mount" ];
+        requires = [ "mnt-kingston240.mount" ];
+      };
+
+      incus = {
+        after = [ "mnt-kingston240.mount" ];
+        requires = [ "mnt-kingston240.mount" ];
+      };
+
+      headscale = {
+        after = [ "caddy.service" ];
+        requires = [ "caddy.service" ];
+      };
+
+      tailscale = {
+        after = [ "systemd-networkd.service" "dnsmasq.service" "headscale.service" ];
+        requires = [ "systemd-networkd.service" "dnsmasq.service" "headscale.service" ];
+      };
+
+      syncthing = {
+        after = [ "tailscale.service" ];
+        requires = [ "tailscale.service" ];
+      };
+
+      router-services-check = {
+        description = "Check that all router services are running";
+        after = [ "caddy.service" "incus.service" "headscale.service" "tailscale.service" "syncthing.service" "nextdns.service" "dnsmasq.service" "nftables.service" ];
+        requires = [ "caddy.service" "incus.service" "headscale.service" "tailscale.service" "syncthing.service" "nextdns.service" "dnsmasq.service" "nftables.service" ];
+        serviceConfig = {
+          Type = "oneshot";
+          ExecStart = "${pkgs.systemd}/bin/systemctl is-active caddy incus headscale tailscale syncthing nextdns dnsmasq nftables";
+          RemainAfterExit = true;
+        };
+      };
+
       systemd-networkd-wait-online.enable = lib.mkForce false;
       nix-daemon.serviceConfig = {
         CPUQuota = "800%";
@@ -175,6 +209,16 @@
       dnsmasq = {
         after = [ "systemd-networkd.service" ];
         wants = [ "systemd-networkd.service" ];
+      };
+
+      nextdns = {
+        after = [ "systemd-networkd.service" ];
+        requires = [ "systemd-networkd.service" ];
+      };
+
+      nftables = {
+        after = [ "systemd-networkd.service" ];
+        requires = [ "systemd-networkd.service" ];
       };
     };
     network = {
@@ -230,7 +274,11 @@
     alloy.enable = true;
     bolt.enable = true;
     bootloader.enable = true;
-    caddy.enable = true;
+    caddy = {
+      enable = true;
+      configFile = "/mnt/kingston240/caddy/Caddyfile";
+      environmentFile = "/mnt/kingston240/caddy/caddy.env";
+    };
     env.enable = true;
     fwupd.enable = true;
     fzf.enable = true;
