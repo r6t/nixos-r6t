@@ -160,15 +160,10 @@
 
   system.stateVersion = "23.11";
 
-
-
-
   systemd = {
     tmpfiles.rules = [
-      "d /mnt/thunderbay 0755 root root -"
-      "d /mnt/thunderkey 0755 root root -"
-      "L /etc/caddy/Caddyfile - - - - /mnt/crownstore/Sync/app-config/caddy/crown.Caddyfile"
-      "L /etc/caddy/caddy.env - - - - /mnt/crownstore/Sync/app-config/caddy/crown.caddy.env"
+      "L /etc/caddy/Caddyfile - - - - /mnt/kingston240/caddy/Caddyfile"
+      "L /etc/caddy/caddy.env - - - - /mnt/kingston240/caddy/caddy.env"
     ];
     services = {
       systemd-networkd-wait-online.enable = lib.mkForce false;
@@ -218,10 +213,6 @@
         };
       };
     };
-    #      "10-enp5s0" = { matchConfig.Path = "pci-0000:05:00.0"; linkConfig.Name = "enp5s0"; };
-    #      "10-enp6s0" = { matchConfig.Path = "pci-0000:06:00.0"; linkConfig.Name = "enp6s0"; };
-    #      "10-enp7s0" = { matchConfig.Path = "pci-0000:07:00.0"; linkConfig.Name = "enp7s0"; };
-    #      "10-enp8s0" = { matchConfig.Path = "pci-0000:09:00.0"; linkConfig.Name = "enp8s0"; };
   };
 
 
