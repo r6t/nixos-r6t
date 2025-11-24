@@ -198,8 +198,8 @@
 
       # Syncthing depends on tailscale for connectivity
       syncthing = {
-        after = [ "tailscale.service" ];
-        wants = [ "tailscale.service" ];
+        after = [ "tailscaled.service" ];
+        wants = [ "tailscaled.service" ];
       };
 
       # Router health check service
