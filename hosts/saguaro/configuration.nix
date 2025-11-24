@@ -243,7 +243,11 @@
     localization.enable = true;
     nix.enable = true;
     rdfind.enable = true;
-    sops.enable = true;
+    sops = {
+      enable = true;
+      defaultSopsFile = "/mnt/kingston240/sops-ryan/secrets.yaml";
+      ageKeyFile = "/mnt/kingston240/age/keys.txt";
+    };
     ssh.enable = true;
     sshfs.enable = true;
     syncthing.enable = true;
