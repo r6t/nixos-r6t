@@ -1,8 +1,10 @@
 ## Rules
 
+- only modify files that are part of this flake git project. for files outside this scope needing modification, tell me to do it.
 - do not run git add, commit, or push actions
 - do not run nixos rebuild actions
-- do not run nix flake update
+- do not run nix build actions
+- do not run nix flake update or modify ./flake.lock
 
 ## Setup commands
 
@@ -16,6 +18,7 @@
 
 ## Environment
 
+- I almost always do flake development work on the host "mountainball" so if we're working on another host, consider that is almost certainly not the current host you're running on.
 - fish shell. suggestions for shell actions should be done in fish
 - NixOS with flakes
 - after making changes to the nix flake, run ./format.fish and update flake code accordingly if needed.

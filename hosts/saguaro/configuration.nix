@@ -196,12 +196,6 @@
         requires = [ "caddy.service" ];
       };
 
-      # Tailscale depends on control plane being ready
-      tailscale = {
-        after = [ "dnsmasq.service" "caddy.service" "headscale.service" ];
-        wants = [ "dnsmasq.service" "caddy.service" "headscale.service" ];
-      };
-
       # Syncthing depends on tailscale for connectivity
       syncthing = {
         after = [ "tailscale.service" ];
