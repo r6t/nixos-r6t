@@ -243,17 +243,26 @@
     env.enable = true;
     fwupd.enable = true;
     fzf.enable = true;
+
+    headscale = {
+      enable = true;
+      serverUrl = "https://headscale.r6t.io";
+      baseDomain = "r6.internal";
+    };
+
     iperf.enable = true;
     incus.enable = true;
     localization.enable = true;
     mountLuksStore.kingston240 = { device = "/dev/disk/by-uuid/d7c2abad-2a6d-47ef-8310-dd57fb1156b9"; keyFile = "/root/kingston240key"; mountPoint = "/mnt/kingston240"; };
     nix.enable = true;
     rdfind.enable = true;
+
     sops = {
       enable = true;
       defaultSopsFile = "/mnt/kingston240/sops-ryan/secrets.yaml";
       ageKeyFile = "/mnt/kingston240/age/keys.txt";
     };
+
     ssh.enable = true;
     sshfs.enable = true;
     syncthing.enable = true;
