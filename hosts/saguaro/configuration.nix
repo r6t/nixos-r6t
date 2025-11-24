@@ -181,7 +181,7 @@
 
       tailscale = {
         after = [ "systemd-networkd.service" "dnsmasq.service" "headscale.service" ];
-        requires = [ "systemd-networkd.service" "dnsmasq.service" "headscale.service" ];
+        wants = [ "systemd-networkd.service" "dnsmasq.service" "headscale.service" ];
       };
 
       syncthing = {
