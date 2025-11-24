@@ -180,8 +180,8 @@
       };
 
       tailscale = {
-        after = [ "systemd-networkd.service" "dnsmasq.service" "headscale.service" ];
-        wants = [ "systemd-networkd.service" "dnsmasq.service" "headscale.service" ];
+        after = [ "dnsmasq.service" "caddy.service" "headscale.service" ];
+        wants = [ "dnsmasq.service" "caddy.service" "headscale.service" ];
       };
 
       syncthing = {
@@ -191,11 +191,11 @@
 
       router-services-check = {
         description = "Check that all router services are running";
-        after = [ "caddy.service" "incus.service" "headscale.service" "tailscale.service" "syncthing.service" "nextdns.service" "dnsmasq.service" "nftables.service" ];
-        requires = [ "caddy.service" "incus.service" "headscale.service" "tailscale.service" "syncthing.service" "nextdns.service" "dnsmasq.service" "nftables.service" ];
+        after = [ "caddy.service" "incus.service" "headscale.service" "syncthing.service" "nextdns.service" "dnsmasq.service" "nftables.service" ];
+        requires = [ "caddy.service" "incus.service" "headscale.service" "syncthing.service" "nextdns.service" "dnsmasq.service" "nftables.service" ];
         serviceConfig = {
           Type = "oneshot";
-          ExecStart = "${pkgs.systemd}/bin/systemctl is-active caddy incus headscale tailscale syncthing nextdns dnsmasq nftables";
+          ExecStart = "${pkgs.systemd}/bin/systemctl is-active caddy incus headscale syncthing nextdns dnsmasq nftables";
           RemainAfterExit = true;
         };
       };
