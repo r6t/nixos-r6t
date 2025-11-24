@@ -1,9 +1,9 @@
 ## Rules
 
 - only modify files that are part of this flake git project. for files outside this scope needing modification, tell me to do it.
-- do not run git add, commit, or push actions
-- do not run nixos rebuild or nix build actions
-- do not run nix flake update or modify ./flake.lock
+- never run git add, commit, or push actions
+- never run nixos rebuild or nix build actions
+- never run nix flake update or modify ./flake.lock
 
 ## Environment
 
@@ -11,6 +11,7 @@
 - flake developement is almost exclusively done on the host "mountainball". assume you're running there unless I say otherwise in the prompt. this means commands to check systems other than mountainball cannot be run locally.
 - fish shell. suggestions for shell actions should be done in fish
 - after making changes to the nix flake, run ./format.fish and update flake code accordingly if needed.
+- every module must be listed on modules/default.nix
 
 ### Structure
 

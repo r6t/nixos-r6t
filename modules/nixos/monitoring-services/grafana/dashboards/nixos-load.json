@@ -1,0 +1,58 @@
+{
+  "title": "r6 NixOS Systems: Load Averages",
+  "uid": "r6-systems-load",
+  "tags": ["nixos", "systems"],
+  "timezone": "browser",
+  "schemaVersion": 37,
+  "version": 1,
+  "panels": [
+    {
+      "id": 2,
+      "type": "row",
+      "title": "Individual Host Load",
+      "collapsed": false
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "Load Averages - $instance",
+      "gridPos": { "x": 0, "y": 1, "w": 24, "h": 8 },
+      "repeat": "instance",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "node_load1{job=\"r6-nix-systems\", instance=\"$instance\"}",
+          "legendFormat": "1m",
+          "refId": "A"
+        },
+        {
+          "expr": "node_load5{job=\"r6-nix-systems\", instance=\"$instance\"}",
+          "legendFormat": "5m",
+          "refId": "B"
+        },
+        {
+          "expr": "node_load15{job=\"r6-nix-systems\", instance=\"$instance\"}",
+          "legendFormat": "15m",
+          "refId": "C"
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        }
+      }
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "instance",
+        "type": "query",
+        "query": "label_values(node_load1{job=\"r6-nix-systems\"}, instance)",
+        "refresh": 2,
+        "sort": 1
+      }
+    ]
+  }
+}

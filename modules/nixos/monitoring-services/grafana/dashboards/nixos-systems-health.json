@@ -1,0 +1,190 @@
+{
+  "title": "r6 Nix Systems: General Monitoring",
+  "uid": "r6-nix-full",
+  "tags": ["nixos", "systems", "monitoring"],
+  "timezone": "browser",
+  "schemaVersion": 37,
+  "version": 2,
+  "editable": true,
+  "refresh": "30s",
+  "panels": [
+    {
+      "id": 1,
+      "type": "row",
+      "title": "Host Overview",
+      "collapsed": false,
+      "gridPos": { "x": 0, "y": 0, "w": 24, "h": 1 }
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Host Status",
+      "gridPos": { "x": 0, "y": 1, "w": 24, "h": 2 },
+      "datasource": "Prometheus",
+      "options": {
+        "reduceOptions": { "values": false },
+        "text": {},
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "count(node_uname_info{job=\"r6-nix-systems\"})",
+          "legendFormat": "Total Hosts",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "row",
+      "title": "CPU & Memory",
+      "collapsed": false,
+      "gridPos": { "x": 0, "y": 3, "w": 24, "h": 1 }
+    },
+    {
+      "id": 4,
+      "type": "timeseries",
+      "title": "CPU Usage - $instance",
+      "gridPos": { "x": 0, "y": 4, "w": 24, "h": 8 },
+      "repeat": "instance",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "100 - (avg by (instance) (irate(node_cpu_seconds_total{job=\"r6-nix-systems\",mode=\"idle\"}[5m])) * 100)",
+          "legendFormat": "Used",
+          "refId": "A"
+        },
+        {
+          "expr": "avg by (instance) (irate(node_cpu_seconds_total{job=\"r6-nix-systems\",mode=\"user\"}[5m])) * 100",
+          "legendFormat": "User",
+          "refId": "B"
+        },
+        {
+          "expr": "avg by (instance) (irate(node_cpu_seconds_total{job=\"r6-nix-systems\",mode=\"system\"}[5m])) * 100",
+          "legendFormat": "System",
+          "refId": "C"
+        }
+      ],
+      "options": {
+        "legend": { "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "multi", "sort": "descending" }
+      }
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Memory Usage - $instance",
+      "gridPos": { "x": 0, "y": 12, "w": 24, "h": 8 },
+      "repeat": "instance",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "node_memory_MemTotal_bytes{job=\"r6-nix-systems\"} - node_memory_MemAvailable_bytes{job=\"r6-nix-systems\"}",
+          "legendFormat": "Used",
+          "refId": "A"
+        },
+        {
+          "expr": "node_memory_Cached_bytes{job=\"r6-nix-systems\"}",
+          "legendFormat": "Cached",
+          "refId": "B"
+        },
+        {
+          "expr": "node_memory_Buffers_bytes{job=\"r6-nix-systems\"}",
+          "legendFormat": "Buffers",
+          "refId": "C"
+        }
+      ],
+      "options": {
+        "legend": { "displayMode": "table", "placement": "bottom" },
+        "unit": "bytes"
+      }
+    },
+    {
+      "id": 6,
+      "type": "row",
+      "title": "Disk & Network",
+      "collapsed": false,
+      "gridPos": { "x": 0, "y": 20, "w": 24, "h": 1 }
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Disk Usage - $device ($instance)",
+      "gridPos": { "x": 0, "y": 21, "w": 24, "h": 8 },
+      "repeat": "device",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "node_filesystem_avail_bytes{job=\"r6-nix-systems\",device=~\"$device\",fstype!=\"tmpfs\",device!~\"^/dev/loop.*\"}",
+          "legendFormat": "Available",
+          "refId": "A"
+        },
+        {
+          "expr": "node_filesystem_size_bytes{job=\"r6-nix-systems\",device=~\"$device\",fstype!=\"tmpfs\",device!~\"^/dev/loop.*\"}",
+          "legendFormat": "Total",
+          "refId": "B"
+        }
+      ],
+      "options": {
+        "legend": { "displayMode": "table", "placement": "bottom" },
+        "unit": "bytes"
+      }
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "Network Traffic - $device ($instance)",
+      "gridPos": { "x": 0, "y": 29, "w": 24, "h": 8 },
+      "repeat": "device",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "irate(node_network_receive_bytes_total{job=\"r6-nix-systems\",device=~\"$device\"}[5m])*8",
+          "legendFormat": "Receive",
+          "refId": "A"
+        },
+        {
+          "expr": "irate(node_network_transmit_bytes_total{job=\"r6-nix-systems\",device=~\"$device\"}[5m])*8",
+          "legendFormat": "Transmit",
+          "refId": "B"
+        }
+      ],
+      "options": {
+        "legend": { "displayMode": "table", "placement": "bottom" },
+        "unit": "bps"
+      }
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "instance",
+        "type": "query",
+        "query": "label_values(node_uname_info{job=\"r6-nix-systems\"}, instance)",
+        "refresh": 2,
+        "sort": 1
+      },
+      {
+        "name": "device",
+        "type": "query",
+        "query": "label_values(node_filesystem_size_bytes{job=\"r6-nix-systems\",fstype!=\"tmpfs\",device!~\"^/dev/loop.*\"}, device)",
+        "refresh": 2,
+        "sort": 1
+      }
+    ]
+  },
+  "annotations": {
+    "list": [
+      {
+        "name": "High Load",
+        "datasource": "Prometheus",
+        "enable": true,
+        "expr": "node_load5{job=\"r6-nix-systems\"} > count(node_cpu_seconds_total{job=\"r6-nix-systems\",mode=\"idle\"}) by (instance)",
+        "color": "red",
+        "fillOpacity": 10
+      }
+    ]
+  }
+}

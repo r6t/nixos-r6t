@@ -36,6 +36,7 @@
         l = "lsd -l";
         ll = "lsd -la";
         lt = "lsd --tree";
+        o = "opencode";
       };
 
       shellAbbrs = {

@@ -73,7 +73,7 @@
     nixos/libimobiledevice/default.nix
     nixos/localization/default.nix
     nixos/loki/default.nix
-    nixos/moonstore/default.nix
+    nixos/monitoring-services/default.nix
     nixos/mountLuksStore/default.nix
     nixos/mullvad/default.nix
     nixos/n8n/default.nix

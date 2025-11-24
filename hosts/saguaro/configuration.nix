@@ -174,6 +174,27 @@
         requires = [ "mnt-kingston240.mount" ];
       };
 
+      # Monitoring services - wait for LUKS mount
+      alloy = {
+        after = [ "mnt-kingston240.mount" ];
+        requires = [ "mnt-kingston240.mount" ];
+      };
+
+      grafana = {
+        after = [ "mnt-kingston240.mount" ];
+        requires = [ "mnt-kingston240.mount" ];
+      };
+
+      loki = {
+        after = [ "mnt-kingston240.mount" ];
+        requires = [ "mnt-kingston240.mount" ];
+      };
+
+      prometheus = {
+        after = [ "mnt-kingston240.mount" ];
+        requires = [ "mnt-kingston240.mount" ];
+      };
+
       # Network stack services - depend on systemd-networkd
       dnsmasq = {
         after = [ "systemd-networkd.service" ];
@@ -271,14 +292,15 @@
       ssh.enable = true;
     };
 
-    alloy.enable = true;
     bolt.enable = true;
     bootloader.enable = true;
+
     caddy = {
       enable = true;
       configFile = "/mnt/kingston240/caddy/Caddyfile";
       environmentFile = "/mnt/kingston240/caddy/caddy.env";
     };
+
     env.enable = true;
     fwupd.enable = true;
     fzf.enable = true;
@@ -292,6 +314,24 @@
     iperf.enable = true;
     incus.enable = true;
     localization.enable = true;
+
+    monitoring-services = {
+      enable = true;
+      dataDir = "/mnt/kingston240";
+      grafana = {
+        domain = "grafana.r6t.io";
+        oidc = {
+          signoutRedirectUrl = "https://pid.r6t.io/";
+          authUrl = "https://pid.r6t.io/authorize";
+          tokenUrl = "https://pid.r6t.io/api/oidc/token";
+          apiUrl = "https://pid.r6t.io/api/oidc/userinfo";
+        };
+      };
+      prometheus = {
+        scrapeTargets = [ "crown:9000" "mountainball:9000" ];
+      };
+    };
+
     mountLuksStore.kingston240 = { device = "/dev/disk/by-uuid/d7c2abad-2a6d-47ef-8310-dd57fb1156b9"; keyFile = "/root/kingston240key"; mountPoint = "/mnt/kingston240"; };
     nix.enable = true;
     rdfind.enable = true;
