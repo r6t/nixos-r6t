@@ -77,11 +77,6 @@
 
   systemd.services = {
 
-    caddy = {
-      after = [ "mnt-crownstore.mount" ];
-      wants = [ "mnt-crownstore.mount" ];
-    };
-
     tailscale-udp-gro = {
       description = "Enable UDP GRO forwarding for Tailscale on Mellanox interfaces";
       after = [ "network.target" ];
@@ -103,8 +98,6 @@
     tmpfiles.rules = [
       "d /mnt/thunderbay 0755 root root -"
       "d /mnt/thunderkey 0755 root root -"
-      "L /etc/caddy/Caddyfile - - - - /mnt/crownstore/Sync/app-config/caddy/crown.Caddyfile"
-      "L /etc/caddy/caddy.env - - - - /mnt/crownstore/Sync/app-config/caddy/crown.caddy.env"
     ];
     services = {
       # Incus storage managment
@@ -141,7 +134,7 @@
     alloy.enable = true;
     bolt.enable = true;
     bootloader.enable = true;
-    caddy.enable = true;
+    caddy.enable = false;
     env.enable = true;
     fwupd.enable = true;
     fzf.enable = true;
