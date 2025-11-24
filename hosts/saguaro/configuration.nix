@@ -74,7 +74,7 @@
             iifname "enp100s0" tcp dport 53 accept
             iifname "enp100s0" udp dport 53 accept
             # Syncthing from LAN
-            iifname "enp100s0" tcp dport 8384 accept
+            iifname "enp100s0" tcp dport { 8384, 22000 } accept
             # Incus from LAN
             iifname "enp100s0" tcp dport 8443 accept
             # Caddy from Tailscale + LAN ONLY
@@ -241,6 +241,7 @@
     iperf.enable = true;
     incus.enable = true;
     localization.enable = true;
+    mountLuksStore.kingston240 = { device = "/dev/disk/by-uuid/d7c2abad-2a6d-47ef-8310-dd57fb1156b9"; keyFile = "/root/kingston240key"; mountPoint = "/mnt/kingston240"; };
     nix.enable = true;
     rdfind.enable = true;
     sops = {
