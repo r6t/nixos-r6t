@@ -31,7 +31,6 @@ in
       enable = true;
       port = 8080; # default
       address = "127.0.0.1"; # caddy listens on 0/0 and proxies in
-      group = "users";
       settings = {
         server_url = cfg.serverUrl;
         dns = {
@@ -39,9 +38,10 @@ in
           override_local_dns = cfg.overrideLocalDns;
         };
       };
-      user = userConfig.username;
     };
     mine.caddy.enable = cfg.enableCaddy;
     networking.firewall.allowedTCPPorts = lib.mkIf cfg.enableCaddy [ 443 ];
+
+    users.users.${userConfig.username}.extraGroups = [ "headscale" ];
   };
 }
