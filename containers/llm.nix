@@ -56,10 +56,10 @@
   ];
 
   mine = {
-    n8n.enable = true;
+    n8n.enable = false;
     nvidia-cuda.enable = true;
     ollama.enable = true;
-    open-webui.enable = true;
+    open-webui.enable = false;
   };
 }
 
