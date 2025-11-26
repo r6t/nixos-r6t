@@ -33,7 +33,10 @@
     useNetworkd = true;
     hostName = "crown";
     dhcpcd.enable = false;
-    defaultGateway = "192.168.6.1";
+    defaultGateway = {
+      address = "192.168.6.1";
+      interface = "enp1s0d1";
+    };
     nameservers = [ "192.168.6.1" ];
 
     bridges = {
