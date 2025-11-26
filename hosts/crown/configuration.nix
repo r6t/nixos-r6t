@@ -98,6 +98,8 @@
     tmpfiles.rules = [
       "d /mnt/thunderbay 0755 root root -"
       "d /mnt/thunderkey 0755 root root -"
+      "L /etc/caddy/Caddyfile - - - - /mnt/crownstore/Sync/app-config/caddy/crown.Caddyfile"
+      "L /etc/caddy/caddy.env - - - - /mnt/crownstore/Sync/app-config/caddy/crown.caddy.env"
     ];
     services = {
       # Incus storage managment
@@ -134,7 +136,7 @@
     alloy.enable = true;
     bolt.enable = true;
     bootloader.enable = true;
-    caddy.enable = false;
+    caddy.enable = true;
     env.enable = true;
     fwupd.enable = true;
     fzf.enable = true;

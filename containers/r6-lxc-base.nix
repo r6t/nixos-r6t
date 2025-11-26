@@ -59,7 +59,6 @@
       settings.datasource_list = [ "NoCloud" ];
     };
 
-
     # dnsmasq gets port 53
     resolved.enable = lib.mkForce false;
 
@@ -74,17 +73,6 @@
         no-negcache = true;
         dns-forward-max = 1500;
         domain-needed = true;
-
-        # Local overrides (hairpin NAT avoidance)
-        address = [
-          # specific overrides
-          "/headscale.r6t.io/192.168.6.1"
-          "/homeassistant.r6t.io/192.168.6.20"
-
-          # wildcard so app LXCs hit router caddy
-          "/r6t.io/192.168.6.1"
-        ];
-
         # needs 127.0.0.1#53 DNS to be provided
         server = [
           "127.0.0.1#5353"
