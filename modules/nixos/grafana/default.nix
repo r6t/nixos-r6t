@@ -24,26 +24,6 @@ in
           root_url = "https://grafana.r6t.io";
           enforce_domain = true;
         };
-        "auth.basic" = {
-          enabled = false;
-        };
-        "auth.generic_oauth" = {
-          enabled = true;
-          name = "Pocket ID";
-          allow_sign_up = true;
-          auto_login = true;
-          signout_redirect_url = "https://pid.r6t.io/";
-          client_id = "$__file{/var/lib/grafana/oidc_client_id}";
-          client_secret = "$__file{/var/lib/grafana/oidc_client_secret}";
-          scopes = "openid profile email";
-          auth_url = "https://pid.r6t.io/authorize";
-          token_url = "https://pid.r6t.io/api/oidc/token";
-          api_url = "https://pid.r6t.io/api/oidc/userinfo";
-          use_pkce = true;
-          use_refresh_token = true;
-          role_attribute_path = "contains(groups[*], 'admins') && 'GrafanaAdmin' || 'Viewer'";
-          allow_assign_grafana_admin = true;
-        };
       };
       provision = {
         datasources.settings.datasources = [
