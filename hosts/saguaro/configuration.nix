@@ -118,7 +118,7 @@
           "/grafana.r6t.io/192.168.6.1"
 
           # wildcard so app LXCs hit router caddy
-          "/r6t.io/192.168.6.1"
+          "/r6t.io/192.168.6.10"
         ];
 
         # specific CNAMEs take precedence over wildard address values

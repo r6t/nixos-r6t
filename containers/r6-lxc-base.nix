@@ -78,7 +78,7 @@
           "/grafana.r6t.io/192.168.6.1"
 
           # wildcard so app LXCs hit router caddy
-          "/r6t.io/192.168.6.1"
+          "/r6t.io/192.168.6.10"
         ];
         # needs 127.0.0.1#53 DNS to be provided
         server = [
