@@ -73,6 +73,13 @@
         no-negcache = true;
         dns-forward-max = 1500;
         domain-needed = true;
+        address = [
+          # specific overrides
+          "/grafana.r6t.io/192.168.6.1"
+
+          # wildcard so app LXCs hit router caddy
+          "/r6t.io/192.168.6.1"
+        ];
         # needs 127.0.0.1#53 DNS to be provided
         server = [
           "127.0.0.1#5353"
