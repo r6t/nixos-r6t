@@ -150,22 +150,6 @@
         requires = [ "mnt-kingston240.mount" ];
       };
 
-      # Network stack services - depend on systemd-networkd
-      dnsmasq = {
-        after = [ "systemd-networkd.service" ];
-        wants = [ "systemd-networkd.service" ];
-      };
-
-      nextdns = {
-        after = [ "systemd-networkd.service" ];
-        requires = [ "systemd-networkd.service" ];
-      };
-
-      nftables = {
-        after = [ "systemd-networkd.service" ];
-        requires = [ "systemd-networkd.service" ];
-      };
-
       # System configuration
       systemd-networkd-wait-online.enable = lib.mkForce false;
       nix-daemon.serviceConfig = {
