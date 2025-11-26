@@ -1,4 +1,4 @@
-{ inputs, lib, pkgs, ... }:
+{ inputs, lib, ... }:
 
 {
   imports = [
@@ -64,19 +64,13 @@
             ct state invalid drop
             # ICMP for diagnostics
             ip protocol icmp accept
-            # SSH from LAN + Tailscale only
-            iifname { "enp100s0", "tailscale0" } tcp dport 22 accept
+            # SSH from LAN only
+            iifname "enp100s0" tcp dport 22 accept
             # DNS from LAN only
             iifname "enp100s0" tcp dport 53 accept
             iifname "enp100s0" udp dport 53 accept
-            # Home Assistant from LAN + Tailscale
-            iifname { "enp100s0", "tailscale0" } tcp dport 8123 accept
-            # Syncthing from LAN + Tailscale
-            iifname { "enp100s0", "tailscale0" } tcp dport { 8384, 22000 } accept
-            # Incus from LAN + Tailscale
-            iifname { "enp100s0", "tailscale0" } tcp dport 8443 accept
-            # Caddy from Tailscale + LAN (all *.r6t.io services)
-            iifname { "tailscale0", "enp100s0" } tcp dport { 80, 443 } accept
+            # Incus from LAN
+            iifname "enp100s0" tcp dport 8443 accept
           }
           chain output {
             type filter hook output priority 0; policy accept;
@@ -88,8 +82,6 @@
             ct state invalid drop
             # LAN -> WAN
             iifname "enp100s0" oifname "enp101s0" accept
-            # Tailscale -> LAN
-            iifname "tailscale0" oifname "enp100s0" accept
           }
         }
         table ip nat {
@@ -153,11 +145,6 @@
     tmpfiles.rules = [ ];
     services = {
       # Storage-dependent services - wait for LUKS mount
-      caddy = {
-        after = [ "mnt-kingston240.mount" ];
-        requires = [ "mnt-kingston240.mount" ];
-      };
-
       incus = {
         after = [ "mnt-kingston240.mount" ];
         requires = [ "mnt-kingston240.mount" ];
@@ -177,25 +164,6 @@
       nftables = {
         after = [ "systemd-networkd.service" ];
         requires = [ "systemd-networkd.service" ];
-      };
-
-      # Syncthing depends on tailscale for connectivity
-      syncthing = {
-        after = [ "tailscaled.service" ];
-        wants = [ "tailscaled.service" ];
-      };
-
-      # Router health check service
-      router-services-check = {
-        description = "Check that all router services are running";
-        after = [ "caddy.service" "incus.service" "syncthing.service" "nextdns.service" "dnsmasq.service" "nftables.service" ];
-        requires = [ "caddy.service" "incus.service" "syncthing.service" "nextdns.service" "dnsmasq.service" "nftables.service" ];
-        wantedBy = [ "multi-user.target" ];
-        serviceConfig = {
-          Type = "oneshot";
-          ExecStart = "${pkgs.systemd}/bin/systemctl is-active caddy incus syncthing nextdns dnsmasq nftables";
-          RemainAfterExit = true;
-        };
       };
 
       # System configuration
@@ -254,42 +222,15 @@
       ssh.enable = true;
     };
 
-    bolt.enable = true;
     bootloader.enable = true;
-
-    caddy = {
-      enable = true;
-      configFile = "/mnt/kingston240/caddy/Caddyfile";
-      environmentFile = "/mnt/kingston240/caddy/caddy.env";
-    };
-
     env.enable = true;
     fwupd.enable = true;
-    fzf.enable = true;
     iperf.enable = true;
+    fzf.enable = true;
     incus.enable = true;
     localization.enable = true;
-
-    monitoring-services = {
-      enable = true;
-      dataDir = "/mnt/kingston240";
-      grafana = {
-        domain = "grafana.r6t.io";
-        oidc = {
-          signoutRedirectUrl = "https://pid.r6t.io/";
-          authUrl = "https://pid.r6t.io/authorize";
-          tokenUrl = "https://pid.r6t.io/api/oidc/token";
-          apiUrl = "https://pid.r6t.io/api/oidc/userinfo";
-        };
-      };
-      prometheus = {
-        scrapeTargets = [ "crown:9000" "mountainball:9000" ];
-      };
-    };
-
     mountLuksStore.kingston240 = { device = "/dev/disk/by-uuid/d7c2abad-2a6d-47ef-8310-dd57fb1156b9"; keyFile = "/root/kingston240key"; mountPoint = "/mnt/kingston240"; };
     nix.enable = true;
-    rdfind.enable = true;
 
     sops = {
       enable = true;
@@ -298,9 +239,6 @@
     };
 
     ssh.enable = true;
-    sshfs.enable = true;
-    syncthing.enable = true;
-    tailscale.enable = true;
     user.enable = true;
   };
 }
