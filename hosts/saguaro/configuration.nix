@@ -113,6 +113,14 @@
         # Explicit DNS listening addresses
         listen-address = [ "127.0.0.1" "192.168.6.1" ];
 
+        address = [
+          # specific overrides
+          "/grafana.r6t.io/192.168.6.1"
+
+          # wildcard so app LXCs hit router caddy
+          "/r6t.io/192.168.6.1"
+        ];
+
         # DHCP only on LAN interface
         interface = "enp100s0";
 

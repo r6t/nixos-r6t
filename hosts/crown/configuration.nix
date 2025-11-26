@@ -33,6 +33,8 @@
     useNetworkd = true;
     hostName = "crown";
     dhcpcd.enable = false;
+    defaultGateway = "192.168.6.1";
+    nameservers = [ "192.168.6.1" ];
 
     bridges = {
       br1 = { interfaces = [ "enp1s0" ]; };
@@ -41,7 +43,12 @@
     interfaces = {
       enp1s0.useDHCP = false; # Bridge interface
       enp1s0d1 = {
-        useDHCP = true; # Primary host 10G interface picks up DHCP reservation
+        # Primary 10G interface
+        useDHCP = false;
+        ipv4.addresses = [{
+          address = "192.168.6.10";
+          prefixLength = 24;
+        }];
       };
       enp5s0.useDHCP = false; # 2.5G unused
       enp6s0.useDHCP = false; # 2.5G unused
