@@ -48,11 +48,6 @@
     firewall = {
       enable = false; # Disabled - using nftables instead
       checkReversePath = false;
-      # 8123 for home assistant
-      # 8384 for syncthing temp
-      # 8443 for incus temporarily
-      allowedTCPPorts = [ 22 443 8123 8384 8443 ];
-      #      trustedInterfaces = [ "br1" "tailscale0" ];
     };
     nftables = {
       enable = true;
@@ -71,18 +66,16 @@
             ip protocol icmp accept
             # SSH from LAN + Tailscale only
             iifname { "enp100s0", "tailscale0" } tcp dport 22 accept
-            # Headscale from WAN (HTTPS only)
-            iifname "enp101s0" tcp dport 443 ct state new accept
-            # DNS from LAN
+            # DNS from LAN only
             iifname "enp100s0" tcp dport 53 accept
             iifname "enp100s0" udp dport 53 accept
-            # Home Assistant from LAN
-            iifname "enp100s0" tcp dport 8123 accept
-            # Syncthing from LAN
-            iifname "enp100s0" tcp dport { 8384, 22000 } accept
-            # Incus from LAN
-            iifname "enp100s0" tcp dport 8443 accept
-            # Caddy from Tailscale + LAN ONLY
+            # Home Assistant from LAN + Tailscale
+            iifname { "enp100s0", "tailscale0" } tcp dport 8123 accept
+            # Syncthing from LAN + Tailscale
+            iifname { "enp100s0", "tailscale0" } tcp dport { 8384, 22000 } accept
+            # Incus from LAN + Tailscale
+            iifname { "enp100s0", "tailscale0" } tcp dport 8443 accept
+            # Caddy from Tailscale + LAN (all *.r6t.io services)
             iifname { "tailscale0", "enp100s0" } tcp dport { 80, 443 } accept
           }
           chain output {
@@ -138,10 +131,6 @@
         no-negcache = true;
         dns-forward-max = 1500;
         domain-needed = true;
-
-        # Local DNS overrides (hairpin NAT avoidance)
-        address = import ./dns-overrides.nix;
-
         # Upstream DNS - NextDNS
         server = [ "127.0.0.1#5353" ];
       };
@@ -190,12 +179,6 @@
         requires = [ "systemd-networkd.service" ];
       };
 
-      # Headscale depends on caddy for TLS termination
-      headscale = {
-        after = [ "caddy.service" ];
-        requires = [ "caddy.service" ];
-      };
-
       # Syncthing depends on tailscale for connectivity
       syncthing = {
         after = [ "tailscaled.service" ];
@@ -205,12 +188,12 @@
       # Router health check service
       router-services-check = {
         description = "Check that all router services are running";
-        after = [ "caddy.service" "incus.service" "headscale.service" "syncthing.service" "nextdns.service" "dnsmasq.service" "nftables.service" ];
-        requires = [ "caddy.service" "incus.service" "headscale.service" "syncthing.service" "nextdns.service" "dnsmasq.service" "nftables.service" ];
+        after = [ "caddy.service" "incus.service" "syncthing.service" "nextdns.service" "dnsmasq.service" "nftables.service" ];
+        requires = [ "caddy.service" "incus.service" "syncthing.service" "nextdns.service" "dnsmasq.service" "nftables.service" ];
         wantedBy = [ "multi-user.target" ];
         serviceConfig = {
           Type = "oneshot";
-          ExecStart = "${pkgs.systemd}/bin/systemctl is-active caddy incus headscale syncthing nextdns dnsmasq nftables";
+          ExecStart = "${pkgs.systemd}/bin/systemctl is-active caddy incus syncthing nextdns dnsmasq nftables";
           RemainAfterExit = true;
         };
       };
@@ -283,13 +266,6 @@
     env.enable = true;
     fwupd.enable = true;
     fzf.enable = true;
-
-    headscale = {
-      enable = true;
-      serverUrl = "https://headscale.r6t.io";
-      baseDomain = "r6.internal";
-    };
-
     iperf.enable = true;
     incus.enable = true;
     localization.enable = true;
