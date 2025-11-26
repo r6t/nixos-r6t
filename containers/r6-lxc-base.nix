@@ -80,6 +80,10 @@
           # wildcard so app LXCs hit router caddy
           "/r6t.io/192.168.6.10"
         ];
+        # specific CNAMEs take precedence over wildard address values
+        cname = [
+          "homeassistant.r6t.io,homeassistant.cloudforest-darter.ts.net"
+        ];
         # needs 127.0.0.1#53 DNS to be provided
         server = [
           "127.0.0.1#5353"
