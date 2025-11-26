@@ -121,6 +121,11 @@
           "/r6t.io/192.168.6.1"
         ];
 
+        # specific CNAMEs take precedence over wildard address values
+        cname = [
+          "homeassistant.r6t.io,homeassistant.cloudforest-darter.ts.net"
+        ];
+
         # DHCP only on LAN interface
         interface = "enp100s0";
 

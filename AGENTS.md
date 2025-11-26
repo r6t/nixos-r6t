@@ -1,6 +1,6 @@
 ## Rules
 
-- only modify files that are part of this flake git project. for files outside this scope needing modification, tell me to do it.
+- only modify files that are part of this flake git project. for files outside this scope needing modification, tell me to do it. one exception: you can mkdir in /tmp and use any directories that you created in /tmp for things like downloading git repos to inspect
 - never run git add, commit, or push actions
 - never run nixos rebuild or nix build actions
 - never run nix flake update or modify ./flake.lock
@@ -27,6 +27,5 @@
 
 ## Code style
 
-- Nix flake that manages multiple systems
 - Repeated configurations are stored in modules, with host-specific details defined in hosts/
 - Use options in modules where it makes sense, hardcoding general config values in modules is ok if I'm unlikely to use other options across my workstations and servers.
