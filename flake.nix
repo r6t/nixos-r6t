@@ -40,6 +40,14 @@
     {
       # Bare-metal hosts
       nixosConfigurations = {
+        # cold storage
+        barrel = nixpkgs.lib.nixosSystem {
+          specialArgs = { inherit userConfig inputs outputs; };
+          modules = [
+            ./hosts/barrel/configuration.nix
+          ];
+        };
+        # primary server
         crown = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit userConfig inputs outputs; };
           modules = [
@@ -53,6 +61,7 @@
             }
           ];
         };
+        # laptop
         mountainball = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit userConfig inputs outputs; };
           modules = [
@@ -66,6 +75,7 @@
             }
           ];
         };
+        # router + appliances
         saguaro = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit userConfig inputs outputs; };
           modules = [
