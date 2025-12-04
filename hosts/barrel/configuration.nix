@@ -148,6 +148,7 @@
     fzf.enable = true;
     localization.enable = true;
     nix.enable = true;
+    sops.enable = true;
     ssh.enable = true;
     user.enable = true;
   };
