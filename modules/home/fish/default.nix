@@ -44,7 +44,7 @@
         g = "git";
         ga = "git add";
         gb = "git branch";
-        gc = "git commit";
+        gc = "git commit -m '";
         gd = "git diff";
         gds = "git diff --staged";
         gg = "git status";
