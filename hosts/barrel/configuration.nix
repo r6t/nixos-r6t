@@ -9,17 +9,31 @@
     ../../modules/default.nix
   ];
 
+  boot = {
+    supportedFilesystems = [ "zfs" ];
+  };
+
   networking = {
     enableIPv6 = false;
     useNetworkd = true;
     hostName = "barrel";
     nameservers = [ "127.0.0.1" ];
+    defaultGateway = {
+      address = "192.168.6.1";
+      interface = "";
+    };
 
     interfaces = {
       # Lower port unused
       eno1.useDHCP = false;
-      # Upper port DHCP
-      eno2.useDHCP = true;
+      # Upper port static IP
+      eno2 = {
+        useDHCP = false;
+        ipv4.addresses = [{
+          address = "192.168.6.3";
+          prefixLength = 24;
+        }];
+      };
     };
 
     # firewall = {
