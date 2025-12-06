@@ -23,7 +23,7 @@
     enableIPv6 = false;
     useNetworkd = true;
     hostName = "barrel";
-    nameservers = [ "127.0.0.1" ];
+    nameservers = [ "192.168.6.1" ];
     defaultGateway = {
       address = "192.168.6.1";
       interface = "";
@@ -97,43 +97,6 @@
 
   services = {
     journald.extraConfig = "SystemMaxUse=500M";
-
-    resolved.enable = lib.mkForce false;
-
-    dnsmasq = {
-      enable = true;
-      resolveLocalQueries = false;
-      settings = {
-        # Bind to interfaces as they come up (timing fix)
-        bind-dynamic = true;
-
-        # Explicit DNS listening addresses
-        listen-address = [ "127.0.0.1" "192.168.6.1" ];
-
-        # DHCP only on LAN interface
-        interface = "enp100s0";
-
-        # DNS Configuration only (DHCP handled by systemd-networkd)
-        no-resolv = true;
-        no-poll = true;
-        cache-size = 10000;
-        no-negcache = true;
-        dns-forward-max = 1500;
-        domain-needed = true;
-        # Upstream DNS - NextDNS
-        server = [ "127.0.0.1#5353" ];
-      };
-    };
-
-    nextdns = {
-      enable = true;
-      arguments = [
-        "-config-file"
-        "/mnt/nextdns.conf"
-        "-listen"
-        "127.0.0.1:5353"
-      ];
-    };
   };
 
   system.stateVersion = "23.11";
