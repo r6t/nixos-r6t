@@ -20,6 +20,7 @@
   };
 
   networking = {
+    hostId = "eb5912c9";
     enableIPv6 = false;
     useNetworkd = true;
     hostName = "barrel";
