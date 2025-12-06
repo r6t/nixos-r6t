@@ -26,7 +26,7 @@
     nameservers = [ "192.168.6.1" ];
     defaultGateway = {
       address = "192.168.6.1";
-      interface = "";
+      interface = "eno2";
     };
 
     interfaces = {
@@ -97,6 +97,10 @@
 
   services = {
     journald.extraConfig = "SystemMaxUse=500M";
+    resolved = {
+      enable = true;
+      domains = [ "~." ];
+    };
   };
 
   system.stateVersion = "23.11";
