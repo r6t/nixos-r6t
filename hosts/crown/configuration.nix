@@ -171,6 +171,14 @@
     syncthing.enable = true;
     tailscale.enable = true;
     user.enable = true;
-    zfs-hdd-pool.enable = true;
+
+    zfs-pool = {
+      hdd-pool = {
+        poolName = "hdd-pool";
+        keyFile = "/mnt/thunderkey/hdd-pool.key";
+        after = [ "mnt-thunderkey.mount" ];
+        requires = [ "mnt-thunderkey.mount" ];
+      };
+    };
   };
 }

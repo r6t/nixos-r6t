@@ -13,6 +13,12 @@
     supportedFilesystems = [ "zfs" ];
   };
 
+  fileSystems."/mnt/zfskey" = {
+    device = "/dev/disk/by-uuid/213b225c-366b-4577-a56f-366fe577d482";
+    fsType = "ext4";
+    options = [ "noatime" ];
+  };
+
   networking = {
     enableIPv6 = false;
     useNetworkd = true;
@@ -133,7 +139,10 @@
   system.stateVersion = "23.11";
 
   systemd = {
-    tmpfiles.rules = [ ];
+    tmpfiles.rules = [
+      "d /mnt/cold-pool 0755 root root -"
+      "d /mnt/zfskey 0755 root root -"
+    ];
     services = {
       # System configuration
       systemd-networkd-wait-online.enable = lib.mkForce false;
@@ -165,5 +174,14 @@
     sops.enable = true;
     ssh.enable = true;
     user.enable = true;
+
+    zfs-pool = {
+      cold-pool = {
+        poolName = "cold-pool";
+        keyFile = "/mnt/zfskey/cold-pool.key";
+        after = [ "mnt-zfskey.mount" ];
+        requires = [ "mnt-zfskey.mount" ];
+      };
+    };
   };
 }
