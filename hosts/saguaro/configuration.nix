@@ -115,15 +115,13 @@
 
         address = [
           # specific overrides
+          "/crown/192.168.6.10"
           "/grafana.r6t.io/192.168.6.1"
+          "/homeassistant.r6t.io/100.124.208.128"
+          "/saguaro/192.168.6.1"
 
           # wildcard so app LXCs hit router caddy
           "/r6t.io/192.168.6.10"
-        ];
-
-        # specific CNAMEs take precedence over wildard address values
-        cname = [
-          "homeassistant.r6t.io,homeassistant.cloudforest-darter.ts.net"
         ];
 
         # DHCP only on LAN interface
