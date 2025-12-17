@@ -158,6 +158,10 @@
         keyFile = "/mnt/zfskey/cold-pool.key";
         after = [ "mnt-zfskey.mount" ];
         requires = [ "mnt-zfskey.mount" ];
+
+        snapshots = {
+          enable = false; # Snapshots arrive via replication from crown
+        };
       };
     };
   };

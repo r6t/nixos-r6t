@@ -178,6 +178,31 @@
         keyFile = "/mnt/thunderkey/hdd-pool.key";
         after = [ "mnt-thunderkey.mount" ];
         requires = [ "mnt-thunderkey.mount" ];
+
+        snapshots = {
+          enable = true;
+          datasets = [ "pictures" "sync" "scansnap" "music" ];
+
+          daily = {
+            enable = true;
+            keep = 7;
+            time = "02:00";
+          };
+
+          weekly = {
+            enable = true;
+            keep = 4;
+            time = "03:00";
+            dayOfWeek = "Sun";
+          };
+
+          monthly = {
+            enable = true;
+            keep = 36;
+            time = "04:00";
+            dayOfMonth = 1;
+          };
+        };
       };
     };
   };
