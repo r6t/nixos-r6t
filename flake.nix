@@ -62,6 +62,20 @@
           ];
         };
         # laptop
+        feather = nixpkgs.lib.nixosSystem {
+          specialArgs = { inherit userConfig inputs outputs; };
+          modules = [
+            ./hosts/feather/configuration.nix
+            {
+              nixpkgs.config = {
+                allowUnfree = true;
+                # temporary allow recent EOL
+                permittedInsecurePackages = [ "electron-36.9.5" ];
+              };
+            }
+          ];
+        };
+        # laptop
         mountainball = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit userConfig inputs outputs; };
           modules = [
