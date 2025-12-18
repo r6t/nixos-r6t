@@ -223,11 +223,11 @@
         "systems": "systems"
       },
       "locked": {
-        "lastModified": 1765961056,
-        "narHash": "sha256-RCPRBIqKkwngttpcOhRVMbsCjnKYpc6Q5W7gwp36RN0=",
+        "lastModified": 1766006585,
+        "narHash": "sha256-93p9OyPGpZMhbBYNhVjEbAgiWkExIPEQ20cSqH6cNTw=",
         "owner": "nix-community",
         "repo": "nixvim",
-        "rev": "51bbde565a7538bb4e75defee13b3e951fb0ba81",
+        "rev": "9cb77f6ce4fc8d7c56afcf0fa8b39fb929ea5b01",
         "type": "github"
       },
       "original": {
@@ -312,7 +312,7 @@
     "ssh-keys": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-d3r4yz91t83jmakFWrpSzklOwqQWRGrlmO2fHs9lx+c=",
+        "narHash": "sha256-gw64UQrlDpK6TbHpRkuPZBhAl48G50GtCsbwvRvHVrc=",
         "type": "file",
         "url": "https://github.com/r6t.keys"
       },
