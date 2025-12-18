@@ -46,6 +46,7 @@
 
     nixos/adb/default.nix
     nixos/alloy/default.nix
+    nixos/asusctl/default.nix
     nixos/apache/default.nix
     nixos/bluetooth/default.nix
     nixos/bolt/default.nix

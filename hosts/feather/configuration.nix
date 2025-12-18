@@ -29,12 +29,8 @@
     enable = true;
     enable32Bit = true;
     extraPackages = with pkgs; [
-      amdvlk
       rocmPackages.clr.icd
       rocmPackages.clr
-    ];
-    extraPackages32 = with pkgs; [
-      driversi686Linux.amdvlk
     ];
   };
 
@@ -120,6 +116,7 @@
     };
 
     alloy.enable = false;
+    asusctl.enable = true;
     bluetooth.enable = true;
     bolt.enable = true;
     bootloader.enable = true;
