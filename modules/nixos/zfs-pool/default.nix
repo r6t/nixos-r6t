@@ -335,27 +335,11 @@ in
         users = [ "r6t" ];
         commands = [
           {
-            command = "${pkgs.zfs}/bin/zfs receive";
+            command = "${pkgs.zfs}/bin/zfs";
             options = [ "NOPASSWD" ];
           }
           {
-            command = "${pkgs.zfs}/bin/zfs receive *";
-            options = [ "NOPASSWD" ];
-          }
-          {
-            command = "${pkgs.zfs}/bin/zfs list";
-            options = [ "NOPASSWD" ];
-          }
-          {
-            command = "${pkgs.zfs}/bin/zfs list *";
-            options = [ "NOPASSWD" ];
-          }
-          {
-            command = "${pkgs.zfs}/bin/zpool list";
-            options = [ "NOPASSWD" ];
-          }
-          {
-            command = "${pkgs.zfs}/bin/zpool list *";
+            command = "${pkgs.zfs}/bin/zpool";
             options = [ "NOPASSWD" ];
           }
         ];
