@@ -181,7 +181,6 @@
 
         snapshots = {
           enable = true;
-          datasets = [ "pictures" "sync" "scansnap" "music" ];
 
           daily = {
             enable = true;

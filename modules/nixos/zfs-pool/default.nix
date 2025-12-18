@@ -29,12 +29,7 @@ in
           enable = lib.mkOption {
             type = lib.types.bool;
             default = false;
-            description = "Enable automatic snapshot management for this pool";
-          };
-          datasets = lib.mkOption {
-            type = lib.types.listOf lib.types.str;
-            default = [ ];
-            description = "List of datasets within the pool to snapshot (relative to pool name)";
+            description = "Enable automatic snapshot management for all datasets in this pool";
           };
           daily = {
             enable = lib.mkOption {
@@ -139,38 +134,6 @@ in
         )
         cfg)
 
-      # Manual snapshot services (one-shot for all datasets in pool)
-      (lib.mapAttrs'
-        (name: pool:
-          lib.nameValuePair "zfs-snapshot-${name}-manual" {
-            inherit (pool.snapshots) enable;
-            description = "Manual snapshot of all datasets in ${pool.poolName}";
-            serviceConfig = {
-              Type = "oneshot";
-            };
-            script = ''
-              TIMESTAMP=$(${pkgs.coreutils}/bin/date +%Y-%m-%d-%H%M%S)
-              
-              # Get all datasets in the pool
-              DATASETS=$(${pkgs.zfs}/bin/zfs list -H -o name -r ${pool.poolName} | ${pkgs.gnugrep}/bin/grep -v "^${pool.poolName}$" || true)
-              
-              if [ -z "$DATASETS" ]; then
-                echo "No datasets found in pool ${pool.poolName}"
-                exit 0
-              fi
-              
-              # Create snapshot for each dataset
-              for dataset in $DATASETS; do
-                echo "Creating snapshot: $dataset@manual-$TIMESTAMP"
-                if ! ${pkgs.zfs}/bin/zfs snapshot "$dataset@manual-$TIMESTAMP"; then
-                  echo "ERROR: Failed to create snapshot for $dataset" >&2
-                fi
-              done
-            '';
-          }
-        )
-        (lib.filterAttrs (_: pool: pool.snapshots.enable) cfg))
-
       # Daily snapshot services
       (lib.mapAttrs'
         (name: pool:
@@ -184,17 +147,25 @@ in
               DATE=$(${pkgs.coreutils}/bin/date +%Y-%m-%d)
               CUTOFF_DATE=$(${pkgs.coreutils}/bin/date -d "${toString pool.snapshots.daily.keep} days ago" +%Y-%m-%d)
               
-              # Create snapshots for each configured dataset
-              ${lib.concatMapStringsSep "\n" (dataset: ''
-                echo "Creating daily snapshot: ${pool.poolName}/${dataset}@daily-$DATE"
-                if ! ${pkgs.zfs}/bin/zfs snapshot ${pool.poolName}/${dataset}@daily-$DATE; then
-                  echo "ERROR: Failed to create daily snapshot for ${pool.poolName}/${dataset}" >&2
+              # Get all datasets in the pool (excluding pool root)
+              DATASETS=$(${pkgs.zfs}/bin/zfs list -H -o name -r ${pool.poolName} | ${pkgs.gnugrep}/bin/grep -v "^${pool.poolName}$" || true)
+              
+              if [ -z "$DATASETS" ]; then
+                echo "No datasets found in pool ${pool.poolName}"
+                exit 0
+              fi
+              
+              # Create snapshots for each dataset
+              for dataset in $DATASETS; do
+                echo "Creating daily snapshot: $dataset@daily-$DATE"
+                if ! ${pkgs.zfs}/bin/zfs snapshot "$dataset@daily-$DATE"; then
+                  echo "ERROR: Failed to create daily snapshot for $dataset" >&2
                 fi
-              '') pool.snapshots.datasets}
+              done
               
               # Cleanup old snapshots
-              ${lib.concatMapStringsSep "\n" (dataset: ''
-                ${pkgs.zfs}/bin/zfs list -H -t snapshot -o name -s creation ${pool.poolName}/${dataset} 2>/dev/null | \
+              for dataset in $DATASETS; do
+                ${pkgs.zfs}/bin/zfs list -H -t snapshot -o name -s creation "$dataset" 2>/dev/null | \
                   ${pkgs.gnugrep}/bin/grep "@daily-" | \
                   while read snap; do
                     SNAP_DATE=$(echo "$snap" | ${pkgs.gnused}/bin/sed 's/.*@daily-//')
@@ -205,7 +176,7 @@ in
                       fi
                     fi
                   done
-              '') pool.snapshots.datasets}
+              done
             '';
           }
         )
@@ -222,19 +193,26 @@ in
             };
             script = ''
               WEEK=$(${pkgs.coreutils}/bin/date +%Y-W%V)
-              CUTOFF_WEEKS_AGO=${toString pool.snapshots.weekly.keep}
               
-              # Create snapshots for each configured dataset
-              ${lib.concatMapStringsSep "\n" (dataset: ''
-                echo "Creating weekly snapshot: ${pool.poolName}/${dataset}@weekly-$WEEK"
-                if ! ${pkgs.zfs}/bin/zfs snapshot ${pool.poolName}/${dataset}@weekly-$WEEK; then
-                  echo "ERROR: Failed to create weekly snapshot for ${pool.poolName}/${dataset}" >&2
+              # Get all datasets in the pool (excluding pool root)
+              DATASETS=$(${pkgs.zfs}/bin/zfs list -H -o name -r ${pool.poolName} | ${pkgs.gnugrep}/bin/grep -v "^${pool.poolName}$" || true)
+              
+              if [ -z "$DATASETS" ]; then
+                echo "No datasets found in pool ${pool.poolName}"
+                exit 0
+              fi
+              
+              # Create snapshots for each dataset
+              for dataset in $DATASETS; do
+                echo "Creating weekly snapshot: $dataset@weekly-$WEEK"
+                if ! ${pkgs.zfs}/bin/zfs snapshot "$dataset@weekly-$WEEK"; then
+                  echo "ERROR: Failed to create weekly snapshot for $dataset" >&2
                 fi
-              '') pool.snapshots.datasets}
+              done
               
               # Cleanup old snapshots (keep last N weeks)
-              ${lib.concatMapStringsSep "\n" (dataset: ''
-                ${pkgs.zfs}/bin/zfs list -H -t snapshot -o name -s creation ${pool.poolName}/${dataset} 2>/dev/null | \
+              for dataset in $DATASETS; do
+                ${pkgs.zfs}/bin/zfs list -H -t snapshot -o name -s creation "$dataset" 2>/dev/null | \
                   ${pkgs.gnugrep}/bin/grep "@weekly-" | \
                   ${pkgs.coreutils}/bin/head -n -${toString pool.snapshots.weekly.keep} | \
                   while read snap; do
@@ -243,7 +221,7 @@ in
                       echo "ERROR: Failed to destroy snapshot $snap" >&2
                     fi
                   done
-              '') pool.snapshots.datasets}
+              done
             '';
           }
         )
@@ -261,17 +239,25 @@ in
             script = ''
               MONTH=$(${pkgs.coreutils}/bin/date +%Y-%m)
               
-              # Create snapshots for each configured dataset
-              ${lib.concatMapStringsSep "\n" (dataset: ''
-                echo "Creating monthly snapshot: ${pool.poolName}/${dataset}@monthly-$MONTH"
-                if ! ${pkgs.zfs}/bin/zfs snapshot ${pool.poolName}/${dataset}@monthly-$MONTH; then
-                  echo "ERROR: Failed to create monthly snapshot for ${pool.poolName}/${dataset}" >&2
+              # Get all datasets in the pool (excluding pool root)
+              DATASETS=$(${pkgs.zfs}/bin/zfs list -H -o name -r ${pool.poolName} | ${pkgs.gnugrep}/bin/grep -v "^${pool.poolName}$" || true)
+              
+              if [ -z "$DATASETS" ]; then
+                echo "No datasets found in pool ${pool.poolName}"
+                exit 0
+              fi
+              
+              # Create snapshots for each dataset
+              for dataset in $DATASETS; do
+                echo "Creating monthly snapshot: $dataset@monthly-$MONTH"
+                if ! ${pkgs.zfs}/bin/zfs snapshot "$dataset@monthly-$MONTH"; then
+                  echo "ERROR: Failed to create monthly snapshot for $dataset" >&2
                 fi
-              '') pool.snapshots.datasets}
+              done
               
               # Cleanup old snapshots (keep last N months)
-              ${lib.concatMapStringsSep "\n" (dataset: ''
-                ${pkgs.zfs}/bin/zfs list -H -t snapshot -o name -s creation ${pool.poolName}/${dataset} 2>/dev/null | \
+              for dataset in $DATASETS; do
+                ${pkgs.zfs}/bin/zfs list -H -t snapshot -o name -s creation "$dataset" 2>/dev/null | \
                   ${pkgs.gnugrep}/bin/grep "@monthly-" | \
                   ${pkgs.coreutils}/bin/head -n -${toString pool.snapshots.monthly.keep} | \
                   while read snap; do
@@ -280,7 +266,7 @@ in
                       echo "ERROR: Failed to destroy snapshot $snap" >&2
                     fi
                   done
-              '') pool.snapshots.datasets}
+              done
             '';
           }
         )
