@@ -332,7 +332,7 @@ in
     # Configure passwordless sudo for ZFS receive operations (for replication targets)
     security.sudo.extraRules = lib.mkIf (lib.any (pool: pool.allowRemoteReplication) (lib.attrValues cfg)) [
       {
-        users = [ config.mine.user.username ];
+        users = [ "r6t" ];
         commands = [
           {
             command = "${pkgs.zfs}/bin/zfs receive";
