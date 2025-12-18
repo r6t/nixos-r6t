@@ -179,6 +179,10 @@
         after = [ "mnt-thunderkey.mount" ];
         requires = [ "mnt-thunderkey.mount" ];
 
+        delegation = {
+          enableSend = true; # Allow r6t to send snapshots without sudo
+        };
+
         snapshots = {
           enable = true;
 

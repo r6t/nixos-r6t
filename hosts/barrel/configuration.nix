@@ -159,6 +159,10 @@
         after = [ "mnt-zfskey.mount" ];
         requires = [ "mnt-zfskey.mount" ];
 
+        delegation = {
+          enableReceive = true; # Allow r6t to receive snapshots without sudo
+        };
+
         snapshots = {
           enable = false; # Snapshots arrive via replication from crown
         };
