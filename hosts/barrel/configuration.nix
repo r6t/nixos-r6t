@@ -158,6 +158,7 @@
         keyFile = "/mnt/zfskey/cold-pool.key";
         after = [ "mnt-zfskey.mount" ];
         requires = [ "mnt-zfskey.mount" ];
+        allowRemoteReplication = true; # Enable passwordless sudo for ZFS receive
 
         snapshots = {
           enable = false; # Snapshots arrive via replication from crown

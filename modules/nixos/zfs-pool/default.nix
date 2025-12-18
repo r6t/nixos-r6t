@@ -25,6 +25,11 @@ in
           default = [ ];
           description = "Systemd units this service requires";
         };
+        allowRemoteReplication = lib.mkOption {
+          type = lib.types.bool;
+          default = false;
+          description = "Allow passwordless sudo for ZFS receive operations (for remote replication target)";
+        };
         snapshots = {
           enable = lib.mkOption {
             type = lib.types.bool;
@@ -322,6 +327,39 @@ in
           }
         )
         (lib.filterAttrs (_: pool: pool.snapshots.enable && pool.snapshots.monthly.enable) cfg))
+    ];
+
+    # Configure passwordless sudo for ZFS receive operations (for replication targets)
+    security.sudo.extraRules = lib.mkIf (lib.any (pool: pool.allowRemoteReplication) (lib.attrValues cfg)) [
+      {
+        users = [ config.mine.user.username ];
+        commands = [
+          {
+            command = "${pkgs.zfs}/bin/zfs receive";
+            options = [ "NOPASSWD" ];
+          }
+          {
+            command = "${pkgs.zfs}/bin/zfs receive *";
+            options = [ "NOPASSWD" ];
+          }
+          {
+            command = "${pkgs.zfs}/bin/zfs list";
+            options = [ "NOPASSWD" ];
+          }
+          {
+            command = "${pkgs.zfs}/bin/zfs list *";
+            options = [ "NOPASSWD" ];
+          }
+          {
+            command = "${pkgs.zfs}/bin/zpool list";
+            options = [ "NOPASSWD" ];
+          }
+          {
+            command = "${pkgs.zfs}/bin/zpool list *";
+            options = [ "NOPASSWD" ];
+          }
+        ];
+      }
     ];
   };
 }
