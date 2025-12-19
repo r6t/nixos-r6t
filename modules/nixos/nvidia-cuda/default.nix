@@ -1,11 +1,36 @@
-{ lib, config, pkgs, ... }: {
+{ lib, config, pkgs, ... }:
 
-  options = {
-    mine.nvidia-cuda.enable =
-      lib.mkEnableOption "configure nvidia gpu for cuda";
+let
+  cfg = config.mine.nvidia-cuda;
+in
+{
+
+  options.mine.nvidia-cuda = {
+    enable = lib.mkEnableOption "configure nvidia gpu for cuda";
+
+    package = lib.mkOption {
+      type = lib.types.enum [ "production" "stable" "latest" "legacy_470" ];
+      default = "production";
+      description = ''
+        NVIDIA driver package to use.
+        - production: Latest production driver (supports GTX 16/RTX 20 series and newer)
+        - stable: Stable driver branch
+        - latest: Beta/latest driver
+        - legacy_470: Legacy 470.xx driver (supports GTX 10 series)
+      '';
+    };
+
+    openDriver = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = ''
+        Use the open-source NVIDIA kernel modules.
+        Set to false for older GPUs (GTX 10 series and earlier).
+      '';
+    };
   };
 
-  config = lib.mkIf config.mine.nvidia-cuda.enable {
+  config = lib.mkIf cfg.enable {
 
     environment.systemPackages = with pkgs; [ cudatoolkit libva ];
     hardware = {
@@ -14,10 +39,18 @@
         enable32Bit = true;
       };
       nvidia = {
-        package = config.boot.kernelPackages.nvidiaPackages.production; # or latest, stable
+        package =
+          if cfg.package == "legacy_470" then
+            config.boot.kernelPackages.nvidiaPackages.legacy_470
+          else if cfg.package == "latest" then
+            config.boot.kernelPackages.nvidiaPackages.latest
+          else if cfg.package == "stable" then
+            config.boot.kernelPackages.nvidiaPackages.stable
+          else
+            config.boot.kernelPackages.nvidiaPackages.production;
         modesetting.enable = true;
         powerManagement.enable = false;
-        open = true;
+        open = cfg.openDriver;
         nvidiaSettings = false;
       };
       nvidia-container-toolkit.enable = true;
