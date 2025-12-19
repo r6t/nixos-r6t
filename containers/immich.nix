@@ -10,7 +10,11 @@
 
   mine = {
     immich.enable = true;
-    nvidia-cuda.enable = true;
+    nvidia-cuda = {
+      enable = true;
+      package = "legacy_470";
+      openDriver = false;
+    };
   };
 
   nixpkgs.overlays = [

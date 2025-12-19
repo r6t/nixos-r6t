@@ -57,7 +57,11 @@
 
   mine = {
     n8n.enable = false;
-    nvidia-cuda.enable = true;
+    nvidia-cuda = {
+      enable = true;
+      package = "legacy_470";
+      openDriver = false;
+    };
     ollama.enable = true;
     open-webui.enable = false;
   };

@@ -28,6 +28,16 @@ in
         Set to false for older GPUs (GTX 10 series and earlier).
       '';
     };
+
+    containerToolkit = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = ''
+        Enable nvidia-container-toolkit for GPU passthrough to containers.
+        Required for Docker/Incus containers that need GPU access.
+        May have limited support with legacy drivers.
+      '';
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -53,7 +63,7 @@ in
         open = cfg.openDriver;
         nvidiaSettings = false;
       };
-      nvidia-container-toolkit.enable = true;
+      nvidia-container-toolkit.enable = cfg.containerToolkit;
     };
     nixpkgs = {
       config = {
