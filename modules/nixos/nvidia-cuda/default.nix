@@ -42,7 +42,11 @@ in
 
   config = lib.mkIf cfg.enable {
 
-    environment.systemPackages = with pkgs; [ cudatoolkit libva ];
+    environment.systemPackages = with pkgs; [
+      # Use CUDA 11.4 for legacy_470 driver, otherwise use latest
+      (if cfg.package == "legacy_470" then cudaPackages_11_4.cudatoolkit else cudatoolkit)
+      libva
+    ];
     hardware = {
       graphics = {
         enable = true;
