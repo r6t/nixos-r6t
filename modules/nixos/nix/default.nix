@@ -26,8 +26,7 @@
         auto-optimise-store = true;
         download-buffer-size = 524288000;
         experimental-features = [ "nix-command" "flakes" "cgroups" ];
-        # optimize for 16 cores
-        max-jobs = 16;
+        max-jobs = 1; # troubleshooting. been using 16
       };
     };
 

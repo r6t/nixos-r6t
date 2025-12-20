@@ -116,7 +116,7 @@
 
   systemd = {
     tmpfiles.rules = [
-      "d /mnt/cold-pool 0755 root root -"
+      "d /mnt/barrel-pool 0755 r6t users -"
       "d /mnt/zfskey 0755 root root -"
     ];
     services = {
@@ -153,9 +153,9 @@
     user.enable = true;
 
     zfs-pool = {
-      cold-pool = {
-        poolName = "cold-pool";
-        keyFile = "/mnt/zfskey/cold-pool.key";
+      barrel-pool = {
+        poolName = "barrel-pool";
+        keyFile = "/mnt/zfskey/barrel-pool.key";
         after = [ "mnt-zfskey.mount" ];
         requires = [ "mnt-zfskey.mount" ];
 
