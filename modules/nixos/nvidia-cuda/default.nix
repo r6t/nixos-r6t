@@ -38,14 +38,26 @@ in
         May have limited support with legacy drivers.
       '';
     };
+
+    installCudaToolkit = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = ''
+        Install CUDA toolkit (nvcc, headers, etc.) on the system.
+        Set to true for physical hosts that compile CUDA code or run local GPU workloads.
+        Set to false for containers that use nvidia-container-toolkit (runtime libraries mounted from host).
+      '';
+    };
   };
 
   config = lib.mkIf cfg.enable {
 
     environment.systemPackages = with pkgs; [
-      # Use CUDA 11.4 for legacy_470 driver, otherwise use latest
-      (if cfg.package == "legacy_470" then cudaPackages_11_4.cudatoolkit else cudatoolkit)
       libva
+    ] ++ lib.optionals cfg.installCudaToolkit [
+      # Install cudatoolkit for physical hosts that need nvcc, CUDA headers, etc.
+      # Containers don't need this - nvidia-container-toolkit mounts runtime libs from host
+      cudatoolkit
     ];
     hardware = {
       graphics = {

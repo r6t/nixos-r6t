@@ -14,6 +14,7 @@
       enable = true;
       package = "legacy_470";
       openDriver = false;
+      installCudaToolkit = false; # Container uses runtime libs from host via nvidia-container-toolkit
     };
   };
 
