@@ -94,6 +94,7 @@
     nixos/sound/default.nix
     nixos/ssh/default.nix
     nixos/sshfs/default.nix
+    nixos/steam/default.nix
     nixos/syncthing/default.nix
     nixos/tailscale/default.nix
     nixos/thunderbay/default.nix

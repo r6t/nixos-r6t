@@ -115,6 +115,7 @@
                 	set -x _PR_DISABLE_AI 1
         		pay-respects fish --alias | source
                         fish_add_path $HOME/.nix-profile/bin
+                        fish_add_path $HOME/.local/bin
       '';
     };
   };

@@ -12,8 +12,21 @@
   boot = {
     initrd = {
       availableKernelModules = [ "nvme" "xhci_pci" "thunderbolt" "usbhid" "usb_storage" "sd_mod" "sdhci_pci" ];
-      kernelModules = [ ];
-      luks.devices."luks-83b36ca5-9233-4848-a3e1-7ade3fefd315".device = "/dev/disk/by-uuid/83b36ca5-9233-4848-a3e1-7ade3fefd315";
+      kernelModules = [ "amdgpu" ];
+      secrets."/swap_keyfile.bin" = "/root/swap_keyfile.bin";
+      luks.devices."luks-swap" = {
+        device = "/dev/disk/by-uuid/b59c205f-248e-4b54-a769-fb89e7a8f5b4";
+        keyFile = "/swap_keyfile.bin";
+        preLVM = false;
+        allowDiscards = true;
+        bypassWorkqueues = true;
+      };
+      luks.devices."luks-83b36ca5-9233-4848-a3e1-7ade3fefd315" = {
+        device = "/dev/disk/by-uuid/83b36ca5-9233-4848-a3e1-7ade3fefd315";
+        preLVM = true;
+        allowDiscards = true;
+        bypassWorkqueues = true;
+      };
     };
     kernelModules = [ "kvm-amd" ];
     extraModulePackages = [ ];
@@ -32,8 +45,10 @@
       options = [ "fmask=0077" "dmask=0077" ];
     };
 
-  swapDevices =
-    [{ device = "/dev/disk/by-uuid/87184ddc-82b3-4901-a75b-4c5c0feaf0e8"; }];
+  swapDevices = [
+    # Use the mapped swap device UUID (for /dev/mapper/swap-crypt)
+    { device = "/dev/disk/by-uuid/ba7ca596-09b0-476b-9917-c11b5d98ea44"; }
+  ];
 
   # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
   # (the default) this is the recommended approach. When using systemd-networkd it's

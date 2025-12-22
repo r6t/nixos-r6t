@@ -10,20 +10,31 @@
 
   # ASUS ROG Z13 2025 AI Max 395 (GZ302) Hardware Configuration
   # Hardware: AMD Ryzen AI MAX+ 395 (Strix Halo), AMD Radeon 8060S, MediaTek MT7925 WiFi
+  environment.variables.AMD_VULKAN_ICD = "RADV";
 
   # Kernel parameters for Strix Halo optimization
-  boot.kernelParams = [
-    # AMD GPU optimizations for Radeon 8060S (RDNA 3.5)
-    "amdgpu.ppfeaturemask=0xffffffff"
+  boot = {
+    kernelParams = [
+      # AMD GPU optimizations for Radeon 8060S (RDNA 3.5)
+      "amdgpu.ppfeaturemask=0xffffffff"
 
-    # AI/LLM workload optimizations
-    "amd_iommu=off" # Lower latency GPU memory access
-    "amdgpu.gttsize=131072" # GTT size to 128MB for larger unified memory pools
+      # AI/LLM workload optimizations
+      "amd_iommu=off" # Lower latency GPU memory access
+      "amdgpu.gttsize=65536" # 64GB or 50% RAM to GPU
 
-    "amd_pstate=guided" # AMD P-State driver (guided mode for efficiency)
-  ];
+      "amd_pstate=guided" # AMD P-State driver (guided mode for efficiency)
+      # Hibernation resume target (encrypted swap)
+      "resume=UUID=ba7ca596-09b0-476b-9917-c11b5d98ea44"
 
-  boot.kernelPackages = lib.mkDefault pkgs.linuxPackages_latest;
+      "pcie_aspm=off" # WiFi 7 stability
+      "amdgpu.dcdebugmask=0x10" # Early KMS
+    ];
+
+    # Device used for resume from hibernation
+    resumeDevice = "/dev/disk/by-uuid/ba7ca596-09b0-476b-9917-c11b5d98ea44";
+
+    kernelPackages = lib.mkDefault pkgs.linuxPackages_latest;
+  };
 
   hardware.graphics = {
     enable = true;
@@ -57,6 +68,7 @@
   };
 
   networking = {
+    enableIPv6 = false;
     hostName = "feather";
     firewall = {
       enable = true;
@@ -144,6 +156,7 @@
     sound.enable = true;
     ssh.enable = true;
     sshfs.enable = true;
+    steam.enable = true;
     syncthing.enable = true;
     tailscale.enable = true;
     usb4-sfp.enable = true;
