@@ -5,12 +5,11 @@
       lib.mkEnableOption "enable sandboxed steam with performance optimizations";
   };
 
-  config = lib.mkIf config.mine.v4l-utils.enable {
+  config = lib.mkIf config.mine.steam.enable {
     environment.systemPackages = with pkgs; [
       steam-devices-udev-rules
       gamescope # Micro-compositor for better frame pacing/latency
       mangohud # Overlay for performance monitoring
-      gamemode # daemon to optimize system performance on demand
       protonup-qt
     ];
     # Enable Gamemode (System-level optimization)
@@ -33,7 +32,6 @@
       gamescopeSession.enable = true; # Adds a session entry for Steam+Gamescope
       extest.enable = true; # Improves controller compatibility
     };
-
 
     # Fix gamemode priority warnings
     security.pam.loginLimits = [

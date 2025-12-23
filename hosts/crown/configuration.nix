@@ -164,8 +164,8 @@
     nix.enable = true;
     nvidia-cuda = {
       enable = true;
-      package = "legacy_470";
-      openDriver = false;
+      package = "production";
+      openDriver = true;
     };
     prometheus-node-exporter.enable = true;
     rdfind.enable = true;

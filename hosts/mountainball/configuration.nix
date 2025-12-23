@@ -1,4 +1,4 @@
-{ inputs, lib, ... }:
+{ inputs, ... }:
 {
   imports = [
     inputs.home-manager.nixosModules.home-manager
@@ -8,15 +8,6 @@
     ./hardware-configuration.nix
     ../../modules/default.nix
   ];
-
-  # eGPU configuration for RTX 4070 Super via Thunderbolt
-  hardware.nvidia.powerManagement.enable = lib.mkForce true;
-
-  # Allow hot-plugging the eGPU without requiring reboot
-  services.udev.extraRules = ''
-    # Authorize Thunderbolt devices automatically
-    ACTION=="add", SUBSYSTEM=="thunderbolt", ATTR{authorized}=="0", ATTR{authorized}="1"
-  '';
 
   networking = {
     hostName = "mountainball";
@@ -109,12 +100,6 @@
     mullvad.enable = true;
     networkmanager.enable = true;
     nix.enable = true;
-    nvidia-cuda = {
-      enable = true;
-      package = "production";
-      openDriver = true;
-      containerToolkit = false;
-    };
     npm.enable = true;
     printing.enable = true;
     pinchflat.enable = true;
@@ -124,6 +109,7 @@
     sound.enable = true;
     ssh.enable = true;
     sshfs.enable = true;
+    steam.enable = true;
     syncthing.enable = true;
     tailscale.enable = true;
     usb4-sfp.enable = true;

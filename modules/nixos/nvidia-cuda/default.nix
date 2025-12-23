@@ -9,14 +9,13 @@ in
     enable = lib.mkEnableOption "configure nvidia gpu for cuda";
 
     package = lib.mkOption {
-      type = lib.types.enum [ "production" "stable" "latest" "legacy_470" ];
+      type = lib.types.enum [ "production" "stable" "latest" ];
       default = "production";
       description = ''
         NVIDIA driver package to use.
-        - production: Latest production driver (supports GTX 16/RTX 20 series and newer)
+        - production: Latest production driver (supports RTX 20 series and newer)
         - stable: Stable driver branch
         - latest: Beta/latest driver
-        - legacy_470: Legacy 470.xx driver (supports GTX 10 series)
       '';
     };
 
@@ -25,7 +24,7 @@ in
       default = true;
       description = ''
         Use the open-source NVIDIA kernel modules.
-        Set to false for older GPUs (GTX 10 series and earlier).
+        Supported on RTX 20 series and newer.
       '';
     };
 
@@ -35,7 +34,6 @@ in
       description = ''
         Enable nvidia-container-toolkit for GPU passthrough to containers.
         Required for Docker/Incus containers that need GPU access.
-        May have limited support with legacy drivers.
       '';
     };
 
@@ -52,13 +50,12 @@ in
 
   config = lib.mkIf cfg.enable {
 
-    environment.systemPackages = with pkgs; [
-      libva
-    ] ++ lib.optionals cfg.installCudaToolkit [
-      # Install cudatoolkit for physical hosts that need nvcc, CUDA headers, etc.
-      # Containers don't need this - nvidia-container-toolkit mounts runtime libs from host
-      cudatoolkit
-    ];
+    environment.systemPackages =
+      lib.optionals cfg.installCudaToolkit (with pkgs; [
+        # Install cudatoolkit for physical hosts that need nvcc, CUDA headers, etc.
+        # Containers don't need this - nvidia-container-toolkit mounts runtime libs from host
+        cudatoolkit
+      ]);
     hardware = {
       graphics = {
         enable = true;
@@ -66,9 +63,7 @@ in
       };
       nvidia = {
         package =
-          if cfg.package == "legacy_470" then
-            config.boot.kernelPackages.nvidiaPackages.legacy_470
-          else if cfg.package == "latest" then
+          if cfg.package == "latest" then
             config.boot.kernelPackages.nvidiaPackages.latest
           else if cfg.package == "stable" then
             config.boot.kernelPackages.nvidiaPackages.stable
@@ -88,7 +83,6 @@ in
         nvidia.acceptLicense = true;
       };
     };
-    services.xserver.videoDrivers = [ "nvidia" ];
   };
 }
 
