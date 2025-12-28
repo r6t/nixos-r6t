@@ -6,6 +6,12 @@ let
   #   - Z13 internal: 2560x1600 @ 180Hz (16:10)
   #   - AOC U27G3X:   3840x2160 @ 160Hz (16:9, 4K)
   #
+  # Profiles:
+  #   - gamescope:      1440p/1600p native (main profile, no upscaling)
+  #   - gamescope-fsr:  1080p/1200p → FSR → 1440p/1600p (performance)
+  #   - gamescope-4k:   4K native (AOC only, low-spec games)
+  #   - gamescope-4kfsr: 1440p → FSR → 4K (AOC only, quality upscale)
+  #
   # All wrappers use:
   #   --rt: Realtime scheduling (enabled via PAM limits, not capabilities)
   #   --adaptive-sync: VRR/FreeSync for smooth frame pacing
@@ -37,8 +43,8 @@ let
   # =============================================================================
   # gamescope - General purpose auto-detecting wrapper
   # =============================================================================
-  # AOC present: 2560x1440 render @ 160Hz (good balance of perf/quality on 4K panel)
-  # Z13 only:    2560x1600 native @ 180Hz
+  # AOC present: 2560x1440 @ 160Hz
+  # Z13 only:    2560x1600 @ 180Hz
   gamescope-wrapper = pkgs.writeShellScriptBin "gamescope" ''
     ${detectAoc}
 
@@ -57,11 +63,11 @@ let
   '';
 
   # =============================================================================
-  # gamescope-1080fsr - Max performance profile with FSR upscaling
+  # gamescope-fsr - Performance profile with FSR upscaling
   # =============================================================================
-  # AOC present: 1920x1080 render → FSR → 2560x1440 output @ 160Hz
-  # Z13 only:    1920x1200 render → FSR → 2560x1600 output @ 180Hz
-  gamescope-1080fsr = pkgs.writeShellScriptBin "gamescope-1080fsr" ''
+  # AOC present: 1920x1080 → FSR → 2560x1440 @ 160Hz
+  # Z13 only:    1920x1200 → FSR → 2560x1600 @ 180Hz
+  gamescope-fsr = pkgs.writeShellScriptBin "gamescope-fsr" ''
     ${detectAoc}
 
     if [ "$AOC_FOUND" -eq 1 ]; then
@@ -80,6 +86,46 @@ let
         -- "$@"
     fi
   '';
+
+  # =============================================================================
+  # gamescope-4k - Native 4K for low-spec games (AOC only)
+  # =============================================================================
+  # AOC present: 3840x2160 native @ 160Hz
+  # Z13 only:    Fails with error (4K not applicable)
+  gamescope-4k = pkgs.writeShellScriptBin "gamescope-4k" ''
+    ${detectAoc}
+
+    if [ "$AOC_FOUND" -eq 1 ]; then
+      exec ${pkgs.gamescope}/bin/gamescope \
+        -W 3840 -H 2160 -r 160 \
+        ${commonFlags} \
+        -- "$@"
+    else
+      echo "gamescope-4k: AOC U27G3X not detected. This profile requires a 4K160 display." >&2
+      exit 1
+    fi
+  '';
+
+  # =============================================================================
+  # gamescope-4kfsr - 1440p upscaled to 4K via FSR (AOC only)
+  # =============================================================================
+  # AOC present: 2560x1440 → FSR → 3840x2160 @ 160Hz
+  # Z13 only:    Fails with error (4K not applicable)
+  gamescope-4kfsr = pkgs.writeShellScriptBin "gamescope-4kfsr" ''
+    ${detectAoc}
+
+    if [ "$AOC_FOUND" -eq 1 ]; then
+      exec ${pkgs.gamescope}/bin/gamescope \
+        -w 2560 -h 1440 \
+        -W 3840 -H 2160 -r 160 \
+        -F fsr \
+        ${commonFlags} \
+        -- "$@"
+    else
+      echo "gamescope-4kfsr: AOC U27G3X not detected. This profile requires a 4K160 display." >&2
+      exit 1
+    fi
+  '';
 in
 {
 
@@ -92,8 +138,10 @@ in
     environment.systemPackages = with pkgs; [
       steam-devices-udev-rules
       # Gamescope profiles (gamescope-wrapper shadows the base 'gamescope' command)
-      gamescope-wrapper # Auto-detect: 1440p@160 (AOC) or native@180 (Z13)
-      gamescope-1080fsr # Auto-detect: 1080p FSR upscale for max performance
+      gamescope-wrapper # Auto-detect: 1440p@160 (AOC) or 1600p@180 (Z13)
+      gamescope-fsr # Auto-detect: 1080p/1200p → FSR → 1440p/1600p
+      gamescope-4k # native 4K@160 for low-spec games
+      gamescope-4kfsr # 1440p → FSR → 4K@160
       mangohud # Performance overlay
       gamemode # System optimization daemon
       protonup-qt # Proton version manager
