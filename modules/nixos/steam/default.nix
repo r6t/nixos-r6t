@@ -4,20 +4,24 @@ let
   #
   # Hardware:
   #   - Z13 internal: 2560x1600 @ 180Hz (16:10)
-  #   - AOC U27G3X:   3840x2160 @ 160Hz (16:9, 4K)
+  #   - AOC U27G3X:   3840x2160 @ 160Hz (16:9) - used at 1440p
   #
   # Profiles:
-  #   - gamescope:      1440p/1600p native (main profile, no upscaling)
-  #   - gamescope-fsr:  1080p/1200p → FSR → 1440p/1600p (performance)
-  #   - gamescope-4k:   4K native (AOC only, low-spec games)
-  #   - gamescope-4kfsr: 1440p → FSR → 4K (AOC only, quality upscale)
+  #   - gamescope-auto: Native resolution (1440p@160 on AOC, 1600p@180 on Z13)
+  #   - gamescope-fsr:  FSR upscaling (1080p→1440p on AOC, 1200p→1600p on Z13)
   #
-  # All wrappers use:
-  #   --rt: Realtime scheduling (enabled via PAM limits, not capabilities)
-  #   --adaptive-sync: VRR/FreeSync for smooth frame pacing
-  #   --fullscreen: Dedicated fullscreen mode
-  #   --force-grab-cursor: Keep cursor inside game window
-  #   --mangoapp: MangoHud overlay support
+  # All wrappers:
+  #   - Detect if already inside gamescope (e.g., gamescopeSession) and pass
+  #     through directly to avoid nested instances
+  #   - Auto-detect display via EDID
+  #   - Use: --rt, --adaptive-sync, --fullscreen, --force-grab-cursor, --mangoapp
+
+  # Helper to detect if already running inside gamescope
+  detectNestedGamescope = ''
+    if [ -n "''${GAMESCOPE_WAYLAND_DISPLAY:-}" ]; then
+      exec "$@"
+    fi
+  '';
 
   # Helper to detect AOC U27G3X via EDID
   detectAoc = ''
@@ -32,7 +36,6 @@ let
     done
   '';
 
-  # Common flags used by all profiles
   commonFlags = ''
     --rt \
     --adaptive-sync \
@@ -40,90 +43,37 @@ let
     --force-grab-cursor \
     --mangoapp'';
 
-  # =============================================================================
-  # gamescope - General purpose auto-detecting wrapper
-  # =============================================================================
-  # AOC present: 2560x1440 @ 160Hz
-  # Z13 only:    2560x1600 @ 180Hz
-  gamescope-wrapper = pkgs.writeShellScriptBin "gamescope" ''
+  # gamescope-auto: Native resolution
+  # AOC: 2560x1440 @ 160Hz | Z13: 2560x1600 @ 180Hz
+  gamescope-auto = pkgs.writeShellScriptBin "gamescope-auto" ''
+    ${detectNestedGamescope}
     ${detectAoc}
 
     if [ "$AOC_FOUND" -eq 1 ]; then
       exec ${pkgs.gamescope}/bin/gamescope \
-        -w 2560 -h 1440 \
-        -W 2560 -H 1440 -r 160 \
-        ${commonFlags} \
-        -- "$@"
+        -w 2560 -h 1440 -W 2560 -H 1440 -r 160 \
+        ${commonFlags} -- "$@"
     else
       exec ${pkgs.gamescope}/bin/gamescope \
         -W 2560 -H 1600 -r 180 \
-        ${commonFlags} \
-        -- "$@"
+        ${commonFlags} -- "$@"
     fi
   '';
 
-  # =============================================================================
-  # gamescope-fsr - Performance profile with FSR upscaling
-  # =============================================================================
-  # AOC present: 1920x1080 → FSR → 2560x1440 @ 160Hz
-  # Z13 only:    1920x1200 → FSR → 2560x1600 @ 180Hz
+  # gamescope-fsr: FSR upscaling from 1080p/1200p
+  # AOC: 1920x1080 → FSR → 2560x1440 @ 160Hz | Z13: 1920x1200 → FSR → 2560x1600 @ 180Hz
   gamescope-fsr = pkgs.writeShellScriptBin "gamescope-fsr" ''
+    ${detectNestedGamescope}
     ${detectAoc}
 
     if [ "$AOC_FOUND" -eq 1 ]; then
       exec ${pkgs.gamescope}/bin/gamescope \
-        -w 1920 -h 1080 \
-        -W 2560 -H 1440 -r 160 \
-        -F fsr \
-        ${commonFlags} \
-        -- "$@"
+        -w 1920 -h 1080 -W 2560 -H 1440 -r 160 -F fsr \
+        ${commonFlags} -- "$@"
     else
       exec ${pkgs.gamescope}/bin/gamescope \
-        -w 1920 -h 1200 \
-        -W 2560 -H 1600 -r 180 \
-        -F fsr \
-        ${commonFlags} \
-        -- "$@"
-    fi
-  '';
-
-  # =============================================================================
-  # gamescope-4k - Native 4K for low-spec games (AOC only)
-  # =============================================================================
-  # AOC present: 3840x2160 native @ 160Hz
-  # Z13 only:    Fails with error (4K not applicable)
-  gamescope-4k = pkgs.writeShellScriptBin "gamescope-4k" ''
-    ${detectAoc}
-
-    if [ "$AOC_FOUND" -eq 1 ]; then
-      exec ${pkgs.gamescope}/bin/gamescope \
-        -W 3840 -H 2160 -r 160 \
-        ${commonFlags} \
-        -- "$@"
-    else
-      echo "gamescope-4k: AOC U27G3X not detected. This profile requires a 4K160 display." >&2
-      exit 1
-    fi
-  '';
-
-  # =============================================================================
-  # gamescope-4kfsr - 1440p upscaled to 4K via FSR (AOC only)
-  # =============================================================================
-  # AOC present: 2560x1440 → FSR → 3840x2160 @ 160Hz
-  # Z13 only:    Fails with error (4K not applicable)
-  gamescope-4kfsr = pkgs.writeShellScriptBin "gamescope-4kfsr" ''
-    ${detectAoc}
-
-    if [ "$AOC_FOUND" -eq 1 ]; then
-      exec ${pkgs.gamescope}/bin/gamescope \
-        -w 2560 -h 1440 \
-        -W 3840 -H 2160 -r 160 \
-        -F fsr \
-        ${commonFlags} \
-        -- "$@"
-    else
-      echo "gamescope-4kfsr: AOC U27G3X not detected. This profile requires a 4K160 display." >&2
-      exit 1
+        -w 1920 -h 1200 -W 2560 -H 1600 -r 180 -F fsr \
+        ${commonFlags} -- "$@"
     fi
   '';
 in
@@ -137,14 +87,11 @@ in
   config = lib.mkIf config.mine.steam.enable {
     environment.systemPackages = with pkgs; [
       steam-devices-udev-rules
-      # Gamescope profiles (gamescope-wrapper shadows the base 'gamescope' command)
-      gamescope-wrapper # Auto-detect: 1440p@160 (AOC) or 1600p@180 (Z13)
-      gamescope-fsr # Auto-detect: 1080p/1200p → FSR → 1440p/1600p
-      gamescope-4k # native 4K@160 for low-spec games
-      gamescope-4kfsr # 1440p → FSR → 4K@160
-      mangohud # Performance overlay
-      gamemode # System optimization daemon
-      protonup-qt # Proton version manager
+      gamescope-auto
+      gamescope-fsr
+      mangohud
+      gamemode
+      protonup-qt
     ];
 
     # Enable Gamemode (System-level optimization)
