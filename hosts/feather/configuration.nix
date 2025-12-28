@@ -16,7 +16,9 @@
   boot = {
     kernelParams = [
       # AMD GPU optimizations for Radeon 8060S (RDNA 3.5)
-      "amdgpu.ppfeaturemask=0xffffffff"
+      # 0xfffd7fff disables GFXOFF (bit 15) and STUTTER_MODE (bit 17) to prevent microstuttering
+      # on high refresh rate external displays while keeping other power features enabled
+      "amdgpu.ppfeaturemask=0xfffd7fff"
 
       # AI/LLM workload optimizations
       "amd_iommu=off" # Lower latency GPU memory access
@@ -28,6 +30,7 @@
 
       "pcie_aspm=off" # WiFi 7 stability
       "amdgpu.dcdebugmask=0x10" # Early KMS
+      "amdgpu.abmlevel=0" # Disable panel power savings (causes timing issues with external displays)
     ];
 
     # Device used for resume from hibernation
