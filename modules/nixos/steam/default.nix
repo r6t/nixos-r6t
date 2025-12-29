@@ -49,11 +49,17 @@ let
     ${detectNestedGamescope}
     ${detectAoc}
 
+    # Debug logging
+    echo "[gamescope-auto] AOC_FOUND=$AOC_FOUND" >> /tmp/gamescope-auto.log
+    date >> /tmp/gamescope-auto.log
+
     if [ "$AOC_FOUND" -eq 1 ]; then
+      echo "[gamescope-auto] Using AOC mode: 1440p@160" >> /tmp/gamescope-auto.log
       exec ${pkgs.gamescope}/bin/gamescope \
         -w 2560 -h 1440 -W 2560 -H 1440 -r 160 \
         ${commonFlags} -- "$@"
     else
+      echo "[gamescope-auto] Using Z13 mode: 1600p@180" >> /tmp/gamescope-auto.log
       exec ${pkgs.gamescope}/bin/gamescope \
         -W 2560 -H 1600 -r 180 \
         ${commonFlags} -- "$@"
