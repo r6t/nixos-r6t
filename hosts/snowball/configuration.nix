@@ -79,6 +79,9 @@
         accelProfile = "adaptive";
       };
     };
+
+    # Fingerprint reader support (if present on this model)
+    fprintd.enable = false;
   };
 
   networking = {
@@ -163,19 +166,18 @@
     nvidia-cuda = {
       enable = true;
       package = "latest"; # RTX 5070 Ti (Blackwell) requires latest drivers (565+)
-      openDriver = true;
+      openDriver = true; # Blackwell REQUIRES open kernel modules (proprietary doesn't support it)
       containerToolkit = false; # No container GPU passthrough needed
       installCudaToolkit = true; # Install CUDA for local ML/AI workloads
       powerManagement = true; # Enable for laptop suspend/hibernate support
       enableSettings = true; # Enable nvidia-settings GUI
       enableGspFirmware = true; # Required for RTX 50-series (Blackwell)
       prime = {
-        enable = true;
-        offload = true; # On-demand GPU switching with nvidia-offload
-        # Set PCI Bus IDs after hardware-configuration.nix is available
-        # Find with: lspci | grep -E "VGA|3D"
-        # amdgpuBusId = "PCI:X:0:0";  # AMD Radeon 890M iGPU
-        # nvidiaBusId = "PCI:Y:0:0";  # NVIDIA RTX 5070 Ti dGPU
+        enable = false; # Discrete-only mode (no hybrid graphics for now)
+        # To enable hybrid graphics later, set enable = true and configure bus IDs:
+        # offload = true;
+        # amdgpuBusId = "PCI:65:0:0";  # AMD Radeon 890M iGPU (from lspci: 65:00.0)
+        # nvidiaBusId = "PCI:64:0:0";  # NVIDIA RTX 5070 Ti dGPU (from lspci: 64:00.0)
       };
     };
     printing.enable = true;
