@@ -62,20 +62,6 @@
           ];
         };
         # laptop
-        feather = nixpkgs.lib.nixosSystem {
-          specialArgs = { inherit userConfig inputs outputs; };
-          modules = [
-            ./hosts/feather/configuration.nix
-            {
-              nixpkgs.config = {
-                allowUnfree = true;
-                # temporary allow recent EOL
-                permittedInsecurePackages = [ "electron-36.9.5" ];
-              };
-            }
-          ];
-        };
-        # laptop
         mountainball = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit userConfig inputs outputs; };
           modules = [
@@ -94,6 +80,22 @@
           specialArgs = { inherit userConfig inputs outputs; };
           modules = [
             ./hosts/saguaro/configuration.nix
+          ];
+        };
+        # laptop
+        snowball = nixpkgs.lib.nixosSystem {
+          specialArgs = { inherit userConfig inputs outputs; };
+          modules = [
+            ./hosts/snowball/configuration.nix
+            {
+              nixpkgs.config = {
+                allowUnfree = true;
+                cudaSupport = true;
+                nvidia.acceptLicense = true;
+                # temporary allow recent EOL
+                permittedInsecurePackages = [ "electron-36.9.5" ];
+              };
+            }
           ];
         };
       };
