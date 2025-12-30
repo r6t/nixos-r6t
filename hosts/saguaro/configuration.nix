@@ -57,19 +57,29 @@
             type filter hook input priority 0; policy drop;
             # Loopback always allowed
             iifname "lo" accept
+
             # DHCP from LAN (before conntrack)
             iifname "enp100s0" udp dport 67 accept
+
             # Established/related from anywhere
             ct state { established, related } accept
             ct state invalid drop
+
             # ICMP for diagnostics
             ip protocol icmp accept
+
             # SSH from LAN only
             iifname "enp100s0" tcp dport 22 accept
+
             # DNS from LAN only
             iifname "enp100s0" tcp dport 53 accept
             iifname "enp100s0" udp dport 53 accept
-            # Incus from LAN
+
+            # iperf3 from LAN only
+            iifname "enp100s0" tcp dport 5201 accept
+            iifname "enp100s0" udp dport 5201 accept
+
+            # Incus from LAN only
             iifname "enp100s0" tcp dport 8443 accept
           }
           chain output {
@@ -115,13 +125,12 @@
 
         address = [
           # specific overrides
+          # "/homeassistant.r6t.io/100.124.208.128"
           "/crown/192.168.6.10"
-          "/grafana.r6t.io/192.168.6.1"
-          "/homeassistant.r6t.io/100.124.208.128"
           "/saguaro/192.168.6.1"
 
-          # wildcard so app LXCs hit router caddy
-          "/r6t.io/192.168.6.10"
+          # wildcard works too. example:
+          # "/r6t.io/192.168.6.10"
         ];
 
         # DHCP only on LAN interface
