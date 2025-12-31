@@ -13,19 +13,9 @@ in
       default = "production";
       description = ''
         NVIDIA driver package to use.
-        - production: Latest production driver (recommended for servers)
-        - stable: Stable driver branch
-        - latest: Beta/latest driver
-      '';
-    };
-
-    openDriver = lib.mkOption {
-      type = lib.types.bool;
-      default = true;
-      description = ''
-        Use the open-source NVIDIA kernel modules.
-        Supported on Turing (RTX 20 series) and newer.
-        Set to false for Maxwell, Pascal, Volta GPUs (which require proprietary).
+        - production
+        - stable
+        - latest
       '';
     };
 
@@ -73,7 +63,7 @@ in
             config.boot.kernelPackages.nvidiaPackages.production;
         modesetting.enable = true;
         powerManagement.enable = false;
-        open = cfg.openDriver;
+        open = true;
         nvidiaSettings = false;
       };
       nvidia-container-toolkit.enable = cfg.containerToolkit;
@@ -86,5 +76,6 @@ in
         nvidia.acceptLicense = true;
       };
     };
+    services.xserver.videoDrivers = [ "nvidia" ];
   };
 }

@@ -9,6 +9,7 @@
     ../../modules/default.nix
   ];
 
+
   boot = {
     kernel.sysctl = {
       # Enable forwarding for containers
@@ -53,8 +54,8 @@
           prefixLength = 24;
         }];
       };
-      enp5s0.useDHCP = false; # 2.5G unused
-      enp6s0.useDHCP = false; # 2.5G unused
+      enp5s0.useDHCP = false; # Incus passthrough
+      enp6s0.useDHCP = false; # Incus passthrough
       enp7s0.useDHCP = false; # 2.5G unused
       enp8s0.useDHCP = false; # 2.5G unused
       br1.useDHCP = true; # 10G bridge for Incus
@@ -84,7 +85,6 @@
 
   system.stateVersion = "23.11";
 
-
   systemd.services = {
 
     tailscale-udp-gro = {
@@ -112,7 +112,6 @@
       "L /etc/caddy/caddy.env - - - - /mnt/crownstore/Sync/app-config/caddy/crown.caddy.env"
     ];
     services = {
-      # Incus storage managment
       incus = {
         # Wait for storage pool before starting incus...
         requires = [ "mnt-crownstore.mount" ];
@@ -129,7 +128,6 @@
         CPUQuota = "800%";
       };
     };
-
   };
 
   # modules/
@@ -164,8 +162,7 @@
     nix.enable = true;
     nvidia-cuda = {
       enable = true;
-      package = "production";
-      openDriver = true;
+      package = "latest";
     };
     prometheus-node-exporter.enable = true;
     rdfind.enable = true;
@@ -184,7 +181,7 @@
         requires = [ "mnt-thunderkey.mount" ];
 
         delegation = {
-          enableSend = true; # Allow r6t to send snapshots without sudo
+          enableSend = true; # send snapshots without sudo
         };
 
         snapshots = {
@@ -198,7 +195,7 @@
 
           weekly = {
             enable = true;
-            keep = 4;
+            keep = 6;
             time = "03:00";
             dayOfWeek = "Sun";
           };

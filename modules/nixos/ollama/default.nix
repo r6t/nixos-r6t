@@ -13,7 +13,6 @@ in
     services.ollama = {
       enable = true;
       package = pkgs.ollama-cuda;
-      acceleration = "cuda";
       host = "0.0.0.0";
       port = ollamaPort;
       # default store: /var/lib/ollama/models

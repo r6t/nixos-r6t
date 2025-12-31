@@ -13,7 +13,6 @@
     nvidia-cuda = {
       enable = true;
       package = "production";
-      openDriver = true;
       installCudaToolkit = false;
     };
   };

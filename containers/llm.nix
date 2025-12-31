@@ -60,7 +60,6 @@
     nvidia-cuda = {
       enable = true;
       package = "production";
-      openDriver = true;
       installCudaToolkit = false;
     };
     ollama.enable = true;

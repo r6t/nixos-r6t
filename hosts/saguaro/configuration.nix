@@ -37,7 +37,7 @@
     nameservers = [ "127.0.0.1" ];
 
     interfaces = {
-      # Intel I225-V NIC for router LAN (2.5G)
+      # Intel I225-V NIC for router LAN
       enp100s0.useDHCP = false;
       # WAN interface gets DHCP from ISP
       enp101s0.useDHCP = true;
@@ -124,12 +124,14 @@
         listen-address = [ "127.0.0.1" "192.168.6.1" ];
 
         address = [
-          # specific overrides
+          # disable all router dns overrides for network tuning
+          # # specific overrides
+          # "/crown/192.168.6.10"
+          # "/grafana.r6t.io/192.168.6.1"
           # "/homeassistant.r6t.io/100.124.208.128"
-          "/crown/192.168.6.10"
-          "/saguaro/192.168.6.1"
+          # "/saguaro/192.168.6.1"
 
-          # wildcard works too. example:
+          # # wildcard so app LXCs hit router caddy
           # "/r6t.io/192.168.6.10"
         ];
 
