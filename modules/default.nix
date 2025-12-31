@@ -64,6 +64,7 @@
     nixos/fzf/default.nix
     nixos/grafana/default.nix
     nixos/headscale/default.nix
+    nixos/home-router/default.nix
     nixos/hypr/default.nix
     nixos/immich/default.nix
     nixos/incus/default.nix

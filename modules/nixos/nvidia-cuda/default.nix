@@ -37,6 +37,15 @@ in
         Set to false for containers that use nvidia-container-toolkit (runtime libraries mounted from host).
       '';
     };
+
+    gspFirmware = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = ''
+        Enable GSP (GPU System Processor) firmware.
+        Required for RTX 50 series, recommended for RTX 40 series.
+      '';
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -65,6 +74,7 @@ in
         powerManagement.enable = false;
         open = true;
         nvidiaSettings = false;
+        gsp.enable = cfg.gspFirmware;
       };
       nvidia-container-toolkit.enable = cfg.containerToolkit;
     };

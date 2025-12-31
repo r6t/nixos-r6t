@@ -34,6 +34,11 @@
 
   services.fprintd.enable = false;
 
+  # Network hang diagnostics script
+  environment.systemPackages = [
+    (pkgs.writeScriptBin "network-debug" (builtins.readFile ./network-debug.fish))
+  ];
+
   system.stateVersion = "23.11";
 
   time.timeZone = "America/Los_Angeles";
