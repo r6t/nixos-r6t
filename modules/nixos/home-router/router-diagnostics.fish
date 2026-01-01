@@ -34,16 +34,16 @@ echo "$BOLD╚══════════════════════
 section_header "WAN Interface Status"
 set -l wan_interface enp101s0
 echo "Interface: $wan_interface"
-ip -br addr show $wan_interface 2>/dev/null || echo "${RED}Error: Interface not found$NORMAL"
-ethtool $wan_interface 2>/dev/null | grep -E "Speed:|Duplex:|Link detected:" || echo "${YELLOW}No ethtool data available$NORMAL"
+ip -br addr show $wan_interface 2>/dev/null || echo "$RED"Error: Interface not found"$NORMAL"
+ethtool $wan_interface 2>/dev/null | grep -E "Speed:|Duplex:|Link detected:" || echo "$YELLOW"No ethtool data available"$NORMAL"
 
 # CAKE Status - Egress (Upload)
 section_header "CAKE Egress (Upload) Status"
 if check_cake_active $wan_interface
-    echo "${GREEN}✓ CAKE is ACTIVE on $wan_interface (egress/upload)$NORMAL"
+    echo "$GREEN""✓ CAKE is ACTIVE on $wan_interface (egress/upload)$NORMAL"
     tc -s qdisc show dev $wan_interface
 else
-    echo "${RED}✗ CAKE is NOT active on $wan_interface$NORMAL"
+    echo "$RED""✗ CAKE is NOT active on $wan_interface$NORMAL"
     echo "Current qdisc:"
     tc qdisc show dev $wan_interface
 end
@@ -53,14 +53,14 @@ section_header "CAKE Ingress (Download) Status"
 set -l ifb_interface "ifb4$wan_interface"
 if ip link show $ifb_interface &>/dev/null
     if check_cake_active $ifb_interface
-        echo "${GREEN}✓ CAKE is ACTIVE on $ifb_interface (ingress/download)$NORMAL"
+        echo "$GREEN""✓ CAKE is ACTIVE on $ifb_interface (ingress/download)$NORMAL"
         tc -s qdisc show dev $ifb_interface
     else
-        echo "${RED}✗ IFB exists but CAKE is NOT active$NORMAL"
+        echo "$RED""✗ IFB exists but CAKE is NOT active$NORMAL"
         tc qdisc show dev $ifb_interface
     end
 else
-    echo "${RED}✗ IFB interface $ifb_interface does not exist$NORMAL"
+    echo "$RED""✗ IFB interface $ifb_interface does not exist$NORMAL"
     echo "Ingress shaping is not configured"
 end
 
@@ -85,11 +85,11 @@ systemctl status cake-qos-ingress.service --no-pager -l | head -15
 
 # Tips
 section_header "Quick Commands"
-echo "  ${BOLD}Watch CAKE stats:$NORMAL       watch -n 1 'tc -s qdisc show dev $wan_interface'"
-echo "  ${BOLD}Restart CAKE:$NORMAL           sudo systemctl restart cake-qos-egress cake-qos-ingress"
-echo "  ${BOLD}Disable CAKE:$NORMAL           sudo systemctl stop cake-qos-egress cake-qos-ingress"
-echo "  ${BOLD}Check bufferbloat:$NORMAL      Open https://www.waveform.com/tools/bufferbloat"
-echo "  ${BOLD}Detailed stats:$NORMAL         tc -s -d qdisc show dev $wan_interface"
+echo "  $BOLD"Watch CAKE stats:"$NORMAL       watch -n 1 'tc -s qdisc show dev $wan_interface'"
+echo "  $BOLD"Restart CAKE:"$NORMAL           sudo systemctl restart cake-qos-egress cake-qos-ingress"
+echo "  $BOLD"Disable CAKE:"$NORMAL           sudo systemctl stop cake-qos-egress cake-qos-ingress"
+echo "  $BOLD"Check bufferbloat:"$NORMAL      Open https://www.waveform.com/tools/bufferbloat"
+echo "  $BOLD"Detailed stats:"$NORMAL         tc -s -d qdisc show dev $wan_interface"
 echo
 
 echo "$BOLD════════════════════════════════════════════════════════════$NORMAL"

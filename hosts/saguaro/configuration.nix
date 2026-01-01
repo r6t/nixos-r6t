@@ -231,6 +231,7 @@
     bootloader.enable = true;
     env.enable = true;
     fwupd.enable = true;
+    home-router.enable = true;
     iperf.enable = true;
     fzf.enable = true;
     incus.enable = true;
