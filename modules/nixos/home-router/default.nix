@@ -82,20 +82,20 @@ in
       };
     };
 
-    # Firewall configuration
-    firewall = {
+    # nftables configuration - LAN-only access
+    nftablesAllowFromLan = {
       extraTcpPorts = lib.mkOption {
         type = lib.types.listOf lib.types.int;
         default = [ ];
         example = [ 5201 8443 ];
-        description = "Extra TCP ports to allow from LAN";
+        description = "Extra TCP ports to allow from LAN only (NOT exposed to WAN)";
       };
 
       extraUdpPorts = lib.mkOption {
         type = lib.types.listOf lib.types.int;
         default = [ ];
         example = [ 5201 ];
-        description = "Extra UDP ports to allow from LAN";
+        description = "Extra UDP ports to allow from LAN only (NOT exposed to WAN)";
       };
     };
 
@@ -184,19 +184,19 @@ in
 
       nftables =
         let
-          # Generate extra TCP port rules
+          # Generate extra TCP port rules (LAN-only)
           extraTcpRules = lib.concatMapStringsSep "\n"
             (port: ''
               iifname "${cfg.lanInterface}" tcp dport ${toString port} accept
             '')
-            cfg.firewall.extraTcpPorts;
+            cfg.nftablesAllowFromLan.extraTcpPorts;
 
-          # Generate extra UDP port rules
+          # Generate extra UDP port rules (LAN-only)
           extraUdpRules = lib.concatMapStringsSep "\n"
             (port: ''
               iifname "${cfg.lanInterface}" udp dport ${toString port} accept
             '')
-            cfg.firewall.extraUdpPorts;
+            cfg.nftablesAllowFromLan.extraUdpPorts;
         in
         {
           enable = true;
@@ -210,12 +210,17 @@ in
                 # DHCP from LAN (before conntrack)
                 iifname "${cfg.lanInterface}" udp dport 67 accept
 
-                # Established/related from anywhere
+                # Established/related connections (return traffic for outbound connections)
                 ct state { established, related } accept
-                ct state invalid drop
 
-                # ICMP for diagnostics
-                ip protocol icmp accept
+                # Invalid packets - log and drop
+                ct state invalid log prefix "INVALID-PKT: " drop
+
+                # Explicitly drop NEW connections from WAN (defense in depth)
+                iifname "${cfg.wanInterface}" ct state new log prefix "WAN-INPUT-DROP: " drop
+
+                # ICMP from LAN only (no WAN ping)
+                iifname "${cfg.lanInterface}" ip protocol icmp accept
 
                 # SSH from LAN only
                 iifname "${cfg.lanInterface}" tcp dport 22 accept
@@ -336,7 +341,6 @@ in
 
     # CAKE QoS services
     systemd.services = lib.mkIf cfg.cake.enable {
-      # Service 1: Apply CAKE to egress (upload/WAN transmit)
       cake-qos-egress = {
         description = "CAKE QoS egress (upload) shaping on ${cfg.wanInterface}";
         after = [ "systemd-networkd.service" "network-online.target" ];
@@ -377,7 +381,6 @@ in
         '';
       };
 
-      # Service 2: Apply CAKE to ingress (download/WAN receive) via IFB
       cake-qos-ingress = {
         description = "CAKE QoS ingress (download) shaping on ${cfg.wanInterface} via IFB";
         after = [ "cake-qos-egress.service" ];

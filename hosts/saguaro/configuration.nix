@@ -16,13 +16,9 @@
   };
 
   networking.hostName = "saguaro";
-
   nix.settings.use-cgroups = true;
-
   time.timeZone = "America/Los_Angeles";
-
   services.journald.extraConfig = "SystemMaxUse=500M";
-
   system.stateVersion = "23.11";
 
   systemd = {
@@ -53,7 +49,6 @@
       ssh.enable = true;
     };
 
-    # Router configuration with hardware-specific details
     home-router = {
       enable = true;
       cake.enable = true;
@@ -77,8 +72,8 @@
         nextdnsConfigFile = "/mnt/nextdns.conf";
       };
 
-      # Allow LAN to access the router host on specific ports  
-      firewall = {
+      # Allow LAN to access the router host on specific ports
+      nftablesAllowFromLan = {
         extraTcpPorts = [ 5201 8443 ]; # iperf3, incus
         extraUdpPorts = [ 5201 ]; # iperf3
       };
