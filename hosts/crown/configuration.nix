@@ -163,7 +163,6 @@
     nvidia-cuda = {
       enable = true;
       package = "latest";
-      openDriver = true;
     };
     prometheus-node-exporter.enable = true;
     rdfind.enable = true;
