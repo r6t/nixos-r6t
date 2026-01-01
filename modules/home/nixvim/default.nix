@@ -402,7 +402,7 @@
           oil.enable = true;
           treesitter = {
             enable = true;
-            folding = false;
+            folding.enable = false;
             settings.indent.enable = true;
           };
           web-devicons.enable = true;
