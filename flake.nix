@@ -86,6 +86,18 @@
 
       # Container images
       packages.${system} = {
+        audiobookshelf = nixos-generators.nixosGenerate {
+          inherit system;
+          format = "lxc";
+          modules = [ ./containers/audiobookshelf.nix ];
+          specialArgs = { inherit outputs userConfig inputs; };
+        };
+        audiobookshelfMetadata = nixos-generators.nixosGenerate {
+          inherit system;
+          format = "lxc-metadata";
+          modules = [ ./containers/audiobookshelf.nix ];
+          specialArgs = { inherit outputs userConfig inputs; };
+        };
         docker = nixos-generators.nixosGenerate {
           inherit system;
           format = "lxc";
