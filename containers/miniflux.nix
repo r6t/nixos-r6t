@@ -24,7 +24,7 @@
     adminCredentialsFile = "/var/lib/miniflux/env";
 
     config = {
-      LISTEN_ADDR = "0.0.0.0:8080";
+      LISTEN_ADDR = "0.0.0.0:84";
       BASE_URL = "https://miniflux.r6t.io";
 
       # OIDC configuration (secret in adminCredentialsFile)
@@ -41,5 +41,5 @@
     };
   };
 
-  networking.firewall.allowedTCPPorts = [ 8080 ];
+  networking.firewall.allowedTCPPorts = [ 84 ];
 }
