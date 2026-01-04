@@ -1,3 +1,5 @@
+{ ... }:
+
 {
   imports = [
     ./r6-lxc-base.nix
@@ -14,14 +16,6 @@
     home = "/var/lib/audiobookshelf";
   };
 
-  # Upstream NixOS module stores config/metadata in /var/lib/audiobookshelf
-  # symlink to existing persistent storage paths mounted by Incus
-  systemd.tmpfiles.rules = [
-    "d /var/lib/audiobookshelf 0755 audiobookshelf users -"
-    "L /var/lib/audiobookshelf/config - - - - /mnt/crownstore/config/audiobookshelf"
-    "L /var/lib/audiobookshelf/metadata - - - - /mnt/crownstore/app-storage/audiobookshelf/metadata"
-  ];
-
   services.audiobookshelf = {
     enable = true;
     host = "0.0.0.0";
@@ -30,4 +24,7 @@
     group = "users";
     openFirewall = true;
   };
+
+  # Prevent StateDirectory from creating config/metadata dirs - Incus mounts them
+  systemd.services.audiobookshelf.serviceConfig.StateDirectory = "";
 }
