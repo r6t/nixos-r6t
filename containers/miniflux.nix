@@ -1,4 +1,4 @@
-{ lib, ... }:
+{ lib, pkgs, ... }:
 
 {
   imports = [
@@ -28,15 +28,26 @@
   users.users.postgres.uid = lib.mkForce 999;
 
   services.postgresql = {
-    # Point to Incus-mounted persistent storage
+    enable = true;
+    package = pkgs.postgresql_15;
     dataDir = "/var/lib/postgresql/data";
+    # Skip NixOS ensureUsers/ensureDatabases - using existing Docker-migrated DB
+    ensureUsers = [ ];
+    ensureDatabases = [ ];
+    # Trust local connections (matches Docker setup)
+    authentication = lib.mkForce ''
+      local all all trust
+      host all all 127.0.0.1/32 trust
+      host all all ::1/128 trust
+    '';
   };
 
   services.miniflux = {
     enable = true;
-    createDatabaseLocally = true;
+    # Don't use NixOS PostgreSQL management - existing DB has different setup
+    createDatabaseLocally = false;
 
-    # Environment file for secrets (OAUTH2_CLIENT_SECRET, ADMIN_PASSWORD if needed)
+    # Environment file for secrets (OAUTH2_CLIENT_SECRET, DATABASE_URL)
     adminCredentialsFile = "/var/lib/miniflux/env";
 
     config = {
@@ -54,6 +65,12 @@
       # Don't create admin on startup - using existing db
       CREATE_ADMIN = 0;
     };
+  };
+
+  # Ensure miniflux starts after postgresql
+  systemd.services.miniflux = {
+    after = [ "postgresql.service" ];
+    requires = [ "postgresql.service" ];
   };
 
   networking.firewall.allowedTCPPorts = [ 84 ];
