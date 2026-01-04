@@ -35,11 +35,16 @@
     user = "jellyfin";
     group = "users";
     openFirewall = true;
-
-    # Paths to be bind-mounted by Incus profile
-    dataDir = "/var/lib/jellyfin";
-    configDir = "/var/lib/jellyfin/config";
-    cacheDir = "/var/cache/jellyfin";
-    logDir = "/var/log/jellyfin";
+    # Uses nixpkgs defaults:
+    # dataDir = /var/lib/jellyfin
+    # configDir = /var/lib/jellyfin/config
+    # cacheDir = /var/cache/jellyfin
+    # logDir = /var/lib/jellyfin/log
+    #
+    # Incus profile mounts:
+    # /mnt/crownstore/config/jellyfin/data   -> /var/lib/jellyfin
+    # /mnt/crownstore/config/jellyfin/config -> /var/lib/jellyfin/config
+    # /mnt/crownstore/config/jellyfin/log    -> /var/lib/jellyfin/log
+    # /mnt/crownstore/cache/jellyfin         -> /var/cache/jellyfin
   };
 }
