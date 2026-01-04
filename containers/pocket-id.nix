@@ -41,7 +41,7 @@
     dataDir = "/var/lib/pocket-id";
 
     settings = {
-      PUBLIC_APP_URL = "https://pid.r6t.io";
+      APP_URL = "https://pid.r6t.io";
       TRUST_PROXY = true;
     };
   };
