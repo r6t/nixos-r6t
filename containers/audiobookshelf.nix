@@ -12,6 +12,22 @@ in
 
   networking.hostName = "audiobookshelf";
 
+  # append DNS server settings: crown DNS override
+  # allows workloads not on tailnet to use same DNS names
+  services = {
+    dnsmasq = {
+      settings = {
+        address = [
+          # specific overrides
+          "/grafana.r6t.io/192.168.6.1"
+
+          # wildcard so app LXCs hit router caddy
+          "/r6t.io/192.168.6.10"
+        ];
+      };
+    };
+  };
+
   # UID 1000 matches existing data ownership (r6t:users on host)
   users.users.audiobookshelf = {
     uid = 1000;
@@ -34,7 +50,7 @@ in
   systemd.services.audiobookshelf.serviceConfig.ExecStart = lib.mkForce
     "${pkgs.audiobookshelf}/bin/audiobookshelf --host 0.0.0.0 --port 13378 --config ${configPath} --metadata ${metadataPath}";
 
-  # Audiobookshelf bug: BackupManager hardcodes /metadata and /config paths
+  # BackupManager hardcodes /metadata and /config paths
   # regardless of CLI flags. Symlink to actual locations.
   systemd.tmpfiles.rules = [
     "L /config - - - - ${configPath}"
