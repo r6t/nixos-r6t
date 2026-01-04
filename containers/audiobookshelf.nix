@@ -33,4 +33,11 @@ in
   # Must pass --config and --metadata CLI flags for correct paths.
   systemd.services.audiobookshelf.serviceConfig.ExecStart = lib.mkForce
     "${pkgs.audiobookshelf}/bin/audiobookshelf --host 0.0.0.0 --port 13378 --config ${configPath} --metadata ${metadataPath}";
+
+  # Audiobookshelf bug: BackupManager hardcodes /metadata and /config paths
+  # regardless of CLI flags. Symlink to actual locations.
+  systemd.tmpfiles.rules = [
+    "L /config - - - - ${configPath}"
+    "L /metadata - - - - ${metadataPath}"
+  ];
 }
