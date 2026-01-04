@@ -182,6 +182,18 @@
           modules = [ ./containers/monitoring.nix ];
           specialArgs = { inherit outputs userConfig inputs; };
         };
+        pocketId = nixos-generators.nixosGenerate {
+          inherit system;
+          format = "lxc";
+          modules = [ ./containers/pocket-id.nix ];
+          specialArgs = { inherit outputs userConfig inputs; };
+        };
+        pocketIdMetadata = nixos-generators.nixosGenerate {
+          inherit system;
+          format = "lxc-metadata";
+          modules = [ ./containers/pocket-id.nix ];
+          specialArgs = { inherit outputs userConfig inputs; };
+        };
         tailnetExit = nixos-generators.nixosGenerate {
           inherit system;
           format = "lxc";
