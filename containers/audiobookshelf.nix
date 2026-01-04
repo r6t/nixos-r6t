@@ -1,5 +1,9 @@
-{ lib, ... }:
+{ lib, pkgs, ... }:
 
+let
+  configPath = "/var/lib/audiobookshelf/config";
+  metadataPath = "/var/lib/audiobookshelf/metadata";
+in
 {
   imports = [
     ./r6-lxc-base.nix
@@ -8,7 +12,7 @@
 
   networking.hostName = "audiobookshelf";
 
-  # audiobookshelf user with UID 1000 to match existing data ownership
+  # UID 1000 matches existing data ownership (r6t:users on host)
   users.users.audiobookshelf = {
     uid = 1000;
     group = "users";
@@ -25,6 +29,8 @@
     openFirewall = true;
   };
 
-  # Prevent StateDirectory from creating config/metadata dirs - Incus mounts them
-  systemd.services.audiobookshelf.serviceConfig.StateDirectory = lib.mkForce "";
+  # NixOS module bug: sets env vars that audiobookshelf ignores.
+  # Must pass --config and --metadata CLI flags for correct paths.
+  systemd.services.audiobookshelf.serviceConfig.ExecStart = lib.mkForce
+    "${pkgs.audiobookshelf}/bin/audiobookshelf --host 0.0.0.0 --port 13378 --config ${configPath} --metadata ${metadataPath}";
 }
