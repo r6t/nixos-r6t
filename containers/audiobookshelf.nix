@@ -1,4 +1,4 @@
-{ ... }:
+{ lib, ... }:
 
 {
   imports = [
@@ -26,5 +26,5 @@
   };
 
   # Prevent StateDirectory from creating config/metadata dirs - Incus mounts them
-  systemd.services.audiobookshelf.serviceConfig.StateDirectory = "";
+  systemd.services.audiobookshelf.serviceConfig.StateDirectory = lib.mkForce "";
 }
