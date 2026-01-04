@@ -1,4 +1,4 @@
-{ lib, pkgs, ... }:
+{ ... }:
 
 {
   imports = [
@@ -8,70 +8,33 @@
 
   networking.hostName = "miniflux";
 
-  # append DNS server settings: crown DNS override
-  # allows workloads not on tailnet to use same DNS names
-  services = {
-    dnsmasq = {
-      settings = {
-        address = [
-          # specific overrides
-          "/grafana.r6t.io/192.168.6.1"
-
-          # wildcard so app LXCs hit router caddy
-          "/r6t.io/192.168.6.10"
-        ];
-      };
-    };
-  };
-
-  # Match existing PostgreSQL data ownership (docker postgres UID 999)
-  users.users.postgres.uid = lib.mkForce 999;
-
-  services.postgresql = {
-    enable = true;
-    package = pkgs.postgresql_15;
-    dataDir = "/var/lib/postgresql/data";
-    # Skip NixOS ensureUsers/ensureDatabases - using existing Docker-migrated DB
-    ensureUsers = [ ];
-    ensureDatabases = [ ];
-    # Trust local connections (matches Docker setup)
-    authentication = lib.mkForce ''
-      local all all trust
-      host all all 127.0.0.1/32 trust
-      host all all ::1/128 trust
-    '';
-  };
-
   services.miniflux = {
     enable = true;
-    # Don't use NixOS PostgreSQL management - existing DB has different setup
-    createDatabaseLocally = false;
+    createDatabaseLocally = true;
 
-    # Environment file for secrets (OAUTH2_CLIENT_SECRET, DATABASE_URL)
+    # Environment file for secrets (OAUTH2_CLIENT_SECRET)
     adminCredentialsFile = "/var/lib/miniflux/env";
 
     config = {
       LISTEN_ADDR = "0.0.0.0:8080";
       BASE_URL = "https://miniflux.r6t.io";
 
-      # OIDC configuration (secret in adminCredentialsFile)
+      # OIDC configuration (OAUTH2_CLIENT_SECRET in adminCredentialsFile)
       OAUTH2_PROVIDER = "oidc";
+      OAUTH2_CLIENT_ID = "67dcba05-b852-4827-bc8d-f8bba652b05d";
       OAUTH2_REDIRECT_URL = "https://miniflux.r6t.io/oauth2/oidc/callback";
       OAUTH2_OIDC_DISCOVERY_ENDPOINT = "https://pid.r6t.io";
       OAUTH2_OIDC_PROVIDER_NAME = "PocketID";
       OAUTH2_USER_CREATION = 1;
       DISABLE_LOCAL_AUTH = 0;
 
-      # Don't create admin on startup - using existing db
+      # Don't create admin - importing existing users from backup
       CREATE_ADMIN = 0;
     };
   };
 
-  # Ensure miniflux starts after postgresql
-  systemd.services.miniflux = {
-    after = [ "postgresql.service" ];
-    requires = [ "postgresql.service" ];
-  };
+  # PostgreSQL dataDir on persistent storage (mounted by Incus)
+  services.postgresql.dataDir = "/var/lib/postgresql/data";
 
   networking.firewall.allowedTCPPorts = [ 8080 ];
 }
