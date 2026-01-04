@@ -158,6 +158,18 @@
           modules = [ ./containers/llm.nix ];
           specialArgs = { inherit outputs userConfig inputs; };
         };
+        miniflux = nixos-generators.nixosGenerate {
+          inherit system;
+          format = "lxc";
+          modules = [ ./containers/miniflux.nix ];
+          specialArgs = { inherit outputs userConfig inputs; };
+        };
+        minifluxMetadata = nixos-generators.nixosGenerate {
+          inherit system;
+          format = "lxc-metadata";
+          modules = [ ./containers/miniflux.nix ];
+          specialArgs = { inherit outputs userConfig inputs; };
+        };
         monitoring = nixos-generators.nixosGenerate {
           inherit system;
           format = "lxc";
