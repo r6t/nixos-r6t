@@ -51,7 +51,7 @@
     adminCredentialsFile = "/var/lib/miniflux/env";
 
     config = {
-      LISTEN_ADDR = "0.0.0.0:84";
+      LISTEN_ADDR = "0.0.0.0:8080";
       BASE_URL = "https://miniflux.r6t.io";
 
       # OIDC configuration (secret in adminCredentialsFile)
@@ -73,5 +73,5 @@
     requires = [ "postgresql.service" ];
   };
 
-  networking.firewall.allowedTCPPorts = [ 84 ];
+  networking.firewall.allowedTCPPorts = [ 8080 ];
 }
