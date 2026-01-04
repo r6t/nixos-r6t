@@ -146,6 +146,18 @@
           modules = [ ./containers/immich.nix ];
           specialArgs = { inherit outputs userConfig inputs; };
         };
+        jellyfin = nixos-generators.nixosGenerate {
+          inherit system;
+          format = "lxc";
+          modules = [ ./containers/jellyfin.nix ];
+          specialArgs = { inherit outputs userConfig inputs; };
+        };
+        jellyfinMetadata = nixos-generators.nixosGenerate {
+          inherit system;
+          format = "lxc-metadata";
+          modules = [ ./containers/jellyfin.nix ];
+          specialArgs = { inherit outputs userConfig inputs; };
+        };
         llm = nixos-generators.nixosGenerate {
           inherit system;
           format = "lxc";
