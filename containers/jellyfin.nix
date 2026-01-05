@@ -45,7 +45,9 @@
   };
 
   # Existing config has Docker paths hardcoded - symlink for compatibility
+  # Docker used /config as root, NixOS uses /var/lib/jellyfin
   systemd.tmpfiles.rules = [
     "L /cache - - - - /var/cache/jellyfin"
+    "L /config - - - - /var/lib/jellyfin"
   ];
 }
