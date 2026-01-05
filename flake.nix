@@ -98,6 +98,18 @@
           modules = [ ./containers/audiobookshelf.nix ];
           specialArgs = { inherit outputs userConfig inputs; };
         };
+        changedetection = nixos-generators.nixosGenerate {
+          inherit system;
+          format = "lxc";
+          modules = [ ./containers/changedetection.nix ];
+          specialArgs = { inherit outputs userConfig inputs; };
+        };
+        changedetectionMetadata = nixos-generators.nixosGenerate {
+          inherit system;
+          format = "lxc-metadata";
+          modules = [ ./containers/changedetection.nix ];
+          specialArgs = { inherit outputs userConfig inputs; };
+        };
         docker = nixos-generators.nixosGenerate {
           inherit system;
           format = "lxc";
