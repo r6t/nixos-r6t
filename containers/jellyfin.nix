@@ -36,9 +36,11 @@
     group = "users";
     openFirewall = true;
 
-    # Match Docker layout: /mnt/crownstore/config/jellyfin mounted to /var/lib/jellyfin
-    # Contains: config/, data/, log/, metadata/, plugins/, root/, transcodes/
-    dataDir = "/var/lib/jellyfin/data";
+    # Docker mounted /mnt/crownstore/config/jellyfin to /config
+    # NixOS jellyfin creates data/ subdir inside dataDir
+    # So dataDir=/var/lib/jellyfin results in DB at /var/lib/jellyfin/data/jellyfin.db
+    # which maps to /mnt/crownstore/config/jellyfin/data/jellyfin.db - correct!
+    dataDir = "/var/lib/jellyfin";
     configDir = "/var/lib/jellyfin/config";
     cacheDir = "/var/cache/jellyfin";
     logDir = "/var/lib/jellyfin/log";
