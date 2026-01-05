@@ -206,6 +206,18 @@
           modules = [ ./containers/pocket-id.nix ];
           specialArgs = { inherit outputs userConfig inputs; };
         };
+        searxng = nixos-generators.nixosGenerate {
+          inherit system;
+          format = "lxc";
+          modules = [ ./containers/searxng.nix ];
+          specialArgs = { inherit outputs userConfig inputs; };
+        };
+        searxngMetadata = nixos-generators.nixosGenerate {
+          inherit system;
+          format = "lxc-metadata";
+          modules = [ ./containers/searxng.nix ];
+          specialArgs = { inherit outputs userConfig inputs; };
+        };
         tailnetExit = nixos-generators.nixosGenerate {
           inherit system;
           format = "lxc";
