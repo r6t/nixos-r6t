@@ -43,4 +43,9 @@
     cacheDir = "/var/cache/jellyfin";
     logDir = "/var/lib/jellyfin/log";
   };
+
+  # Existing config has Docker paths hardcoded - symlink for compatibility
+  systemd.tmpfiles.rules = [
+    "L /cache - - - - /var/cache/jellyfin"
+  ];
 }
