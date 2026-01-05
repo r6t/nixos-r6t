@@ -24,7 +24,7 @@
       enable = true;
       package = pkgs.searxng;
       redisCreateLocally = true;
-      runInUwsgi = true;
+      configureUwsgi = true;
 
       uwsgiConfig = {
         http = "0.0.0.0:8085";
