@@ -29,13 +29,17 @@ let
         window-padding-x = 4;
         window-padding-y = 4;
 
+        # Color rendering - use linear-corrected for consistent sRGB colors
+        # macOS defaults to 'native' (Display P3) which can make colors look faded
+        alpha-blending = "linear-corrected";
+
         # Font
         font-size = 13;
 
         # Clipboard
         copy-on-select = "clipboard";
 
-        # Carbon colorscheme (matching your alacritty config)
+        # Oxocarbon-inspired colorscheme (traditional ANSI mapping)
         background = "161616";
         foreground = "ffffff";
         selection-background = "525252";

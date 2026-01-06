@@ -110,6 +110,9 @@
                 stateVersion = "23.11";
               };
 
+              # Enable XDG base directories for config file management
+              xdg.enable = true;
+
               # Disable app bundling - MDM blocks App Management permissions for copyApps,
               # and linkApps symlinks don't work well with Spotlight/Dock anyway.
               # GUI apps (Ghostty) installed via Homebrew; home-manager still manages their configs.
