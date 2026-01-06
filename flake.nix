@@ -109,6 +109,10 @@
                 stateVersion = "23.11";
               };
 
+              # Copy .app bundles to ~/Applications so they appear in Spotlight/Dock
+              # (linkApps is default for stateVersion < 25.11 which does not integrate with macOS)
+              targets.darwin.copyApps.enable = true;
+
               # Enable the portable modules
               mine.home = {
                 alacritty.enable = true;
