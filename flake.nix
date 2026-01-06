@@ -102,12 +102,17 @@
             ./modules/home/ghostty/default.nix
             ./modules/home/nixvim/default.nix
             ./modules/home/zellij/default.nix
-            (_: {
+            ({ config, ... }: {
               # Read from environment variables (requires --impure flag)
               home = {
                 username = builtins.getEnv "USER";
                 homeDirectory = builtins.getEnv "HOME";
                 stateVersion = "23.11";
+
+                # Symlink ghostty config to macOS Application Support location
+                # Ghostty's Preferences UI looks here, not at XDG location
+                file."Library/Application Support/com.mitchellh.ghostty/config".source =
+                  config.lib.file.mkOutOfStoreSymlink "${config.xdg.configHome}/ghostty/config";
               };
 
               # Enable XDG base directories for config file management
