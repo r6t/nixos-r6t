@@ -99,6 +99,7 @@
             ./modules/home/alacritty/default.nix
             ./modules/home/atuin/default.nix
             ./modules/home/fish/default.nix
+            ./modules/home/ghostty/default.nix
             ./modules/home/nixvim/default.nix
             ./modules/home/zellij/default.nix
             (_: {
@@ -111,7 +112,7 @@
 
               # Disable app bundling - MDM blocks App Management permissions for copyApps,
               # and linkApps symlinks don't work well with Spotlight/Dock anyway.
-              # GUI apps (Alacritty) installed via Homebrew; home-manager still manages their configs.
+              # GUI apps (Ghostty) installed via Homebrew; home-manager still manages their configs.
               targets.darwin.linkApps.enable = false;
 
               # Enable the portable modules
@@ -119,6 +120,7 @@
                 alacritty.enable = true;
                 atuin.enable = true;
                 fish.enable = true;
+                ghostty.enable = true;
                 nixvim = {
                   enable = true;
                   enableSopsSecrets = false; # No sops on work machine

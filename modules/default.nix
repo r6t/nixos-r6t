@@ -24,6 +24,7 @@
     home/fish/default.nix
     home/fontconfig/default.nix
     home/freecad/default.nix
+    home/ghostty/default.nix
     home/git/default.nix
     home/home-manager/default.nix
     home/hyprland/default.nix
