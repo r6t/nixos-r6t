@@ -34,11 +34,6 @@
 
   services.fprintd.enable = false;
 
-  # Network hang diagnostics script
-  environment.systemPackages = [
-    (pkgs.writeScriptBin "network-debug" (builtins.readFile ./network-debug.fish))
-  ];
-
   system.stateVersion = "23.11";
 
   time.timeZone = "America/Los_Angeles";
@@ -82,7 +77,7 @@
       ssh.enable = true;
       teams-for-linux.enable = true;
       virt-viewer.enable = true;
-      webcord.enable = true;
+      webcord.enable = false;
       zellij.enable = true;
     };
 

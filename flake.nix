@@ -84,6 +84,47 @@
         };
       };
 
+      # Standalone home-manager for non-NixOS systems (macOS, other Linux)
+      # Usage: home-manager switch --flake .#work --impure
+      # Requires env vars: USER, HOME (auto-set by shell)
+      homeConfigurations = {
+        work = inputs.home-manager.lib.homeManagerConfiguration {
+          pkgs = import nixpkgs {
+            system = builtins.currentSystem or "aarch64-darwin";
+            config.allowUnfree = true;
+          };
+          extraSpecialArgs = { inherit inputs; userConfig = null; };
+          modules = [
+            inputs.nixvim.homeModules.nixvim
+            ./modules/home/alacritty/default.nix
+            ./modules/home/atuin/default.nix
+            ./modules/home/fish/default.nix
+            ./modules/home/nixvim/default.nix
+            ./modules/home/zellij/default.nix
+            (_: {
+              # Read from environment variables (requires --impure flag)
+              home = {
+                username = builtins.getEnv "USER";
+                homeDirectory = builtins.getEnv "HOME";
+                stateVersion = "23.11";
+              };
+
+              # Enable the portable modules
+              mine.home = {
+                alacritty.enable = true;
+                atuin.enable = true;
+                fish.enable = true;
+                nixvim = {
+                  enable = true;
+                  enableSopsSecrets = false; # No sops on work machine
+                };
+                zellij.enable = true;
+              };
+            })
+          ];
+        };
+      };
+
       # Container images
       packages.${system} = {
         audiobookshelf = nixos-generators.nixosGenerate {

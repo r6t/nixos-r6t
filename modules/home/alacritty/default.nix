@@ -1,16 +1,17 @@
-{ lib, config, userConfig, ... }: {
+{ lib, config, pkgs, userConfig ? null, ... }:
 
-  options = {
-    mine.home.alacritty.enable =
-      lib.mkEnableOption "enable alacritty in home-manager";
-  };
+let
+  cfg = config.mine.home.alacritty;
+  isNixOS = userConfig != null;
 
-  config = lib.mkIf config.mine.home.alacritty.enable {
-    home-manager.users.${userConfig.username}.programs.alacritty = {
+  # Shared alacritty configuration
+  alacrittyConfig = {
+    programs.alacritty = {
       enable = true;
       settings = {
         window = {
-          decorations = "none";
+          # macOS handles decorations differently
+          decorations = if pkgs.stdenv.isDarwin then "buttonless" else "none";
         };
         terminal.shell = {
           program = "zellij";
@@ -57,4 +58,18 @@
       };
     };
   };
+
+in
+{
+  options.mine.home.alacritty.enable =
+    lib.mkEnableOption "enable alacritty in home-manager";
+
+  config = lib.mkIf cfg.enable (
+    if isNixOS then {
+      # NixOS mode: configure via home-manager.users wrapper
+      home-manager.users.${userConfig.username} = alacrittyConfig;
+    } else
+    # Standalone home-manager mode: configure directly
+      alacrittyConfig
+  );
 }
