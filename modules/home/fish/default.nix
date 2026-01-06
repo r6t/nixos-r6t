@@ -67,16 +67,16 @@ let
                 string replace -r '^([^/]+)/([^-]+)-(.+)$' '$1/$2-$3' | \
                 string replace -r '([^/])[^/-]*' '$1' | \
                 string replace -r '([^-])[^/-]*' '$1')
-              echo -n (set_color be95ff)" branch:"$short_branch
+              echo -n (set_color be95ff)" 🌱 "$short_branch
             else
-              echo -n (set_color be95ff)" branch:"$branch
+              echo -n (set_color be95ff)" 🌱 "$branch
             end
           end
           if test -n "$IN_NIX_SHELL"
-            echo -n (set_color 82cfff)" nix:"$DEVSHELL_NAME
+            echo -n (set_color 82cfff)" ❄ "$DEVSHELL_NAME
           end
           if test -n "$VIRTUAL_ENV"
-            echo -n (set_color 42be65)" py"
+            echo -n (set_color 42be65)" 🐍"
           end
           echo -n (set_color normal)" > "
         '';
@@ -118,11 +118,12 @@ let
   fishPackages = with pkgs; [
     bat
     fishPlugins.forgit
-    fishPlugins.fzf-fish
     lsd
     pandoc
     pay-respects
     ripgrep
+  ] ++ lib.optionals pkgs.stdenv.isLinux [
+    fishPlugins.fzf-fish # marked broken on darwin
   ];
 
 in
