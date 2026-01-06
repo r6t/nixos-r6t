@@ -16,8 +16,12 @@ let
       enableFishIntegration = true;
 
       settings = {
-        # Shell - launch zellij by default
-        command = "zellij -l welcome";
+        # Shell - use fish, then launch zellij from fish config or manually
+        # On macOS, need full path since login shell may not have nix in PATH yet
+        command =
+          if pkgs.stdenv.isDarwin
+          then "$HOME/.nix-profile/bin/fish"
+          else "zellij -l welcome";
 
         # Window appearance
         window-decoration = if pkgs.stdenv.isDarwin then true else "server";
