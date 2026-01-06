@@ -118,6 +118,7 @@ let
   fishPackages = with pkgs; [
     bat
     fishPlugins.forgit
+    fzf
     lsd
     pandoc
     pay-respects

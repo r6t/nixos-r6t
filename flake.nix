@@ -109,9 +109,10 @@
                 stateVersion = "23.11";
               };
 
-              # Copy .app bundles to ~/Applications so they appear in Spotlight/Dock
-              # (linkApps is default for stateVersion < 25.11 which does not integrate with macOS)
-              targets.darwin.copyApps.enable = true;
+              # Disable app bundling - MDM blocks App Management permissions for copyApps,
+              # and linkApps symlinks don't work well with Spotlight/Dock anyway.
+              # GUI apps (Alacritty) installed via Homebrew; home-manager still manages their configs.
+              targets.darwin.linkApps.enable = false;
 
               # Enable the portable modules
               mine.home = {
