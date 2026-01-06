@@ -112,6 +112,14 @@ let
       fish_add_path $HOME/.nix-profile/bin
       fish_add_path $HOME/.local/bin
     '';
+
+    # Login shell init - ensure nix is available on macOS
+    # Determinate Nix installs to /nix/var/nix/profiles/default/bin
+    loginShellInit = ''
+      if test -e /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.fish
+        source /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.fish
+      end
+    '';
   };
 
   # Shared packages used in both modes
