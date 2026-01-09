@@ -68,7 +68,11 @@ let
       nativeBuildInputs = baseTools ++ [ pkgs.python3Packages.pip ];
       packages = pythonTools ++ nodeTools ++ extraPackages;
       shellHook = ''
-        ${self.checks.${pkgs.stdenv.hostPlatform.system}.pre-commit-check.shellHook or ""}
+        ${
+          if pkgs.stdenv.hostPlatform.system == "x86_64-linux"
+          then self.checks.${pkgs.stdenv.hostPlatform.system}.pre-commit-check.shellHook or ""
+          else ""
+        }
         export DEVSHELL_NAME="${name}"
         
         if command -v fish >/dev/null; then
@@ -118,7 +122,11 @@ in
       ];
       shell = "${pkgs.fish}/bin/fish";
       shellHook = ''
-        ${self.checks.${pkgs.stdenv.hostPlatform.system}.pre-commit-check.shellHook or ""}
+        ${
+          if pkgs.stdenv.hostPlatform.system == "x86_64-linux"
+          then self.checks.${pkgs.stdenv.hostPlatform.system}.pre-commit-check.shellHook or ""
+          else ""
+        }
         export DEVSHELL_NAME="aws"
 
         if command -v fish >/dev/null; then

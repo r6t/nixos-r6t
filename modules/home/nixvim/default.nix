@@ -14,6 +14,7 @@ let
     alejandra
     deadnix
     nixpkgs-fmt
+    python3Packages.pylint
     stylua
     statix
     yamlfmt

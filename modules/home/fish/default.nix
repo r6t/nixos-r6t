@@ -81,6 +81,29 @@ let
           echo -n (set_color normal)" > "
         '';
       };
+
+      fish_right_prompt = {
+        body = ''
+          # AWS credentials indicator
+          # Checks for federated auth (AWS_SESSION_TOKEN, AWS_ACCESS_KEY_ID) 
+          # and traditional profiles (AWS_PROFILE, AWS_DEFAULT_PROFILE)
+          set -l aws_indicator ""
+          
+          if test -n "$AWS_DEFAULT_PROFILE"
+            set aws_indicator $AWS_DEFAULT_PROFILE
+          else if test -n "$AWS_PROFILE"
+            set aws_indicator $AWS_PROFILE
+          else if test -n "$AWS_SESSION_TOKEN"; or test -n "$AWS_ACCESS_KEY_ID"
+            # Federated/temporary credentials active but no profile name
+            set aws_indicator "federated"
+          end
+          
+          if test -n "$aws_indicator"
+            # Use oxocarbon yellow (palette 3) for background, black for text
+            echo -n (set_color 262626 --background ffe97b)" ☁ $aws_indicator "(set_color normal)
+          end
+        '';
+      };
     } // lib.optionalAttrs pkgs.stdenv.isLinux {
       # NixOS-specific rebuild function (Linux only)
       nrs = {
@@ -91,17 +114,6 @@ let
           echo "nixos-rebuild for: $current_hostname"
           echo "sudo nixos-rebuild switch --flake '$flake_path#$current_hostname'"
           sudo nixos-rebuild switch --flake "$flake_path#$current_hostname"
-        '';
-      };
-    } // lib.optionalAttrs pkgs.stdenv.isDarwin {
-      # macOS-specific rebuild function
-      hms = {
-        description = "Run home-manager switch --flake for standalone home-manager.";
-        body = ''
-          set flake_path "${homeDir}/git/nixos-r6t"
-          echo "home-manager switch for: work"
-          echo "home-manager switch --flake '$flake_path#work' --impure"
-          home-manager switch --flake "$flake_path#work" --impure
         '';
       };
     };
