@@ -85,16 +85,17 @@ let
       fish_right_prompt = {
         body = ''
           # AWS credentials indicator
-          # Checks for federated auth (AWS_SESSION_TOKEN, AWS_ACCESS_KEY_ID) 
-          # and traditional profiles (AWS_PROFILE, AWS_DEFAULT_PROFILE)
           set -l aws_indicator ""
           
-          if test -n "$AWS_DEFAULT_PROFILE"
+          # Check for custom profile name first (set by 'i' function)
+          if test -n "$AWS_PROFILE_NAME"
+            set aws_indicator $AWS_PROFILE_NAME
+          else if test -n "$AWS_DEFAULT_PROFILE"
             set aws_indicator $AWS_DEFAULT_PROFILE
           else if test -n "$AWS_PROFILE"
             set aws_indicator $AWS_PROFILE
           else if test -n "$AWS_SESSION_TOKEN"; or test -n "$AWS_ACCESS_KEY_ID"
-            # Federated/temporary credentials active but no profile name
+            # Fallback for federated credentials without profile name
             set aws_indicator "federated"
           end
           
@@ -123,6 +124,13 @@ let
       pay-respects fish --alias | source
       fish_add_path $HOME/.nix-profile/bin
       fish_add_path $HOME/.local/bin
+      fish_add_path $HOME/.toolbox/bin
+      fish_add_path /apollo/env/SDETools/bin
+      
+      # Source local work-specific config if it exists (not in git)
+      if test -f $HOME/.config/fish/work-local.fish
+        source $HOME/.config/fish/work-local.fish
+      end
     '';
 
     # Login shell init - ensure nix is available on macOS

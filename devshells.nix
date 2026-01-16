@@ -89,53 +89,32 @@ in
 
   default = mkShell { name = "nix"; };
 
-  aws =
-    let
-      pkgsWithOverlay = import nixpkgs {
-        inherit (pkgs.stdenv.hostPlatform) system;
-        overlays = [
-          (_: prev: {
-            python3 = prev.python3.override {
-              packageOverrides = _: python-prev: {
-                awacs = python-prev.awacs.overridePythonAttrs (old: {
-                  checkInputs = (old.checkInputs or [ ]) ++ [ python-prev.pytest ];
-                });
-              };
-            };
-          })
-        ];
-      };
-    in
-    pkgs.mkShell {
-      AWS_REGION = "us-west-2";
-      nativeBuildInputs = baseTools ++ (with pkgs; [
-        awscli2
-        nodejs_20
-        ssm-session-manager-plugin
-        nodePackages_latest.aws-cdk
-      ]) ++ [ pkgs.python3Packages.pip ];
-      packages = with pkgsWithOverlay; [
-        (python3.withPackages (ps: with ps; [
-          boto3
-          troposphere
-        ]))
-      ];
-      shell = "${pkgs.fish}/bin/fish";
-      shellHook = ''
-        ${
-          if pkgs.stdenv.hostPlatform.system == "x86_64-linux"
-          then self.checks.${pkgs.stdenv.hostPlatform.system}.pre-commit-check.shellHook or ""
-          else ""
-        }
-        export DEVSHELL_NAME="aws"
+  aws = pkgs.mkShell {
+    AWS_REGION = "us-west-2";
+    nativeBuildInputs = baseTools ++ (with pkgs; [
+      awscli2
+      nodejs_20
+      ssm-session-manager-plugin
+      nodePackages_latest.aws-cdk
+    ]);
+    # No Python packages - use Amazon toolbox Python to avoid conflicts with isengardcli
+    packages = [ ];
+    shell = "${pkgs.fish}/bin/fish";
+    shellHook = ''
+      ${
+        if pkgs.stdenv.hostPlatform.system == "x86_64-linux"
+        then self.checks.${pkgs.stdenv.hostPlatform.system}.pre-commit-check.shellHook or ""
+        else ""
+      }
+      export DEVSHELL_NAME="aws"
 
-        if command -v fish >/dev/null; then
-          exec fish
-        else
-          echo "Warning: fish not found, falling back to bash"
-        fi
-      '';
-    };
+      if command -v fish >/dev/null; then
+        exec fish
+      else
+        echo "Warning: fish not found, falling back to bash"
+      fi
+    '';
+  };
 
   media = mkShell {
     name = "media";
