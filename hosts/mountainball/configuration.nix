@@ -62,7 +62,7 @@
       drawio.enable = true;
       fish.enable = true;
       fontconfig.enable = true;
-      freecad.enable = true;
+      freecad.enable = false; # 20260118 builds failing on pagmo
       git.enable = true;
       home-manager.enable = true;
       hyprland.enable = false;
