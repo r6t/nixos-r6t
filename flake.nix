@@ -308,6 +308,18 @@
           modules = [ ./containers/searxng.nix ];
           specialArgs = { inherit outputs userConfig inputs; };
         };
+        obsidianRemote = nixos-generators.nixosGenerate {
+          system = linuxSystem;
+          format = "lxc";
+          modules = [ ./containers/obsidian-remote.nix ];
+          specialArgs = { inherit outputs userConfig inputs; };
+        };
+        obsidianRemoteMetadata = nixos-generators.nixosGenerate {
+          system = linuxSystem;
+          format = "lxc-metadata";
+          modules = [ ./containers/obsidian-remote.nix ];
+          specialArgs = { inherit outputs userConfig inputs; };
+        };
         tailnetExit = nixos-generators.nixosGenerate {
           system = linuxSystem;
           format = "lxc";
