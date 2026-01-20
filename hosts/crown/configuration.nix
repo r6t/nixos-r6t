@@ -79,7 +79,7 @@
     journald.extraConfig = "SystemMaxUse=500M";
     resolved = {
       enable = true;
-      domains = [ "~." ];
+      settings.Resolve.Domains = [ "~." ];
     };
   };
 
