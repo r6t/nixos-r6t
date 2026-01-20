@@ -1,4 +1,4 @@
-{ pkgs, self, nixpkgs, ... }:
+{ pkgs, self, ... }:
 
 let
   # --- Custom Package Definitions ---

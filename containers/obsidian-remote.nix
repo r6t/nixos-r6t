@@ -20,8 +20,8 @@
       image = "ghcr.io/sytone/obsidian-remote:latest";
       ports = [ "8088:8088" ];
       volumes = [
-        "/var/lib/obsidian-remote/vaults:/vaults"
-        "/var/lib/obsidian-remote/config:/config"
+        "/vaults:/vaults"
+        "/config:/config"
       ];
       environment = {
         PUID = "1000";
@@ -35,13 +35,6 @@
       };
     };
   };
-
-  # Pre-create data directories for Incus bind-mounts
-  systemd.tmpfiles.rules = [
-    "d /var/lib/obsidian-remote 0755 root root -"
-    "d /var/lib/obsidian-remote/vaults 0755 root root -"
-    "d /var/lib/obsidian-remote/config 0755 root root -"
-  ];
 
   networking.firewall.allowedTCPPorts = [ 8088 ];
 }
