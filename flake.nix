@@ -320,6 +320,18 @@
           modules = [ ./containers/tailnet-exit.nix ];
           specialArgs = { inherit outputs userConfig inputs; };
         };
+        remotePlasma = nixos-generators.nixosGenerate {
+          system = linuxSystem;
+          format = "lxc";
+          modules = [ ./containers/remote-plasma.nix ];
+          specialArgs = { inherit outputs userConfig inputs; };
+        };
+        remotePlasmaMetadata = nixos-generators.nixosGenerate {
+          system = linuxSystem;
+          format = "lxc-metadata";
+          modules = [ ./containers/remote-plasma.nix ];
+          specialArgs = { inherit outputs userConfig inputs; };
+        };
       };
 
       # Pre-commit
