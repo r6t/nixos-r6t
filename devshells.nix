@@ -95,6 +95,8 @@ let
   };
 
   # AWS devshell shellHook - for personal NixOS systems
+  # Note: Does NOT exec fish - that's the caller's responsibility
+  # This makes the devshell easier to extend (see work devshell in nix-work-r6t)
   awsShellHook = ''
     ${
       if pkgs.stdenv.hostPlatform.system == "x86_64-linux"
@@ -102,12 +104,6 @@ let
       else ""
     }
     export DEVSHELL_NAME="aws"
-    
-    if command -v fish >/dev/null; then
-      exec fish
-    else
-      echo "Warning: fish not found, falling back to bash"
-    fi
   '';
 
 in
