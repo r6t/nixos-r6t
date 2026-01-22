@@ -122,15 +122,41 @@ let
     interactiveShellInit = ''
       set -x _PR_DISABLE_AI 1
       pay-respects fish --alias | source
+      
+      # Source work devshell Isengard functions if in work devshell
+      if test -n "$WORK_FISH_FUNCTIONS"
+        source $WORK_FISH_FUNCTIONS
+      end
+      
+      # Universal user paths
       fish_add_path $HOME/.nix-profile/bin
       fish_add_path $HOME/.local/bin
-      fish_add_path $HOME/.toolbox/bin
-      fish_add_path /apollo/env/SDETools/bin
       
-      # Source local work-specific config if it exists (not in git)
-      if test -f $HOME/.config/fish/work-local.fish
-        source $HOME/.config/fish/work-local.fish
+      # Ensure nix command is available (Determinate Nix installation)
+      # This is especially important in devshells which strip system PATH
+      fish_add_path /nix/var/nix/profiles/default/bin
+      
+      # Work devshell specific paths
+      if test "$DEVSHELL_NAME" = "work"
+        fish_add_path $HOME/.toolbox/bin
+        fish_add_path /apollo/env/SDETools/bin
       end
+      
+      # macOS system paths (only on Darwin or in work devshell)
+      # Appended directly to PATH (not using fish_add_path to avoid persistence)
+      # These are fallback paths - nix tools take priority
+      if test (uname) = "Darwin"; or test "$DEVSHELL_NAME" = "work"
+        for p in /opt/pmk/env/global/bin /usr/local/bin /opt/homebrew/bin /System/Cryptexes/App/usr/bin /var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin /var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin /var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin
+          if test -d $p; and not contains $p $PATH
+            set -gx PATH $PATH $p
+          end
+        end
+      end
+      
+      # Suppress Determinate Nix FamilyDisplayName warning (macOS 26.x compatibility issue)
+      # This specific warning is harmless and will be fixed in future nix versions
+      # Other warnings are still visible
+      set -gx NIX_IGNORE_SYMLINK_STORE 1  # Try to reduce daemon warnings
     '';
 
     # Login shell init - ensure nix is available on macOS

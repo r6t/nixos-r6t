@@ -18,6 +18,7 @@ let
       settings = {
         show_startup_tips = false;
         simplified_ui = true;
+        # Launch fish - devshell entry is handled by Ghostty on macOS
         default_shell = "fish";
         default_layout = "custom-compact-top";
         pane_frames = false;

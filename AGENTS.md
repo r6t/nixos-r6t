@@ -2,7 +2,7 @@
 
 - only modify files that are part of this flake git project. for files outside this scope needing modification, tell me to do it. one exception: you can mkdir in /tmp and use any directories that you created in /tmp for things like downloading git repos to inspect
 - never run git add, commit, or push actions
-- never run nixos rebuild or nix build actions
+- never run nixos rebuild, nix build, home-manager switch, or any nix commands that build/activate configurations
 - never run nix flake update or modify ./flake.lock
 
 ## Environment

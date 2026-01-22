@@ -94,62 +94,6 @@
         };
       };
 
-      # Standalone home-manager for non-NixOS systems (macOS, other Linux)
-      # Usage: home-manager switch --flake .#work --impure
-      # Requires env vars: USER, HOME (auto-set by shell)
-      homeConfigurations = {
-        work = inputs.home-manager.lib.homeManagerConfiguration {
-          pkgs = import nixpkgs {
-            system = builtins.currentSystem or "aarch64-darwin";
-            config.allowUnfree = true;
-          };
-          extraSpecialArgs = { inherit inputs; userConfig = null; };
-          modules = [
-            inputs.nixvim.homeModules.nixvim
-            ./modules/home/alacritty/default.nix
-            ./modules/home/atuin/default.nix
-            ./modules/home/fish/default.nix
-            ./modules/home/ghostty/default.nix
-            ./modules/home/nixvim/default.nix
-            ./modules/home/zellij/default.nix
-            ({ config, ... }: {
-              # Read from environment variables (requires --impure flag)
-              home = {
-                username = builtins.getEnv "USER";
-                homeDirectory = builtins.getEnv "HOME";
-                stateVersion = "23.11";
-
-                # Symlink ghostty config to macOS Application Support location
-                # Ghostty's Preferences UI looks here, not at XDG location
-                file."Library/Application Support/com.mitchellh.ghostty/config".source =
-                  config.lib.file.mkOutOfStoreSymlink "${config.xdg.configHome}/ghostty/config";
-              };
-
-              # Enable XDG base directories for config file management
-              xdg.enable = true;
-
-              # Disable app bundling - MDM blocks App Management permissions for copyApps,
-              # and linkApps symlinks don't work well with Spotlight/Dock anyway.
-              # GUI apps (Ghostty) installed via Homebrew; home-manager still manages their configs.
-              targets.darwin.linkApps.enable = false;
-
-              # Enable the portable modules
-              mine.home = {
-                alacritty.enable = true;
-                atuin.enable = true;
-                fish.enable = true;
-                ghostty.enable = true;
-                nixvim = {
-                  enable = true;
-                  enableSopsSecrets = false; # No sops on work machine
-                };
-                zellij.enable = true;
-              };
-            })
-          ];
-        };
-      };
-
       # Container images
       packages.${linuxSystem} = {
         audiobookshelf = nixos-generators.nixosGenerate {
@@ -361,6 +305,17 @@
             pylint.enable = true;
           };
         };
+      };
+
+      # Export home-manager modules for use by other flakes (e.g., nix-work-r6t)
+      # These portable modules work on any system (NixOS, macOS, other Linux)
+      homeManagerModules = {
+        fish = import ./modules/home/fish/default.nix;
+        nixvim = import ./modules/home/nixvim/default.nix;
+        zellij = import ./modules/home/zellij/default.nix;
+        git = import ./modules/home/git/default.nix;
+        atuin = import ./modules/home/atuin/default.nix;
+        alacritty = import ./modules/home/alacritty/default.nix;
       };
     };
 }

@@ -83,38 +83,44 @@ let
       '';
     };
 
+  # --- AWS Base Configuration ---
+  # Shared packages and environment for aws devshell
+  awsBase = {
+    nativeBuildInputs = baseTools ++ (with pkgs; [
+      awscli2
+      nodejs_20
+      ssm-session-manager-plugin
+    ]);
+    packages = [ ];
+  };
+
+  # AWS devshell shellHook - for personal NixOS systems
+  awsShellHook = ''
+    ${
+      if pkgs.stdenv.hostPlatform.system == "x86_64-linux"
+      then self.checks.${pkgs.stdenv.hostPlatform.system}.pre-commit-check.shellHook or ""
+      else ""
+    }
+    export DEVSHELL_NAME="aws"
+    
+    if command -v fish >/dev/null; then
+      exec fish
+    else
+      echo "Warning: fish not found, falling back to bash"
+    fi
+  '';
+
 in
 {
   # --- Shell Definitions ---
 
   default = mkShell { name = "nix"; };
 
-  aws = pkgs.mkShell {
-    AWS_REGION = "us-west-2";
-    nativeBuildInputs = baseTools ++ (with pkgs; [
-      awscli2
-      nodejs_20
-      ssm-session-manager-plugin
-      nodePackages_latest.aws-cdk
-    ]);
-    # No Python packages - use Amazon toolbox Python to avoid conflicts with isengardcli
-    packages = [ ];
-    shell = "${pkgs.fish}/bin/fish";
-    shellHook = ''
-      ${
-        if pkgs.stdenv.hostPlatform.system == "x86_64-linux"
-        then self.checks.${pkgs.stdenv.hostPlatform.system}.pre-commit-check.shellHook or ""
-        else ""
-      }
-      export DEVSHELL_NAME="aws"
-
-      if command -v fish >/dev/null; then
-        exec fish
-      else
-        echo "Warning: fish not found, falling back to bash"
-      fi
-    '';
-  };
+  # AWS devshell - for personal NixOS systems
+  # Uses mkShell to include standard build toolchain for flexibility
+  aws = pkgs.mkShell (awsBase // {
+    shellHook = awsShellHook;
+  });
 
   media = mkShell {
     name = "media";

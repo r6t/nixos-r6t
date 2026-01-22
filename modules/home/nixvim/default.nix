@@ -61,6 +61,31 @@ let
           },
         }
 
+        -- Auto-reload files when changed externally (by OpenCode, git, etc.)
+        -- This works together with autoread option to automatically reload buffers
+        local autoread_group = vim.api.nvim_create_augroup("autoread", { clear = true })
+        
+        -- Check for file changes when entering a buffer or gaining focus
+        vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "CursorHold" }, {
+          group = autoread_group,
+          pattern = "*",
+          callback = function()
+            -- Only check if the buffer is a normal file and is loaded
+            if vim.bo.buftype == "" and vim.fn.getcmdwintype() == "" then
+              vim.cmd("checktime")
+            end
+          end,
+        })
+        
+        -- Suppress the "file changed" prompt and reload automatically
+        vim.api.nvim_create_autocmd("FileChangedShellPost", {
+          group = autoread_group,
+          pattern = "*",
+          callback = function()
+            vim.notify("File reloaded: " .. vim.fn.expand("%"), vim.log.levels.INFO)
+          end,
+        })
+
         -- Fix for zellij.nvim health check
         vim.health = vim.health or {}
         vim.health.report_start = vim.health.report_start or function() end
