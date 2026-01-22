@@ -160,8 +160,8 @@ in
       # NixOS: wrap in home-manager.users
       home-manager.users.${userConfig.username} = fishConfig;
     } else {
-             # Standalone home-manager: configure directly
-             fishConfig
-           }
-      );
-      }
+      # Standalone home-manager: configure directly
+      fishConfig
+    }
+  );
+}
