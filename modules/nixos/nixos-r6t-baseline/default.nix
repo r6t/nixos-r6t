@@ -8,10 +8,10 @@
   config = lib.mkIf config.mine.nixos-r6t-baseline.enable {
     # Enable fish shell system-wide
     programs.fish.enable = true;
-    
+
     # Add fish to /etc/shells
     environment.shells = with pkgs; [ fish ];
-    
+
     # System packages
     environment.systemPackages = with pkgs; [
       bat
