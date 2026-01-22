@@ -156,12 +156,11 @@ in
     lib.mkEnableOption "enable fish in home-manager";
 
   config = lib.mkIf cfg.enable (
-    if isNixOS then {
+    if isNixOS
+    then {
       # NixOS: wrap in home-manager.users
       home-manager.users.${userConfig.username} = fishConfig;
-    } else {
-      # Standalone home-manager: configure directly
-      fishConfig
     }
+    else fishConfig # Standalone home-manager: configure directly
   );
 }
