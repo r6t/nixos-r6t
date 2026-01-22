@@ -55,9 +55,9 @@ let
           
           set -l shell_name $argv[1]
           if test -z "$shell_name"
-              nix develop $flake_path#
+              nix develop $flake_path# --command fish
           else
-              nix develop "$flake_path#$shell_name"
+              nix develop "$flake_path#$shell_name" --command fish
           end
         '';
       };
