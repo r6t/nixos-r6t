@@ -40,11 +40,19 @@ let
       nd = {
         description = "nix develop aka enter devshell";
         body = ''
-          set flake_path "${homeDir}/git/nixos-r6t"
-          if not test -d "$flake_path"
-              echo "Error: Flake path not found at $flake_path"
-              return 1
+          # Try work flake first, then personal flake
+          set -l work_flake "${homeDir}/git/nix-work-r6t"
+          set -l personal_flake "${homeDir}/git/nixos-r6t"
+          
+          if test -d "$work_flake"
+            set flake_path "$work_flake"
+          else if test -d "$personal_flake"
+            set flake_path "$personal_flake"
+          else
+            echo "Error: No flake found at $work_flake or $personal_flake"
+            return 1
           end
+          
           set -l shell_name $argv[1]
           if test -z "$shell_name"
               nix develop $flake_path#
