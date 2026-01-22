@@ -40,16 +40,10 @@ let
       nd = {
         description = "nix develop aka enter devshell";
         body = ''
-          # Try work flake first, then personal flake
-          set -l work_flake "${homeDir}/git/nix-work-r6t"
-          set -l personal_flake "${homeDir}/git/nixos-r6t"
+          set -l flake_path "${homeDir}/git/nixos-r6t"
           
-          if test -d "$work_flake"
-            set flake_path "$work_flake"
-          else if test -d "$personal_flake"
-            set flake_path "$personal_flake"
-          else
-            echo "Error: No flake found at $work_flake or $personal_flake"
+          if not test -d "$flake_path"
+            echo "Error: No flake found at $flake_path"
             return 1
           end
           
@@ -128,14 +122,6 @@ let
     };
 
     interactiveShellInit = ''
-      set -x _PR_DISABLE_AI 1
-      pay-respects fish --alias | source
-      
-      # Source work devshell Isengard functions if in work devshell
-      if test -n "$WORK_FISH_FUNCTIONS"
-        source $WORK_FISH_FUNCTIONS
-      end
-      
       # Universal user paths
       fish_add_path $HOME/.nix-profile/bin
       fish_add_path $HOME/.local/bin
@@ -143,37 +129,10 @@ let
       # Ensure nix command is available (Determinate Nix installation)
       # This is especially important in devshells which strip system PATH
       fish_add_path /nix/var/nix/profiles/default/bin
-      
-      # Work devshell specific paths
-      if test "$DEVSHELL_NAME" = "work"
-        fish_add_path $HOME/.toolbox/bin
-        fish_add_path /apollo/env/SDETools/bin
-      end
-      
-      # macOS system paths (only on Darwin or in work devshell)
-      # Appended directly to PATH (not using fish_add_path to avoid persistence)
-      # These are fallback paths - nix tools take priority
-      if test (uname) = "Darwin"; or test "$DEVSHELL_NAME" = "work"
-        for p in /opt/pmk/env/global/bin /usr/local/bin /opt/homebrew/bin /System/Cryptexes/App/usr/bin /var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin /var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin /var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin
-          if test -d $p; and not contains $p $PATH
-            set -gx PATH $PATH $p
-          end
-        end
-      end
-      
-      # Suppress Determinate Nix FamilyDisplayName warning (macOS 26.x compatibility issue)
-      # This specific warning is harmless and will be fixed in future nix versions
-      # Other warnings are still visible
-      set -gx NIX_IGNORE_SYMLINK_STORE 1  # Try to reduce daemon warnings
     '';
 
-    # Login shell init - ensure nix is available on macOS
-    # Determinate Nix installs to /nix/var/nix/profiles/default/bin
-    loginShellInit = ''
-      if test -e /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.fish
-        source /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.fish
-      end
-    '';
+    # Login shell init - not needed on NixOS (nix is always available)
+    loginShellInit = "";
   };
 
   # Shared packages used in both modes
@@ -183,7 +142,6 @@ let
     fzf
     lsd
     pandoc
-    pay-respects
     ripgrep
   ] ++ lib.optionals pkgs.stdenv.isLinux [
     fishPlugins.fzf-fish # marked broken on darwin
