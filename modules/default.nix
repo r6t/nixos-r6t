@@ -58,7 +58,7 @@
     nixos/ddc-i2c/default.nix
     nixos/direnv/default.nix
     nixos/docker/default.nix
-    nixos/env/default.nix
+    nixos/nixos-r6t-baseline/default.nix
     nixos/exit-node-routing/default.nix
     nixos/fonts/default.nix
     nixos/fwupd/default.nix

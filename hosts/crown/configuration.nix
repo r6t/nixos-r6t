@@ -145,7 +145,7 @@
     bolt.enable = true;
     bootloader.enable = true;
     caddy.enable = true;
-    env.enable = true;
+    nixos-r6t-baseline.enable = true;
     fwupd.enable = true;
     fzf.enable = true;
     iperf.enable = true;

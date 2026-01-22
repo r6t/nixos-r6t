@@ -89,7 +89,7 @@
     direnv.enable = true;
     ddc-i2c.enable = true;
     docker.enable = true;
-    env.enable = true;
+    nixos-r6t-baseline.enable = true;
     fonts.enable = true;
     fwupd.enable = true;
     fzf.enable = true;
