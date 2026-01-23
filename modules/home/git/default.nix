@@ -1,8 +1,7 @@
-{ lib, config, pkgs, userConfig ? null, ... }:
+{ lib, config, pkgs, userConfig, isNixOS ? true, ... }:
 
 let
   cfg = config.mine.home.git;
-  isNixOS = userConfig != null;
 
   # Shared packages
   gitPackages = with pkgs; [

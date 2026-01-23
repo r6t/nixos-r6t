@@ -1,8 +1,7 @@
-{ lib, config, userConfig ? null, ... }:
+{ lib, config, userConfig, isNixOS ? true, ... }:
 
 let
   cfg = config.mine.home.atuin;
-  isNixOS = userConfig != null;
 
   # Shared atuin configuration
   atuinConfig = {

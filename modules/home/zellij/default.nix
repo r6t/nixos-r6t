@@ -1,8 +1,7 @@
-{ lib, config, pkgs, userConfig ? null, ... }:
+{ lib, config, pkgs, userConfig, isNixOS ? true, ... }:
 
 let
   cfg = config.mine.home.zellij;
-  isNixOS = userConfig != null;
 
   # Shared zellij configuration
   zellijConfig = {
