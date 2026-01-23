@@ -228,16 +228,16 @@
           modules = [ ./containers/pocket-id.nix ];
           specialArgs = { inherit outputs userConfig inputs; };
         };
-        roon = nixos-generators.nixosGenerate {
+        ntfy = nixos-generators.nixosGenerate {
           system = linuxSystem;
           format = "lxc";
-          modules = [ ./containers/roon.nix ];
+          modules = [ ./containers/ntfy.nix ];
           specialArgs = { inherit outputs userConfig inputs; };
         };
-        roonMetadata = nixos-generators.nixosGenerate {
+        ntfyMetadata = nixos-generators.nixosGenerate {
           system = linuxSystem;
           format = "lxc-metadata";
-          modules = [ ./containers/roon.nix ];
+          modules = [ ./containers/ntfy.nix ];
           specialArgs = { inherit outputs userConfig inputs; };
         };
         searxng = nixos-generators.nixosGenerate {

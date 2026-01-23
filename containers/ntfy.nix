@@ -40,10 +40,5 @@
     };
   };
 
-  # Ensure attachment directory exists
-  systemd.tmpfiles.rules = [
-    "d /var/lib/ntfy-sh/attachments 0750 ntfy-sh ntfy-sh -"
-  ];
-
   networking.firewall.allowedTCPPorts = [ 8083 ];
 }
