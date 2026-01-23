@@ -1,12 +1,8 @@
-{ lib, config, pkgs, userConfig, ... }:
+{ lib, config, pkgs, userConfig, isNixOS ? true, ... }:
 
 let
   cfg = config.mine.home.fish;
   homeDir = userConfig.homeDirectory;
-
-  # Detect if we're in NixOS context (has home-manager.users option)
-  # or standalone home-manager context (configure directly)
-  isNixOS = config ? home-manager;
 
   # Pure home-manager fish configuration
   fishConfig = {
