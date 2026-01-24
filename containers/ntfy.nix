@@ -56,12 +56,12 @@
 
         # Allow all accounts (single user setup)
         allowed_uuids = [ "*" ];
-      };
 
-      # Generate VAPID key: mollysocket vapid gen
-      # Then create /var/lib/mollysocket/env with:
-      # MOLLY_VAPID_PRIVKEY=<your-generated-key>
-      environmentFile = "/var/lib/mollysocket/env";
+        # VAPID key file in persistent storage
+        # Generate: mollysocket vapid gen > /var/lib/mollysocket/vapid.key
+        # Persisted via Incus mount to /var/lib/private/mollysocket
+        vapid_key_file = "/var/lib/mollysocket/vapid.key";
+      };
     };
   };
 
