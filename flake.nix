@@ -264,16 +264,16 @@
           modules = [ ./containers/tailnet-exit.nix ];
           specialArgs = { inherit outputs userConfig inputs; };
         };
-        remotePlasma = nixos-generators.nixosGenerate {
+        wgExitNode = nixos-generators.nixosGenerate {
           system = linuxSystem;
           format = "lxc";
-          modules = [ ./containers/remote-plasma.nix ];
+          modules = [ ./containers/wg-exit-node.nix ];
           specialArgs = { inherit outputs userConfig inputs; };
         };
-        remotePlasmaMetadata = nixos-generators.nixosGenerate {
+        wgExitNodeMetadata = nixos-generators.nixosGenerate {
           system = linuxSystem;
           format = "lxc-metadata";
-          modules = [ ./containers/remote-plasma.nix ];
+          modules = [ ./containers/wg-exit-node.nix ];
           specialArgs = { inherit outputs userConfig inputs; };
         };
       };
