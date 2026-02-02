@@ -1,10 +1,10 @@
 {
   imports = [
-    ./r6-lxc-base.nix
-    ./r6-lxc-mullvad-dns-add-on.nix
-    ../modules/nixos/exit-node-routing/default.nix
+    ./wg-exit-node.nix
   ];
 
-  mine.exit-node-routing.enable = true;
+  mine.exit-node-routing = {
+    enable = true;
+    enableTailscale = true;
+  };
 }
-
