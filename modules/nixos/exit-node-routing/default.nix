@@ -68,6 +68,14 @@ in
           enable = true;
           checkReversePath = "loose";
           allowPing = true;
+          # Kill-switch: block forwarded traffic if wg0 is down
+          extraCommands = ''
+            iptables -D FORWARD -o eth0 ! -d 192.168.6.0/24 -j DROP 2>/dev/null || true
+            iptables -I FORWARD -o eth0 ! -d 192.168.6.0/24 -j DROP
+          '';
+          extraStopCommands = ''
+            iptables -D FORWARD -o eth0 ! -d 192.168.6.0/24 -j DROP 2>/dev/null || true
+          '';
         };
 
         nat = {
