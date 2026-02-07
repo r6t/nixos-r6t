@@ -20,7 +20,6 @@ in
       };
       root = {
         openssh.authorizedKeys.keyFiles = lib.mkForce [ ssh-keys.outPath ];
-        shell = lib.mkDefault pkgs.fish;
       };
     };
   };

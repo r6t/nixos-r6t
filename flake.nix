@@ -52,14 +52,14 @@
       nixosConfigurations = {
         # cold storage
         barrel = nixpkgs.lib.nixosSystem {
-          specialArgs = { inherit userConfig inputs outputs; };
+          specialArgs = { inherit userConfig inputs outputs; isNixOS = true; };
           modules = [
             ./hosts/barrel/configuration.nix
           ];
         };
         # primary server
         crown = nixpkgs.lib.nixosSystem {
-          specialArgs = { inherit userConfig inputs outputs; };
+          specialArgs = { inherit userConfig inputs outputs; isNixOS = true; };
           modules = [
             ./hosts/crown/configuration.nix
             {
@@ -73,7 +73,7 @@
         };
         # laptop
         mountainball = nixpkgs.lib.nixosSystem {
-          specialArgs = { inherit userConfig inputs outputs; };
+          specialArgs = { inherit userConfig inputs outputs; isNixOS = true; };
           modules = [
             ./hosts/mountainball/configuration.nix
             {
@@ -87,7 +87,7 @@
         };
         # router + appliances
         saguaro = nixpkgs.lib.nixosSystem {
-          specialArgs = { inherit userConfig inputs outputs; };
+          specialArgs = { inherit userConfig inputs outputs; isNixOS = true; };
           modules = [
             ./hosts/saguaro/configuration.nix
           ];

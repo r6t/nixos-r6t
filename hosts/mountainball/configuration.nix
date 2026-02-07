@@ -77,7 +77,7 @@
       ssh.enable = true;
       teams-for-linux.enable = true;
       virt-viewer.enable = true;
-      webcord.enable = false;
+      webcord.enable = true;
       zellij.enable = true;
     };
 
