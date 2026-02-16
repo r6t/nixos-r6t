@@ -10,9 +10,11 @@ let
       bat
       fishPlugins.forgit
       fzf
+      jq
       lsd
       pandoc
       ripgrep
+      yq
     ] ++ lib.optionals pkgs.stdenv.isLinux [
       fishPlugins.fzf-fish
     ];
