@@ -113,6 +113,11 @@ let
           key = "<leader>bp";
           options.desc = "Previous buffer";
         }
+        {
+          action = "<cmd>lua require('conform').format()<CR>";
+          key = "<leader>bf";
+          options.desc = "Buffer format";
+        }
 
         # Fugitive
         {
