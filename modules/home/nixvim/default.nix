@@ -564,26 +564,28 @@ let
         };
         treesitter-textobjects = {
           enable = true;
-          select = {
-            enable = true;
-            lookahead = true;
-            keymaps = {
-              # Usage examples:
-              # vaf - select around function (including signature)
-              # vif - select inside function (body only)
-              # daf - delete entire function
-              # yif - yank function body
-              # cac - change entire class
-              "af" = "@function.outer";
-              "if" = "@function.inner";
-              "ac" = "@class.outer";
-              "ic" = "@class.inner";
-              "aa" = "@parameter.outer";
-              "ia" = "@parameter.inner";
-              "al" = "@loop.outer";
-              "il" = "@loop.inner";
-              "ai" = "@conditional.outer";
-              "ii" = "@conditional.inner";
+          settings = {
+            select = {
+              enable = true;
+              lookahead = true;
+              keymaps = {
+                # Usage examples:
+                # vaf - select around function (including signature)
+                # vif - select inside function (body only)
+                # daf - delete entire function
+                # yif - yank function body
+                # cac - change entire class
+                "af" = "@function.outer";
+                "if" = "@function.inner";
+                "ac" = "@class.outer";
+                "ic" = "@class.inner";
+                "aa" = "@parameter.outer";
+                "ia" = "@parameter.inner";
+                "al" = "@loop.outer";
+                "il" = "@loop.inner";
+                "ai" = "@conditional.outer";
+                "ii" = "@conditional.inner";
+              };
             };
           };
         };
