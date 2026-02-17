@@ -9,6 +9,9 @@ let
     python3Packages.black
     python3Packages.isort
     nodePackages.prettier
+    shfmt
+    go # provides gofmt and goimports
+    rustfmt
     # linters
     alejandra
     deadnix
@@ -130,12 +133,78 @@ let
           key = "<leader>gb";
           options.desc = "Git blame";
         }
+        {
+          action = "<cmd>Git diff<CR>";
+          key = "<leader>gd";
+          options.desc = "Git diff";
+        }
+        {
+          action = "<cmd>Git log<CR>";
+          key = "<leader>gl";
+          options.desc = "Git log";
+        }
+        {
+          action = "<cmd>Git commit<CR>";
+          key = "<leader>gc";
+          options.desc = "Git commit";
+        }
+        {
+          action = "<cmd>Git pull<CR>";
+          key = "<leader>gp";
+          options.desc = "Git pull";
+        }
+        {
+          action = "<cmd>Git push<CR>";
+          key = "<leader>gP";
+          options.desc = "Git push";
+        }
+
+        # Gitsigns (hunk operations)
+        {
+          action = "<cmd>Gitsigns preview_hunk<CR>";
+          key = "<leader>gh";
+          options.desc = "Preview git hunk";
+        }
+        {
+          action = "<cmd>Gitsigns next_hunk<CR>";
+          key = "<leader>gn";
+          options.desc = "Next git hunk";
+        }
+        {
+          action = "<cmd>Gitsigns prev_hunk<CR>";
+          key = "<leader>gN";
+          options.desc = "Previous git hunk";
+        }
+        {
+          action = "<cmd>Gitsigns stage_hunk<CR>";
+          key = "<leader>gs";
+          mode = [ "n" "x" ];
+          options.desc = "Stage git hunk";
+        }
+        {
+          action = "<cmd>Gitsigns undo_stage_hunk<CR>";
+          key = "<leader>gu";
+          options.desc = "Unstage git hunk";
+        }
+        {
+          action = "<cmd>Gitsigns reset_hunk<CR>";
+          key = "<leader>gr";
+          mode = [ "n" "x" ];
+          options.desc = "Reset git hunk";
+        }
 
         # LSP
         {
           action = "<cmd>LspInfo<CR>";
           key = "<leader>li";
           options.desc = "LSP Info";
+        }
+        {
+          # Shows function signatures, types, and documentation in a float window
+          # TODO: Experiment with auto-hover on CursorHold after getting used to manual trigger
+          action = "<cmd>lua vim.lsp.buf.hover()<CR>";
+          key = "<leader>lh";
+          options.desc = "LSP Hover documentation";
         }
         {
           action = "<cmd>lua vim.lsp.buf.definition()<CR>";
@@ -149,8 +218,13 @@ let
         }
         {
           action = "<cmd>lua vim.lsp.buf.rename()<CR>";
-          key = "<leader>ln";
+          key = "<leader>lR";
           options.desc = "LSP Rename symbol";
+        }
+        {
+          action = "<cmd>lua vim.lsp.buf.format()<CR>";
+          key = "<leader>lf";
+          options.desc = "LSP Format buffer";
         }
         {
           action = "<cmd>lua vim.lsp.buf.code_action()<CR>";
@@ -159,19 +233,51 @@ let
           options.desc = "LSP Code actions";
         }
         {
-          action = "<cmd>lua vim.diagnostic.setqflist()<CR>";
+          action = "<cmd>lua vim.diagnostic.open_float()<CR>";
+          key = "<leader>lm";
+          options.desc = "LSP Show diagnostic message";
+        }
+        {
+          action = "<cmd>Trouble diagnostics toggle<CR>";
           key = "<leader>le";
-          options.desc = "Show all diagnostics";
+          options.desc = "Toggle diagnostics (Trouble)";
+        }
+        {
+          action = "<cmd>Trouble diagnostics toggle filter.buf=0<CR>";
+          key = "<leader>lb";
+          options.desc = "Buffer diagnostics (Trouble)";
         }
         {
           action = "<cmd>lua vim.diagnostic.goto_next()<CR>";
-          key = "<leader>en";
+          key = "<leader>ln";
           options.desc = "Next diagnostic";
         }
         {
           action = "<cmd>lua vim.diagnostic.goto_prev()<CR>";
-          key = "<leader>ep";
+          key = "<leader>lp";
           options.desc = "Previous diagnostic";
+        }
+
+        # Quickfix navigation
+        {
+          action = "<cmd>cnext<CR>";
+          key = "<leader>qn";
+          options.desc = "Next quickfix item";
+        }
+        {
+          action = "<cmd>cprev<CR>";
+          key = "<leader>qp";
+          options.desc = "Previous quickfix item";
+        }
+        {
+          action = "<cmd>Trouble qflist toggle<CR>";
+          key = "<leader>qo";
+          options.desc = "Open quickfix (Trouble)";
+        }
+        {
+          action = "<cmd>Trouble close<CR>";
+          key = "<leader>qc";
+          options.desc = "Close Trouble";
         }
 
         # File navigation
@@ -238,6 +344,16 @@ let
           options.desc = "Live grep";
         }
         {
+          action = "<cmd>lua Snacks.picker.grep_word()<CR>";
+          key = "<leader>fw";
+          options.desc = "Grep word under cursor";
+        }
+        {
+          action = "<cmd>lua Snacks.picker.lines()<CR>";
+          key = "<leader>f/";
+          options.desc = "Search in current buffer";
+        }
+        {
           action = "<cmd>lua Snacks.picker.buffers()<CR>";
           key = "<leader>fb";
           options.desc = "Find buffers";
@@ -266,15 +382,20 @@ let
 
       opts = {
         autoread = true;
+        cursorline = true;
+        expandtab = true;
         ignorecase = true;
         inccommand = "split";
         incsearch = true;
         number = true;
         relativenumber = true;
+        scrolloff = 8;
         shiftwidth = 2;
+        sidescrolloff = 8;
         signcolumn = "yes:1";
         smartcase = true;
         swapfile = false;
+        tabstop = 2;
         undofile = true;
         updatetime = 100;
       };
@@ -339,12 +460,15 @@ let
           settings = {
             formatters_by_ft = {
               css = [ "prettier" ];
+              go = [ "gofmt" ];
               html = [ "prettier" ];
               json = [ "prettier" ];
               lua = [ "stylua" ];
               markdown = [ "prettier" ];
               nix = [ "alejandra" ];
               python = [ "isort" "black" ];
+              rust = [ "rustfmt" ];
+              sh = [ "shfmt" ];
               yaml = [ "yamlfmt" ];
             };
           };
@@ -359,12 +483,29 @@ let
         fugitive.enable = true;
         fzf-lua.enable = true;
         git-conflict.enable = true;
+        gitsigns = {
+          enable = true;
+          settings = {
+            current_line_blame = false;
+            signs = {
+              add.text = "│";
+              change.text = "│";
+              delete.text = "_";
+              topdelete.text = "‾";
+              changedelete.text = "~";
+              untracked.text = "┆";
+            };
+          };
+        };
         lualine.enable = true;
 
         lsp = {
           enable = true;
           servers = {
             bashls.enable = true;
+            cssls.enable = true;
+            gopls.enable = true;
+            html.enable = true;
             jsonls.enable = true;
             lua_ls = {
               enable = true;
@@ -377,8 +518,6 @@ let
                 formatting.command = [ "nixpkgs-fmt" ];
               };
             };
-            html.enable = true;
-            cssls.enable = true;
             pyright = {
               enable = true;
               settings = {
@@ -391,6 +530,11 @@ let
                   };
                 };
               };
+            };
+            rust_analyzer = {
+              enable = true;
+              installCargo = true;
+              installRustc = true;
             };
             yamlls.enable = true;
           };
@@ -417,6 +561,39 @@ let
           enable = true;
           folding.enable = false;
           settings.indent.enable = true;
+        };
+        treesitter-textobjects = {
+          enable = true;
+          select = {
+            enable = true;
+            lookahead = true;
+            keymaps = {
+              # Usage examples:
+              # vaf - select around function (including signature)
+              # vif - select inside function (body only)
+              # daf - delete entire function
+              # yif - yank function body
+              # cac - change entire class
+              "af" = "@function.outer";
+              "if" = "@function.inner";
+              "ac" = "@class.outer";
+              "ic" = "@class.inner";
+              "aa" = "@parameter.outer";
+              "ia" = "@parameter.inner";
+              "al" = "@loop.outer";
+              "il" = "@loop.inner";
+              "ai" = "@conditional.outer";
+              "ii" = "@conditional.inner";
+            };
+          };
+        };
+        trouble = {
+          enable = true;
+          settings = {
+            auto_close = false;
+            auto_open = false;
+            use_diagnostic_signs = true;
+          };
         };
         web-devicons.enable = true;
         which-key = {
