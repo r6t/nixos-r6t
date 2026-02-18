@@ -3,6 +3,8 @@
   options = {
     mine.home.kde-apps.enable =
       lib.mkEnableOption "enable plasma-manager and misc KDE software in home-manager";
+    mine.home.kde-apps.tablet =
+      lib.mkEnableOption "tablet/touchscreen support (on-screen keyboard, touch-friendly input)";
   };
 
   config = lib.mkIf config.mine.home.kde-apps.enable {
@@ -30,6 +32,10 @@
           kdePackages.polkit-kde-agent-1 # KDE privlege escalation helper
           kdePackages.qtwayland # KDE app support + https://wiki.hyprland.org/hyprland-wiki/pages/Nvidia/
           rar # Krusader support
+        ]
+        ++ lib.optionals config.mine.home.kde-apps.tablet [
+          maliit-framework # Wayland on-screen keyboard framework
+          maliit-keyboard # Wayland on-screen keyboard for Plasma
         ];
       };
 
@@ -160,12 +166,34 @@
             }
           ];
 
+          # NOTE: PowerDevil blocks logind lid-switch handling and enforces sleep
+          # policy here instead. Logind settings (hosts/*/configuration.nix) serve as
+          # fallback. Keep both in sync. systemd.sleep.extraConfig defines HOW
+          # suspend-then-hibernate works (HibernateDelaySec, SuspendState).
           powerdevil = {
             AC = {
               autoSuspend.action = "nothing";
               powerButtonAction = "shutDown";
               turnOffDisplay.idleTimeout = 3600;
-              whenSleepingEnter = "standby";
+              whenSleepingEnter = "standby"; # stay in s2idle on AC for network availability
+            };
+            battery = {
+              autoSuspend = {
+                action = "sleep";
+                idleTimeout = 600; # 10 min idle on battery → sleep
+              };
+              powerButtonAction = "sleep";
+              turnOffDisplay.idleTimeout = 300;
+              whenSleepingEnter = "hybridSleep"; # suspend-then-hibernate on battery
+            };
+            lowBattery = {
+              autoSuspend = {
+                action = "hibernate";
+                idleTimeout = 300;
+              };
+              powerButtonAction = "hibernate";
+              turnOffDisplay.idleTimeout = 120;
+              whenSleepingEnter = "hybridSleep";
             };
           };
           session = {

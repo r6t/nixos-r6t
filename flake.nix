@@ -72,6 +72,19 @@
           ];
         };
         # laptop
+        goldenball = nixpkgs.lib.nixosSystem {
+          specialArgs = { inherit userConfig inputs outputs; isNixOS = true; };
+          modules = [
+            ./hosts/goldenball/configuration.nix
+            {
+              nixpkgs.config = {
+                allowUnfree = true;
+                # temporary allow recent EOL
+                permittedInsecurePackages = [ "electron-36.9.5" ];
+              };
+            }
+          ];
+        };
         mountainball = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit userConfig inputs outputs; isNixOS = true; };
           modules = [

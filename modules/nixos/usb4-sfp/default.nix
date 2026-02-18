@@ -6,9 +6,7 @@
   config = lib.mkIf config.mine.usb4-sfp.enable {
     boot.kernelModules = [ "ixgbe" ];
     boot.extraModprobeConfig = ''
-      # still getting intermittent freeze w unsupported_sfp=1
-      # trying LRO FdirMode InterruptThrottleRate too
-      options ixgbe allow_unsupported_sfp=1 LRO=0,0 FdirMode=0,0 InterruptThrottleRate=1,1
+      options ixgbe allow_unsupported_sfp=1
     '';
 
     systemd.network.links = {

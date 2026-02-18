@@ -3,6 +3,8 @@
   options = {
     mine.kde.enable =
       lib.mkEnableOption "enable and configure kde desktop";
+    mine.kde.tablet =
+      lib.mkEnableOption "on-screen keyboard support for tablet/detachable use";
   };
 
   config = lib.mkIf config.mine.kde.enable {
@@ -28,6 +30,9 @@
         sddm = {
           enable = true;
           wayland.enable = true;
+          # On-screen keyboard at login (tablet/detached keyboard use)
+          settings.General.InputMethod =
+            lib.mkIf config.mine.kde.tablet "qtvirtualkeyboard";
         };
       };
       xserver = {

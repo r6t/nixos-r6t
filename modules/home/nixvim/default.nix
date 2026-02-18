@@ -2,6 +2,37 @@
 
 let
   cfg = config.mine.home.nixvim;
+  ollamaCfg = cfg.opencode-ollama;
+
+  # Build the opencode.json Ollama provider config when enabled
+  opencodeOllamaConfig = lib.mkIf ollamaCfg.enable {
+    ".config/opencode/opencode.json" = {
+      text = builtins.toJSON {
+        "$schema" = "https://opencode.ai/config.json";
+        provider = {
+          ollama = {
+            npm = "@ai-sdk/openai-compatible";
+            name = "Ollama (local)";
+            options = {
+              baseURL = ollamaCfg.baseURL;
+            };
+            models = lib.mapAttrs
+              (_id: m:
+                {
+                  name = m.name;
+                }
+                // lib.optionalAttrs (m.context != null || m.output != null) {
+                  limit =
+                    lib.optionalAttrs (m.context != null) { context = m.context; }
+                    // lib.optionalAttrs (m.output != null) { output = m.output; };
+                }
+              )
+              ollamaCfg.models;
+          };
+        };
+      };
+    };
+  };
 
   # Shared packages
   nixvimPackages = with pkgs; [
@@ -619,6 +650,39 @@ in
       default = true;
       description = "Whether to configure sops secrets for AI API keys (disable for work machines)";
     };
+
+    opencode-ollama = {
+      enable = lib.mkEnableOption "connect OpenCode to a local/remote Ollama instance";
+
+      baseURL = lib.mkOption {
+        type = lib.types.str;
+        default = "http://127.0.0.1:11434/v1";
+        description = "Ollama OpenAI-compatible API endpoint.";
+      };
+
+      models = lib.mkOption {
+        type = lib.types.attrsOf (lib.types.submodule {
+          options = {
+            name = lib.mkOption {
+              type = lib.types.str;
+              description = "Display name shown in OpenCode model picker.";
+            };
+            context = lib.mkOption {
+              type = lib.types.nullOr lib.types.int;
+              default = null;
+              description = "Max input context tokens (null = provider default).";
+            };
+            output = lib.mkOption {
+              type = lib.types.nullOr lib.types.int;
+              default = null;
+              description = "Max output tokens (null = provider default).";
+            };
+          };
+        });
+        default = { };
+        description = "Ollama models to expose to OpenCode. Keys are Ollama model IDs.";
+      };
+    };
   };
 
   config = lib.mkIf cfg.enable (
@@ -637,12 +701,15 @@ in
       home-manager.users.${userConfig.username} = lib.mkMerge [
         {
           home.packages = nixvimPackages;
-          home.file = lib.mkIf cfg.enableSopsSecrets {
-            ".config/fish/conf.d/90-vim-sops-secrets.fish" = {
-              text = builtins.readFile ./setVimSessionVars.fish;
-              executable = true;
-            };
-          };
+          home.file = lib.mkMerge [
+            (lib.mkIf cfg.enableSopsSecrets {
+              ".config/fish/conf.d/90-vim-sops-secrets.fish" = {
+                text = builtins.readFile ./setVimSessionVars.fish;
+                executable = true;
+              };
+            })
+            opencodeOllamaConfig
+          ];
         }
         nixvimConfig
       ];
@@ -650,7 +717,10 @@ in
     # Standalone home-manager mode: configure directly
     # Note: sops secrets not available in standalone mode
       lib.mkMerge [
-        { home.packages = nixvimPackages; }
+        {
+          home.packages = nixvimPackages;
+          home.file = opencodeOllamaConfig;
+        }
         nixvimConfig
       ]
   );

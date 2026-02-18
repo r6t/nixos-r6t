@@ -62,7 +62,17 @@
       package = "production";
       installCudaToolkit = false;
     };
-    ollama.enable = true;
+    ollama = {
+      enable = true;
+      acceleration = "cuda";
+      host = "0.0.0.0";
+      models = [
+        "llama3.1:8b"
+        "gemma3:12b"
+        "qwen2.5-coder:14b"
+        "qwen3:14b"
+      ];
+    };
     open-webui.enable = false;
   };
 }
