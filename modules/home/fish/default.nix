@@ -8,12 +8,15 @@ let
   fishConfig = {
     home.packages = with pkgs; [
       bat
+      fd
       fishPlugins.forgit
       fzf
+      gnused
       jq
       lsd
       pandoc
       ripgrep
+      tree
       yq
     ] ++ lib.optionals pkgs.stdenv.isLinux [
       fishPlugins.fzf-fish
