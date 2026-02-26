@@ -52,6 +52,8 @@
     home-router = {
       enable = true;
       cake.enable = true;
+      healthCheck.enable = true;
+      wanWatchdog.enable = true;
       lanAddress = "192.168.6.1/24";
       lanInterface = "enp100s0";
       wanInterface = "enp101s0";
