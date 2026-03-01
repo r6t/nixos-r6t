@@ -52,10 +52,9 @@ in
         else if cfg.acceleration == "rocm" then pkgs.ollama-rocm
         else if cfg.acceleration == "vulkan" then pkgs.ollama-vulkan
         else pkgs.ollama;
-      host = cfg.host;
+      inherit (cfg) host environmentVariables;
       port = ollamaPort;
       loadModels = cfg.models;
-      environmentVariables = cfg.environmentVariables;
     };
 
     # ROCm's HIP runtime JIT-compiles GPU kernels, which requires W+X memory pages.

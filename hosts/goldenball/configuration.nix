@@ -47,27 +47,27 @@
   # Handheld Daemon (HHD): maps the Legion Go's built-in gamepad controllers
   # (which appear as separate input devices) into a unified virtual gamepad.
   # Also provides TDP control via adjustor and the acpi_call module.
-  services.handheld-daemon = {
-    enable = true;
-    user = userConfig.username;
-    ui.enable = true;
-    adjustor.enable = true;
-  };
-
   # USB4 dock stability: disable D3cold on the Intel PCIe switches inside the
   # Plugable USB4-HUB3A (8086:0b26, 8086:15ef) — hotplugged devices can fail
   # to wake from deep power-off states.
-  services.udev.extraRules = ''
-    ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x8086", ATTR{device}=="0x0b26", ATTR{d3cold_allowed}="0"
-    ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x8086", ATTR{device}=="0x15ef", ATTR{d3cold_allowed}="0"
-  '';
-
   # Touchscreen support
-  services.libinput = {
-    enable = true;
-    touchpad = {
-      naturalScrolling = true;
-      tapping = true;
+  services = {
+    handheld-daemon = {
+      enable = true;
+      user = userConfig.username;
+      ui.enable = true;
+      adjustor.enable = true;
+    };
+    udev.extraRules = ''
+      ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x8086", ATTR{device}=="0x0b26", ATTR{d3cold_allowed}="0"
+      ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x8086", ATTR{device}=="0x15ef", ATTR{d3cold_allowed}="0"
+    '';
+    libinput = {
+      enable = true;
+      touchpad = {
+        naturalScrolling = true;
+        tapping = true;
+      };
     };
   };
 

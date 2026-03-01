@@ -353,172 +353,174 @@ in
         };
       };
 
-      # systemd-networkd configuration
-      systemd.network = {
-        enable = true;
+      # systemd configuration (networkd, services, timers)
+      systemd = {
+        network = {
+          enable = true;
 
-        # WAN interface - DHCP from ISP
-        networks."10-wan" = {
-          matchConfig.Name = cfg.wanInterface;
-          networkConfig = {
-            DHCP = "ipv4";
-          };
-          linkConfig.RequiredForOnline = "routable";
-        };
-
-        # LAN interface
-        networks."20-lan" = {
-          matchConfig.Name = cfg.lanInterface;
-          address = [ cfg.lanAddress ];
-
-          # Force interface UP and configured even without link/carrier
-          networkConfig = {
-            ConfigureWithoutCarrier = true;
-            DHCPServer = true;
-            LinkLocalAddressing = "ipv4";
-          };
-          linkConfig = {
-            ActivationPolicy = "always-up";
-            ARP = true;
+          # WAN interface - DHCP from ISP
+          networks."10-wan" = {
+            matchConfig.Name = cfg.wanInterface;
+            networkConfig = {
+              DHCP = "ipv4";
+            };
+            linkConfig.RequiredForOnline = "routable";
           };
 
-          # DHCP Server Configuration
-          dhcpServerConfig = {
-            PoolOffset = cfg.dhcpServer.poolOffset;
-            PoolSize = cfg.dhcpServer.poolSize;
-            DNS = [ cfg.lanGatewayIP ];
-            EmitRouter = true;
-          };
-        };
-      };
+          # LAN interface
+          networks."20-lan" = {
+            matchConfig.Name = cfg.lanInterface;
+            address = [ cfg.lanAddress ];
 
-      # CAKE QoS services
-      systemd.services = (lib.optionalAttrs cfg.cake.enable {
-        cake-qos-egress = {
-          description = "CAKE QoS egress (upload) shaping on ${cfg.wanInterface}";
-          after = [ "systemd-networkd.service" "network-online.target" ];
-          wants = [ "network-online.target" ];
-          wantedBy = [ "multi-user.target" ];
+            # Force interface UP and configured even without link/carrier
+            networkConfig = {
+              ConfigureWithoutCarrier = true;
+              DHCPServer = true;
+              LinkLocalAddressing = "ipv4";
+            };
+            linkConfig = {
+              ActivationPolicy = "always-up";
+              ARP = true;
+            };
 
-          serviceConfig = {
-            Type = "oneshot";
-            RemainAfterExit = true;
-          };
-
-          script = ''
-            # Wait for interface to be ready
-            for i in {1..30}; do
-              if ${pkgs.iproute2}/bin/ip link show ${cfg.wanInterface} &>/dev/null; then
-                break
-              fi
-              sleep 1
-            done
-
-            # Remove existing qdisc (ignore errors if none exists)
-            ${pkgs.iproute2}/bin/tc qdisc del dev ${cfg.wanInterface} root 2>/dev/null || true
-
-            # Apply CAKE to WAN egress (upload)
-            ${pkgs.iproute2}/bin/tc qdisc add dev ${cfg.wanInterface} root cake \
-              bandwidth ${toString cfg.cake.uploadRate}kbit \
-              ${lib.concatStringsSep " " cfg.cake.extraOptions} \
-              ethernet \
-              overhead ${toString cfg.cake.overhead}
-
-            echo "CAKE egress (upload) applied to ${cfg.wanInterface}: ${toString cfg.cake.uploadRate} kbit"
-          '';
-
-          preStop = ''
-            # Restore default qdisc on service stop
-            ${pkgs.iproute2}/bin/tc qdisc del dev ${cfg.wanInterface} root 2>/dev/null || true
-            echo "CAKE egress removed from ${cfg.wanInterface}"
-          '';
-        };
-
-        cake-qos-ingress = {
-          description = "CAKE QoS ingress (download) shaping on ${cfg.wanInterface} via IFB";
-          after = [ "cake-qos-egress.service" ];
-          wants = [ "cake-qos-egress.service" ];
-          wantedBy = [ "multi-user.target" ];
-
-          serviceConfig = {
-            Type = "oneshot";
-            RemainAfterExit = true;
-          };
-
-          script = ''
-            # Create IFB (Intermediate Functional Block) interface for ingress shaping
-            ${pkgs.iproute2}/bin/ip link add ifb4${cfg.wanInterface} type ifb 2>/dev/null || true
-            ${pkgs.iproute2}/bin/ip link set ifb4${cfg.wanInterface} up
-
-            # Redirect ingress traffic from WAN to IFB
-            ${pkgs.iproute2}/bin/tc qdisc add dev ${cfg.wanInterface} handle ffff: ingress 2>/dev/null || true
-            ${pkgs.iproute2}/bin/tc filter add dev ${cfg.wanInterface} parent ffff: \
-              protocol all u32 match u32 0 0 \
-              action mirred egress redirect dev ifb4${cfg.wanInterface}
-
-            # Apply CAKE to IFB egress (which handles WAN ingress/download)
-            ${pkgs.iproute2}/bin/tc qdisc del dev ifb4${cfg.wanInterface} root 2>/dev/null || true
-            ${pkgs.iproute2}/bin/tc qdisc add dev ifb4${cfg.wanInterface} root cake \
-              bandwidth ${toString cfg.cake.downloadRate}kbit \
-              ${lib.concatStringsSep " " (lib.filter (opt: opt != "ack-filter") cfg.cake.extraOptions)} \
-              ethernet \
-              overhead ${toString cfg.cake.overhead}
-
-            echo "CAKE ingress (download) applied to ${cfg.wanInterface} via ifb4${cfg.wanInterface}: ${toString cfg.cake.downloadRate} kbit"
-          '';
-
-          preStop = ''
-            # Clean up ingress shaping
-            ${pkgs.iproute2}/bin/tc qdisc del dev ${cfg.wanInterface} ingress 2>/dev/null || true
-            ${pkgs.iproute2}/bin/tc qdisc del dev ifb4${cfg.wanInterface} root 2>/dev/null || true
-            ${pkgs.iproute2}/bin/ip link set ifb4${cfg.wanInterface} down 2>/dev/null || true
-            ${pkgs.iproute2}/bin/ip link del ifb4${cfg.wanInterface} 2>/dev/null || true
-            echo "CAKE ingress removed from ${cfg.wanInterface}"
-          '';
-        };
-      }) // lib.optionalAttrs cfg.healthCheck.enable {
-        router-health-check = {
-          description = "Router health check";
-          after = [ "network-online.target" "dnsmasq.service" ];
-          wants = [ "network-online.target" ];
-          path = [ pkgs.iproute2 pkgs.dig pkgs.nftables pkgs.iputils pkgs.systemd ];
-
-          serviceConfig = {
-            Type = "oneshot";
-            ExecStart = "${healthCheckScript}/bin/router-health-check";
+            # DHCP Server Configuration
+            dhcpServerConfig = {
+              PoolOffset = cfg.dhcpServer.poolOffset;
+              PoolSize = cfg.dhcpServer.poolSize;
+              DNS = [ cfg.lanGatewayIP ];
+              EmitRouter = true;
+            };
           };
         };
-      } // lib.optionalAttrs cfg.wanWatchdog.enable {
-        wan-watchdog = {
-          description = "WAN connectivity watchdog";
-          after = [ "network-online.target" ];
-          wants = [ "network-online.target" ];
-          path = [ pkgs.iputils pkgs.systemd pkgs.coreutils ];
 
-          serviceConfig = {
-            Type = "oneshot";
-            ExecStart = "${wanWatchdogScript}/bin/wan-watchdog";
-            RuntimeDirectory = "wan-watchdog";
+        # CAKE QoS services
+        services = (lib.optionalAttrs cfg.cake.enable {
+          cake-qos-egress = {
+            description = "CAKE QoS egress (upload) shaping on ${cfg.wanInterface}";
+            after = [ "systemd-networkd.service" "network-online.target" ];
+            wants = [ "network-online.target" ];
+            wantedBy = [ "multi-user.target" ];
+
+            serviceConfig = {
+              Type = "oneshot";
+              RemainAfterExit = true;
+            };
+
+            script = ''
+              # Wait for interface to be ready
+              for i in {1..30}; do
+                if ${pkgs.iproute2}/bin/ip link show ${cfg.wanInterface} &>/dev/null; then
+                  break
+                fi
+                sleep 1
+              done
+
+              # Remove existing qdisc (ignore errors if none exists)
+              ${pkgs.iproute2}/bin/tc qdisc del dev ${cfg.wanInterface} root 2>/dev/null || true
+
+              # Apply CAKE to WAN egress (upload)
+              ${pkgs.iproute2}/bin/tc qdisc add dev ${cfg.wanInterface} root cake \
+                bandwidth ${toString cfg.cake.uploadRate}kbit \
+                ${lib.concatStringsSep " " cfg.cake.extraOptions} \
+                ethernet \
+                overhead ${toString cfg.cake.overhead}
+
+              echo "CAKE egress (upload) applied to ${cfg.wanInterface}: ${toString cfg.cake.uploadRate} kbit"
+            '';
+
+            preStop = ''
+              # Restore default qdisc on service stop
+              ${pkgs.iproute2}/bin/tc qdisc del dev ${cfg.wanInterface} root 2>/dev/null || true
+              echo "CAKE egress removed from ${cfg.wanInterface}"
+            '';
+          };
+
+          cake-qos-ingress = {
+            description = "CAKE QoS ingress (download) shaping on ${cfg.wanInterface} via IFB";
+            after = [ "cake-qos-egress.service" ];
+            wants = [ "cake-qos-egress.service" ];
+            wantedBy = [ "multi-user.target" ];
+
+            serviceConfig = {
+              Type = "oneshot";
+              RemainAfterExit = true;
+            };
+
+            script = ''
+              # Create IFB (Intermediate Functional Block) interface for ingress shaping
+              ${pkgs.iproute2}/bin/ip link add ifb4${cfg.wanInterface} type ifb 2>/dev/null || true
+              ${pkgs.iproute2}/bin/ip link set ifb4${cfg.wanInterface} up
+
+              # Redirect ingress traffic from WAN to IFB
+              ${pkgs.iproute2}/bin/tc qdisc add dev ${cfg.wanInterface} handle ffff: ingress 2>/dev/null || true
+              ${pkgs.iproute2}/bin/tc filter add dev ${cfg.wanInterface} parent ffff: \
+                protocol all u32 match u32 0 0 \
+                action mirred egress redirect dev ifb4${cfg.wanInterface}
+
+              # Apply CAKE to IFB egress (which handles WAN ingress/download)
+              ${pkgs.iproute2}/bin/tc qdisc del dev ifb4${cfg.wanInterface} root 2>/dev/null || true
+              ${pkgs.iproute2}/bin/tc qdisc add dev ifb4${cfg.wanInterface} root cake \
+                bandwidth ${toString cfg.cake.downloadRate}kbit \
+                ${lib.concatStringsSep " " (lib.filter (opt: opt != "ack-filter") cfg.cake.extraOptions)} \
+                ethernet \
+                overhead ${toString cfg.cake.overhead}
+
+              echo "CAKE ingress (download) applied to ${cfg.wanInterface} via ifb4${cfg.wanInterface}: ${toString cfg.cake.downloadRate} kbit"
+            '';
+
+            preStop = ''
+              # Clean up ingress shaping
+              ${pkgs.iproute2}/bin/tc qdisc del dev ${cfg.wanInterface} ingress 2>/dev/null || true
+              ${pkgs.iproute2}/bin/tc qdisc del dev ifb4${cfg.wanInterface} root 2>/dev/null || true
+              ${pkgs.iproute2}/bin/ip link set ifb4${cfg.wanInterface} down 2>/dev/null || true
+              ${pkgs.iproute2}/bin/ip link del ifb4${cfg.wanInterface} 2>/dev/null || true
+              echo "CAKE ingress removed from ${cfg.wanInterface}"
+            '';
+          };
+        }) // lib.optionalAttrs cfg.healthCheck.enable {
+          router-health-check = {
+            description = "Router health check";
+            after = [ "network-online.target" "dnsmasq.service" ];
+            wants = [ "network-online.target" ];
+            path = [ pkgs.iproute2 pkgs.dig pkgs.nftables pkgs.iputils pkgs.systemd ];
+
+            serviceConfig = {
+              Type = "oneshot";
+              ExecStart = "${healthCheckScript}/bin/router-health-check";
+            };
+          };
+        } // lib.optionalAttrs cfg.wanWatchdog.enable {
+          wan-watchdog = {
+            description = "WAN connectivity watchdog";
+            after = [ "network-online.target" ];
+            wants = [ "network-online.target" ];
+            path = [ pkgs.iputils pkgs.systemd pkgs.coreutils ];
+
+            serviceConfig = {
+              Type = "oneshot";
+              ExecStart = "${wanWatchdogScript}/bin/wan-watchdog";
+              RuntimeDirectory = "wan-watchdog";
+            };
           };
         };
-      };
 
-      systemd.timers = (lib.optionalAttrs cfg.healthCheck.enable {
-        router-health-check = {
-          description = "Periodic router health check";
-          wantedBy = [ "timers.target" ];
-          timerConfig = {
-            OnBootSec = "5min";
-            OnUnitActiveSec = cfg.healthCheck.interval;
+        timers = (lib.optionalAttrs cfg.healthCheck.enable {
+          router-health-check = {
+            description = "Periodic router health check";
+            wantedBy = [ "timers.target" ];
+            timerConfig = {
+              OnBootSec = "5min";
+              OnUnitActiveSec = cfg.healthCheck.interval;
+            };
           };
-        };
-      }) // lib.optionalAttrs cfg.wanWatchdog.enable {
-        wan-watchdog = {
-          description = "Periodic WAN connectivity check";
-          wantedBy = [ "timers.target" ];
-          timerConfig = {
-            OnBootSec = "3min";
-            OnUnitActiveSec = cfg.wanWatchdog.interval;
+        }) // lib.optionalAttrs cfg.wanWatchdog.enable {
+          wan-watchdog = {
+            description = "Periodic WAN connectivity check";
+            wantedBy = [ "timers.target" ];
+            timerConfig = {
+              OnBootSec = "3min";
+              OnUnitActiveSec = cfg.wanWatchdog.interval;
+            };
           };
         };
       };

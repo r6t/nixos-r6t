@@ -21,11 +21,28 @@ in
 
     # GNOME Keyring: stores NetworkManager WiFi passwords, GPG/SSH keys, etc.
     # Without this, NM has no secret agent and re-prompts for WiFi on every boot.
-    services.gnome.gnome-keyring.enable = true;
-    security.pam.services.gdm-password.enableGnomeKeyring = true;
-
     # Exclude default GNOME apps we don't need
-    services.gnome.core-apps.enable = false;
+    services = {
+      gnome = {
+        gnome-keyring.enable = true;
+        core-apps.enable = false;
+      };
+      desktopManager.gnome.enable = true;
+      displayManager = {
+        gdm = {
+          enable = true;
+          wayland = true;
+        };
+      };
+      xserver = {
+        enable = true;
+        xkb = {
+          layout = "us";
+          variant = "";
+        };
+      };
+    };
+    security.pam.services.gdm-password.enableGnomeKeyring = true;
     environment.gnome.excludePackages = with pkgs; [
       gnome-tour
       gnome-user-docs
@@ -41,23 +58,6 @@ in
       enable = true;
       platformTheme = "gnome";
       style = "adwaita-dark";
-    };
-
-    services = {
-      desktopManager.gnome.enable = true;
-      displayManager = {
-        gdm = {
-          enable = true;
-          wayland = true;
-        };
-      };
-      xserver = {
-        enable = true;
-        xkb = {
-          layout = "us";
-          variant = "";
-        };
-      };
     };
   };
 }

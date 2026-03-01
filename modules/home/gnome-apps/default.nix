@@ -90,6 +90,11 @@ in
               switch-to-application-3 = [ "<Super>3" ];
               switch-to-application-4 = [ "<Super>4" ];
               switch-to-application-5 = [ "<Super>5" ];
+
+              # Screenshot shortcuts (match customized KDE, macOS pattern)
+              screenshot = [ "<Super><Shift>3" ];
+              show-screenshot-ui = [ "<Super><Shift>4" ];
+              show-screen-recording-ui = [ "<Super><Shift>5" ];
             };
 
             # Power: suspend on battery idle, nothing on AC

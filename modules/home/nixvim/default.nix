@@ -14,17 +14,17 @@ let
             npm = "@ai-sdk/openai-compatible";
             name = "Ollama (local)";
             options = {
-              baseURL = ollamaCfg.baseURL;
+              inherit (ollamaCfg) baseURL;
             };
             models = lib.mapAttrs
               (_id: m:
                 {
-                  name = m.name;
+                  inherit (m) name;
                 }
                 // lib.optionalAttrs (m.context != null || m.output != null) {
                   limit =
-                    lib.optionalAttrs (m.context != null) { context = m.context; }
-                    // lib.optionalAttrs (m.output != null) { output = m.output; };
+                    lib.optionalAttrs (m.context != null) { inherit (m) context; }
+                    // lib.optionalAttrs (m.output != null) { inherit (m) output; };
                 }
               )
               ollamaCfg.models;

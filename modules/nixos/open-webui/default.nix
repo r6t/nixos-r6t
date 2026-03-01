@@ -30,8 +30,7 @@ in
   config = lib.mkIf cfg.enable {
     services.open-webui = {
       enable = true;
-      host = cfg.host;
-      port = cfg.port;
+      inherit (cfg) host port;
       stateDir = "/var/lib/open-webui"; # open-webui nixpkgs default
       environment = {
         ANONYMIZED_TELEMETRY = "False";
