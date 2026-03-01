@@ -17,6 +17,7 @@ in
         home.packages = with pkgs; [
           gnome-calculator
           gnome-system-monitor
+          gnomeExtensions.hide-top-bar
           loupe # GNOME image viewer
           nautilus # GNOME file manager
           snapshot # GNOME camera
@@ -80,6 +81,7 @@ in
               disable-user-extensions = false;
               enabled-extensions = [
                 "appindicatorsupport@rgcjonas.gmail.com"
+                "hide-top-bar@mathematic.io"
               ];
             };
 

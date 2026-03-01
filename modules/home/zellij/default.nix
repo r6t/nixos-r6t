@@ -17,6 +17,7 @@ let
       settings = {
         show_startup_tips = false;
         simplified_ui = true;
+        hide_tabs_bar_when_one_tab = true;
         default_shell = "fish";
         default_layout = "custom-compact-top";
         pane_frames = false;
@@ -34,10 +35,23 @@ let
             "bind \"Super o\"" = { SwitchToMode = "session"; };
             "bind \"Super m\"" = { SwitchToMode = "move"; };
             "bind \"Alt n\"" = { NewPane = ""; };
-            "bind \"Alt h\"" = { MoveFocus = "Left"; };
-            "bind \"Alt l\"" = { MoveFocus = "Right"; };
-            "bind \"Alt j\"" = { MoveFocus = "Down"; };
-            "bind \"Alt k\"" = { MoveFocus = "Up"; };
+            # Alt h/j/k/l: use zellij defaults (MoveFocusOrTab for h/l, MoveFocus for j/k)
+            # Direct tab switching - no Tab mode needed
+            "bind \"Alt 1\"" = { GoToTab = 1; };
+            "bind \"Alt 2\"" = { GoToTab = 2; };
+            "bind \"Alt 3\"" = { GoToTab = 3; };
+            "bind \"Alt 4\"" = { GoToTab = 4; };
+            "bind \"Alt 5\"" = { GoToTab = 5; };
+            "bind \"Alt 6\"" = { GoToTab = 6; };
+            "bind \"Alt 7\"" = { GoToTab = 7; };
+            "bind \"Alt 8\"" = { GoToTab = 8; };
+            "bind \"Alt 9\"" = { GoToTab = 9; };
+            # Tab management
+            "bind \"Alt t\"" = { NewTab = ""; };
+            "bind \"Alt r\"" = { SwitchToMode = "RenameTab"; };
+            # Alt [ / Alt ] left at defaults (PreviousSwapLayout / NextSwapLayout)
+            # Fullscreen focused pane
+            "bind \"Alt Shift f\"" = { ToggleFullscreen = ""; };
           };
           locked = {
             "bind \"Super z\"" = { SwitchToMode = "normal"; };
