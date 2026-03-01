@@ -113,6 +113,23 @@ in
             "org/gnome/system/location" = {
               enabled = true;
             };
+
+            # Disable GNOME donation nags (notifications + Settings About panel)
+            "org/gnome/settings-daemon/plugins/housekeeping" = {
+              donation-reminder-enabled = false;
+            };
+            "org/gnome/software" = {
+              donation-reminder-enabled = false;
+            };
+
+            # Workspace navigation: swap PgUp/PgDown for horizontal layout
+            # Meta+PgUp = right (next workspace), Meta+PgDown = left (previous)
+            "org/gnome/desktop/wm/keybindings" = {
+              switch-to-workspace-right = [ "<Super>Page_Up" ];
+              switch-to-workspace-left = [ "<Super>Page_Down" ];
+              switch-to-workspace-up = [ "disabled" ];
+              switch-to-workspace-down = [ "disabled" ];
+            };
           };
         };
       };
