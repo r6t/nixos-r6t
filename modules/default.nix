@@ -25,6 +25,7 @@
     home/fontconfig/default.nix
     home/freecad/default.nix
     home/git/default.nix
+    home/gnome-apps/default.nix
     home/home-manager/default.nix
     home/hyprland/default.nix
     home/k2pdfopt/default.nix
@@ -62,6 +63,7 @@
     nixos/fonts/default.nix
     nixos/fwupd/default.nix
     nixos/fzf/default.nix
+    nixos/gnome/default.nix
     nixos/grafana/default.nix
     nixos/headscale/default.nix
     nixos/home-router/default.nix

@@ -88,9 +88,9 @@
   # On battery: suspend-then-hibernate for safety (sleep 30min then hibernate
   # to encrypted swap, preserving game state).
   # On AC: plain suspend so the system wakes quickly.
-  # NOTE: KDE PowerDevil (modules/home/kde-apps) blocks logind lid-switch handling
-  # and enforces its own sleep policy via whenSleepingEnter. These logind settings
-  # serve as fallback (pre-login, PowerDevil crash). Keep both in sync.
+  # NOTE: GNOME power settings (modules/home/gnome-apps dconf) also control
+  # sleep behavior in-session. These logind settings serve as fallback
+  # (pre-login, GNOME crash). Keep both in sync.
   services.logind.settings.Login = {
     HandleLidSwitch = "suspend-then-hibernate";
     HandleLidSwitchExternalPower = "suspend";
@@ -99,7 +99,7 @@
   };
 
   # Defines HOW suspend-then-hibernate works (not WHEN it triggers).
-  # Used by both logind and PowerDevil when they invoke systemd-sleep.
+  # Used by both logind and GNOME power settings when they invoke systemd-sleep.
   systemd.sleep.extraConfig = ''
     HibernateDelaySec=30m
   '';
@@ -141,8 +141,10 @@
       git.enable = true;
       home-manager.enable = true;
       hyprland.enable = false;
-      kde-apps.enable = true;
-      kde-apps.tablet = true;
+      gnome-apps.enable = true;
+      gnome-apps.tablet = true;
+      kde-apps.enable = false;
+      kde-apps.tablet = false;
       mako.enable = false;
       mpv.enable = true;
       nixvim.enable = true;
@@ -174,8 +176,10 @@
     fzf.enable = true;
     hypr.enable = false;
     iperf.enable = true;
-    kde.enable = true;
-    kde.tablet = true;
+    gnome.enable = true;
+    gnome.tablet = true;
+    kde.enable = false;
+    kde.tablet = false;
     localization.enable = true;
     mullvad.enable = true;
     networkmanager.enable = true;

@@ -66,7 +66,8 @@
       git.enable = true;
       home-manager.enable = true;
       hyprland.enable = false;
-      kde-apps.enable = true;
+      gnome-apps.enable = true;
+      kde-apps.enable = false;
       mako.enable = false;
       mpv.enable = true;
       nixvim.enable = true;
@@ -95,7 +96,8 @@
     fzf.enable = true;
     hypr.enable = false;
     iperf.enable = true;
-    kde.enable = true;
+    gnome.enable = true;
+    kde.enable = false;
     localization.enable = true;
     mullvad.enable = true;
     networkmanager.enable = true;
