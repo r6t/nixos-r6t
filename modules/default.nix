@@ -104,6 +104,7 @@
     nixos/usb4-sfp/default.nix
     nixos/user/default.nix
     nixos/v4l-utils/default.nix
+    nixos/yubikey-luks-enroll/default.nix
     nixos/zfs-pool/default.nix
     nixos/zola/default.nix
   ];

@@ -1,21 +1,30 @@
-{ lib, config, pkgs, ... }: {
+{ lib, config, pkgs, ... }:
+let
+  cfg = config.mine.kde;
+in
+{
 
   options = {
     mine.kde.enable =
       lib.mkEnableOption "enable and configure kde desktop";
     mine.kde.tablet =
-      lib.mkEnableOption "on-screen keyboard support for tablet/detachable use";
+      lib.mkEnableOption "tablet/touchscreen extras (on-screen keyboard packages)";
   };
 
-  config = lib.mkIf config.mine.kde.enable {
-    environment.systemPackages = with pkgs; [
-      aha
-      clinfo
-      mesa-demos
-      vulkan-tools
-      wayland-utils
-      wl-clipboard
-    ];
+  config = lib.mkIf cfg.enable {
+    environment.systemPackages = with pkgs;
+      [
+        aha
+        clinfo
+        mesa-demos
+        vulkan-tools
+        wayland-utils
+        wl-clipboard
+      ]
+      ++ lib.optionals cfg.tablet [
+        maliit-framework # Wayland on-screen keyboard framework
+        maliit-keyboard # Wayland on-screen keyboard for Plasma
+      ];
     environment.plasma6.excludePackages = with pkgs.kdePackages; [
       dolphin
       dolphin-plugins
@@ -30,9 +39,6 @@
         sddm = {
           enable = true;
           wayland.enable = true;
-          # On-screen keyboard at login (tablet/detached keyboard use)
-          settings.General.InputMethod =
-            lib.mkIf config.mine.kde.tablet "qtvirtualkeyboard";
         };
       };
       xserver = {
