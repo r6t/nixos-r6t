@@ -68,6 +68,7 @@
       hyprland.enable = false;
       gnome-apps.enable = false;
       kde-apps.enable = true;
+      makemkv.enable = true;
       mako.enable = false;
       mpv.enable = true;
       nixvim.enable = true;

@@ -5,7 +5,7 @@
       lib.mkEnableOption "enable makemkv";
   };
 
-  config = lib.mkIf config.mine.bolt.enable {
+  config = lib.mkIf config.mine.makemkv.enable {
     boot.kernelModules = [
       "sg"
     ];
