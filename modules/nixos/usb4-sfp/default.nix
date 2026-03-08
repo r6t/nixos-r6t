@@ -13,14 +13,14 @@
       "10-ixgbe0" = {
         matchConfig = {
           Driver = "ixgbe";
-          DevicePath = "*-pci-*:00.0"; # first port
+          Path = "*-pci-*:00.0"; # first port
         };
         linkConfig.Name = "ixgbe0";
       };
       "11-ixgbe1" = {
         matchConfig = {
           Driver = "ixgbe";
-          DevicePath = "*-pci-*:00.1"; # second port
+          Path = "*-pci-*:00.1"; # second port
         };
         linkConfig.Name = "ixgbe1";
       };
@@ -34,11 +34,11 @@
       wants = [ "network-online.target" ];
       path = [ pkgs.ethtool pkgs.coreutils pkgs.iproute2 ];
       script = ''
-        # Wait for link stability
-        sleep 3
-        
         # Only proceed if interface exists
         if ip link show ixgbe0 &>/dev/null; then
+          # Wait for link stability
+          sleep 3
+
           echo "Applying ixgbe0 settings..."
           
           # Disable pause frames (flow control)

@@ -27,14 +27,14 @@ let
         keybinds = {
           unbind = [ "Ctrl g" "Ctrl p" "Ctrl n" "Ctrl t" "Ctrl s" "Ctrl o" "Ctrl m" ];
           normal = {
-            "bind \"Super z\"" = { SwitchToMode = "locked"; };
-            "bind \"Super p\"" = { SwitchToMode = "pane"; };
-            "bind \"Super n\"" = { SwitchToMode = "resize"; };
-            "bind \"Super t\"" = { SwitchToMode = "tab"; };
-            "bind \"Super s\"" = { SwitchToMode = "scroll"; };
-            "bind \"Super o\"" = { SwitchToMode = "session"; };
-            "bind \"Super m\"" = { SwitchToMode = "move"; };
-            "bind \"Alt n\"" = { NewPane = ""; };
+            "bind \"Super z\"" = { SwitchToMode._args = [ "Locked" ]; };
+            "bind \"Super p\"" = { SwitchToMode._args = [ "Pane" ]; };
+            "bind \"Super n\"" = { SwitchToMode._args = [ "Resize" ]; };
+            "bind \"Super t\"" = { SwitchToMode._args = [ "Tab" ]; };
+            "bind \"Super s\"" = { SwitchToMode._args = [ "Scroll" ]; };
+            "bind \"Super o\"" = { SwitchToMode._args = [ "Session" ]; };
+            "bind \"Super m\"" = { SwitchToMode._args = [ "Move" ]; };
+            "bind \"Alt n\"" = { NewPane = { }; };
             # Alt h/j/k/l: use zellij defaults (MoveFocusOrTab for h/l, MoveFocus for j/k)
             # Direct tab switching - no Tab mode needed
             "bind \"Alt 1\"" = { GoToTab = 1; };
@@ -47,14 +47,12 @@ let
             "bind \"Alt 8\"" = { GoToTab = 8; };
             "bind \"Alt 9\"" = { GoToTab = 9; };
             # Tab management
-            "bind \"Alt t\"" = { NewTab = ""; };
-            "bind \"Alt r\"" = { SwitchToMode = "RenameTab"; };
+            "bind \"Alt t\"" = { NewTab = { }; };
+            "bind \"Alt r\"" = { SwitchToMode._args = [ "RenameTab" ]; };
             # Alt [ / Alt ] left at defaults (PreviousSwapLayout / NextSwapLayout)
-            # Fullscreen focused pane
-            "bind \"Alt Shift f\"" = { ToggleFullscreen = ""; };
           };
           locked = {
-            "bind \"Super z\"" = { SwitchToMode = "normal"; };
+            "bind \"Super z\"" = { SwitchToMode._args = [ "Normal" ]; };
           };
         };
 

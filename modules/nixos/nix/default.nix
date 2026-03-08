@@ -19,7 +19,7 @@
       gc = {
         automatic = true;
         dates = "monthly";
-        options = "--delete-older-than-60d";
+        options = "--delete-older-than 60d";
       };
 
       settings = {

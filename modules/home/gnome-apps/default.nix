@@ -17,6 +17,8 @@ in
         home.packages = with pkgs; [
           gnome-calculator
           gnome-system-monitor
+          gnome-terminal
+          gnomeExtensions.brightness-control-using-ddcutil # DDC/CI sliders in quick settings
           gnomeExtensions.hide-top-bar
           loupe # GNOME image viewer
           nautilus # GNOME file manager
@@ -81,6 +83,7 @@ in
               disable-user-extensions = false;
               enabled-extensions = [
                 "appindicatorsupport@rgcjonas.gmail.com"
+                "display-brightness-ddcutil@themightydeity.github.com"
                 "hide-top-bar@mathematic.io"
               ];
             };
@@ -106,9 +109,11 @@ in
               sleep-inactive-battery-timeout = 600;
             };
 
-            # Window management: add minimize/maximize buttons
+            # Window management: add minimize/maximize buttons, focus follows mouse
             "org/gnome/desktop/wm/preferences" = {
               button-layout = "appmenu:minimize,maximize,close";
+              focus-mode = "sloppy";
+              auto-raise = false;
             };
 
             # Location services (for night light if switching to automatic later)

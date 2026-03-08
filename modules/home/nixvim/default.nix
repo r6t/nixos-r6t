@@ -156,6 +156,11 @@ let
         # Fugitive
         {
           action = "<cmd>Git<CR>";
+          key = "<leader>ga";
+          options.desc = "Git add";
+        }
+        {
+          action = "<cmd>Git<CR>";
           key = "<leader>gg";
           options.desc = "Git status";
         }
