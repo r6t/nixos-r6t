@@ -30,6 +30,7 @@
     home/hyprland/default.nix
     home/k2pdfopt/default.nix
     home/kde-apps/default.nix
+    home/makemkv/default.nix
     home/mako/default.nix
     home/mpv/default.nix
     home/nixvim/default.nix

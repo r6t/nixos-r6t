@@ -141,10 +141,10 @@
       git.enable = true;
       home-manager.enable = true;
       hyprland.enable = false;
-      gnome-apps.enable = true;
-      gnome-apps.tablet = true;
-      kde-apps.enable = false;
-      kde-apps.tablet = false;
+      gnome-apps.enable = false;
+      gnome-apps.tablet = false;
+      kde-apps.enable = true;
+      kde-apps.tablet = true;
       mako.enable = false;
       mpv.enable = true;
       nixvim.enable = true;
@@ -160,7 +160,7 @@
     };
 
     alloy.enable = false;
-    asusctl.enable = false; # Lenovo, not ASUS
+    asusctl.enable = false;
     bluetooth.enable = true;
     bolt.enable = true;
     bootloader.enable = true;
@@ -169,17 +169,17 @@
     ddc-i2c.enable = false;
     docker.enable = false;
     nixos-r6t-baseline.enable = true;
-    ollama.enable = false; # 16GB RAM — use mountainball/crown for LLM work
+    ollama.enable = false;
     open-webui.enable = false;
     fonts.enable = true;
     fwupd.enable = true;
     fzf.enable = true;
     hypr.enable = false;
     iperf.enable = true;
-    gnome.enable = true;
-    gnome.tablet = true;
-    kde.enable = false;
-    kde.tablet = false;
+    gnome.enable = false;
+    gnome.tablet = false;
+    kde.enable = true;
+    kde.tablet = true;
     localization.enable = true;
     mullvad.enable = true;
     networkmanager.enable = true;
