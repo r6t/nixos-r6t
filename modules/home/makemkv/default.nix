@@ -1,11 +1,11 @@
 { lib, config, pkgs, userConfig, ... }: {
 
   options = {
-    mine.bolt.enable =
+    mine.home.makemkv.enable =
       lib.mkEnableOption "enable makemkv";
   };
 
-  config = lib.mkIf config.mine.makemkv.enable {
+  config = lib.mkIf config.mine.home.makemkv.enable {
     boot.kernelModules = [
       "sg"
     ];

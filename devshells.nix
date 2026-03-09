@@ -74,12 +74,6 @@ let
           else ""
         }
         export DEVSHELL_NAME="${name}"
-        
-        if command -v fish >/dev/null; then
-          exec fish
-        else
-          echo "Warning: fish not found, falling back to bash"
-        fi
       '';
     };
 
@@ -102,12 +96,6 @@ let
       else ""
     }
     export DEVSHELL_NAME="aws"
-    
-    if command -v fish >/dev/null; then
-      exec fish
-    else
-      echo "Warning: fish not found, falling back to bash"
-    fi
   '';
 
 in

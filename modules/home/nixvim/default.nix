@@ -189,6 +189,95 @@ let
           key = "<leader>gP";
           options.desc = "Git push";
         }
+        {
+          action = "<cmd>Git fetch<CR>";
+          key = "<leader>gf";
+          options.desc = "Git fetch";
+        }
+        {
+          action = "<cmd>Git rebase -i HEAD~10<CR>";
+          key = "<leader>gri";
+          options.desc = "Git rebase interactive (last 10)";
+        }
+        {
+          action = "<cmd>Git rebase --continue<CR>";
+          key = "<leader>grc";
+          options.desc = "Git rebase continue";
+        }
+        {
+          action = "<cmd>Git rebase --abort<CR>";
+          key = "<leader>gra";
+          options.desc = "Git rebase abort";
+        }
+        {
+          action = "<cmd>Git rebase --skip<CR>";
+          key = "<leader>grs";
+          options.desc = "Git rebase skip";
+        }
+        {
+          action = "<cmd>Git merge<CR>";
+          key = "<leader>gm";
+          options.desc = "Git merge";
+        }
+        {
+          action = "<cmd>Git merge --abort<CR>";
+          key = "<leader>gma";
+          options.desc = "Git merge abort";
+        }
+        {
+          # Gdiffsplit! = 3-way diff for conflict resolution
+          # left=//2 target/ours, middle=working copy, right=//3 merge/theirs
+          action = "<cmd>Gdiffsplit!<CR>";
+          key = "<leader>gdd";
+          options.desc = "3-way diff (conflict resolution)";
+        }
+        {
+          # In 3-way diff: pull hunk from target/ours (left pane)
+          action = "<cmd>diffget //2<CR>";
+          key = "<leader>g2";
+          options.desc = "Diffget from target/ours (//2)";
+        }
+        {
+          # In 3-way diff: pull hunk from merge/theirs (right pane)
+          action = "<cmd>diffget //3<CR>";
+          key = "<leader>g3";
+          options.desc = "Diffget from merge/theirs (//3)";
+        }
+        {
+          action = "<cmd>Git stash<CR>";
+          key = "<leader>gSs";
+          options.desc = "Git stash";
+        }
+        {
+          action = "<cmd>Git stash pop<CR>";
+          key = "<leader>gSp";
+          options.desc = "Git stash pop";
+        }
+        {
+          action = "<cmd>Git stash list<CR>";
+          key = "<leader>gSl";
+          options.desc = "Git stash list";
+        }
+        {
+          action = "<cmd>Git cherry-pick<CR>";
+          key = "<leader>gcp";
+          options.desc = "Git cherry-pick";
+        }
+        {
+          action = "<cmd>Git cherry-pick --abort<CR>";
+          key = "<leader>gcpa";
+          options.desc = "Git cherry-pick abort";
+        }
+        {
+          action = "<cmd>Gwrite<CR>";
+          key = "<leader>gw";
+          options.desc = "Gwrite: stage/checkout current file";
+        }
+        {
+          action = "<cmd>Gread<CR>";
+          key = "<leader>gR";
+          options.desc = "Gread: revert buffer to index";
+        }
 
         # Gitsigns (hunk operations)
         {

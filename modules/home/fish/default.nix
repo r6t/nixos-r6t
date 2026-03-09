@@ -34,25 +34,43 @@ let
         ll = "lsd -la";
         lt = "lsd --tree";
         o = "opencode";
+        v = "nvim";
       };
 
       shellAbbrs = {
         cat = "bat";
-        g = "git";
+        # git staging / inspection
         ga = "git add";
-        gb = "git branch";
-        gc = "git commit -m";
-        gd = "git diff";
-        gds = "git diff --staged";
-        gg = "git status";
-        gl = "git log --oneline --graph --decorate";
-        gp = "git push";
-        gs = "git status";
+        gb = "nvim -c 'Git branch'";
+        gc = "nvim -c 'Git commit'";
+        gd = "nvim -c 'Gdiffsplit'";
+        gds = "nvim -c 'Gdiffsplit --staged'";
+        gf = "nvim -c 'Git fetch'";
+        gg = "nvim -c Git";
+        gl = "nvim -c 'Git log --oneline --graph --decorate'";
+        gp = "nvim -c 'Git push'";
+        gs = "nvim -c Git";
+        # rebase workflow
+        gri = "nvim -c 'Git rebase -i'";
+        grc = "nvim -c 'Git rebase --continue'";
+        gra = "nvim -c 'Git rebase --abort'";
+        grs = "nvim -c 'Git rebase --skip'";
+        # merge workflow
+        gm = "nvim -c 'Git merge'";
+        gma = "nvim -c 'Git merge --abort'";
+        # conflict resolution: open 3-way diff on conflicted file
+        gx = "nvim -c 'Gdiffsplit!'";
+        # stash
+        gst = "nvim -c 'Git stash'";
+        gstp = "nvim -c 'Git stash pop'";
+        gstl = "nvim -c 'Git stash list'";
+        # cherry-pick
+        gcp = "nvim -c 'Git cherry-pick'";
       };
 
       functions = {
         nd = {
-          description = "nix develop aka enter devshell";
+          description = "Enter a named nixos-r6t devshell (aws, media, etc). Default devshell auto-activates via direnv in ~/git/nixos-r6t.";
           body = ''
             set -l flake_path "${homeDir}/git/nixos-r6t"
             
@@ -98,6 +116,52 @@ let
           '';
         };
 
+        i = {
+          description = "Switch AWS profile (or clear to default)";
+          body = ''
+            set -l profile_name $argv[1]
+            if test -z "$profile_name"
+              set -e AWS_PROFILE
+              set -e AWS_ACCESS_KEY_ID
+              set -e AWS_SECRET_ACCESS_KEY
+              set -e AWS_SESSION_TOKEN
+              set -e AWS_PROFILE_NAME
+              echo "✓ Cleared AWS profile, using default"
+            else if grep -q "^\[profile $profile_name\]" ~/.aws/config
+              set -gx AWS_PROFILE $profile_name
+              set -e AWS_ACCESS_KEY_ID
+              set -e AWS_SECRET_ACCESS_KEY
+              set -e AWS_SESSION_TOKEN
+              set -e AWS_PROFILE_NAME
+              echo "✓ Switched to AWS profile: $profile_name"
+            else
+              echo "❌ Profile '$profile_name' not found in ~/.aws/config"
+              echo "Run 'ils' to list available profiles."
+              return 1
+            end
+          '';
+        };
+
+        ils = {
+          description = "List AWS profiles from ~/.aws/config";
+          body = ''
+            echo "Available AWS profiles (locally configured):"
+            grep "^\[profile " ~/.aws/config | sed 's/\[profile \(.*\)\]/  - \1/'
+          '';
+        };
+
+        iunset = {
+          description = "Clear all AWS credentials and profile from environment";
+          body = ''
+            set -e AWS_PROFILE
+            set -e AWS_ACCESS_KEY_ID
+            set -e AWS_SECRET_ACCESS_KEY
+            set -e AWS_SESSION_TOKEN
+            set -e AWS_PROFILE_NAME
+            echo "✓ Cleared AWS credentials"
+          '';
+        };
+
         fish_right_prompt = {
           body = ''
             # AWS credentials indicator
@@ -111,8 +175,8 @@ let
             else if test -n "$AWS_PROFILE"
               set aws_indicator $AWS_PROFILE
             else if test -n "$AWS_SESSION_TOKEN"; or test -n "$AWS_ACCESS_KEY_ID"
-              # Fallback for federated credentials without profile name
-              set aws_indicator "federated"
+              # No profile env var set but credentials present — use "default" profile
+              set aws_indicator "default"
             end
             
             if test -n "$aws_indicator"

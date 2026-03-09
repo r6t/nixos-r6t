@@ -5,6 +5,8 @@ result/*
 result*/*
 .pre-commit-config.yaml
 .aider*
+.direnv
+.direnv/
 .vscode
 .vscode/
 README.html
