@@ -41,6 +41,7 @@
   # modules
   mine = {
     flatpak = {
+      base.enable = true;
       anki.enable = true;
       calibre.enable = true;
       element.enable = true;

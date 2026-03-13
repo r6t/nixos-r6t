@@ -10,13 +10,10 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    virtualisation = {
-      ${svc} = {
-        enable = true;
-        agent.enable = false;
-        ui.enable = true;
-      };
-      libvirtd.enable = true;
+    virtualisation.${svc} = {
+      enable = true;
+      agent.enable = false;
+      ui.enable = true;
     };
 
     users.users.${userConfig.username} = {

@@ -1,6 +1,7 @@
 { ... }: {
 
   imports = [
+    flatpak/base/default.nix
     flatpak/anki/default.nix
     flatpak/calibre/default.nix
     flatpak/element/default.nix
