@@ -81,6 +81,7 @@
       };
     };
 
+    bolt.enable = true;
     bootloader.enable = true;
     nixos-r6t-baseline.enable = true;
     fwupd.enable = true;
