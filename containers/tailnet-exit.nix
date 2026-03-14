@@ -1,6 +1,6 @@
 {
   imports = [
-    ./wg-exit-node.nix
+    ./lib/wg-exit-node.nix
   ];
 
   mine.exit-node-routing = {
