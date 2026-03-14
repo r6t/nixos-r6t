@@ -1,7 +1,7 @@
 {
   imports = [
-    ./r6-lxc-base.nix
-    ./r6-lxc-mullvad-dns-add-on.nix
+    ./lib/base.nix
+    ./lib/mullvad-dns.nix
   ];
 
   networking.hostName = "changedetection";

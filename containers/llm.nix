@@ -5,8 +5,8 @@
     ../modules/nixos/ollama/default.nix
     ../modules/nixos/open-webui/default.nix
     ./docker.nix
-    ./r6-lxc-base.nix
-    ./r6-lxc-mullvad-dns-add-on.nix
+    ./lib/base.nix
+    ./lib/mullvad-dns.nix
   ];
 
   networking = {

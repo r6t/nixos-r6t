@@ -107,189 +107,43 @@
         };
       };
 
-      # Container images
-      packages.${linuxSystem} = {
-        audiobookshelf = nixos-generators.nixosGenerate {
-          system = linuxSystem;
-          format = "lxc";
-          modules = [ ./containers/audiobookshelf.nix ];
-          specialArgs = { inherit outputs userConfig inputs; };
-        };
-        audiobookshelfMetadata = nixos-generators.nixosGenerate {
-          system = linuxSystem;
-          format = "lxc-metadata";
-          modules = [ ./containers/audiobookshelf.nix ];
-          specialArgs = { inherit outputs userConfig inputs; };
-        };
-        changedetection = nixos-generators.nixosGenerate {
-          system = linuxSystem;
-          format = "lxc";
-          modules = [ ./containers/changedetection.nix ];
-          specialArgs = { inherit outputs userConfig inputs; };
-        };
-        changedetectionMetadata = nixos-generators.nixosGenerate {
-          system = linuxSystem;
-          format = "lxc-metadata";
-          modules = [ ./containers/changedetection.nix ];
-          specialArgs = { inherit outputs userConfig inputs; };
-        };
-        docker = nixos-generators.nixosGenerate {
-          system = linuxSystem;
-          format = "lxc";
-          modules = [ ./containers/docker.nix ];
-          specialArgs = { inherit outputs userConfig inputs; };
-        };
-        dockerMetadata = nixos-generators.nixosGenerate {
-          system = linuxSystem;
-          format = "lxc-metadata";
-          modules = [ ./containers/docker.nix ];
-          specialArgs = { inherit outputs userConfig inputs; };
-        };
-        dns = nixos-generators.nixosGenerate {
-          system = linuxSystem;
-          format = "lxc";
-          modules = [ ./containers/dns.nix ];
-          specialArgs = { inherit outputs userConfig inputs; };
-        };
-        dnsMetadata = nixos-generators.nixosGenerate {
-          system = linuxSystem;
-          format = "lxc-metadata";
-          modules = [ ./containers/dns.nix ];
-          specialArgs = { inherit outputs userConfig inputs; };
-        };
-        headscale = nixos-generators.nixosGenerate {
-          system = linuxSystem;
-          format = "lxc";
-          modules = [ ./containers/headscale.nix ];
-          specialArgs = { inherit outputs userConfig inputs; };
-        };
-        headscaleMetadata = nixos-generators.nixosGenerate {
-          system = linuxSystem;
-          format = "lxc-metadata";
-          modules = [ ./containers/headscale.nix ];
-          specialArgs = { inherit outputs userConfig inputs; };
-        };
-        immich = nixos-generators.nixosGenerate {
-          system = linuxSystem;
-          format = "lxc";
-          modules = [ ./containers/immich.nix ];
-          specialArgs = { inherit outputs userConfig inputs; };
-        };
-        immichMetadata = nixos-generators.nixosGenerate {
-          system = linuxSystem;
-          format = "lxc-metadata";
-          modules = [ ./containers/immich.nix ];
-          specialArgs = { inherit outputs userConfig inputs; };
-        };
-        jellyfin = nixos-generators.nixosGenerate {
-          system = linuxSystem;
-          format = "lxc";
-          modules = [ ./containers/jellyfin.nix ];
-          specialArgs = { inherit outputs userConfig inputs; };
-        };
-        jellyfinMetadata = nixos-generators.nixosGenerate {
-          system = linuxSystem;
-          format = "lxc-metadata";
-          modules = [ ./containers/jellyfin.nix ];
-          specialArgs = { inherit outputs userConfig inputs; };
-        };
-        llm = nixos-generators.nixosGenerate {
-          system = linuxSystem;
-          format = "lxc";
-          modules = [ ./containers/llm.nix ];
-          specialArgs = { inherit outputs userConfig inputs; };
-        };
-        llmMetadata = nixos-generators.nixosGenerate {
-          system = linuxSystem;
-          format = "lxc-metadata";
-          modules = [ ./containers/llm.nix ];
-          specialArgs = { inherit outputs userConfig inputs; };
-        };
-        miniflux = nixos-generators.nixosGenerate {
-          system = linuxSystem;
-          format = "lxc";
-          modules = [ ./containers/miniflux.nix ];
-          specialArgs = { inherit outputs userConfig inputs; };
-        };
-        minifluxMetadata = nixos-generators.nixosGenerate {
-          system = linuxSystem;
-          format = "lxc-metadata";
-          modules = [ ./containers/miniflux.nix ];
-          specialArgs = { inherit outputs userConfig inputs; };
-        };
-        monitoring = nixos-generators.nixosGenerate {
-          system = linuxSystem;
-          format = "lxc";
-          modules = [ ./containers/monitoring.nix ];
-          specialArgs = { inherit outputs userConfig inputs; };
-        };
-        monitoringMetadata = nixos-generators.nixosGenerate {
-          system = linuxSystem;
-          format = "lxc-metadata";
-          modules = [ ./containers/monitoring.nix ];
-          specialArgs = { inherit outputs userConfig inputs; };
-        };
-        pocketId = nixos-generators.nixosGenerate {
-          system = linuxSystem;
-          format = "lxc";
-          modules = [ ./containers/pocket-id.nix ];
-          specialArgs = { inherit outputs userConfig inputs; };
-        };
-        pocketIdMetadata = nixos-generators.nixosGenerate {
-          system = linuxSystem;
-          format = "lxc-metadata";
-          modules = [ ./containers/pocket-id.nix ];
-          specialArgs = { inherit outputs userConfig inputs; };
-        };
-        ntfy = nixos-generators.nixosGenerate {
-          system = linuxSystem;
-          format = "lxc";
-          modules = [ ./containers/ntfy.nix ];
-          specialArgs = { inherit outputs userConfig inputs; };
-        };
-        ntfyMetadata = nixos-generators.nixosGenerate {
-          system = linuxSystem;
-          format = "lxc-metadata";
-          modules = [ ./containers/ntfy.nix ];
-          specialArgs = { inherit outputs userConfig inputs; };
-        };
-        searxng = nixos-generators.nixosGenerate {
-          system = linuxSystem;
-          format = "lxc";
-          modules = [ ./containers/searxng.nix ];
-          specialArgs = { inherit outputs userConfig inputs; };
-        };
-        searxngMetadata = nixos-generators.nixosGenerate {
-          system = linuxSystem;
-          format = "lxc-metadata";
-          modules = [ ./containers/searxng.nix ];
-          specialArgs = { inherit outputs userConfig inputs; };
-        };
-        tailnetExit = nixos-generators.nixosGenerate {
-          system = linuxSystem;
-          format = "lxc";
-          modules = [ ./containers/tailnet-exit.nix ];
-          specialArgs = { inherit outputs userConfig inputs; };
-        };
-        tailnetExitMetadata = nixos-generators.nixosGenerate {
-          system = linuxSystem;
-          format = "lxc-metadata";
-          modules = [ ./containers/tailnet-exit.nix ];
-          specialArgs = { inherit outputs userConfig inputs; };
-        };
-        wgExitNode = nixos-generators.nixosGenerate {
-          system = linuxSystem;
-          format = "lxc";
-          modules = [ ./containers/wg-exit-node.nix ];
-          specialArgs = { inherit outputs userConfig inputs; };
-        };
-        wgExitNodeMetadata = nixos-generators.nixosGenerate {
-          system = linuxSystem;
-          format = "lxc-metadata";
-          modules = [ ./containers/wg-exit-node.nix ];
-          specialArgs = { inherit outputs userConfig inputs; };
-        };
-      };
+      # Container images — auto-generated from containers/*.nix
+      # Each file produces two outputs: {name} (rootfs) and {name}-metadata
+      # Build with: nix build .#<name>  or  nix build .#<name>-metadata
+      packages.${linuxSystem} =
+        let
+          containerDir = ./containers;
+          containerFiles = builtins.filter
+            (f: nixpkgs.lib.hasSuffix ".nix" f)
+            (builtins.attrNames (builtins.readDir containerDir));
+
+          mkImage = file:
+            let
+              name = builtins.replaceStrings [ ".nix" ] [ "" ] file;
+              module = containerDir + "/${file}";
+            in
+            [
+              {
+                inherit name;
+                value = nixos-generators.nixosGenerate {
+                  system = linuxSystem;
+                  format = "lxc";
+                  modules = [ module ];
+                  specialArgs = { inherit outputs userConfig inputs; };
+                };
+              }
+              {
+                name = "${name}-metadata";
+                value = nixos-generators.nixosGenerate {
+                  system = linuxSystem;
+                  format = "lxc-metadata";
+                  modules = [ module ];
+                  specialArgs = { inherit outputs userConfig inputs; };
+                };
+              }
+            ];
+        in
+        builtins.listToAttrs (builtins.concatMap mkImage containerFiles);
 
       # Pre-commit
       checks.${linuxSystem} = {

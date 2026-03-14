@@ -2,7 +2,7 @@
 {
   imports = [
     "${modulesPath}/virtualisation/lxc-container.nix"
-    ../modules/nixos/localization/default.nix
+    ../../modules/nixos/localization/default.nix
   ];
 
   boot.isContainer = true;
@@ -88,4 +88,3 @@
   programs.fish.enable = true;
   users.users.root.shell = pkgs.fish;
 }
-

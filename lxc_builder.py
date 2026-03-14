@@ -1,129 +1,167 @@
 #!/usr/bin/env python3
-"""
-Build LXC images defined in flake, then incus import
-"""
+"""Build LXC images defined in flake, then incus import."""
 
-import glob
+import argparse
 import shutil
 import subprocess
+import sys
 from datetime import datetime
 from pathlib import Path
 
-
-def run_command(cmd, check=True):
-    """Run a shell command and return its stdout and stderr."""
-    try:
-        result = subprocess.run(
-            cmd, shell=True, capture_output=True, text=True, check=check
-        )
-        return result.stdout.strip(), result.stderr.strip()
-    except subprocess.CalledProcessError as e:
-        if check:
-            print(f"Command failed: {cmd}")
-            print(f"Error: {e.stderr}")
-            raise
-        return e.stdout, e.stderr
+TMP_BASE = Path("/tmp/lxc")
+CONTAINERS_DIR = Path("containers")
 
 
-def kebab_to_camel(name):
-    """Convert kebab-case string to camelCase."""
-    parts = name.split("-")
-    return parts[0] + "".join(word.capitalize() for word in parts[1:])
+def run(cmd, check=True):
+    """Run a command and return (stdout, stderr)."""
+    result = subprocess.run(cmd, capture_output=True, text=True, check=False)
+    if check and result.returncode != 0:
+        print(f"  Command failed: {' '.join(cmd)}")
+        print(f"  Error: {result.stderr.strip()}")
+        raise subprocess.CalledProcessError(result.returncode, cmd)
+    return result.stdout.strip(), result.stderr.strip()
 
 
-def get_container_names():
-    """Get container names from containers/*.nix excluding r6-lxc* files.
+def get_containers():
+    """Discover buildable containers from containers/*.nix filenames.
+
+    Every .nix file directly under containers/ is a buildable LXC image.
+    Base layers and add-ons live in containers/lib/ and are excluded.
 
     Returns:
-        list of tuples: (camelCase_name, kebab-case_name)
+        list of str: sorted container names (kebab-case, no extension)
     """
-    containers_dir = Path("containers")
-    if not containers_dir.exists():
-        print("containers/ directory not found")
+    if not CONTAINERS_DIR.exists():
         return []
-
-    nix_files = [
-        f for f in containers_dir.glob("*.nix") if not f.stem.startswith("r6-lxc")
-    ]
-    containers = []
-    for f in nix_files:
-        kebab_name = f.stem
-        camel_name = kebab_to_camel(kebab_name) if "-" in kebab_name else kebab_name
-        containers.append((camel_name, kebab_name))
-    print(f"Discovered containers: {containers}")
-    return containers
+    return sorted(f.stem for f in CONTAINERS_DIR.glob("*.nix"))
 
 
-def get_next_version_number(container_name):
-    """Return the next available build version number for a container.
-
-    Args:
-        container_name (str): kebab-case container name
-
-    Returns:
-        int: next version number
-    """
-    base_path = Path(f"/tmp/lxc/{container_name}")
-    if not base_path.exists():
+def next_version(name):
+    """Return the next build version number for a container."""
+    base = TMP_BASE / name
+    if not base.exists():
         return 1
-    versions = [
-        int(d.name) for d in base_path.iterdir() if d.is_dir() and d.name.isdigit()
-    ]
+    versions = [int(d.name) for d in base.iterdir() if d.is_dir() and d.name.isdigit()]
     return max(versions, default=0) + 1
 
 
-def build_and_deploy_container(camel_name, kebab_name):
-    """Build the container and its metadata, copy artifacts, and import to incus.
+def find_tarball(result_dir):
+    """Find the single .tar.xz in a nix build result."""
+    tarball_dir = result_dir / "tarball"
+    tarballs = list(tarball_dir.glob("*.tar.xz"))
+    if len(tarballs) != 1:
+        raise FileNotFoundError(
+            f"Expected 1 tarball in {tarball_dir}, found {len(tarballs)}"
+        )
+    return tarballs[0]
+
+
+def build_and_import(name, dry_run=False):
+    """Build a container image + metadata and import to incus.
 
     Args:
-        camel_name (str): camelCase nix flake attribute name
-        kebab_name (str): kebab-case container name for path and alias
+        name: container name (kebab-case, matches flake attribute and filename)
+        dry_run: if True, only print what would be built
     """
-    print(f"=== Building {camel_name} (file: {kebab_name}) ===")
-    version = get_next_version_number(kebab_name)
-    tmp_dir = Path(f"/tmp/lxc/{kebab_name}/{version}")
+    print(f"\n{'=' * 50}")
+    print(f"  {name}")
+    print(f"{'=' * 50}")
+
+    if dry_run:
+        print(f"  nix build .#{name}")
+        print(f"  nix build .#{name}-metadata")
+        print(f"  incus image import ... --alias {name}")
+        return
+
+    version = next_version(name)
+    tmp_dir = TMP_BASE / name / str(version)
     tmp_dir.mkdir(parents=True, exist_ok=True)
+    result_link = Path("result")
 
-    print(f"Building .#{camel_name}...")
-    run_command(f"nix build .#{camel_name}")
-    container_tarball = glob.glob("result/tarball/*.tar.xz")[0]
+    # Build rootfs
+    print(f"  Building .#{name} ...")
+    run(["nix", "build", f".#{name}"])
     root_target = tmp_dir / "root.tar.xz"
-    shutil.copy2(container_tarball, root_target)
+    shutil.copy2(find_tarball(result_link), root_target)
 
-    print(f"Building .#{camel_name}Metadata...")
-    run_command(f"nix build .#{camel_name}Metadata")
-    metadata_tarball = glob.glob("result/tarball/*.tar.xz")[0]
+    # Build metadata
+    print(f"  Building .#{name}-metadata ...")
+    run(["nix", "build", f".#{name}-metadata"])
     metadata_target = tmp_dir / "metadata.tar.xz"
-    shutil.copy2(metadata_tarball, metadata_target)
+    shutil.copy2(find_tarball(result_link), metadata_target)
 
-    alias_name = kebab_name.replace("_", "-").replace(".", "-")
-    import_cmd = (
-        f"incus image import {metadata_target} {root_target} --alias {alias_name}"
-    )
-    print(f"Importing to incus: {import_cmd}")
-    stdout, stderr = run_command(import_cmd, check=False)
+    # Import to incus
+    import_cmd = [
+        "incus",
+        "image",
+        "import",
+        str(metadata_target),
+        str(root_target),
+        "--alias",
+        name,
+    ]
+    print(f"  Importing as '{name}' ...")
+    stdout, stderr = run(import_cmd, check=False)
     if "Image with same fingerprint already exists" in stderr:
-        print(
-            f"🔄 Image {camel_name} was already up to date. This build wasn't necessary."
-        )
-    else:
-        print(stdout)
+        print("  Already up to date (fingerprint unchanged)")
+    elif stdout:
+        print(f"  {stdout}")
 
-    print(f"✅ Incus image alias {alias_name} set from version {version}")
+    print(f"  Done: {name} v{version}")
 
 
 def main():
-    """Start building and deploying all containers from the containers/ directory."""
-    print("🚀 Build and deploy LXC images")
-    print(f"Timestamp: {datetime.now().isoformat()}")
+    """Parse arguments and build/import selected LXC containers."""
+    parser = argparse.ArgumentParser(
+        description="Build and import LXC images from flake"
+    )
+    parser.add_argument(
+        "containers",
+        nargs="*",
+        help="Containers to build (by name). Omit to build all.",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show what would be built without building",
+    )
+    parser.add_argument(
+        "--list", action="store_true", help="List available containers and exit"
+    )
+    args = parser.parse_args()
 
-    containers = get_container_names()
-    if not containers:
-        print("No containers found to build")
-        return
+    print(f"LXC Builder - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
-    for camel_name, kebab_name in containers:
-        build_and_deploy_container(camel_name, kebab_name)
+    available = get_containers()
+    if not available:
+        print("No containers found in containers/")
+        sys.exit(1)
+
+    if args.list:
+        print(f"\nAvailable containers ({len(available)}):")
+        for name in available:
+            print(f"  {name}")
+        sys.exit(0)
+
+    # Validate requested containers
+    if args.containers:
+        targets = []
+        for req in args.containers:
+            if req in available:
+                targets.append(req)
+            else:
+                print(f"Unknown container: {req}")
+                print(f"Available: {', '.join(available)}")
+                sys.exit(1)
+    else:
+        targets = available
+
+    print(f"Building {len(targets)} container(s): {', '.join(targets)}")
+
+    for name in targets:
+        build_and_import(name, dry_run=args.dry_run)
+
+    print(f"\nFinished: {len(targets)} container(s) processed")
 
 
 if __name__ == "__main__":
