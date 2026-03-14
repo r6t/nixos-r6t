@@ -57,7 +57,10 @@
       lanAddress = "192.168.6.1/24";
       lanInterface = "enp100s0";
       wanInterface = "enp101s0";
-      extraInterfaces = [ "enp0s13f0u3c2" ]; # USB NIC for VM
+      extraInterfaces = [
+        "enp0s13f0u3c2" # USB NIC for Home Assistant VM
+        "enp0s13f0u1c2" # USB NIC for LXC passthrough
+      ];
       dhcpServer = {
         poolOffset = 11;
         poolSize = 79; # 11-89
