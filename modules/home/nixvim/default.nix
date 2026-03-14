@@ -155,6 +155,11 @@ let
 
         # Fugitive
         {
+          action = "<cmd>Git add -p<CR>";
+          key = "<leader>ga";
+          options.desc = "Git add by hunk";
+        }
+        {
           action = "<cmd>Git<CR>";
           key = "<leader>gg";
           options.desc = "Git status";
@@ -260,13 +265,8 @@ let
         }
         {
           action = "<cmd>Git cherry-pick<CR>";
-          key = "<leader>gcp";
+          key = "<leader>go";
           options.desc = "Git cherry-pick";
-        }
-        {
-          action = "<cmd>Git cherry-pick --abort<CR>";
-          key = "<leader>gcpa";
-          options.desc = "Git cherry-pick abort";
         }
         {
           action = "<cmd>Gwrite<CR>";

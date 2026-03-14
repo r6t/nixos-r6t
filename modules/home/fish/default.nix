@@ -65,7 +65,7 @@ let
         gstp = "nvim -c 'Git stash pop'";
         gstl = "nvim -c 'Git stash list'";
         # cherry-pick
-        gcp = "nvim -c 'Git cherry-pick'";
+        go = "nvim -c 'Git cherry-pick'";
       };
 
       functions = {

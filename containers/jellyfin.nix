@@ -6,22 +6,6 @@
 
   networking.hostName = "jellyfin";
 
-  # append DNS server settings: crown DNS override
-  # allows workloads not on tailnet to use same DNS names
-  services = {
-    dnsmasq = {
-      settings = {
-        address = [
-          # specific overrides
-          "/grafana.r6t.io/192.168.6.1"
-
-          # wildcard so app LXCs hit router caddy
-          "/r6t.io/192.168.6.10"
-        ];
-      };
-    };
-  };
-
   # UID 1000:100 matches existing data ownership (r6t:users on host)
   users.users.jellyfin = {
     uid = 1000;

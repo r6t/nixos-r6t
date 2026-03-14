@@ -9,16 +9,6 @@
   networking.hostName = "searxng";
 
   services = {
-    # DNS overrides for local resolution
-    dnsmasq = {
-      settings = {
-        address = [
-          "/grafana.r6t.io/192.168.6.1"
-          "/r6t.io/192.168.6.10"
-        ];
-      };
-    };
-
     # services.searx uses searxng package
     searx = {
       enable = true;

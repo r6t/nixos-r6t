@@ -1,24 +1,14 @@
-{ lib, ... }:
+# LAN DNS overrides for containers not on the tailnet.
+# Resolves *.r6t.io services to the correct LAN host
+# so containers can reach caddy reverse proxies directly.
 {
-  networking.nameservers = [ "127.0.0.1" ];
-  services = {
-    # dnsmasq gets port 53
-    resolved.enable = lib.mkForce false;
+  services.dnsmasq.settings.address = [
+    # spire (192.168.6.3) — monitoring + auth on saguaro
+    "/grafana.r6t.io/192.168.6.3"
+    "/loki.r6t.io/192.168.6.3"
+    "/pid.r6t.io/192.168.6.3"
 
-    # extra params for nextdns reporting
-    dnsmasq.settings = {
-      add-mac = true;
-      add-subnet = "32,128";
-    };
-
-    # 5353/udp nextdns service with mapped in config
-    nextdns = {
-      enable = true;
-      arguments = [
-        "-config-file"
-        "/mnt/nextdns.conf"
-      ];
-    };
-  };
+    # crown (192.168.6.10) — everything else
+    "/r6t.io/192.168.6.10"
+  ];
 }
-

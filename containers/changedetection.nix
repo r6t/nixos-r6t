@@ -7,15 +7,6 @@
   networking.hostName = "changedetection";
 
   services = {
-    dnsmasq = {
-      settings = {
-        address = [
-          "/grafana.r6t.io/192.168.6.1"
-          "/r6t.io/192.168.6.10"
-        ];
-      };
-    };
-
     changedetection-io = {
       enable = true;
       behindProxy = true;
