@@ -1,8 +1,13 @@
+{ lib, ... }:
+
 {
   imports = [
     ./lib/base.nix
     ./lib/mullvad-dns.nix
   ];
+
+  nixpkgs.config.allowUnfreePredicate = pkg:
+    builtins.elem (lib.getName pkg) [ "changedetection-io" ];
 
   networking.hostName = "changedetection";
 

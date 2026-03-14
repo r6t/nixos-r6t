@@ -158,10 +158,19 @@ def main():
 
     print(f"Building {len(targets)} container(s): {', '.join(targets)}")
 
+    failed = []
     for name in targets:
-        build_and_import(name, dry_run=args.dry_run)
+        try:
+            build_and_import(name, dry_run=args.dry_run)
+        except (subprocess.CalledProcessError, FileNotFoundError) as exc:
+            failed.append(name)
+            print(f"  FAILED: {name} ({exc})")
 
-    print(f"\nFinished: {len(targets)} container(s) processed")
+    passed = len(targets) - len(failed)
+    print(f"\nFinished: {passed}/{len(targets)} succeeded")
+    if failed:
+        print(f"Failed: {', '.join(failed)}")
+        sys.exit(1)
 
 
 if __name__ == "__main__":
