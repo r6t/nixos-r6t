@@ -72,6 +72,7 @@
     nixos/hypr/default.nix
     nixos/immich/default.nix
     nixos/incus/default.nix
+    nixos/incus-nightly-rebuild/default.nix
     nixos/iperf/default.nix
     nixos/jellyfin/default.nix
     nixos/karakeep/default.nix

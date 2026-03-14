@@ -150,6 +150,10 @@
     fzf.enable = true;
     iperf.enable = true;
     incus.enable = true;
+    incus-nightly-rebuild = {
+      enable = true;
+      flakePath = "/home/r6t/git/nixos-r6t";
+    };
     localization.enable = true;
 
     mountLuksStore = {

@@ -1,7 +1,12 @@
 #!/usr/bin/env python3
-"""Build LXC images defined in flake, then incus import."""
+"""Build LXC images defined in flake, then incus import.
+
+Interactive:  lxc_builder.py [containers...]   Build specified (or all) containers
+Nightly:      lxc_builder.py --nightly         Build only running incus instances
+"""
 
 import argparse
+import json
 import shutil
 import subprocess
 import sys
@@ -10,6 +15,7 @@ from pathlib import Path
 
 TMP_BASE = Path("/tmp/lxc")
 CONTAINERS_DIR = Path("containers")
+INSTANCE_MAP_FILE = Path("instance_map.json")
 
 
 def run(cmd, check=True):
@@ -34,6 +40,71 @@ def get_containers():
     if not CONTAINERS_DIR.exists():
         return []
     return sorted(f.stem for f in CONTAINERS_DIR.glob("*.nix"))
+
+
+def get_instance_map():
+    """Load instance name -> flake attribute mappings from instance_map.json.
+
+    Used when incus instance names don't match container filenames.
+    e.g. {"mv-seattle": "tailnet-exit", "mv-oslo": "tailnet-exit"}
+
+    Returns:
+        dict: instance name -> flake attribute name
+    """
+    if not INSTANCE_MAP_FILE.exists():
+        return {}
+    return json.loads(INSTANCE_MAP_FILE.read_text(encoding="utf-8"))
+
+
+def get_running_instances():
+    """Get list of running incus instance names.
+
+    Returns:
+        list of str: instance names, or empty list if incus unavailable
+    """
+    try:
+        stdout, _ = run(
+            ["incus", "list", "-c", "n", "--format", "csv", "status=RUNNING"],
+            check=False,
+        )
+        return [line.strip() for line in stdout.splitlines() if line.strip()]
+    except FileNotFoundError:
+        return []
+
+
+def resolve_nightly_targets():
+    """Determine which containers to build based on running incus instances.
+
+    Matches running instance names to container .nix files (direct match)
+    or uses instance_map.json for non-obvious mappings (e.g. mv-seattle -> tailnet-exit).
+
+    Returns:
+        list of str: deduplicated, sorted container attribute names to build
+    """
+    available = set(get_containers())
+    instance_map = get_instance_map()
+    running = get_running_instances()
+
+    if not running:
+        print("No running incus instances found")
+        return []
+
+    targets = set()
+    for instance in running:
+        if instance in instance_map:
+            attr = instance_map[instance]
+            if attr in available:
+                targets.add(attr)
+                print(f"  {instance} -> {attr} (mapped)")
+            else:
+                print(f"  {instance} -> {attr} (mapped, but no container file)")
+        elif instance in available:
+            targets.add(instance)
+            print(f"  {instance} (direct match)")
+        else:
+            print(f"  {instance} (skipped, no match)")
+
+    return sorted(targets)
 
 
 def next_version(name):
@@ -110,6 +181,34 @@ def build_and_import(name, dry_run=False):
     print(f"  Done: {name} v{version}")
 
 
+def resolve_targets(args, available):
+    """Determine which containers to build based on CLI arguments.
+
+    Returns:
+        list of str: container names to build
+    """
+    if args.nightly:
+        print("\nNightly mode: matching running instances to containers")
+        targets = resolve_nightly_targets()
+        if not targets:
+            print("Nothing to build")
+            sys.exit(0)
+        return targets
+
+    if args.containers:
+        targets = []
+        for req in args.containers:
+            if req in available:
+                targets.append(req)
+            else:
+                print(f"Unknown container: {req}")
+                print(f"Available: {', '.join(available)}")
+                sys.exit(1)
+        return targets
+
+    return available
+
+
 def main():
     """Parse arguments and build/import selected LXC containers."""
     parser = argparse.ArgumentParser(
@@ -128,6 +227,11 @@ def main():
     parser.add_argument(
         "--list", action="store_true", help="List available containers and exit"
     )
+    parser.add_argument(
+        "--nightly",
+        action="store_true",
+        help="Nightly mode: only build containers with running incus instances",
+    )
     args = parser.parse_args()
 
     print(f"LXC Builder - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
@@ -143,20 +247,8 @@ def main():
             print(f"  {name}")
         sys.exit(0)
 
-    # Validate requested containers
-    if args.containers:
-        targets = []
-        for req in args.containers:
-            if req in available:
-                targets.append(req)
-            else:
-                print(f"Unknown container: {req}")
-                print(f"Available: {', '.join(available)}")
-                sys.exit(1)
-    else:
-        targets = available
-
-    print(f"Building {len(targets)} container(s): {', '.join(targets)}")
+    targets = resolve_targets(args, available)
+    print(f"\nBuilding {len(targets)} container(s): {', '.join(targets)}")
 
     failed = []
     for name in targets:
