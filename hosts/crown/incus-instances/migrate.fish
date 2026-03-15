@@ -15,7 +15,12 @@
 set PROFILE_DIR (realpath (dirname (status filename)))
 
 # Instance -> old profile name mapping
+# Exit nodes first — they are gateways for downstream app containers
 set -l instances \
+    mv-seattle:4-mv-seattle \
+    mv-vancouver:5-mv-vancouver \
+    mv-oslo:6-mv-oslo \
+    mv-zurich:7-mv-zurich \
     audiobookshelf:131-br1-audiobookshelf \
     changedetection:99-br1-changedetection \
     immich:130-br1-immich \
@@ -24,10 +29,6 @@ set -l instances \
     ladder:104-br1-ladder \
     llm:134-br1-llm \
     miniflux:105-br1-miniflux \
-    mv-oslo:6-mv-oslo \
-    mv-seattle:4-mv-seattle \
-    mv-vancouver:5-mv-vancouver \
-    mv-zurich:7-mv-zurich \
     ntfy:106-br1-ntfy \
     paperless:106-br1-paperless \
     pirate-ship:162-br1-pirate-ship \
