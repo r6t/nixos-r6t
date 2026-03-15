@@ -1,0 +1,11 @@
+{
+  "it-tools": "docker",
+  "ladder": "docker",
+  "mv-oslo": "tailnet-exit",
+  "mv-seattle": "tailnet-exit",
+  "mv-vancouver": "tailnet-exit",
+  "mv-zurich": "tailnet-exit",
+  "paperless": "docker",
+  "pirate-ship": "docker",
+  "sts": "docker"
+}

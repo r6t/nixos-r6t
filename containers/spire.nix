@@ -1,5 +1,8 @@
 { lib, ... }:
 
+let
+  allCaddyRoutes = import ./lib/caddy-routes.nix;
+in
 {
   imports = [
     ./lib/base.nix
@@ -36,7 +39,11 @@
   };
 
   mine = {
-    caddy.enable = true;
+    caddy = {
+      enable = true;
+      environmentFile = "/etc/caddy/caddy.env";
+      routes = allCaddyRoutes.spire;
+    };
     iperf.enable = true;
     monitoring-services = {
       enable = true;

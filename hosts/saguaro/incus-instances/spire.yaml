@@ -5,10 +5,10 @@ config:
     datasource_list: [NoCloud, None]
 description: spire
 devices:
-  caddy-config:
-    path: /etc/caddy
+  caddy-env:
+    path: /etc/caddy/caddy.env
     shift: "true"
-    source: /mnt/kingston240/spire/caddy
+    source: /mnt/kingston240/spire/caddy/caddy.env
     type: disk
   eth0:
     name: eth0

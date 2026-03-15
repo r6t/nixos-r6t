@@ -1,5 +1,29 @@
 { inputs, lib, pkgs, ... }:
 
+let
+  allCaddyRoutes = import ../../containers/lib/caddy-routes.nix;
+
+  # Containers whose caddy routes are served by crown's host caddy.
+  # Excludes spire (runs its own caddy on saguaro).
+  crownContainers = [
+    "audiobookshelf"
+    "changedetection"
+    "immich"
+    "it-tools"
+    "jellyfin"
+    "ladder"
+    "llm"
+    "miniflux"
+    "ntfy"
+    "paperless"
+    "pirate-ship"
+    "pocket-id"
+    "searxng"
+    "sts"
+  ];
+
+  crownCaddyRoutes = lib.foldl' (acc: name: acc // allCaddyRoutes.${name}) { } crownContainers;
+in
 {
   imports = [
     inputs.home-manager.nixosModules.home-manager
@@ -108,8 +132,6 @@
     tmpfiles.rules = [
       "d /mnt/thunderbay 0755 root root -"
       "d /mnt/thunderkey 0755 root root -"
-      "L /etc/caddy/Caddyfile - - - - /mnt/crownstore/Sync/app-config/caddy/crown.Caddyfile"
-      "L /etc/caddy/caddy.env - - - - /mnt/crownstore/Sync/app-config/caddy/crown.caddy.env"
     ];
     services = {
       incus = {
@@ -144,7 +166,11 @@
     alloy.enable = true;
     bolt.enable = true;
     bootloader.enable = true;
-    caddy.enable = true;
+    caddy = {
+      enable = true;
+      environmentFile = "/mnt/crownstore/Sync/app-config/caddy/crown.caddy.env";
+      routes = crownCaddyRoutes;
+    };
     nixos-r6t-baseline.enable = true;
     fwupd.enable = true;
     fzf.enable = true;

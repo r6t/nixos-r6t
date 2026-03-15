@@ -24,7 +24,7 @@ in
       description = "Nightly nix build for running incus container images";
       serviceConfig = {
         Type = "oneshot";
-        ExecStart = "${pkgs.python3}/bin/python3 ${cfg.flakePath}/lxc_builder.py --nightly";
+        ExecStart = "${pkgs.python3}/bin/python3 ${cfg.flakePath}/containers/build.py --nightly";
         WorkingDirectory = cfg.flakePath;
         Nice = 19;
         IOSchedulingClass = "idle";

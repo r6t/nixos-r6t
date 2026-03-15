@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Build LXC images defined in flake, then incus import.
 
-Interactive:  lxc_builder.py [containers...]   Build specified (or all) containers
-Nightly:      lxc_builder.py --nightly         Build only running incus instances
+Interactive:  containers/build.py [names...]   Build specified (or all) containers
+Nightly:      containers/build.py --nightly    Build only running incus instances
 """
 
 import argparse
@@ -14,8 +14,10 @@ from datetime import datetime
 from pathlib import Path
 
 TMP_BASE = Path("/tmp/lxc")
-CONTAINERS_DIR = Path("containers")
-INSTANCE_MAP_FILE = Path("instance_map.json")
+SCRIPT_DIR = Path(__file__).resolve().parent
+FLAKE_DIR = SCRIPT_DIR.parent
+CONTAINERS_DIR = SCRIPT_DIR
+INSTANCE_MAP_FILE = FLAKE_DIR / "hosts/crown/incus-instances/instance_map.json"
 
 
 def run(cmd, check=True):
@@ -149,15 +151,17 @@ def build_and_import(name, dry_run=False):
     tmp_dir.mkdir(parents=True, exist_ok=True)
     result_link = Path("result")
 
+    flake_ref = str(FLAKE_DIR)
+
     # Build rootfs
     print(f"  Building .#{name} ...")
-    run(["nix", "build", f".#{name}"])
+    run(["nix", "build", f"{flake_ref}#{name}"])
     root_target = tmp_dir / "root.tar.xz"
     shutil.copy2(find_tarball(result_link), root_target)
 
     # Build metadata
     print(f"  Building .#{name}-metadata ...")
-    run(["nix", "build", f".#{name}-metadata"])
+    run(["nix", "build", f"{flake_ref}#{name}-metadata"])
     metadata_target = tmp_dir / "metadata.tar.xz"
     shutil.copy2(find_tarball(result_link), metadata_target)
 
