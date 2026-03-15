@@ -15,11 +15,6 @@ devices:
     nictype: physical
     parent: enp0s13f0u1c2
     type: nic
-  grafana-secrets:
-    path: /var/lib/monitoring/grafana
-    shift: "true"
-    source: /mnt/kingston240/spire/grafana
-    type: disk
   monitoring-data:
     path: /var/lib/monitoring
     shift: "true"
