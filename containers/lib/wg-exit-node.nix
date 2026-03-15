@@ -1,9 +1,9 @@
 {
   imports = [
-    ./lib/base.nix
-    ./lib/mullvad-dns.nix
-    ../modules/nixos/exit-node-routing/default.nix
-    ../modules/nixos/tailscale/default.nix
+    ./base.nix
+    ./mullvad-dns.nix
+    ../../modules/nixos/exit-node-routing/default.nix
+    ../../modules/nixos/tailscale/default.nix
   ];
 
   mine.exit-node-routing.enable = true;

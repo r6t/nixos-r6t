@@ -133,6 +133,9 @@ in
             root_url = "https://${cfg.grafana.domain}";
             enforce_domain = true;
           };
+          security = {
+            secret_key = "$__file{${cfg.dataDir}/grafana/secret_key}";
+          };
           "auth.basic" = {
             enabled = false;
           };
