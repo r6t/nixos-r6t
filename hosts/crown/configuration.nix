@@ -173,7 +173,10 @@ in
     fwupd.enable = true;
     fzf.enable = true;
     iperf.enable = true;
-    incus.enable = true;
+    incus = {
+      enable = true;
+      profileDir = "/home/r6t/git/nixos-r6t/hosts/crown/incus-instances";
+    };
     incus-nightly-rebuild = {
       enable = true;
       flakePath = "/home/r6t/git/nixos-r6t";

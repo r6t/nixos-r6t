@@ -90,7 +90,10 @@
     fwupd.enable = true;
     iperf.enable = true;
     fzf.enable = true;
-    incus.enable = true;
+    incus = {
+      enable = true;
+      profileDir = "/home/r6t/git/nixos-r6t/hosts/saguaro/incus-instances";
+    };
     localization.enable = true;
     mountLuksStore.kingston240 = {
       device = "/dev/disk/by-uuid/d7c2abad-2a6d-47ef-8310-dd57fb1156b9";
