@@ -1,0 +1,38 @@
+config:
+  security.nesting: "true"
+  user.user-data: |
+    #cloud-config
+    datasource_list: [NoCloud, None]
+description: ladder
+devices:
+  eth0:
+    name: eth0
+    nictype: bridged
+    parent: br1
+    type: nic
+  ladder-config:
+    path: /mnt/crownstore/config/ladder
+    shift: "true"
+    source: /mnt/crownstore/config/ladder
+    type: disk
+  ladder-port:
+    connect: tcp:127.0.0.1:8082
+    listen: tcp:0.0.0.0:8082
+    type: proxy
+  root:
+    path: /
+    pool: default
+    type: disk
+  seed-meta-data:
+    path: /var/lib/cloud/seed/nocloud/meta-data
+    source: /home/r6t/git/nixos-r6t/hosts/crown/incus-instances/seed/ladder.meta-data
+    type: disk
+  seed-network-config:
+    path: /var/lib/cloud/seed/nocloud/network-config
+    source: /home/r6t/git/nixos-r6t/hosts/crown/incus-instances/seed/ladder.network-config
+    type: disk
+  seed-user-data:
+    path: /var/lib/cloud/seed/nocloud/user-data
+    source: /home/r6t/git/nixos-r6t/hosts/crown/incus-instances/seed/ladder.user-data
+    type: disk
+name: ladder

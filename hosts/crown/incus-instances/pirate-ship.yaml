@@ -1,0 +1,115 @@
+config:
+  security.nesting: "true"
+  user.user-data: |
+    #cloud-config
+    datasource_list: [NoCloud, None]
+description: pirate-ship
+devices:
+  config-deemix:
+    path: /mnt/crownstore/config/deemix
+    shift: "true"
+    source: /mnt/crownstore/config/deemix
+    type: disk
+  config-radarr:
+    path: /mnt/crownstore/config/radarr
+    shift: "true"
+    source: /mnt/crownstore/config/radarr
+    type: disk
+  config-sabnzbd:
+    path: /mnt/crownstore/config/sabnzbd
+    shift: "true"
+    source: /mnt/crownstore/config/sabnzbd
+    type: disk
+  config-sonarr:
+    path: /mnt/crownstore/config/sonarr
+    shift: "true"
+    source: /mnt/crownstore/config/sonarr
+    type: disk
+  config-transmission:
+    path: /mnt/crownstore/config/transmission
+    shift: "true"
+    source: /mnt/crownstore/config/transmission
+    type: disk
+  docker-compose:
+    path: /mnt/docker-compose/pirate-ship
+    shift: "true"
+    source: /mnt/crownstore/Sync/app-config/docker-compose/crown/pirate-ship
+    type: disk
+  eth0:
+    name: eth0
+    nictype: bridged
+    parent: br1
+    type: nic
+  movies:
+    path: /mnt/thunderbay/8TB-A/movies
+    shift: "true"
+    source: /mnt/thunderbay/8TB-A/movies
+    type: disk
+  music-unsorted:
+    path: /mnt/thunderbay/8TB-D/storage/plex/music_unsorted
+    shift: "true"
+    source: /mnt/thunderbay/8TB-D/storage/plex/music_unsorted
+    type: disk
+  radarr-port:
+    connect: tcp:127.0.0.1:7878
+    listen: tcp:0.0.0.0:7878
+    type: proxy
+  root:
+    path: /
+    pool: default
+    type: disk
+  sab-port:
+    connect: tcp:127.0.0.1:8081
+    listen: tcp:0.0.0.0:8081
+    type: proxy
+  sabnzbd-complete:
+    path: /mnt/crownstore/app-storage/download/sabnzbd/complete
+    shift: "true"
+    source: /mnt/crownstore/app-storage/download/sabnzbd/complete
+    type: disk
+  sabnzbd-downloading:
+    path: /mnt/crownstore/app-storage/download/sabnzbd/downloading
+    shift: "true"
+    source: /mnt/crownstore/app-storage/download/sabnzbd/downloading
+    type: disk
+  seed-meta-data:
+    path: /var/lib/cloud/seed/nocloud/meta-data
+    source: /home/r6t/git/nixos-r6t/hosts/crown/incus-instances/seed/pirate-ship.meta-data
+    type: disk
+  seed-network-config:
+    path: /var/lib/cloud/seed/nocloud/network-config
+    source: /home/r6t/git/nixos-r6t/hosts/crown/incus-instances/seed/pirate-ship.network-config
+    type: disk
+  seed-user-data:
+    path: /var/lib/cloud/seed/nocloud/user-data
+    source: /home/r6t/git/nixos-r6t/hosts/crown/incus-instances/seed/pirate-ship.user-data
+    type: disk
+  sonarr-port:
+    connect: tcp:127.0.0.1:8989
+    listen: tcp:0.0.0.0:8989
+    type: proxy
+  transmission-complete:
+    path: /mnt/crownstore/app-storage/download/transmission/complete
+    shift: "true"
+    source: /mnt/crownstore/app-storage/download/transmission/complete
+    type: disk
+  transmission-watch:
+    path: /mnt/crownstore/app-storage/download/transmission/watch
+    shift: "true"
+    source: /mnt/crownstore/app-storage/download/transmission/watch
+    type: disk
+  tv:
+    path: /mnt/thunderbay/8TB-D/storage/plex/tv
+    shift: "true"
+    source: /mnt/thunderbay/8TB-D/storage/plex/tv
+    type: disk
+  tx-port:
+    connect: tcp:127.0.0.1:9091
+    listen: tcp:0.0.0.0:9091
+    type: proxy
+  youtube:
+    path: /mnt/thunderbay/8TB-D/storage/plex/youtube
+    shift: "true"
+    source: /mnt/thunderbay/8TB-D/storage/plex/youtube
+    type: disk
+name: pirate-ship

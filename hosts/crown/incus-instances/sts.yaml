@@ -1,0 +1,61 @@
+config:
+  security.nesting: "true"
+  user.user-data: |
+    #cloud-config
+    datasource_list: [NoCloud, None]
+description: sts
+devices:
+  docker-compose:
+    path: /mnt/docker-compose/sts
+    shift: "true"
+    source: /mnt/crownstore/Sync/app-config/docker-compose/crown/sts
+    type: disk
+  eth0:
+    name: eth0
+    nictype: bridged
+    parent: br1
+    type: nic
+  root:
+    path: /
+    pool: default
+    type: disk
+  seed-meta-data:
+    path: /var/lib/cloud/seed/nocloud/meta-data
+    source: /home/r6t/git/nixos-r6t/hosts/crown/incus-instances/seed/sts.meta-data
+    type: disk
+  seed-network-config:
+    path: /var/lib/cloud/seed/nocloud/network-config
+    source: /home/r6t/git/nixos-r6t/hosts/crown/incus-instances/seed/sts.network-config
+    type: disk
+  seed-user-data:
+    path: /var/lib/cloud/seed/nocloud/user-data
+    source: /home/r6t/git/nixos-r6t/hosts/crown/incus-instances/seed/sts.user-data
+    type: disk
+  sts-cache:
+    path: /mnt/crownstore/app-storage/sts
+    shift: "true"
+    source: /mnt/crownstore/app-storage/sts
+    type: disk
+  sts-config:
+    path: /mnt/crownstore/config/sts
+    shift: "true"
+    source: /mnt/crownstore/config/sts
+    type: disk
+  sts-data:
+    path: /mnt/thunderbay/8TB-C/sts
+    shift: "true"
+    source: /mnt/thunderbay/8TB-C/sts
+    type: disk
+  sts-https-port:
+    connect: tcp:127.0.0.1:47813
+    listen: tcp:0.0.0.0:47813
+    type: proxy
+  sts-http-port:
+    connect: tcp:127.0.0.1:47812
+    listen: tcp:0.0.0.0:47812
+    type: proxy
+  sts-port:
+    connect: tcp:127.0.0.1:47811
+    listen: tcp:0.0.0.0:47811
+    type: proxy
+name: sts

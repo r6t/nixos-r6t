@@ -1,0 +1,4 @@
+#cloud-config
+preserve_hostname: false
+hostname: paperless
+manage_etc_hosts: true

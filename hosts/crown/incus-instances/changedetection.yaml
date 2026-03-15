@@ -1,0 +1,38 @@
+config:
+  security.nesting: "true"
+  user.user-data: |
+    #cloud-config
+    datasource_list: [NoCloud, None]
+description: changedetection
+devices:
+  changed-port:
+    connect: tcp:127.0.0.1:5000
+    listen: tcp:0.0.0.0:5000
+    type: proxy
+  crownstore-config:
+    path: /var/lib/changedetection-io
+    shift: "true"
+    source: /mnt/crownstore/config/changedetection/
+    type: disk
+  eth0:
+    name: eth0
+    nictype: bridged
+    parent: br1
+    type: nic
+  root:
+    path: /
+    pool: default
+    type: disk
+  seed-meta-data:
+    path: /var/lib/cloud/seed/nocloud/meta-data
+    source: /home/r6t/git/nixos-r6t/hosts/crown/incus-instances/seed/changedetection.meta-data
+    type: disk
+  seed-network-config:
+    path: /var/lib/cloud/seed/nocloud/network-config
+    source: /home/r6t/git/nixos-r6t/hosts/crown/incus-instances/seed/changedetection.network-config
+    type: disk
+  seed-user-data:
+    path: /var/lib/cloud/seed/nocloud/user-data
+    source: /home/r6t/git/nixos-r6t/hosts/crown/incus-instances/seed/changedetection.user-data
+    type: disk
+name: changedetection

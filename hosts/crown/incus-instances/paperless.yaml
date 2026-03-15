@@ -1,0 +1,53 @@
+config:
+  security.nesting: "true"
+  user.user-data: |
+    #cloud-config
+    datasource_list: [NoCloud, None]
+description: paperless
+devices:
+  docker-compose:
+    path: /mnt/docker-compose/paperless
+    shift: "true"
+    source: /mnt/crownstore/Sync/app-config/docker-compose/crown/paperless
+    type: disk
+  eth0:
+    name: eth0
+    nictype: bridged
+    parent: br1
+    type: nic
+  paperless-data:
+    path: /mnt/crownstore/data/paperless-pg
+    shift: "true"
+    source: /mnt/crownstore/data/paperless-pg
+    type: disk
+  paperless-port:
+    connect: tcp:127.0.0.1:8000
+    listen: tcp:0.0.0.0:8000
+    type: proxy
+  paperless-storage:
+    path: /mnt/crownstore/app-storage/paperless
+    shift: "true"
+    source: /mnt/crownstore/app-storage/paperless
+    type: disk
+  root:
+    path: /
+    pool: default
+    type: disk
+  seed-meta-data:
+    path: /var/lib/cloud/seed/nocloud/meta-data
+    source: /home/r6t/git/nixos-r6t/hosts/crown/incus-instances/seed/paperless.meta-data
+    type: disk
+  seed-network-config:
+    path: /var/lib/cloud/seed/nocloud/network-config
+    source: /home/r6t/git/nixos-r6t/hosts/crown/incus-instances/seed/paperless.network-config
+    type: disk
+  seed-user-data:
+    path: /var/lib/cloud/seed/nocloud/user-data
+    source: /home/r6t/git/nixos-r6t/hosts/crown/incus-instances/seed/paperless.user-data
+    type: disk
+  syncthing-paperless:
+    path: /mnt/crownstore/Sync/paperless-ngx/
+    shift: "true"
+    source: /mnt/crownstore/Sync/paperless-ngx/
+    type: disk
+name: paperless

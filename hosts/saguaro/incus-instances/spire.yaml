@@ -1,0 +1,49 @@
+config:
+  security.nesting: "true"
+  user.user-data: |
+    #cloud-config
+    datasource_list: [NoCloud, None]
+description: spire
+devices:
+  caddy-config:
+    path: /etc/caddy
+    shift: "true"
+    source: /mnt/kingston240/spire/caddy
+    type: disk
+  eth0:
+    name: eth0
+    nictype: physical
+    parent: enp0s13f0u1c2
+    type: nic
+  grafana-secrets:
+    path: /var/lib/monitoring/grafana
+    shift: "true"
+    source: /mnt/kingston240/spire/grafana
+    type: disk
+  monitoring-data:
+    path: /var/lib/monitoring
+    shift: "true"
+    source: /mnt/kingston240/spire/monitoring
+    type: disk
+  pocket-id-data:
+    path: /var/lib/pocket-id
+    shift: "true"
+    source: /mnt/kingston240/spire/pocket-id
+    type: disk
+  root:
+    path: /
+    pool: kingston-pool
+    type: disk
+  seed-meta-data:
+    path: /var/lib/cloud/seed/nocloud/meta-data
+    source: /home/r6t/git/nixos-r6t/hosts/saguaro/incus-instances/seed/spire.meta-data
+    type: disk
+  seed-network-config:
+    path: /var/lib/cloud/seed/nocloud/network-config
+    source: /home/r6t/git/nixos-r6t/hosts/saguaro/incus-instances/seed/spire.network-config
+    type: disk
+  seed-user-data:
+    path: /var/lib/cloud/seed/nocloud/user-data
+    source: /home/r6t/git/nixos-r6t/hosts/saguaro/incus-instances/seed/spire.user-data
+    type: disk
+name: spire

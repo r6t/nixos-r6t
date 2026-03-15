@@ -1,0 +1,90 @@
+config:
+  security.nesting: "true"
+  user.user-data: |
+    #cloud-config
+    datasource_list: [NoCloud, None]
+description: immich
+devices:
+  camera-a5000:
+    path: /mnt/thunderbay/8TB-C/Pictures/cameras/sony-a5000
+    readonly: "true"
+    shift: "true"
+    source: /mnt/thunderbay/8TB-C/Pictures/cameras/sony-a5000
+    type: disk
+  camera-a6500:
+    path: /mnt/thunderbay/8TB-C/Pictures/cameras/sony-a6500
+    readonly: "true"
+    shift: "true"
+    source: /mnt/thunderbay/8TB-C/Pictures/cameras/sony-a6500
+    type: disk
+  camera-ancient-cannon1:
+    path: /mnt/thunderbay/8TB-C/Pictures/cameras/ancient-cannon-1
+    readonly: "true"
+    shift: "true"
+    source: /mnt/thunderbay/8TB-C/Pictures/cameras/ancient-cannon-1
+    type: disk
+  camera-ancient-cannon2:
+    path: /mnt/thunderbay/8TB-C/Pictures/cameras/ancient-cannon-2
+    readonly: "true"
+    shift: "true"
+    source: /mnt/thunderbay/8TB-C/Pictures/cameras/ancient-cannon-2
+    type: disk
+  camera-icloudpd:
+    path: /mnt/thunderbay/8TB-C/Pictures/cameras/icloudpd
+    readonly: "true"
+    shift: "true"
+    source: /mnt/thunderbay/8TB-C/Pictures/cameras/icloudpd
+    type: disk
+  camera-om1:
+    path: /mnt/thunderbay/8TB-C/Pictures/cameras/OM-1
+    readonly: "true"
+    shift: "true"
+    source: /mnt/thunderbay/8TB-C/Pictures/cameras/OM-1
+    type: disk
+  camera-rx100m6:
+    path: /mnt/thunderbay/8TB-C/Pictures/cameras/sony-rx100m6
+    readonly: "true"
+    shift: "true"
+    source: /mnt/thunderbay/8TB-C/Pictures/cameras/sony-rx100m6
+    type: disk
+  eth0:
+    name: eth0
+    nictype: bridged
+    parent: br1
+    type: nic
+  gpu:
+    gid: "303"
+    gputype: physical
+    pci: 0000:0c:00.0
+    type: gpu
+  immich-data:
+    path: /var/lib/postgresql
+    shift: "true"
+    source: /mnt/crownstore/data/immich
+    type: disk
+  immich-port:
+    connect: tcp:127.0.0.1:2283
+    listen: tcp:0.0.0.0:2283
+    type: proxy
+  immich-storage:
+    path: /var/lib/immich
+    shift: "true"
+    source: /mnt/crownstore/app-storage/immich
+    type: disk
+  root:
+    path: /
+    pool: default
+    type: disk
+  seed-meta-data:
+    path: /var/lib/cloud/seed/nocloud/meta-data
+    source: /home/r6t/git/nixos-r6t/hosts/crown/incus-instances/seed/immich.meta-data
+    type: disk
+  seed-network-config:
+    path: /var/lib/cloud/seed/nocloud/network-config
+    source: /home/r6t/git/nixos-r6t/hosts/crown/incus-instances/seed/immich.network-config
+    type: disk
+  seed-user-data:
+    path: /var/lib/cloud/seed/nocloud/user-data
+    source: /home/r6t/git/nixos-r6t/hosts/crown/incus-instances/seed/immich.user-data
+    type: disk
+name: immich

@@ -1,0 +1,58 @@
+config:
+  security.nesting: "true"
+  user.user-data: |
+    #cloud-config
+    datasource_list: [NoCloud, None]
+description: audiobookshelf
+devices:
+  audiobooks:
+    path: /audiobooks
+    shift: "true"
+    source: /mnt/thunderbay/8TB-C/books/audiobooks
+    type: disk
+  audiobookshelf-config:
+    path: /var/lib/audiobookshelf/config
+    shift: "true"
+    source: /mnt/crownstore/config/audiobookshelf
+    type: disk
+  audiobookshelf-metadata:
+    path: /var/lib/audiobookshelf/metadata
+    shift: "true"
+    source: /mnt/crownstore/app-storage/audiobookshelf/metadata
+    type: disk
+  audiobookshelf-port:
+    connect: tcp:127.0.0.1:13378
+    listen: tcp:0.0.0.0:13378
+    type: proxy
+  eth0:
+    name: eth0
+    nictype: bridged
+    parent: br1
+    type: nic
+  headspace:
+    path: /headspace
+    shift: "true"
+    source: /mnt/thunderbay/8TB-C/headspace
+    type: disk
+  podcasts:
+    path: /podcasts
+    shift: "true"
+    source: /mnt/thunderbay/8TB-C/podcasts
+    type: disk
+  root:
+    path: /
+    pool: default
+    type: disk
+  seed-meta-data:
+    path: /var/lib/cloud/seed/nocloud/meta-data
+    source: /home/r6t/git/nixos-r6t/hosts/crown/incus-instances/seed/audiobookshelf.meta-data
+    type: disk
+  seed-network-config:
+    path: /var/lib/cloud/seed/nocloud/network-config
+    source: /home/r6t/git/nixos-r6t/hosts/crown/incus-instances/seed/audiobookshelf.network-config
+    type: disk
+  seed-user-data:
+    path: /var/lib/cloud/seed/nocloud/user-data
+    source: /home/r6t/git/nixos-r6t/hosts/crown/incus-instances/seed/audiobookshelf.user-data
+    type: disk
+name: audiobookshelf

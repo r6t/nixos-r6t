@@ -1,0 +1,65 @@
+config:
+  security.nesting: "true"
+  user.user-data: |
+    #cloud-config
+    datasource_list: [NoCloud, None]
+description: llm
+devices:
+  anyllm-port:
+    connect: tcp:127.0.0.1:3001
+    listen: tcp:0.0.0.0:3001
+    type: proxy
+  eth0:
+    name: eth0
+    nictype: bridged
+    parent: br1
+    type: nic
+  gpu:
+    gid: "303"
+    gputype: physical
+    pci: 0000:0c:00.0
+    type: gpu
+  n8n-data:
+    path: /var/lib/private/n8n
+    shift: "true"
+    source: /mnt/crownstore/app-storage/n8n
+    type: disk
+  n8n-port:
+    connect: tcp:127.0.0.1:5678
+    listen: tcp:0.0.0.0:5678
+    type: proxy
+  oi-port:
+    connect: tcp:127.0.0.1:8087
+    listen: tcp:0.0.0.0:8087
+    type: proxy
+  ollama-model-data:
+    path: /var/lib/private/ollama/models
+    shift: "true"
+    source: /mnt/crownstore/app-storage/ollama-model-store
+    type: disk
+  ollama-port:
+    connect: tcp:127.0.0.1:11434
+    listen: tcp:0.0.0.0:11434
+    type: proxy
+  open-webui-data:
+    path: /var/lib/private/open-webui
+    shift: "true"
+    source: /mnt/crownstore/app-storage/open-webui
+    type: disk
+  root:
+    path: /
+    pool: default
+    type: disk
+  seed-meta-data:
+    path: /var/lib/cloud/seed/nocloud/meta-data
+    source: /home/r6t/git/nixos-r6t/hosts/crown/incus-instances/seed/llm.meta-data
+    type: disk
+  seed-network-config:
+    path: /var/lib/cloud/seed/nocloud/network-config
+    source: /home/r6t/git/nixos-r6t/hosts/crown/incus-instances/seed/llm.network-config
+    type: disk
+  seed-user-data:
+    path: /var/lib/cloud/seed/nocloud/user-data
+    source: /home/r6t/git/nixos-r6t/hosts/crown/incus-instances/seed/llm.user-data
+    type: disk
+name: llm

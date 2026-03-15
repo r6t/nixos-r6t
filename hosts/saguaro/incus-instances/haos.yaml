@@ -1,0 +1,20 @@
+config:
+  limits.memory: 6GiB
+  security.secureboot: "false"
+description: Home Assistant OS
+devices:
+  eth0:
+    name: eth0
+    nictype: physical
+    parent: enp0s13f0u3c2
+    type: nic
+  root:
+    path: /
+    pool: kingston-pool
+    size: 50GiB
+    type: disk
+  zigbee:
+    productid: ea60
+    type: usb
+    vendorid: 10c4
+name: haos

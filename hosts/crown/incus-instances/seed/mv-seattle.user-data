@@ -1,0 +1,4 @@
+#cloud-config
+preserve_hostname: false
+hostname: mv-seattle
+manage_etc_hosts: true

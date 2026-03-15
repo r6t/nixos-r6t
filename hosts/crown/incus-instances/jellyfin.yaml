@@ -1,0 +1,63 @@
+config:
+  security.nesting: "true"
+  user.user-data: |
+    #cloud-config
+    datasource_list: [NoCloud, None]
+description: jellyfin
+devices:
+  eth0:
+    name: eth0
+    nictype: bridged
+    parent: br1
+    type: nic
+  jellyfin-cache:
+    path: /var/cache/jellyfin
+    shift: "true"
+    source: /mnt/crownstore/cache/jellyfin
+    type: disk
+  jellyfin-data:
+    path: /var/lib/jellyfin
+    shift: "true"
+    source: /mnt/crownstore/config/jellyfin
+    type: disk
+  jellyfin-movies:
+    path: /media/movies
+    shift: "true"
+    source: /mnt/thunderbay/8TB-A/movies
+    type: disk
+  jellyfin-music:
+    path: /media/music
+    shift: "true"
+    source: /mnt/thunderbay/8TB-D/storage/plex/music
+    type: disk
+  jellyfin-port:
+    connect: tcp:127.0.0.1:8096
+    listen: tcp:0.0.0.0:8096
+    type: proxy
+  jellyfin-tv:
+    path: /media/tv
+    shift: "true"
+    source: /mnt/thunderbay/8TB-D/storage/plex/tv
+    type: disk
+  jellyfin-youtube:
+    path: /media/youtube
+    shift: "true"
+    source: /mnt/thunderbay/8TB-D/storage/plex/youtube
+    type: disk
+  root:
+    path: /
+    pool: default
+    type: disk
+  seed-meta-data:
+    path: /var/lib/cloud/seed/nocloud/meta-data
+    source: /home/r6t/git/nixos-r6t/hosts/crown/incus-instances/seed/jellyfin.meta-data
+    type: disk
+  seed-network-config:
+    path: /var/lib/cloud/seed/nocloud/network-config
+    source: /home/r6t/git/nixos-r6t/hosts/crown/incus-instances/seed/jellyfin.network-config
+    type: disk
+  seed-user-data:
+    path: /var/lib/cloud/seed/nocloud/user-data
+    source: /home/r6t/git/nixos-r6t/hosts/crown/incus-instances/seed/jellyfin.user-data
+    type: disk
+name: jellyfin

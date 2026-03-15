@@ -1,0 +1,4 @@
+#cloud-config
+preserve_hostname: false
+hostname: sts
+manage_etc_hosts: true

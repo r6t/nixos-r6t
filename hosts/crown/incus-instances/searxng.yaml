@@ -1,0 +1,38 @@
+config:
+  security.nesting: "true"
+  user.user-data: |
+    #cloud-config
+    datasource_list: [NoCloud, None]
+description: searxng
+devices:
+  eth0:
+    name: eth0
+    nictype: bridged
+    parent: br1
+    type: nic
+  root:
+    path: /
+    pool: default
+    type: disk
+  searxng-env:
+    path: /var/lib/searxng/env
+    shift: "true"
+    source: /mnt/crownstore/config/searxng/nixos/env
+    type: disk
+  searxng-port:
+    connect: tcp:127.0.0.1:8085
+    listen: tcp:0.0.0.0:8085
+    type: proxy
+  seed-meta-data:
+    path: /var/lib/cloud/seed/nocloud/meta-data
+    source: /home/r6t/git/nixos-r6t/hosts/crown/incus-instances/seed/searxng.meta-data
+    type: disk
+  seed-network-config:
+    path: /var/lib/cloud/seed/nocloud/network-config
+    source: /home/r6t/git/nixos-r6t/hosts/crown/incus-instances/seed/searxng.network-config
+    type: disk
+  seed-user-data:
+    path: /var/lib/cloud/seed/nocloud/user-data
+    source: /home/r6t/git/nixos-r6t/hosts/crown/incus-instances/seed/searxng.user-data
+    type: disk
+name: searxng

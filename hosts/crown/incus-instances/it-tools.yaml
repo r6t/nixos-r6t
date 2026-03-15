@@ -1,0 +1,38 @@
+config:
+  security.nesting: "true"
+  user.user-data: |
+    #cloud-config
+    datasource_list: [NoCloud, None]
+description: it-tools
+devices:
+  docker-compose:
+    path: /mnt/docker-compose/it-tools
+    shift: "true"
+    source: /mnt/crownstore/Sync/app-config/docker-compose/crown/it-tools
+    type: disk
+  eth0:
+    name: eth0
+    nictype: bridged
+    parent: br1
+    type: nic
+  root:
+    path: /
+    pool: default
+    type: disk
+  seed-meta-data:
+    path: /var/lib/cloud/seed/nocloud/meta-data
+    source: /home/r6t/git/nixos-r6t/hosts/crown/incus-instances/seed/it-tools.meta-data
+    type: disk
+  seed-network-config:
+    path: /var/lib/cloud/seed/nocloud/network-config
+    source: /home/r6t/git/nixos-r6t/hosts/crown/incus-instances/seed/it-tools.network-config
+    type: disk
+  seed-user-data:
+    path: /var/lib/cloud/seed/nocloud/user-data
+    source: /home/r6t/git/nixos-r6t/hosts/crown/incus-instances/seed/it-tools.user-data
+    type: disk
+  tools-port:
+    connect: tcp:127.0.0.1:8040
+    listen: tcp:0.0.0.0:8040
+    type: proxy
+name: it-tools
