@@ -6,6 +6,13 @@
   };
 
   config = lib.mkIf config.mine.nixos-r6t-baseline.enable {
+    # SSH brute-force protection
+    services.fail2ban = {
+      enable = true;
+      maxretry = 5;
+      bantime = "1h";
+    };
+
     # Enable fish shell system-wide
     programs.fish.enable = true;
 

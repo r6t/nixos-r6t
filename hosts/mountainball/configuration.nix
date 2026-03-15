@@ -14,8 +14,7 @@
     firewall = {
       enable = true;
       checkReversePath = false;
-      # temp extras while moving services around
-      allowedTCPPorts = [ 22 8384 8443 22000 ];
+      allowedTCPPorts = [ 22 ];
     };
   };
 

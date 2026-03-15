@@ -22,5 +22,8 @@ in
         openssh.authorizedKeys.keyFiles = lib.mkForce [ ssh-keys.outPath ];
       };
     };
+
+    # Defense-in-depth: deny root login regardless of whether mine.ssh is enabled
+    services.openssh.settings.PermitRootLogin = lib.mkDefault "no";
   };
 }

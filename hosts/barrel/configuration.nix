@@ -46,9 +46,7 @@
     firewall = {
       enable = true;
       checkReversePath = false;
-      # have a few extras in here while moving services around
-      allowedTCPPorts = [ 22 443 2283 8443 ];
-      # not sure I need br1 here any longer
+      allowedTCPPorts = [ 22 ];
       trustedInterfaces = [ "tailscale0" ];
     };
     # firewall = {

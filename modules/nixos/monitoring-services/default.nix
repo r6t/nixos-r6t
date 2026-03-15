@@ -127,7 +127,7 @@ in
         dataDir = "${cfg.dataDir}/grafana";
         settings = {
           server = {
-            http_addr = "0.0.0.0";
+            http_addr = "127.0.0.1";
             http_port = cfg.grafana.httpPort;
             inherit (cfg.grafana) domain;
             root_url = "https://${cfg.grafana.domain}";
@@ -190,7 +190,7 @@ in
           auth_enabled = false;
           server = {
             http_listen_port = cfg.loki.httpListenPort;
-            http_listen_address = "0.0.0.0";
+            http_listen_address = "127.0.0.1";
           };
 
           common = {
