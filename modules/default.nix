@@ -66,7 +66,6 @@
     nixos/fwupd/default.nix
     nixos/fzf/default.nix
     nixos/gnome/default.nix
-    nixos/grafana/default.nix
     nixos/headscale/default.nix
     nixos/home-router/default.nix
     nixos/hypr/default.nix
@@ -80,7 +79,6 @@
     nixos/kde/default.nix
     nixos/libimobiledevice/default.nix
     nixos/localization/default.nix
-    nixos/loki/default.nix
     nixos/monitoring-services/default.nix
     nixos/mountLuksStore/default.nix
     nixos/mullvad/default.nix
@@ -94,7 +92,6 @@
     nixos/pinchflat/default.nix
     nixos/printing/default.nix
     nixos/prometheus-node-exporter/default.nix
-    nixos/prometheus/default.nix
     nixos/rdfind/default.nix
     nixos/scansnap/default.nix
     nixos/sops/default.nix

@@ -16,7 +16,12 @@ in
     ../modules/nixos/tailscale/default.nix
   ];
 
-  networking.hostName = "spire";
+  networking = {
+    hostName = "spire";
+    # Open 443 on LAN so saguaro's Alloy can reach caddy for Loki push.
+    # Tailnet access is already covered by tailscale0 trusted interface.
+    firewall.allowedTCPPorts = [ 443 ];
+  };
 
   # Match existing data ownership (r6t:users = 1000:100)
   users.users.pocket-id = {
@@ -60,6 +65,7 @@ in
         apiUrl = "https://pid.r6t.io/api/oidc/userinfo";
       };
       prometheus.scrapeTargets = [ "crown:9000" "mountainball:9000" "192.168.6.1:9000" ];
+      prometheus.incusMetricsTargets = [ "crown:9101" "192.168.6.1:9101" ];
     };
     prometheus-node-exporter.enable = true;
     tailscale = {

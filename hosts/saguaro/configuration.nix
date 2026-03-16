@@ -49,6 +49,11 @@
       ssh.enable = true;
     };
 
+    alloy = {
+      enable = true;
+      lokiUrl = "https://192.168.6.3/loki/api/v1/push";
+      lokiInsecureTls = true;
+    };
     home-router = {
       enable = true;
       cake.enable = true;
@@ -66,14 +71,6 @@
         poolSize = 79; # 11-89
       };
       dns = {
-        # Uncomment/add DNS overrides as needed:
-        # dnsmasqAddresses = [
-        #   "/crown/192.168.6.10"
-        #   "/grafana.r6t.io/192.168.6.1"
-        #   "/homeassistant.r6t.io/100.124.208.128"
-        #   "/saguaro/192.168.6.1"
-        #   "/r6t.io/192.168.6.10"
-        # ];
         nextdnsConfigFile = "/mnt/nextdns.conf";
       };
 
@@ -108,6 +105,7 @@
       ageKeyFile = "/mnt/kingston240/age/keys.txt";
     };
 
+    prometheus-node-exporter.enable = true;
     ssh.enable = true;
     user.enable = true;
   };

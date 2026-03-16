@@ -80,6 +80,9 @@ loki.process "incus_json" {
 
 loki.write "grafana_loki" {
   endpoint {
-    url = "https://loki.r6t.io/loki/api/v1/push"
+    url = "@@LOKI_URL@@"
+    tls_config {
+      insecure_skip_verify = @@LOKI_TLS_INSECURE@@
+    }
   }
 }

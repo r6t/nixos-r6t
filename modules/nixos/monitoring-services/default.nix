@@ -98,8 +98,15 @@ in
       scrapeTargets = lib.mkOption {
         type = lib.types.listOf lib.types.str;
         default = [ ];
-        description = "List of scrape targets (host:port format)";
+        description = "List of node-exporter scrape targets (host:port format)";
         example = [ "crown:9000" "mountainball:9000" "saguaro:9000" ];
+      };
+
+      incusMetricsTargets = lib.mkOption {
+        type = lib.types.listOf lib.types.str;
+        default = [ ];
+        description = "List of incus metrics endpoints (host:port format). Requires core.metrics_address and core.metrics_authentication=false set on the incus host.";
+        example = [ "crown:9101" ];
       };
     };
   };
@@ -257,18 +264,26 @@ in
         port = cfg.prometheus.httpPort;
         stateDir = "monitoring/prometheus";
         inherit (cfg.prometheus) retentionTime;
-        remoteWrite = [{
-          url = "http://localhost:9090/api/v1/write";
-        }];
-        scrapeConfigs = lib.optionals (cfg.prometheus.scrapeTargets != [ ]) [
-          {
-            job_name = "r6-nix-systems";
-            honor_labels = true;
-            static_configs = [{
-              targets = cfg.prometheus.scrapeTargets;
-            }];
-          }
-        ];
+        scrapeConfigs =
+          lib.optionals (cfg.prometheus.scrapeTargets != [ ]) [
+            {
+              job_name = "r6-nix-systems";
+              honor_labels = true;
+              static_configs = [{
+                targets = cfg.prometheus.scrapeTargets;
+              }];
+            }
+          ]
+          ++ lib.optionals (cfg.prometheus.incusMetricsTargets != [ ]) [
+            {
+              job_name = "incus";
+              metrics_path = "/1.0/metrics";
+              scheme = "http";
+              static_configs = [{
+                targets = cfg.prometheus.incusMetricsTargets;
+              }];
+            }
+          ];
         ruleFiles = [
           (pkgs.writeText "alert.rules" ''
             groups:

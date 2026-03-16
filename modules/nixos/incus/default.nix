@@ -76,6 +76,7 @@ in
         Profiles are enforced on every nixos-rebuild — local changes are always overwritten.
       '';
     };
+
   };
 
   config = lib.mkIf cfg.enable {
