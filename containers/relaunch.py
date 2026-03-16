@@ -27,14 +27,21 @@ def run(cmd, check=True):
 
 def get_running_lxc_containers():
     """Get names of running LXC containers (excludes VMs)."""
-    stdout, _ = run(["incus", "list", "-c", "n,T", "--format", "csv", "status=RUNNING"])
+    stdout, _ = run(
+        [
+            "incus",
+            "list",
+            "type=container",
+            "status=running",
+            "-c",
+            "n",
+            "--format",
+            "csv",
+        ]
+    )
     if not stdout:
         return []
-    return [
-        line.split(",")[0]
-        for line in stdout.splitlines()
-        if line.endswith(",CONTAINER")
-    ]
+    return [line.strip() for line in stdout.splitlines() if line.strip()]
 
 
 def get_image_fingerprint(alias):
