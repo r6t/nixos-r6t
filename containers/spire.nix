@@ -32,6 +32,9 @@ in
     # Data directory mounted by Incus from persistent storage
     dataDir = "/var/lib/pocket-id";
 
+    # ENCRYPTION_KEY and other secrets in this file on persistent storage
+    environmentFile = "/var/lib/pocket-id/pocket-id.env";
+
     settings = {
       APP_URL = "https://pid.r6t.io";
       TRUST_PROXY = true;
