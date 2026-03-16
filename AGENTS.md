@@ -20,6 +20,7 @@
 ─ containers/ # LXC image definitions (every \*.nix is a buildable image)
 ─ containers/lib/ # Shared base layers and add-ons for containers (not buildable)
 ─ containers/build.py # Builds container images and imports to incus
+─ containers/relaunch.py # Relaunches running containers with newer images
 ─ devshells.nix # Devshell declarations in a dedicated file to keep flake.nix tidy
 ─ flake.lock # Input version control, managed by nix flake command
 ─ flake.nix # Inputs (sources) and outputs (system configurations, devshells, container images)

@@ -11,7 +11,10 @@ containers/*.nix          NixOS definitions (what runs inside the container)
 flake.nix                 Auto-generates build targets from containers/*.nix
     |
     v
-containers/build.py            Builds images via nix, imports into incus image store
+containers/build.py       Builds images via nix, imports into incus image store
+    |                     Auto-pushes to remote hosts (e.g. spire -> saguaro)
+    v
+containers/relaunch.py    Stops, deletes, relaunches containers with newer images
     |
     v
 hosts/{host}/incus-instances/
@@ -24,7 +27,7 @@ Two hosts run incus:
 - **crown** — primary compute server, runs most LXC containers and VMs
 - **saguaro** — router, runs Home Assistant VM and the spire monitoring container
 
-Images are built on crown and can be pushed to saguaro via `incus image copy local:<name> saguaro: --alias <name>`.
+Images are built on crown. Containers targeting saguaro (e.g. spire) are automatically pushed via `build.py`'s `REMOTE_TARGETS` config.
 
 ## Directory Structure
 
@@ -37,24 +40,29 @@ containers/
     audiobookshelf.nix      Buildable image definitions
     miniflux.nix
     spire.nix
+    tailnet-exit.nix
     ...
     lib/                    Shared base layers and add-ons (NOT buildable images)
         base.nix            Common LXC base: cloud-init, dnsmasq, packages, fish
-        dns-overrides.nix   LAN DNS overrides for *.r6t.io resolution
+        caddy-routes.nix    Single source of truth for all caddy reverse proxy routes
+        dns-overrides.nix   LAN DNS overrides (*.r6t.io -> crown's caddy)
         mullvad-dns.nix     Stubby DoT resolver via Mullvad (port 5353)
         nextdns.nix         NextDNS resolver (port 5353)
-        wg-exit-node.nix    WireGuard + exit-node routing base
+        wg-exit-node.nix    WireGuard + exit-node routing + tailscale auto-join base
+    build.py                Build images, import locally, push to remotes
+    relaunch.py             Relaunch running containers with newer images
 ```
 
 ### Instance Profiles: `hosts/{host}/incus-instances/`
 
-Incus profile YAML files define the runtime environment — how the container connects to the network, what host directories are mounted in, and what ports are exposed. These are the source of truth for incus configuration and are applied with `incus profile edit <name> < file.yaml`.
+Incus profile YAML files define the runtime environment — how the container connects to the network, what host directories are mounted in, and what ports are exposed. Profiles are **declaratively managed** — `nixos-rebuild switch` automatically syncs all YAML profiles into incus, overwriting any local changes.
 
 ```
 hosts/crown/incus-instances/
     audiobookshelf.yaml     Profile YAML for each instance
-    miniflux.yaml
+    mv-seattle.yaml         Exit node with physical NIC passthrough
     ...
+    instance_map.json       Maps instance names to build targets
     seed/                   Cloud-init NoCloud seed files
         miniflux.meta-data
         miniflux.network-config
@@ -72,8 +80,9 @@ hosts/saguaro/incus-instances/
 ### Build Tooling
 
 - **`flake.nix`** — auto-generates `nix build .#<name>` and `nix build .#<name>-metadata` targets for every `containers/*.nix` file
-- **`containers/build.py`** — builds images and imports them into incus. Supports `--list`, `--dry-run`, `--nightly`, and building specific containers by name
-- **`hosts/crown/incus-instances/instance_map.json`** — maps incus instance names to container build targets when they differ (e.g. `mv-seattle` -> `tailnet-exit`)
+- **`containers/build.py`** — builds images and imports them into incus. Supports `--list`, `--dry-run`, `--nightly`, and building specific containers by name. Auto-pushes to remote hosts via `REMOTE_TARGETS` dict.
+- **`containers/relaunch.py`** — compares image fingerprints and relaunches containers that have newer images. Supports `--all` (force), `--dry-run`, and specific container names.
+- **`hosts/crown/incus-instances/instance_map.json`** — maps incus instance names to container build targets when they differ (e.g. `mv-seattle` -> `tailnet-exit`, `pirate-ship` -> `docker`)
 
 ## How to Create a New Container
 
@@ -108,24 +117,31 @@ Key patterns:
 - Import `./lib/base.nix` — provides cloud-init, dnsmasq, common packages, fish shell
 - Import `./lib/mullvad-dns.nix` — provides Mullvad DoT on port 5353 (most containers use this)
 - Import modules from `../modules/nixos/` for services (caddy, tailscale, etc.)
-- The base layer imports `./lib/dns-overrides.nix` automatically — this resolves `*.r6t.io` to the correct LAN IPs so containers can reach caddy reverse proxies
+- The base layer imports `./lib/dns-overrides.nix` automatically — this resolves `*.r6t.io` to crown's caddy IP so containers can reach reverse-proxied services
 - `networking.hostName` must match the filename (without `.nix`)
 - Persistent data directories should use conventional paths (`/var/lib/{service}`) — actual storage is bind-mounted by the incus profile
 
-### Step 2: Build the image
+### Step 2: Add caddy routes (if the container has a web service)
 
-```fish
-# Build just this container
-python3 containers/build.py {name}
+Add routes to `containers/lib/caddy-routes.nix`:
 
-# Or build manually
-nix build .#{name}
-nix build .#{name}-metadata
+```nix
+myapp = {
+  "myapp.r6t.io" = { upstream = "http://localhost:8080"; };
+};
 ```
 
-The builder produces two tarballs (rootfs + metadata) and imports them into the local incus image store with alias `{name}`.
+Then add the container name to the `crownContainers` list in `hosts/crown/configuration.nix`.
 
-### Step 3: Create the incus profile
+### Step 3: Build the image
+
+```fish
+python3 containers/build.py {name}
+```
+
+The builder produces two tarballs (rootfs + metadata) and imports them into the local incus image store with alias `{name}`. If the container is in `REMOTE_TARGETS` (in `build.py`), the image is also pushed to remote hosts.
+
+### Step 4: Create the incus profile
 
 Create `hosts/{host}/incus-instances/{name}.yaml`:
 
@@ -139,13 +155,13 @@ description: { name }
 devices:
   eth0:
     name: eth0
-    nictype: bridged # "bridged" for crown (br1), "physical" for dedicated NIC
-    parent: br1 # br1 on crown, or enp0s13f0u1c2 on saguaro
+    nictype: bridged # "bridged" for app containers on crown (br1)
+    parent: br1 # "physical" + parent: exit0-3 for exit nodes
     type: nic
   root:
     path: /
-    pool: default # Required: "default" on crown, "kingston-pool" on saguaro
-    type: disk # Inherited from default profile only if assigned — we use custom profiles exclusively
+    pool: default # "default" on crown, "kingston-pool" on saguaro
+    type: disk
   seed-meta-data:
     path: /var/lib/cloud/seed/nocloud/meta-data
     source: /home/r6t/git/nixos-r6t/hosts/{host}/incus-instances/seed/{name}.meta-data
@@ -158,28 +174,23 @@ devices:
     path: /var/lib/cloud/seed/nocloud/user-data
     source: /home/r6t/git/nixos-r6t/hosts/{host}/incus-instances/seed/{name}.user-data
     type: disk
-  # Add service-specific devices below:
   # Persistent storage (bind mounts from host):
   #   {name}-data:
-  #     path: /var/lib/{service}    # Path inside container
-  #     shift: "true"               # UID/GID remapping for unprivileged containers
-  #     source: /mnt/crownstore/... # Path on host
+  #     path: /var/lib/{service}
+  #     shift: "true"
+  #     source: /mnt/crownstore/app-storage/{name}
   #     type: disk
-  # Port forwarding (proxy devices):
+  # Port forwarding (proxy devices) for host-mode caddy:
   #   {name}-port:
-  #     connect: tcp:127.0.0.1:8080  # Container-side address
-  #     listen: tcp:0.0.0.0:8080     # Host-side listener
+  #     connect: tcp:127.0.0.1:8080
+  #     listen: tcp:0.0.0.0:8080
   #     type: proxy
-  # GPU passthrough:
-  #   gpu:
-  #     gid: "303"
-  #     gputype: physical
-  #     pci: 0000:0c:00.0
-  #     type: gpu
 name: { name }
 ```
 
-### Step 4: Create seed files
+Profiles are auto-synced to incus on every `nixos-rebuild switch` via the `incus-profile-sync` service. No manual `incus profile create` needed.
+
+### Step 5: Create seed files
 
 Create three files in `hosts/{host}/incus-instances/seed/`:
 
@@ -190,7 +201,7 @@ instance-id: {name}
 local-hostname: {name}
 ```
 
-**`{name}.network-config`** — assigns a static IP and gateway:
+**`{name}.network-config`**:
 
 ```yaml
 version: 2
@@ -217,23 +228,14 @@ hostname: { name }
 manage_etc_hosts: true
 ```
 
-### Step 5: Launch the instance
+### Step 6: Launch the instance
 
 ```fish
-# Create the profile
-incus profile create {name}
-incus profile edit {name} < hosts/{host}/incus-instances/{name}.yaml
-
-# Launch from the image
-incus launch {name} {name} --profile {name}
-
-# Or if pushing to saguaro from crown:
-incus image copy local:{name} saguaro: --alias {name}
-# Then on saguaro:
+# Profile is already synced by nixos-rebuild. Just launch:
 incus launch {name} {name} --profile {name}
 ```
 
-### Step 6: Update instance_map.json (if needed)
+### Step 7: Update instance_map.json (if needed)
 
 If the incus instance name differs from the container build target name (e.g. multiple instances from one image, or Docker-based instances), add a mapping to `hosts/crown/incus-instances/instance_map.json`:
 
@@ -244,70 +246,45 @@ If the incus instance name differs from the container build target name (e.g. mu
 }
 ```
 
-This tells `containers/build.py --nightly` which image to rebuild for each running instance.
-
 ## Network Topology
 
 All containers use static IPs on the 192.168.6.0/24 LAN. DHCP pool is 11-89; static assignments are outside this range.
 
 ### Gateway Routing
 
-Most app containers don't route directly to the internet. They route through Mullvad WireGuard exit nodes (also LXC containers on crown) for privacy:
+Most app containers route through Mullvad WireGuard exit nodes for privacy:
 
 ```
 App container  -->  Exit node container (WireGuard)  -->  Saguaro (router)  -->  Internet
   .91-.104            .4-.7 (mv-*)                          .1
 ```
 
-The gateway IP in each container's `network-config` determines which exit node it routes through.
+Exit nodes have dedicated physical NICs (Intel I226-V, pinned by PCI path as `exit0`-`exit3`). App containers use the br1 bridge.
 
 ### DNS Resolution
 
 Every container runs a local dnsmasq instance on port 53 that:
 
-1. Resolves `*.r6t.io` names to LAN IPs via `containers/lib/dns-overrides.nix` (so containers can reach caddy reverse proxies without hairpin NAT)
+1. Resolves `*.r6t.io` to crown's caddy IP (`192.168.6.10`) via `containers/lib/dns-overrides.nix`
 2. Forwards all other queries to an upstream resolver on port 5353 — either Mullvad DoT (`lib/mullvad-dns.nix`) or NextDNS (`lib/nextdns.nix`)
+
+Crown's caddy handles most `*.r6t.io` services directly (local containers via proxy devices). For services on spire (PocketID), crown's caddy proxies to spire over the tailnet using MagicDNS names (`http://spire.r6t.io:1411`).
 
 ### Caddy Reverse Proxy
 
-Services are accessed via `https://{service}.r6t.io` through caddy reverse proxies. There are two modes:
+All caddy routes are declared in `containers/lib/caddy-routes.nix` — a single source of truth.
 
-**Host mode (crown)**: Caddy runs on the host, not in a container. Routes are declared in nix via `mine.caddy.routes` in the host's `configuration.nix`. The Caddyfile is generated at build time. Each container exposes ports to the host via incus proxy devices, and caddy reverse-proxies to `http://localhost:{port}`.
+**Host mode (crown)**: Caddy runs on the host. Routes from `caddy-routes.nix` generate `services.caddy.virtualHosts` at build time. The caddy module defaults to Route53 DNS challenge with credentials from an environment file. Crown proxies spire services (pid.r6t.io) to spire over the tailnet.
 
-To add a new route when creating a container on crown, add to `containers/lib/caddy-routes.nix`:
+**Container mode (spire)**: Caddy runs inside the container with nix-generated routes from the same `caddy-routes.nix` file. Used when the container manages its own TLS termination.
 
-```nix
-myapp = {
-  "myapp.r6t.io" = { upstream = "http://localhost:8080"; };
-};
-```
+To disable DNS challenge for a host (e.g. HTTP challenge), override `mine.caddy.globalConfig` to `""`.
 
-Then add the container name to the `crownContainers` list in `hosts/crown/configuration.nix`.
+### Service Access Patterns
 
-And add a matching proxy device to the incus profile YAML:
+**From tailnet devices** (laptop, phone): `pid.r6t.io` → Route53 CNAME → spire's tailscale IP → spire's caddy → service. Direct, encrypted.
 
-```yaml
-myapp-port:
-  connect: tcp:127.0.0.1:8080
-  listen: tcp:0.0.0.0:8080
-  type: proxy
-```
-
-**Container mode (spire)**: Caddy runs inside the container with nix-generated routes, same as host mode. The only difference is the ACME env file is bind-mounted in via an incus disk device. This is used when the container manages its own TLS termination (e.g. spire on saguaro, which is on the tailnet and not behind a host-level reverse proxy).
-
-```nix
-mine.caddy = {
-  enable = true;
-  acmeEmail = "domains@r6t.io";
-  acmeDnsConfig = ''
-    acme_dns route53 { ... }
-  '';
-  environmentFile = "/etc/caddy/caddy.env";  # Bind-mounted by incus
-  routes = allCaddyRoutes.spire;              # From containers/lib/caddy-routes.nix
-};
-```
-
-Containers on the tailnet can also be accessed directly via their tailscale IPs.
+**From LAN containers** (immich, miniflux): `pid.r6t.io` → dnsmasq wildcard → `192.168.6.10` (crown) → crown's caddy → `spire.r6t.io:1411` (tailnet) → spire → service. LAN to crown, then encrypted over tailnet to spire.
 
 ## Common Patterns
 
@@ -315,29 +292,13 @@ Containers on the tailnet can also be accessed directly via their tailscale IPs.
 
 Container filesystems are ephemeral — data persists via incus disk devices that bind-mount host directories into the container. Always use `shift: "true"` for UID/GID remapping in unprivileged containers.
 
-```yaml
-# In the profile YAML
-{name}-data:
-  path: /var/lib/{service}
-  shift: "true"
-  source: /mnt/crownstore/app-storage/{name}
-  type: disk
-```
-
 ### Port Forwarding
 
-Containers listen on localhost inside the container. Proxy devices forward traffic from the host's bridge IP:
-
-```yaml
-{name}-port:
-  connect: tcp:127.0.0.1:8080
-  listen: tcp:0.0.0.0:8080
-  type: proxy
-```
+App containers on crown expose ports to the host via incus proxy devices. Crown's caddy reverse-proxies to `http://localhost:{port}`. Define the proxy device in the profile YAML and the route in `caddy-routes.nix`.
 
 ### GPU Passthrough
 
-For CUDA workloads (immich, llm):
+For CUDA workloads (immich, llm), add a GPU device to the profile:
 
 ```yaml
 gpu:
@@ -349,34 +310,86 @@ gpu:
 
 ### Tailscale Access
 
-Containers that need to be reachable on the tailnet import the tailscale module. The module marks `tailscale0` as a trusted interface, so all ports are open over the tailnet without explicit firewall rules.
+Containers that need to be reachable on the tailnet import the tailscale module:
 
 ```nix
-imports = [ ../modules/nixos/tailscale/default.nix ];
 mine.tailscale.enable = true;
 ```
 
-## Nightly Rebuilds
+For containers that should auto-join the tailnet (e.g. exit nodes):
 
-The `incus-nightly-rebuild` NixOS module runs `containers/build.py --nightly` on a timer. It:
+```nix
+mine.tailscale.authKeyFile = "/etc/tailscale/auth-key";
+```
 
-1. Queries incus for running instances
-2. Matches them to container `.nix` files (direct name match or via `instance_map.json`)
-3. Runs `nix build` for each — nix's caching means unchanged containers complete instantly
-4. Imports updated images into the incus store
+The auth key file is bind-mounted from host storage via the incus profile. Use an ephemeral + reusable key from Tailscale admin.
 
-This keeps the image store current after `flake update` or module changes, so that relaunching a container always uses the latest build.
+### Exit Nodes
+
+Exit node containers (`tailnet-exit.nix`) auto-join the tailnet with `--advertise-exit-node --accept-routes --hostname={name}`. Each gets a dedicated physical NIC (named `exit0`-`exit3` via systemd.network.links PCI path pinning) for traffic isolation from app containers.
+
+## Monitoring and Log Collection
+
+### Architecture
+
+```
+Crown host Alloy
+  ├── Host journald  ──→  loki.r6t.io (spire, via tailnet)
+  └── /var/log/incus-journals/*.json  ──→  loki.r6t.io
+
+incus-log-collector service (crown)
+  └── incus exec {name} -- journalctl --follow --output=json
+      └── writes to /var/log/incus-journals/{name}.json per container
+
+Spire (saguaro)
+  ├── Grafana  ──  dashboards + OIDC via PocketID
+  ├── Loki     ──  receives logs from crown's Alloy
+  ├── Prometheus  ──  scrapes crown:9000, mountainball:9000, saguaro:9000
+  └── PocketID  ──  OIDC provider for all services
+```
+
+Crown's host-level Alloy collects both host and container logs. Containers do NOT push to Loki directly — the `incus-log-collector` service on crown manages one `journalctl --follow` process per running container, writing JSON to `/var/log/incus-journals/`. Alloy tails these files and ships to Loki on spire over the tailnet.
+
+### Nightly Rebuilds
+
+The `incus-nightly-rebuild` NixOS module runs `containers/build.py --nightly` at 03:00. It queries incus for running instances, matches them to container `.nix` files (direct name match or via `instance_map.json`), and runs `nix build` for each. Nix's caching means unchanged containers complete instantly.
+
+## Deployment Workflow
+
+### Full rebuild (all containers)
+
+```fish
+# On crown
+cd ~/git/nixos-r6t && git pull
+nrs                                    # Rebuild NixOS, syncs incus profiles
+python3 containers/build.py            # Build all images (pushes spire to saguaro)
+python3 containers/relaunch.py         # Relaunch containers with newer images
+
+# On saguaro
+cd ~/git/nixos-r6t && git pull
+sudo nixos-rebuild switch --flake '.#saguaro'
+python3 containers/relaunch.py spire   # Relaunch spire with new image
+```
+
+### Single container update
+
+```fish
+# On crown
+python3 containers/build.py miniflux
+python3 containers/relaunch.py miniflux
+```
 
 ## Quick Reference
 
-| Task                      | Command                                                                |
-| ------------------------- | ---------------------------------------------------------------------- |
-| List buildable containers | `python3 containers/build.py --list`                                   |
-| Build one container       | `python3 containers/build.py {name}`                                   |
-| Build all containers      | `python3 containers/build.py`                                          |
-| Dry run                   | `python3 containers/build.py --dry-run {name}`                         |
-| Nightly mode              | `python3 containers/build.py --nightly`                                |
-| Apply a profile           | `incus profile edit {name} < hosts/{host}/incus-instances/{name}.yaml` |
-| Launch instance           | `incus launch {name} {name} --profile {name}`                          |
-| Force cloud-init re-seed  | `incus exec {name} -- cloud-init clean && incus restart {name}`        |
-| Push image to saguaro     | `incus image copy local:{name} saguaro: --alias {name}`                |
+| Task                        | Command                                                         |
+| --------------------------- | --------------------------------------------------------------- |
+| List buildable containers   | `python3 containers/build.py --list`                            |
+| Build one container         | `python3 containers/build.py {name}`                            |
+| Build all containers        | `python3 containers/build.py`                                   |
+| Nightly mode                | `python3 containers/build.py --nightly`                         |
+| Relaunch changed containers | `python3 containers/relaunch.py`                                |
+| Relaunch specific           | `python3 containers/relaunch.py {name}`                         |
+| Force relaunch all          | `python3 containers/relaunch.py --all`                          |
+| Preview relaunch            | `python3 containers/relaunch.py --dry-run`                      |
+| Launch new instance         | `incus launch {name} {name} --profile {name}`                   |
+| Force cloud-init re-seed    | `incus exec {name} -- cloud-init clean && incus restart {name}` |
