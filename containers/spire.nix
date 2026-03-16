@@ -1,7 +1,9 @@
-{ lib, ... }:
+{ lib, pkgs, config, ... }:
 
 let
   allCaddyRoutes = import ./lib/caddy-routes.nix;
+  route53ZoneId = "Z01277829BV9937NUSIW";
+  route53Record = "spire.r6t.io";
 in
 {
   imports = [
@@ -67,5 +69,69 @@ in
       # on launch and auto-expires when deleted.
       authKeyFile = "/etc/tailscale/auth-key";
     };
+  };
+
+  # Update Route53 A record for spire.r6t.io after tailscale connects.
+  # Ephemeral nodes get new IPs on each join, so this keeps DNS in sync.
+  systemd.services.route53-update = {
+    description = "Update Route53 A record with current Tailscale IP";
+    after = [ "tailscaled-autoconnect.service" ];
+    wants = [ "tailscaled-autoconnect.service" ];
+    wantedBy = [ "multi-user.target" ];
+    path = [ config.services.tailscale.package pkgs.awscli2 pkgs.jq ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+      EnvironmentFile = "/etc/caddy/caddy.env";
+    };
+    script = ''
+      # Wait for tailscale to be fully connected
+      for i in $(seq 1 30); do
+        TS_IP=$(tailscale ip -4 2>/dev/null)
+        if [ -n "$TS_IP" ]; then
+          break
+        fi
+        sleep 2
+      done
+
+      if [ -z "$TS_IP" ]; then
+        echo "ERROR: Could not get Tailscale IPv4 address after 60s"
+        exit 1
+      fi
+
+      echo "Tailscale IP: $TS_IP"
+
+      # Check current DNS value
+      CURRENT=$(aws route53 list-resource-record-sets \
+        --hosted-zone-id "${route53ZoneId}" \
+        --query "ResourceRecordSets[?Name=='${route53Record}.'].ResourceRecords[0].Value" \
+        --output text 2>/dev/null)
+
+      if [ "$CURRENT" = "$TS_IP" ]; then
+        echo "Route53 already points to $TS_IP, no update needed"
+        exit 0
+      fi
+
+      echo "Updating ${route53Record} from $CURRENT to $TS_IP"
+      aws route53 change-resource-record-sets \
+        --hosted-zone-id "${route53ZoneId}" \
+        --change-batch "$(jq -n \
+          --arg name "${route53Record}" \
+          --arg ip "$TS_IP" \
+          '{
+            Changes: [{
+              Action: "UPSERT",
+              ResourceRecordSet: {
+                Name: $name,
+                Type: "A",
+                TTL: 300,
+                ResourceRecords: [{ Value: $ip }]
+              }
+            }]
+          }'
+        )"
+
+      echo "Route53 updated successfully"
+    '';
   };
 }
