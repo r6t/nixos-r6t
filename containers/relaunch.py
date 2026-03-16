@@ -12,9 +12,45 @@ Usage:
 """
 
 import argparse
+import json
+import socket
 import subprocess
 import sys
 import time
+from pathlib import Path
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+FLAKE_DIR = SCRIPT_DIR.parent
+
+
+def get_instance_map():
+    """Load instance name -> image alias mappings for the current host.
+
+    Many incus instances share a single image (e.g. mv-seattle, mv-oslo
+    both use the 'tailnet-exit' image). instance_map.json stores these
+    mappings per host under hosts/<hostname>/incus-instances/.
+
+    Returns:
+        dict: instance name -> image alias name
+    """
+    hostname = socket.gethostname()
+    map_file = FLAKE_DIR / "hosts" / hostname / "incus-instances" / "instance_map.json"
+    if not map_file.exists():
+        return {}
+    return json.loads(map_file.read_text(encoding="utf-8"))
+
+
+def resolve_image_alias(name, instance_map):
+    """Resolve an instance name to its image alias.
+
+    Args:
+        name: incus instance name
+        instance_map: dict from get_instance_map()
+
+    Returns:
+        str: the image alias to look up
+    """
+    return instance_map.get(name, name)
 
 
 def run(cmd, check=True):
@@ -66,8 +102,16 @@ def profile_exists(name):
     return "not found" not in (stderr or "")
 
 
-def stop_delete_launch(name):
-    """Stop, delete, and relaunch a container. Returns 'relaunched' or 'failed'."""
+def stop_delete_launch(name, image_alias):
+    """Stop, delete, and relaunch a container.
+
+    Args:
+        name: incus instance name
+        image_alias: image alias to launch from (may differ from name)
+
+    Returns:
+        str: 'relaunched' or 'failed'
+    """
     if not profile_exists(name):
         print(f"  ERROR: No profile '{name}' found, skipping (would lose config)")
         return "failed"
@@ -87,8 +131,10 @@ def stop_delete_launch(name):
         return "failed"
 
     # Launch
-    print(f"  Launching from image '{name}' with profile '{name}'...")
-    _, stderr = run(["incus", "launch", name, name, "--profile", name], check=False)
+    print(f"  Launching from image '{image_alias}' with profile '{name}'...")
+    _, stderr = run(
+        ["incus", "launch", image_alias, name, "--profile", name], check=False
+    )
     if stderr and "error" in stderr.lower():
         print(f"  ERROR: Failed to launch: {stderr}")
         return "failed"
@@ -105,15 +151,21 @@ def stop_delete_launch(name):
     return "failed"
 
 
-def check_and_relaunch(name, force=False, dry_run=False):
+def check_and_relaunch(name, image_alias, force=False, dry_run=False):
     """Check if a container needs relaunching and do it.
+
+    Args:
+        name: incus instance name
+        image_alias: image alias to look up and launch from
+        force: relaunch even if image unchanged
+        dry_run: preview without acting
 
     Returns:
         str: "relaunched", "unchanged", "skipped", or "failed"
     """
-    image_fp = get_image_fingerprint(name)
+    image_fp = get_image_fingerprint(image_alias)
     if not image_fp:
-        print(f"  No image alias '{name}' found, skipping")
+        print(f"  No image alias '{image_alias}' found, skipping")
         return "skipped"
 
     instance_fp = get_instance_base_image(name)
@@ -130,7 +182,7 @@ def check_and_relaunch(name, force=False, dry_run=False):
         print("  [dry-run] Would stop, delete, and relaunch")
         return "relaunched"
 
-    return stop_delete_launch(name)
+    return stop_delete_launch(name, image_alias)
 
 
 def main():
@@ -154,6 +206,10 @@ def main():
     print("Incus Container Relaunch")
     print("=" * 50)
 
+    instance_map = get_instance_map()
+    if instance_map:
+        print(f"Loaded instance map ({len(instance_map)} mappings)")
+
     running = get_running_lxc_containers()
     if not running:
         print("No running LXC containers found")
@@ -176,11 +232,15 @@ def main():
     results = {"relaunched": 0, "unchanged": 0, "skipped": 0, "failed": 0}
 
     for name in sorted(running):
+        image_alias = resolve_image_alias(name, instance_map)
+        suffix = f" (image: {image_alias})" if image_alias != name else ""
         print(f"\n{'━' * 50}")
-        print(f"  {name}")
+        print(f"  {name}{suffix}")
         print(f"{'━' * 50}")
 
-        result = check_and_relaunch(name, force=args.all, dry_run=args.dry_run)
+        result = check_and_relaunch(
+            name, image_alias, force=args.all, dry_run=args.dry_run
+        )
         if result == "unchanged":
             print("  Image unchanged, skipping")
         results[result] = results.get(result, 0) + 1
