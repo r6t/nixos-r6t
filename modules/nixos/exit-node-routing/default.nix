@@ -95,7 +95,6 @@ in
         extraUpFlags = [
           "--advertise-exit-node"
           "--accept-routes"
-          "--hostname=${config.networking.hostName}"
         ];
       };
 
@@ -122,32 +121,53 @@ in
         nat.internalInterfaces = [ "tailscale0" ];
       };
 
-      # GRO forwarding for exit node
-      # https://tailscale.com/kb/1320/performance-best-practices#ethtool-configuration
-      systemd.services.tailscale-network-optimizations = {
-        description = "Apply network optimizations for Tailscale";
-        after = [ "network.target" "tailscale.service" ];
-        wantedBy = [ "multi-user.target" ];
-        path = [ pkgs.iproute2 pkgs.ethtool ];
-        script = ''
-          ethtool -K eth0 rx-udp-gro-forwarding on rx-gro-list off || true
-        '';
-        serviceConfig = {
-          Type = "oneshot";
-          RemainAfterExit = true;
+      systemd.services = {
+        # Set tailscale hostname from the live system hostname.
+        # networking.hostName is "nixos" at nix eval time for shared container
+        # images — cloud-init sets the real hostname at runtime, so we read it
+        # dynamically after tailscale connects.
+        tailscale-set-hostname = {
+          description = "Set Tailscale hostname from live system hostname";
+          after = [ "tailscaled-autoconnect.service" ];
+          wants = [ "tailscaled-autoconnect.service" ];
+          wantedBy = [ "multi-user.target" ];
+          path = [ config.services.tailscale.package ];
+          script = ''
+            tailscale set --hostname="$(${pkgs.hostname}/bin/hostname)"
+          '';
+          serviceConfig = {
+            Type = "oneshot";
+            RemainAfterExit = true;
+          };
         };
-      };
 
-      # Wait for network stability
-      # use iptables - nftables seems to have stability issues in LXC
-      systemd.services.tailscaled = {
-        after = [ "network-online.target" ];
-        wants = [ "network-online.target" ];
-        environment = {
-          TS_DEBUG_FIREWALL_MODE = "iptables";
+        # GRO forwarding for exit node
+        # https://tailscale.com/kb/1320/performance-best-practices#ethtool-configuration
+        tailscale-network-optimizations = {
+          description = "Apply network optimizations for Tailscale";
+          after = [ "network.target" "tailscale.service" ];
+          wantedBy = [ "multi-user.target" ];
+          path = [ pkgs.iproute2 pkgs.ethtool ];
+          script = ''
+            ethtool -K eth0 rx-udp-gro-forwarding on rx-gro-list off || true
+          '';
+          serviceConfig = {
+            Type = "oneshot";
+            RemainAfterExit = true;
+          };
         };
-        serviceConfig = {
-          ExecStartPre = "${pkgs.coreutils}/bin/sleep 5";
+
+        # Wait for network stability
+        # use iptables - nftables seems to have stability issues in LXC
+        tailscaled = {
+          after = [ "network-online.target" ];
+          wants = [ "network-online.target" ];
+          environment = {
+            TS_DEBUG_FIREWALL_MODE = "iptables";
+          };
+          serviceConfig = {
+            ExecStartPre = "${pkgs.coreutils}/bin/sleep 5";
+          };
         };
       };
     })
