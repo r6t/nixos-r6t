@@ -19,6 +19,12 @@ FLAKE_DIR = SCRIPT_DIR.parent
 CONTAINERS_DIR = SCRIPT_DIR
 INSTANCE_MAP_FILE = FLAKE_DIR / "hosts/crown/incus-instances/instance_map.json"
 
+# Containers that should be pushed to remote incus servers after local import.
+# Maps container name -> list of remote names (as configured via `incus remote`).
+REMOTE_TARGETS = {
+    "spire": ["saguaro"],
+}
+
 
 def run(cmd, check=True):
     """Run a command and return (stdout, stderr)."""
@@ -129,8 +135,43 @@ def find_tarball(result_dir):
     return tarballs[0]
 
 
+def push_to_remotes(name, remotes, dry_run=False):
+    """Push a locally imported image to remote incus servers.
+
+    Deletes the existing alias on the remote first, then copies.
+
+    Args:
+        name: image alias name
+        remotes: list of remote server names
+        dry_run: if True, only print what would happen
+    """
+    for remote in remotes:
+        if dry_run:
+            print(f"  incus image alias delete {remote}:{name}")
+            print(f"  incus image copy local:{name} {remote}: --alias {name}")
+            continue
+
+        print(f"  Pushing to {remote}...")
+
+        # Delete existing alias (ignore errors if it doesn't exist)
+        run(
+            ["incus", "image", "alias", "delete", f"{remote}:{name}"],
+            check=False,
+        )
+
+        # Copy image to remote
+        _, stderr = run(
+            ["incus", "image", "copy", f"local:{name}", f"{remote}:", "--alias", name],
+            check=False,
+        )
+        if stderr and "error" in stderr.lower():
+            print(f"  WARNING: Push to {remote} failed: {stderr}")
+        else:
+            print(f"  Pushed to {remote}")
+
+
 def build_and_import(name, dry_run=False):
-    """Build a container image + metadata and import to incus.
+    """Build a container image + metadata, import locally, and push to remotes.
 
     Args:
         name: container name (kebab-case, matches flake attribute and filename)
@@ -144,6 +185,8 @@ def build_and_import(name, dry_run=False):
         print(f"  nix build .#{name}")
         print(f"  nix build .#{name}-metadata")
         print(f"  incus image import ... --alias {name}")
+        if name in REMOTE_TARGETS:
+            push_to_remotes(name, REMOTE_TARGETS[name], dry_run=True)
         return
 
     version = next_version(name)
@@ -165,7 +208,7 @@ def build_and_import(name, dry_run=False):
     metadata_target = tmp_dir / "metadata.tar.xz"
     shutil.copy2(find_tarball(result_link), metadata_target)
 
-    # Import to incus
+    # Import to local incus
     import_cmd = [
         "incus",
         "image",
@@ -181,6 +224,10 @@ def build_and_import(name, dry_run=False):
         print("  Already up to date (fingerprint unchanged)")
     elif stdout:
         print(f"  {stdout}")
+
+    # Push to remote servers if configured
+    if name in REMOTE_TARGETS:
+        push_to_remotes(name, REMOTE_TARGETS[name])
 
     print(f"  Done: {name} v{version}")
 
@@ -248,7 +295,9 @@ def main():
     if args.list:
         print(f"\nAvailable containers ({len(available)}):")
         for name in available:
-            print(f"  {name}")
+            remotes = REMOTE_TARGETS.get(name)
+            suffix = f"  -> {', '.join(remotes)}" if remotes else ""
+            print(f"  {name}{suffix}")
         sys.exit(0)
 
     targets = resolve_targets(args, available)
