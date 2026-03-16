@@ -57,9 +57,15 @@ in
         tokenUrl = "https://pid.r6t.io/api/oidc/token";
         apiUrl = "https://pid.r6t.io/api/oidc/userinfo";
       };
-      prometheus.scrapeTargets = [ "crown:9000" "mountainball:9000" "saguaro:9000" ];
+      prometheus.scrapeTargets = [ "crown:9000" "mountainball:9000" "192.168.6.1:9000" ];
     };
     prometheus-node-exporter.enable = true;
-    tailscale.enable = true;
+    tailscale = {
+      enable = true;
+      # Auth key file bind-mounted by incus profile from host storage.
+      # Use an ephemeral + reusable key so spire auto-joins the tailnet
+      # on launch and auto-expires when deleted.
+      authKeyFile = "/etc/tailscale/auth-key";
+    };
   };
 }

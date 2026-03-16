@@ -29,6 +29,11 @@ devices:
     path: /
     pool: kingston-pool
     type: disk
+  tailscale-auth:
+    path: /etc/tailscale/auth-key
+    shift: "true"
+    source: /mnt/kingston240/spire/tailscale/auth-key
+    type: disk
   seed-meta-data:
     path: /var/lib/cloud/seed/nocloud/meta-data
     source: /home/r6t/git/nixos-r6t/hosts/saguaro/incus-instances/seed/spire.meta-data

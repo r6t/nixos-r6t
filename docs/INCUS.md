@@ -344,7 +344,7 @@ incus-log-collector service (crown)
 Spire (saguaro)
   ├── Grafana  ──  dashboards + OIDC via PocketID
   ├── Loki     ──  receives logs from crown's Alloy
-  ├── Prometheus  ──  scrapes crown:9000, mountainball:9000, saguaro:9000
+  ├── Prometheus  ──  scrapes metrics
   └── PocketID  ──  OIDC provider for all services
 ```
 
