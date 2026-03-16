@@ -82,12 +82,16 @@ def get_running_lxc_containers():
 
 def get_image_fingerprint(alias):
     """Get the fingerprint of an image by alias. Returns None if not found."""
-    stdout, _ = run(
-        ["incus", "image", "list", f"alias={alias}", "--format", "csv", "-c", "f"]
-    )
+    stdout, _ = run(["incus", "image", "list", alias, "--format", "csv", "-c", "f,l"])
     if not stdout:
         return None
-    return stdout.splitlines()[0].strip()
+    # Filter to exact alias match — positional filter is a substring match,
+    # so "llm" would also match "ollama" etc.
+    for line in stdout.splitlines():
+        parts = line.split(",", 1)
+        if len(parts) == 2 and parts[1].strip() == alias:
+            return parts[0].strip()
+    return None
 
 
 def get_instance_base_image(name):
