@@ -216,6 +216,10 @@ in
     syncthing.enable = true;
     tailscale.enable = true;
     user.enable = true;
+    wg-metrics = {
+      enable = true;
+      instanceMapFile = "/home/r6t/git/nixos-r6t/hosts/crown/incus-instances/instance_map.json";
+    };
 
     zfs-pool = {
       hdd-pool = {
