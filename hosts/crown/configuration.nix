@@ -46,14 +46,7 @@ in
     supportedFilesystems = [ "zfs" ];
   };
 
-  # Pin 2.5G NIC names by PCI bus path for stable incus passthrough.
-  # These are the 4 ports on the Realtek card, passed to exit node containers.
-  services.udev.extraRules = ''
-    SUBSYSTEM=="net", ACTION=="add", KERNELS=="0000:05:00.0", NAME="exit0"
-    SUBSYSTEM=="net", ACTION=="add", KERNELS=="0000:06:00.0", NAME="exit1"
-    SUBSYSTEM=="net", ACTION=="add", KERNELS=="0000:07:00.0", NAME="exit2"
-    SUBSYSTEM=="net", ACTION=="add", KERNELS=="0000:09:00.0", NAME="exit3"
-  '';
+
 
   fileSystems."/mnt/thunderkey" = {
     device = "/dev/disk/by-label/thunderkey";
@@ -138,6 +131,14 @@ in
   };
 
   systemd = {
+    # Pin 2.5G NIC names by PCI path for stable incus passthrough.
+    # These are the 4 Intel I226-V ports passed to exit node containers.
+    network.links = {
+      "10-exit0" = { matchConfig.Path = "pci-0000:05:00.0"; linkConfig.Name = "exit0"; };
+      "10-exit1" = { matchConfig.Path = "pci-0000:06:00.0"; linkConfig.Name = "exit1"; };
+      "10-exit2" = { matchConfig.Path = "pci-0000:07:00.0"; linkConfig.Name = "exit2"; };
+      "10-exit3" = { matchConfig.Path = "pci-0000:09:00.0"; linkConfig.Name = "exit3"; };
+    };
     tmpfiles.rules = [
       "d /mnt/thunderbay 0755 root root -"
       "d /mnt/thunderkey 0755 root root -"
