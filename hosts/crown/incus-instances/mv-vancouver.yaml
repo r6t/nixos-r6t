@@ -7,8 +7,8 @@ description: mv-vancouver
 devices:
   eth0:
     name: eth0
-    nictype: bridged
-    parent: br1
+    nictype: physical
+    parent: exit1
     type: nic
   root:
     path: /
@@ -30,5 +30,10 @@ devices:
     path: /etc/wireguard/wg0.conf
     shift: "true"
     source: /mnt/crownstore/Sync/app-config/wireguard/ca-van.conf
+    type: disk
+  tailscale-auth:
+    path: /etc/tailscale/auth-key
+    shift: "true"
+    source: /mnt/crownstore/Sync/app-config/tailscale/exit-node-auth-key
     type: disk
 name: mv-vancouver

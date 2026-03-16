@@ -90,7 +90,14 @@ in
     (lib.mkIf cfg.enableTailscale {
       mine.tailscale.enable = true;
 
-      services.tailscale.useRoutingFeatures = lib.mkForce "server";
+      services.tailscale = {
+        useRoutingFeatures = lib.mkForce "server";
+        extraUpFlags = [
+          "--advertise-exit-node"
+          "--accept-routes"
+          "--hostname=${config.networking.hostName}"
+        ];
+      };
 
       # Tailscale MagicDNS as secondary DNS for coordination server access
       services.dnsmasq.settings.server = [ "100.100.100.100" ];

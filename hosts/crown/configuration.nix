@@ -4,7 +4,8 @@ let
   allCaddyRoutes = import ../../containers/lib/caddy-routes.nix;
 
   # Containers whose caddy routes are served by crown's host caddy.
-  # Excludes spire (runs its own caddy on saguaro).
+  # Includes spire-proxy: crown proxies pid.r6t.io to spire over tailnet
+  # so LAN containers can reach PocketID without being on the tailnet.
   crownContainers = [
     "audiobookshelf"
     "changedetection"
@@ -17,8 +18,8 @@ let
     "ntfy"
     "paperless"
     "pirate-ship"
-    "pocket-id"
     "searxng"
+    "spire-proxy"
     "sts"
   ];
 
@@ -44,6 +45,15 @@ in
     kernelParams = [ "kvm-amd" "kvm" "reboot=efi" ];
     supportedFilesystems = [ "zfs" ];
   };
+
+  # Pin 2.5G NIC names by PCI bus path for stable incus passthrough.
+  # These are the 4 ports on the Realtek card, passed to exit node containers.
+  services.udev.extraRules = ''
+    SUBSYSTEM=="net", ACTION=="add", KERNELS=="0000:05:00.0", NAME="exit0"
+    SUBSYSTEM=="net", ACTION=="add", KERNELS=="0000:06:00.0", NAME="exit1"
+    SUBSYSTEM=="net", ACTION=="add", KERNELS=="0000:07:00.0", NAME="exit2"
+    SUBSYSTEM=="net", ACTION=="add", KERNELS=="0000:09:00.0", NAME="exit3"
+  '';
 
   fileSystems."/mnt/thunderkey" = {
     device = "/dev/disk/by-label/thunderkey";
@@ -78,10 +88,11 @@ in
           prefixLength = 24;
         }];
       };
-      enp5s0.useDHCP = false; # Incus passthrough
-      enp6s0.useDHCP = false; # Incus passthrough
-      enp7s0.useDHCP = false; # 2.5G unused
-      enp8s0.useDHCP = false; # 2.5G unused
+      # 2.5G NICs for exit node passthrough (names pinned by MAC via udev)
+      exit0.useDHCP = false;
+      exit1.useDHCP = false;
+      exit2.useDHCP = false;
+      exit3.useDHCP = false;
       br1.useDHCP = true; # 10G bridge for Incus
     };
 
@@ -162,6 +173,7 @@ in
     };
 
     alloy.enable = true;
+    incus-log-collector.enable = true;
     bolt.enable = true;
     bootloader.enable = true;
     caddy = {

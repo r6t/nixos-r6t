@@ -1,3 +1,4 @@
+// Host journal logs
 loki.relabel "journal" {
   forward_to = []
 
@@ -22,9 +23,59 @@ loki.relabel "journal" {
   }
 }
 
-loki.source.journal "all" {
+loki.source.journal "host" {
   forward_to = [loki.write.grafana_loki.receiver]
   relabel_rules = loki.relabel.journal.rules
+}
+
+// Incus container journal logs (collected by incus-log-collector)
+local.file_match "incus_journals" {
+  path_targets = [{
+    __path__ = "/var/log/incus-journals/*.json",
+  }]
+}
+
+loki.source.file "incus_containers" {
+  targets    = local.file_match.incus_journals.targets
+  forward_to = [loki.process.incus_json.receiver]
+}
+
+loki.process "incus_json" {
+  forward_to = [loki.write.grafana_loki.receiver]
+
+  // Parse the JSON journal output to extract labels
+  stage.json {
+    expressions = {
+      host      = "_HOSTNAME"
+      unit      = "_SYSTEMD_UNIT"
+      transport = "_TRANSPORT"
+      priority  = "PRIORITY"
+      message   = "MESSAGE"
+    }
+  }
+
+  stage.labels {
+    values = {
+      host      = "host"
+      unit      = "unit"
+      transport = "transport"
+    }
+  }
+
+  stage.label_drop {
+    values = ["filename"]
+  }
+
+  stage.output {
+    source = "message"
+  }
+
+  // Tag as container source
+  stage.static_labels {
+    values = {
+      source = "incus"
+    }
+  }
 }
 
 loki.write "grafana_loki" {

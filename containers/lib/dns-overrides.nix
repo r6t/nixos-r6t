@@ -1,14 +1,9 @@
-# LAN DNS overrides for containers not on the tailnet.
-# Resolves *.r6t.io services to the correct LAN host
-# so containers can reach caddy reverse proxies directly.
+# Base DNS overrides for ALL containers (including exit nodes).
+# Only includes the crown wildcard — safe for exit node clients
+# who resolve spire services via public DNS / tailscale.
 {
   services.dnsmasq.settings.address = [
-    # spire (192.168.6.3) — monitoring + auth on saguaro
-    "/grafana.r6t.io/192.168.6.3"
-    "/loki.r6t.io/192.168.6.3"
-    "/pid.r6t.io/192.168.6.3"
-
-    # crown (192.168.6.10) — everything else
+    # crown (192.168.6.10) — caddy reverse proxy for most services
     "/r6t.io/192.168.6.10"
   ];
 }

@@ -3,11 +3,23 @@
   options = {
     mine.tailscale.enable =
       lib.mkEnableOption "enable tailscale";
+
+    mine.tailscale.authKeyFile = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      description = ''
+        Path to a file containing a Tailscale auth key.
+        When set, tailscale auto-connects on boot using this key.
+        Use an ephemeral + reusable key for containers that relaunch frequently.
+        The file is bind-mounted into the container via the incus profile.
+      '';
+    };
   };
 
   config = lib.mkIf config.mine.tailscale.enable {
     services.tailscale = {
       enable = true;
+      inherit (config.mine.tailscale) authKeyFile;
     };
 
     networking = {
