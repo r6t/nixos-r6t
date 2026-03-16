@@ -43,11 +43,13 @@
     "searxng.r6t.io" = { upstream = "http://localhost:8085"; };
   };
 
+  # Spire runs services locally — use 127.0.0.1 explicitly because
+  # Loki/Grafana bind to IPv4 only and localhost may resolve to ::1
   spire = {
-    "grafana.r6t.io" = { upstream = "http://localhost:3099"; };
-    "loki.r6t.io" = { upstream = "http://localhost:3030"; };
-    "pid.r6t.io" = { upstream = "http://localhost:1411"; };
-    "prometheus.r6t.io" = { upstream = "http://localhost:9001"; };
+    "grafana.r6t.io" = { upstream = "http://127.0.0.1:3099"; };
+    "loki.r6t.io" = { upstream = "http://127.0.0.1:3030"; };
+    "pid.r6t.io" = { upstream = "http://127.0.0.1:1411"; };
+    "prometheus.r6t.io" = { upstream = "http://127.0.0.1:9001"; };
   };
 
   # Docker-based containers (no containers/*.nix — use the docker image)
