@@ -76,7 +76,7 @@
 
       # Allow LAN to access the router host on specific ports
       nftablesAllowFromLan = {
-        extraTcpPorts = [ 5201 8443 ]; # iperf3, incus
+        extraTcpPorts = [ 5201 8443 9000 9101 ]; # iperf3, incus, node-exporter, incus-metrics
         extraUdpPorts = [ 5201 ]; # iperf3
       };
     };

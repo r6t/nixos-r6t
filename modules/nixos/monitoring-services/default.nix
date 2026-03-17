@@ -278,7 +278,10 @@ in
             {
               job_name = "incus";
               metrics_path = "/1.0/metrics";
-              scheme = "http";
+              scheme = "https";
+              tls_config = {
+                insecure_skip_verify = true;
+              };
               static_configs = [{
                 targets = cfg.prometheus.incusMetricsTargets;
               }];
