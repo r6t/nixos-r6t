@@ -57,25 +57,25 @@ let
         };
 
         themes.oxocarbon = {
-          fg = "#ffffff";
+          fg = "#c6c6c6";
           bg = "#161616";
-          black = "#262626";
+          black = "#161616";
           red = "#ee5396";
           green = "#42be65";
-          yellow = "#ffe97b";
-          blue = "#33b1ff";
+          yellow = "#08bdba";
+          blue = "#78a9ff";
           magenta = "#ff7eb6";
           cyan = "#3ddbd9";
-          white = "#dde1e6";
+          white = "#c6c6c6";
           bright_black = "#393939";
           bright_red = "#ee5396";
           bright_green = "#42be65";
-          bright_yellow = "#ffe97b";
-          bright_blue = "#33b1ff";
+          bright_yellow = "#08bdba";
+          bright_blue = "#78a9ff";
           bright_magenta = "#ff7eb6";
           bright_cyan = "#3ddbd9";
-          bright_white = "#ffffff";
-          orange = "#ffdab9";
+          bright_white = "#f4f4f4";
+          orange = "#ff7eb6";
         };
       };
     };
