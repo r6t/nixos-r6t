@@ -10,6 +10,7 @@
   config = lib.mkIf config.mine.home.kde-apps.enable {
     home-manager.users.${userConfig.username} = {
       home = {
+        file.".local/share/color-schemes/Oxocarbon.colors".source = ./Oxocarbon.colors;
         packages = with pkgs; [
           arj # Krusader support
           dpkg # Krusader support
@@ -98,7 +99,7 @@
           };
 
           workspace = {
-            colorScheme = "BreezeDark";
+            colorScheme = "Oxocarbon";
             theme = "breeze-dark";
             lookAndFeel = "org.kde.breezedark.desktop";
             wallpaper = "${pkgs.kdePackages.plasma-workspace-wallpapers}/share/wallpapers/Kay/contents/images_dark/5120x2880.png";
@@ -311,8 +312,8 @@
             "kded5rc"."Module-browserintegrationreminder"."autoload" = false;
             "kded5rc"."Module-device_automounter"."autoload" = false;
             "kdeglobals"."DirSelect Dialog"."DirSelectDialog Size" = "640,480";
-            "kdeglobals"."General"."AccentColor" = "146,110,228"; # purple
-            "kdeglobals"."General"."LastUsedCustomAccentColor" = "146,110,228";
+            "kdeglobals"."General"."AccentColor" = "130,207,255"; # oxocarbon lightblue #82cfff
+            "kdeglobals"."General"."LastUsedCustomAccentColor" = "130,207,255";
             "kdeglobals"."General"."TerminalApplication" = "alacritty";
             "kdeglobals"."General"."TerminalService" = "Alacritty.desktop";
             "kdeglobals"."KDE"."widgetStyle" = "BreezeDark";
