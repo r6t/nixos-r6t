@@ -13,7 +13,7 @@ let
           decorations = if pkgs.stdenv.isDarwin then "buttonless" else "none";
         };
         terminal.shell = {
-          program = "zellij";
+          program = "${pkgs.zellij}/bin/zellij";
           args = [ "-l" "welcome" ];
         };
         colors = {
