@@ -226,6 +226,30 @@ let
       highlight.ExtraWhitespace.bg = "red";
 
       keymaps = [
+        # Zellij-aware pane/split navigation (Ctrl+hjkl)
+        # From nvim: moves between nvim splits, crosses into zellij panes at edges
+        # From fish panes: use Alt+hjkl instead (zellij native)
+        {
+          action = "<cmd>ZellijNavigateLeft<CR>";
+          key = "<C-h>";
+          options.desc = "Navigate left (nvim split or zellij pane)";
+        }
+        {
+          action = "<cmd>ZellijNavigateDown<CR>";
+          key = "<C-j>";
+          options.desc = "Navigate down (nvim split or zellij pane)";
+        }
+        {
+          action = "<cmd>ZellijNavigateUp<CR>";
+          key = "<C-k>";
+          options.desc = "Navigate up (nvim split or zellij pane)";
+        }
+        {
+          action = "<cmd>ZellijNavigateRight<CR>";
+          key = "<C-l>";
+          options.desc = "Navigate right (nvim split or zellij pane)";
+        }
+
         # Buffer navigation
         {
           action = "<cmd>bnext<CR>";
