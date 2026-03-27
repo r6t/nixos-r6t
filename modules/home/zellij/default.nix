@@ -171,7 +171,7 @@ let
         show_startup_tips = false;
         simplified_ui = true;
         hide_tabs_bar_when_one_tab = true;
-        default_shell = "fish";
+        default_shell = "${pkgs.fish}/bin/fish";
         default_layout = "custom-compact-top";
         pane_frames = false;
         copy_command = if pkgs.stdenv.isDarwin then "pbcopy" else "wl-copy";
@@ -180,9 +180,9 @@ let
         keybinds = {
           unbind = [ "Ctrl g" "Ctrl p" "Ctrl n" "Ctrl t" "Ctrl s" "Ctrl o" "Ctrl m" ];
           normal = {
-            "bind \"Super z\"" = { SwitchToMode._args = [ "Locked" ]; };
+            "bind \"Super g\"" = { SwitchToMode._args = [ "Locked" ]; };
             "bind \"Super p\"" = { SwitchToMode._args = [ "Pane" ]; };
-            "bind \"Super n\"" = { SwitchToMode._args = [ "Resize" ]; };
+            "bind \"Super r\"" = { SwitchToMode._args = [ "Resize" ]; };
             "bind \"Super t\"" = { SwitchToMode._args = [ "Tab" ]; };
             "bind \"Super s\"" = { SwitchToMode._args = [ "Scroll" ]; };
             "bind \"Super o\"" = { SwitchToMode._args = [ "Session" ]; };
@@ -205,7 +205,7 @@ let
             # Alt [ / Alt ] left at defaults (PreviousSwapLayout / NextSwapLayout)
           };
           locked = {
-            "bind \"Super z\"" = { SwitchToMode._args = [ "Normal" ]; };
+            "bind \"Super g\"" = { SwitchToMode._args = [ "Normal" ]; };
           };
         };
       };
