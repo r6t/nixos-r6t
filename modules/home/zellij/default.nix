@@ -170,6 +170,8 @@ let
       settings = {
         show_startup_tips = false;
         simplified_ui = true;
+        session_name = "main-shell";
+        attach_to_session = true;
         hide_tabs_bar_when_one_tab = true;
         default_shell = "${pkgs.fish}/bin/fish";
         default_layout = "custom-compact-top";

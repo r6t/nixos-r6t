@@ -14,7 +14,7 @@ let
         };
         terminal.shell = {
           program = "${pkgs.zellij}/bin/zellij";
-          args = [ "attach" "--create" ];
+          args = [ "-l" "welcome" ];
         };
         colors = {
           primary = {
