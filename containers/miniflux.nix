@@ -21,7 +21,7 @@
 
       # OIDC configuration (OAUTH2_CLIENT_SECRET in adminCredentialsFile)
       OAUTH2_PROVIDER = "oidc";
-      OAUTH2_CLIENT_ID = "67dcba05-b852-4827-bc8d-f8bba652b05d";
+      OAUTH2_CLIENT_ID = "273e3ded-2c83-442f-9a91-188a6b12475a";
       OAUTH2_REDIRECT_URL = "https://miniflux.r6t.io/oauth2/oidc/callback";
       OAUTH2_OIDC_DISCOVERY_ENDPOINT = "https://pid.r6t.io";
       OAUTH2_OIDC_PROVIDER_NAME = "PocketID";
