@@ -12,8 +12,12 @@ let
           # macOS handles decorations differently
           decorations = if pkgs.stdenv.isDarwin then "buttonless" else "none";
         };
-        terminal.shell = {
+        terminal.shell = if pkgs.stdenv.isDarwin then {
           program = "${pkgs.zellij}/bin/zellij";
+        } else {
+          # Wrap in systemd scope so zellij server survives alacritty exit
+          program = "${pkgs.systemd}/bin/systemd-run";
+          args = [ "--scope" "--user" "${pkgs.zellij}/bin/zellij" ];
         };
         colors = {
           primary = {
