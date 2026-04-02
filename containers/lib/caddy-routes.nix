@@ -25,9 +25,8 @@
   };
 
   llm = {
-    "any.r6t.io" = { upstream = "http://localhost:3001"; };
+    "llm.r6t.io" = { upstream = "http://localhost:8088"; };
     "oi.r6t.io" = { upstream = "http://localhost:8087"; };
-    "ollama.r6t.io" = { upstream = "http://localhost:11434"; };
   };
 
   miniflux = {

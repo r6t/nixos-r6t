@@ -1,14 +1,11 @@
 config:
+  limits.memory: 60GiB
   security.nesting: "true"
   user.user-data: |
     #cloud-config
     datasource_list: [NoCloud, None]
 description: llm
 devices:
-  anyllm-port:
-    connect: tcp:127.0.0.1:3001
-    listen: tcp:0.0.0.0:3001
-    type: proxy
   eth0:
     name: eth0
     nictype: bridged
@@ -19,27 +16,18 @@ devices:
     gputype: physical
     pci: 0000:0c:00.0
     type: gpu
-  n8n-data:
-    path: /var/lib/private/n8n
+  llama-cpp-data:
+    path: /var/lib/llama-cpp
     shift: "true"
-    source: /mnt/crownstore/app-storage/n8n
+    source: /mnt/crownstore/app-storage/llama-cpp
     type: disk
-  n8n-port:
-    connect: tcp:127.0.0.1:5678
-    listen: tcp:0.0.0.0:5678
+  llama-server-port:
+    connect: tcp:127.0.0.1:8080
+    listen: tcp:0.0.0.0:8088
     type: proxy
   oi-port:
     connect: tcp:127.0.0.1:8087
     listen: tcp:0.0.0.0:8087
-    type: proxy
-  ollama-model-data:
-    path: /var/lib/private/ollama/models
-    shift: "true"
-    source: /mnt/crownstore/app-storage/ollama-model-store
-    type: disk
-  ollama-port:
-    connect: tcp:127.0.0.1:11434
-    listen: tcp:0.0.0.0:11434
     type: proxy
   open-webui-data:
     path: /var/lib/private/open-webui

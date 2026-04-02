@@ -77,6 +77,7 @@
     nixos/jellyfin/default.nix
     nixos/karakeep/default.nix
     nixos/kde/default.nix
+    nixos/llama-cpp/default.nix
     nixos/libimobiledevice/default.nix
     nixos/localization/default.nix
     nixos/monitoring-services/default.nix

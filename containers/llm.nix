@@ -1,79 +1,44 @@
 {
   imports = [
-    ../modules/nixos/n8n/default.nix
+    ../modules/nixos/llama-cpp/default.nix
     ../modules/nixos/nvidia-cuda/default.nix
-    ../modules/nixos/ollama/default.nix
     ../modules/nixos/open-webui/default.nix
-    ./docker.nix
     ./lib/base.nix
     ./lib/mullvad-dns.nix
   ];
 
-  networking = {
-    hostName = "llm";
-    # allow web frontend docker containers running in LXC to hit LXC host ollama
-    firewall.extraCommands = '' iptables -A INPUT -i br+ -p tcp --dport 11434 -j ACCEPT '';
-  };
-
-  # avoid onnxruntime + nix build env issues
-  nixpkgs.overlays = [
-    (_final: prev: {
-      python313Packages = prev.python313Packages.overrideScope (_pyFinal: pyPrev: {
-        rapidocr-onnxruntime = pyPrev.rapidocr-onnxruntime.overrideAttrs (_old: {
-          doCheck = false;
-          checkPhase = ":";
-          installCheckPhase = ":";
-          pythonImportsCheck = [ ];
-          nativeCheckInputs = [ ];
-          checkInputs = [ ];
-          pytestFlagsArray = [ ];
-          disabledTests = [ ];
-          disabledTestPaths = [ ];
-        });
-      });
-      python3Packages = prev.python3Packages.overrideScope (_pyFinal: pyPrev: {
-        rapidocr-onnxruntime = pyPrev.rapidocr-onnxruntime.overrideAttrs (_old: {
-          doCheck = false;
-          checkPhase = ":";
-          installCheckPhase = ":";
-          pythonImportsCheck = [ ];
-          nativeCheckInputs = [ ];
-          checkInputs = [ ];
-          pytestFlagsArray = [ ];
-          disabledTests = [ ];
-          disabledTestPaths = [ ];
-        });
-      });
-    })
-  ];
+  networking.hostName = "llm";
 
   # Precreate private state dirs (root-owned. systemd will manage perms for DynamicUser)
   # These appear in the rootfs so Incus can bind-mount to them before systemd starts.
   systemd.tmpfiles.rules = [
     "d /var/lib/private 0700 root root -"
     "d /var/lib/private/open-webui 0700 root root -"
-    "d /var/lib/private/n8n 0700 root root -"
+    "d /var/lib/llama-cpp 0700 root root -"
   ];
 
   mine = {
-    n8n.enable = false;
     nvidia-cuda = {
       enable = true;
-      package = "production";
+      package = "latest";
       installCudaToolkit = false;
     };
-    ollama = {
+    llama-cpp = {
       enable = true;
-      acceleration = "cuda";
       host = "0.0.0.0";
-      models = [
-        "llama3.1:8b"
-        "gemma3:12b"
-        "qwen2.5-coder:14b"
-        "qwen3:14b"
-      ];
+      modelsDir = "/var/lib/llama-cpp/models";
+      modelsPreset = {
+        "qwen3-14b" = {
+          hf-repo = "unsloth/Qwen3-14B-GGUF";
+          hf-file = "Qwen3-14B-Q8_0.gguf";
+          alias = "qwen3-14b";
+        };
+      };
     };
-    open-webui.enable = false;
+    open-webui = {
+      enable = true;
+      host = "0.0.0.0";
+      openaiApiUrl = "http://localhost:8080/v1";
+    };
   };
 }
-
