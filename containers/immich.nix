@@ -1,3 +1,6 @@
+let
+  gpu = import ../hosts/crown/gpu.nix;
+in
 {
   imports = [
     ./lib/base.nix
@@ -12,7 +15,7 @@
     immich.enable = true;
     nvidia-cuda = {
       enable = true;
-      package = "production";
+      package = gpu.driverPackage;
       installCudaToolkit = false;
     };
   };

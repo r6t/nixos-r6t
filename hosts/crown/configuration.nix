@@ -2,6 +2,7 @@
 
 let
   allCaddyRoutes = import ../../containers/lib/caddy-routes.nix;
+  gpu = import ./gpu.nix;
 
   # Containers whose caddy routes are served by crown's host caddy.
   # Includes spire-proxy: crown proxies pid.r6t.io to spire over tailnet
@@ -206,7 +207,7 @@ in
     nix.enable = true;
     nvidia-cuda = {
       enable = true;
-      package = "latest";
+      package = gpu.driverPackage;
     };
     prometheus-node-exporter.enable = true;
     rdfind.enable = true;

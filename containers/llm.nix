@@ -1,3 +1,6 @@
+let
+  gpu = import ../hosts/crown/gpu.nix;
+in
 {
   imports = [
     ../modules/nixos/llama-cpp/default.nix
@@ -14,13 +17,13 @@
   systemd.tmpfiles.rules = [
     "d /var/lib/private 0700 root root -"
     "d /var/lib/private/open-webui 0700 root root -"
-    "d /var/lib/llama-cpp 0700 root root -"
+    "d /var/lib/private/llama-cpp 0700 root root -"
   ];
 
   mine = {
     nvidia-cuda = {
       enable = true;
-      package = "latest";
+      package = gpu.driverPackage;
       installCudaToolkit = false;
     };
     llama-cpp = {

@@ -292,6 +292,31 @@ To disable DNS challenge for a host (e.g. HTTP challenge), override `mine.caddy.
 
 Container filesystems are ephemeral — data persists via incus disk devices that bind-mount host directories into the container. Always use `shift: "true"` for UID/GID remapping in unprivileged containers.
 
+**DynamicUser services require `/var/lib/private/` mounts.** Many NixOS services (llama-cpp, open-webui, ntfy-sh, mollysocket) use systemd's `DynamicUser=true` with `StateDirectory`. Systemd stores data at `/var/lib/private/{service}` and bind-mounts it into the service namespace as `/var/lib/{service}`. If incus mounts host storage to `/var/lib/{service}` (the namespace path), the service will fail at startup with `status=238/STATE_DIRECTORY` because systemd finds a pre-existing public directory where it expects to create a private one.
+
+The correct pattern for DynamicUser services:
+
+1. In the container `.nix`, pre-create the private mount point:
+
+```nix
+systemd.tmpfiles.rules = [
+  "d /var/lib/private 0700 root root -"
+  "d /var/lib/private/{service} 0700 root root -"
+];
+```
+
+2. In the incus profile `.yaml`, mount to the private path:
+
+```yaml
+{service}-data:
+  path: /var/lib/private/{service}
+  shift: "true"
+  source: /mnt/crownstore/app-storage/{name}
+  type: disk
+```
+
+Services with static users (immich, jellyfin, audiobookshelf, PostgreSQL) do **not** use DynamicUser and should mount directly to `/var/lib/{service}`. Check the upstream NixOS module for `DynamicUser` or `StateDirectory` to determine which pattern applies.
+
 ### Port Forwarding
 
 App containers on crown expose ports to the host via incus proxy devices. Crown's caddy reverse-proxies to `http://localhost:{port}`. Define the proxy device in the profile YAML and the route in `caddy-routes.nix`.
