@@ -53,6 +53,7 @@ in
         "-ngl"
         "99"
         "--flash-attn"
+        "on"
         "--cache-type-k"
         "q8_0"
         "--cache-type-v"
