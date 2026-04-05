@@ -52,11 +52,6 @@ devices:
     nictype: bridged
     parent: br1
     type: nic
-  gpu:
-    gid: "303"
-    gputype: physical
-    pci: 0000:0c:00.0
-    type: gpu
   immich-data:
     path: /var/lib/postgresql
     shift: "true"

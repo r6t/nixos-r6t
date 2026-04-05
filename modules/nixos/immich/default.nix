@@ -32,7 +32,7 @@ in
       port = immichPort;
       accelerationDevices = null;
       environment = {
-        MACHINE_LEARNING_ACCELERATION = "cuda";
+        MACHINE_LEARNING_ACCELERATION = "cpu";
         MACHINE_LEARNING_CACHE_FOLDER = "/var/cache/immich";
         MACHINE_LEARNING_MODEL_TTL = "300";
         AUTHENTICATION_OIDC_ENABLED = "true";
@@ -47,7 +47,7 @@ in
           LD_LIBRARY_PATH = "${pkgs.python312Packages.onnxruntime}/lib/python3.12/site-packages/onnxruntime/capi";
           MACHINE_LEARNING_DEVICE_IDS = "0";
           MACHINE_LEARNING_CACHE_FOLDER = "/var/cache/immich";
-          MACHINE_LEARNING_ACCELERATION = "cuda";
+          MACHINE_LEARNING_ACCELERATION = "cpu";
           MACHINE_LEARNING_MODEL_TTL = "300";
           MPLCONFIGDIR = "/var/cache/immich";
           HF_HOME = "/var/cache/immich";

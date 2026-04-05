@@ -333,6 +333,10 @@ gpu:
   type: gpu
 ```
 
+For **containers** (not VMs), `gputype: physical` passes GPU device nodes (`/dev/nvidia*`, `/dev/dri/*`) into the container. Multiple containers can share the same physical GPU simultaneously — VRAM is shared, not partitioned. The `pci:` filter selects which GPU when a host has multiple. Note that `physical` is the incus default when `gputype` is omitted.
+
+If a CUDA crash inside one container wedges the GPU driver (kernel log shows `rpcRmApiFree_GSP: GspRmFree failed`), other containers may fail to get NVIDIA device nodes on next launch. Restart all GPU containers (or reboot the host) to recover.
+
 ### Tailscale Access
 
 Containers that need to be reachable on the tailnet import the tailscale module:
