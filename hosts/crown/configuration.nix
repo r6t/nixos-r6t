@@ -145,6 +145,11 @@ in
       "d /mnt/thunderkey 0755 root root -"
     ];
     services = {
+      caddy = {
+        # Caddy's environmentFile (AWS creds for Route53 DNS challenge) lives on crownstore
+        requires = [ "mnt-crownstore.mount" ];
+        after = [ "mnt-crownstore.mount" ];
+      };
       incus = {
         # Wait for storage pool before starting incus...
         requires = [ "mnt-crownstore.mount" ];
