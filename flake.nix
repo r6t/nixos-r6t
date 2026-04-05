@@ -69,13 +69,6 @@
           specialArgs = { inherit userConfig inputs outputs; isNixOS = true; };
           modules = [
             ./hosts/crown/configuration.nix
-            {
-              nixpkgs.config = {
-                allowUnfree = true;
-                cudaSupport = true;
-                nvidia.acceptLicense = true;
-              };
-            }
           ];
         };
         mountainball = nixpkgs.lib.nixosSystem {
