@@ -311,8 +311,7 @@ in
             "baloofilerc"."General"."exclude filters version" = 9;
             "bluedevilglobalrc"."Global"."launchState" = "remember";
             # Touchpad settings are host-specific (device IDs vary by hardware).
-            # Configure via System Settings on each device; plasma-manager will
-            # persist them in ~/.config/kcminputrc.
+            # Configured per-host via programs.plasma.input.touchpads in hosts/*/configuration.nix.
             "kded5rc"."Module-browserintegrationreminder"."autoload" = false;
             "kded5rc"."Module-device_automounter"."autoload" = false;
             "kdeglobals"."DirSelect Dialog"."DirSelectDialog Size" = "640,480";

@@ -1,4 +1,4 @@
-{ inputs, ... }:
+{ inputs, userConfig, ... }:
 {
   imports = [
     inputs.home-manager.nixosModules.home-manager
@@ -32,6 +32,16 @@
   };
 
   services.fprintd.enable = false;
+
+  # Touchpad: PIXA3854:00 093A:0274 (Framework 13 AMD built-in trackpad)
+  home-manager.users.${userConfig.username}.programs.plasma.input.touchpads = [
+    {
+      name = "PIXA3854:00 093A:0274 Touchpad";
+      vendorId = "093a";
+      productId = "0274";
+      naturalScroll = true;
+    }
+  ];
 
   system.stateVersion = "23.11";
 
