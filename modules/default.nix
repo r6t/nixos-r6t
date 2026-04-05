@@ -1,116 +1,24 @@
-{ ... }: {
+# Auto-discover all modules under flatpak/, home/, and nixos/.
+# Any subdirectory containing a default.nix is imported as a module.
+# The lib/ directory is excluded (it contains helpers, not modules).
+_:
 
-  imports = [
-    flatpak/base/default.nix
-    flatpak/anki/default.nix
-    flatpak/calibre/default.nix
-    flatpak/element/default.nix
-    flatpak/inkscape/default.nix
-    flatpak/kamoso/default.nix
-    flatpak/libreoffice/default.nix
-    flatpak/picard/default.nix
-    flatpak/proton-mail/default.nix
-    flatpak/remmina/default.nix
-    flatpak/zoom/default.nix
-
-    home/aider/default.nix
-    home/alacritty/default.nix
-    home/atuin/default.nix
-    home/betaflight-configurator/default.nix
-    home/bitwarden/default.nix
-    home/browsers/default.nix
-    home/crush/default.nix
-    home/darktable/default.nix
-    home/drawio/default.nix
-    home/fish/default.nix
-    home/fontconfig/default.nix
-    home/freecad/default.nix
-    home/git/default.nix
-    home/gnome-apps/default.nix
-    home/home-manager/default.nix
-    home/hyprland/default.nix
-    home/k2pdfopt/default.nix
-    home/kde-apps/default.nix
-    home/makemkv/default.nix
-    home/mako/default.nix
-    home/mpv/default.nix
-    home/nixvim/default.nix
-    home/obs-studio/default.nix
-    home/obsidian/default.nix
-    home/orca-slicer/default.nix
-    home/protonmail-desktop/default.nix
-    home/signal-desktop/default.nix
-    home/ssh/default.nix
-    home/teams-for-linux/default.nix
-    home/virt-viewer/default.nix
-    home/webcord/default.nix
-    home/yt-dlp/default.nix
-    home/zellij/default.nix
-
-    nixos/adb/default.nix
-    nixos/alloy/default.nix
-    nixos/asusctl/default.nix
-    nixos/apache/default.nix
-    nixos/bluetooth/default.nix
-    nixos/bolt/default.nix
-    nixos/bootloader/default.nix
-    nixos/bridge/default.nix
-    nixos/caddy/default.nix
-    nixos/czkawka/default.nix
-    nixos/ddc-i2c/default.nix
-    nixos/direnv/default.nix
-    nixos/docker/default.nix
-    nixos/nixos-r6t-baseline/default.nix
-    nixos/exit-node-routing/default.nix
-    nixos/fonts/default.nix
-    nixos/fwupd/default.nix
-    nixos/fzf/default.nix
-    nixos/gnome/default.nix
-    nixos/headscale/default.nix
-    nixos/home-router/default.nix
-    nixos/hypr/default.nix
-    nixos/immich/default.nix
-    nixos/incus/default.nix
-    nixos/incus-log-collector/default.nix
-    nixos/incus-nightly-rebuild/default.nix
-    nixos/iperf/default.nix
-    nixos/jellyfin/default.nix
-    nixos/karakeep/default.nix
-    nixos/kde/default.nix
-    nixos/llama-cpp/default.nix
-    nixos/libimobiledevice/default.nix
-    nixos/localization/default.nix
-    nixos/monitoring-services/default.nix
-    nixos/mountLuksStore/default.nix
-    nixos/mullvad/default.nix
-    nixos/n8n/default.nix
-    nixos/networkmanager/default.nix
-    nixos/nix/default.nix
-    nixos/npm/default.nix
-    nixos/nvidia-cuda/default.nix
-    nixos/ollama/default.nix
-    nixos/open-webui/default.nix
-    nixos/pinchflat/default.nix
-    nixos/printing/default.nix
-    nixos/prometheus-node-exporter/default.nix
-    nixos/rdfind/default.nix
-    nixos/scansnap/default.nix
-    nixos/sops/default.nix
-    nixos/sound/default.nix
-    nixos/ssh/default.nix
-    nixos/sshfs/default.nix
-    nixos/steam/default.nix
-    nixos/syncthing/default.nix
-    nixos/tailscale/default.nix
-    nixos/thunderbay/default.nix
-    nixos/tpm/default.nix
-    nixos/uptime-kuma/default.nix
-    nixos/usb4-sfp/default.nix
-    nixos/user/default.nix
-    nixos/v4l-utils/default.nix
-    nixos/wg-metrics/default.nix
-    nixos/yubikey-luks-enroll/default.nix
-    nixos/zfs-pool/default.nix
-    nixos/zola/default.nix
-  ];
+let
+  discoverModules = dir:
+    let
+      entries = builtins.readDir (./. + "/${dir}");
+      subdirs = builtins.filter
+        (name: entries.${name} == "directory")
+        (builtins.attrNames entries);
+      hasDefault = name:
+        builtins.pathExists (./. + "/${dir}/${name}/default.nix");
+    in
+    map (name: ./. + "/${dir}/${name}/default.nix")
+      (builtins.filter hasDefault subdirs);
+in
+{
+  imports =
+    discoverModules "flatpak"
+    ++ discoverModules "home"
+    ++ discoverModules "nixos";
 }

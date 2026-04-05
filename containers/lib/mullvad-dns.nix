@@ -1,5 +1,5 @@
 {
-  networking.nameservers = [ "127.0.0.1" ];
+  # nameservers already set by base.nix
   services = {
     # mullvad DoT
     stubby = {

@@ -1,14 +1,4 @@
-{ lib, config, ... }: {
-
-  options = {
-    mine.flatpak.calibre.enable =
-      lib.mkEnableOption "enable calibre via flatpak";
-  };
-
-  config = lib.mkIf config.mine.flatpak.calibre.enable {
-    services.flatpak.enable = true;
-    services.flatpak.packages = [
-      { appId = "com.calibre_ebook.calibre"; origin = "flathub"; }
-    ];
-  };
+import ../../lib/mkFlatpakModule.nix {
+  name = "calibre";
+  appId = "com.calibre_ebook.calibre";
 }

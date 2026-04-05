@@ -2,9 +2,13 @@
 
 let
   cfg = config.mine.home.atuin;
+  wrapHome = import ../../lib/mkPortableHomeConfig.nix { inherit isNixOS userConfig; };
+in
+{
+  options.mine.home.atuin.enable =
+    lib.mkEnableOption "enable atuin in home-manager";
 
-  # Shared atuin configuration
-  atuinConfig = {
+  config = lib.mkIf cfg.enable (wrapHome {
     programs.atuin = {
       enable = true;
       # causes bind -k warning on fish >4.1
@@ -12,19 +16,5 @@ let
       enableFishIntegration = true;
       flags = [ "--disable-up-arrow" ];
     };
-  };
-
-in
-{
-  options.mine.home.atuin.enable =
-    lib.mkEnableOption "enable atuin in home-manager";
-
-  config = lib.mkIf cfg.enable (
-    if isNixOS then {
-      # NixOS mode: configure via home-manager.users wrapper
-      home-manager.users.${userConfig.username} = atuinConfig;
-    } else
-    # Standalone home-manager mode: configure directly
-      atuinConfig
-  );
+  });
 }

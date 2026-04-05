@@ -53,7 +53,6 @@
     };
 
     home = {
-      aider.enable = true;
       alacritty.enable = true;
       atuin.enable = true;
       bitwarden.enable = true;
@@ -64,6 +63,7 @@
       fontconfig.enable = true;
       freecad.enable = false; # 20260118 builds failing on pagmo
       git.enable = true;
+      git.signingPubKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINFSoABOk+KRUGtbxpS5PjcIHy4cYh7GOWxC7rNzv3Ua r6t@mountainball";
       home-manager.enable = true;
       hyprland.enable = false;
       gnome-apps.enable = false;

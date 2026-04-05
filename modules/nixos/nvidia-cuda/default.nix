@@ -79,12 +79,10 @@ in
       nvidia-container-toolkit.enable = cfg.containerToolkit;
     };
 
-    nixpkgs = {
-      config = {
-        allowUnfree = true;
-        cudaSupport = true;
-        nvidia.acceptLicense = true;
-      };
+    # allowUnfree is set at the host level in flake.nix
+    nixpkgs.config = {
+      cudaSupport = true;
+      nvidia.acceptLicense = true;
     };
     services.xserver.videoDrivers = [ "nvidia" ];
   };

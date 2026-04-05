@@ -1,14 +1,4 @@
-{ lib, config, ... }: {
-
-  options = {
-    mine.flatpak.zoom.enable =
-      lib.mkEnableOption "enable zoom via flatpak";
-  };
-
-  config = lib.mkIf config.mine.flatpak.zoom.enable {
-    services.flatpak.enable = true;
-    services.flatpak.packages = [
-      { appId = "us.zoom.Zoom"; origin = "flathub"; }
-    ];
-  };
+import ../../lib/mkFlatpakModule.nix {
+  name = "zoom";
+  appId = "us.zoom.Zoom";
 }

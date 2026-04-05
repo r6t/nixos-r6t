@@ -105,40 +105,21 @@ in
     };
 
     # set secrets
-    sops.secrets = {
-      "caddy/headscale/aws_access_key_id" = lib.mkIf config.mine.sops.enable {
-        owner = config.users.users.${userConfig.username}.name;
-      };
-      "caddy/headscale/aws_region" = lib.mkIf config.mine.sops.enable {
-        owner = config.users.users.${userConfig.username}.name;
-      };
-      "caddy/headscale/aws_secret_access_key" = lib.mkIf config.mine.sops.enable {
-        owner = config.users.users.${userConfig.username}.name;
-      };
-      "caddy/lab/aws_access_key_id" = lib.mkIf config.mine.sops.enable {
-        owner = config.users.users.${userConfig.username}.name;
-      };
-      "caddy/lab/aws_region" = lib.mkIf config.mine.sops.enable {
-        owner = config.users.users.${userConfig.username}.name;
-      };
-      "caddy/lab/aws_secret_access_key" = lib.mkIf config.mine.sops.enable {
-        owner = config.users.users.${userConfig.username}.name;
-      };
-      "grafana/oidc_client_id" = lib.mkIf config.mine.sops.enable {
-        owner = config.users.users.${userConfig.username}.name;
-      };
-      "grafana/oidc_client_secret" = lib.mkIf config.mine.sops.enable {
-        owner = config.users.users.${userConfig.username}.name;
-      };
-      "immich/db_password" = lib.mkIf config.mine.sops.enable {
-        owner = config.users.users.${userConfig.username}.name;
-      };
-      "immich/oidc_client_id" = lib.mkIf config.mine.sops.enable {
-        owner = config.users.users.${userConfig.username}.name;
-      };
-      "immich/oidc_client_secret" = lib.mkIf config.mine.sops.enable {
-        owner = config.users.users.${userConfig.username}.name;
-      };
-    };
+    sops.secrets = lib.mkIf config.mine.sops.enable (
+      lib.genAttrs [
+        "caddy/headscale/aws_access_key_id"
+        "caddy/headscale/aws_region"
+        "caddy/headscale/aws_secret_access_key"
+        "caddy/lab/aws_access_key_id"
+        "caddy/lab/aws_region"
+        "caddy/lab/aws_secret_access_key"
+        "grafana/oidc_client_id"
+        "grafana/oidc_client_secret"
+        "immich/db_password"
+        "immich/oidc_client_id"
+        "immich/oidc_client_secret"
+      ]
+        (_: { owner = config.users.users.${userConfig.username}.name; })
+    );
   };
 }

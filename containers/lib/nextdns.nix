@@ -1,10 +1,7 @@
-{ lib, ... }:
+_:
 {
-  networking.nameservers = [ "127.0.0.1" ];
+  # nameservers and resolved already handled by base.nix
   services = {
-    # dnsmasq gets port 53
-    resolved.enable = lib.mkForce false;
-
     # extra params for nextdns reporting
     dnsmasq.settings = {
       add-mac = true;

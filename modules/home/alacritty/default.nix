@@ -2,6 +2,8 @@
 
 let
   cfg = config.mine.home.alacritty;
+  wrapHome = import ../../lib/mkPortableHomeConfig.nix { inherit isNixOS userConfig; };
+  c = (import ../../lib/palette.nix).hex;
 
   # Shared alacritty configuration
   alacrittyConfig = {
@@ -22,33 +24,29 @@ let
           };
         colors = {
           primary = {
-            background = "#161616";
+            background = c.base00;
             foreground = "#ffffff";
           };
           search = {
             matches = {
               foreground = "CellBackground";
-              background = "#ee5396";
+              background = c.pink;
             };
           };
           normal = {
-            black = "#262626";
-            red = "#ee5396";
-            green = "#42be65";
-            yellow = "#ffe97b";
-            blue = "#33b1ff";
-            magenta = "#ff7eb6";
-            cyan = "#3ddbd9";
-            white = "#dde1e6";
+            inherit (c) green cyan yellow;
+            black = c.base01;
+            red = c.pink;
+            blue = c.lightblue33;
+            magenta = c.lightpink;
+            white = c.base04;
           };
           bright = {
-            black = "#393939";
-            red = "#ee5396";
-            green = "#42be65";
-            yellow = "#ffe97b";
-            blue = "#33b1ff";
-            magenta = "#ff7eb6";
-            cyan = "#3ddbd9";
+            inherit (c) green cyan yellow;
+            black = c.base02;
+            red = c.pink;
+            blue = c.lightblue33;
+            magenta = c.lightpink;
             white = "#ffffff";
           };
         };
@@ -67,12 +65,5 @@ in
   options.mine.home.alacritty.enable =
     lib.mkEnableOption "enable alacritty in home-manager";
 
-  config = lib.mkIf cfg.enable (
-    if isNixOS then {
-      # NixOS mode: configure via home-manager.users wrapper
-      home-manager.users.${userConfig.username} = alacrittyConfig;
-    } else
-    # Standalone home-manager mode: configure directly
-      alacrittyConfig
-  );
+  config = lib.mkIf cfg.enable (wrapHome alacrittyConfig);
 }

@@ -1,4 +1,9 @@
-{ lib, config, pkgs, ... }: {
+{ lib, config, pkgs, ... }:
+
+let
+  commonPackages = import ../../lib/common-packages.nix pkgs;
+in
+{
 
   options = {
     mine.nixos-r6t-baseline.enable =
@@ -19,38 +24,17 @@
     # Add fish to /etc/shells
     environment.shells = with pkgs; [ fish ];
 
-    # System packages
-    environment.systemPackages = with pkgs; [
+    # System packages — common set plus host-specific extras
+    environment.systemPackages = commonPackages ++ (with pkgs; [
       bat
       cryptsetup
-      curl
-      dig
-      ethtool
-      fd
       ffmpeg
-      git
-      git-remote-codecommit
-      gnumake
       home-manager
-      htop
       inetutils
-      lshw
-      neovim
-      netcat
-      nmap
-      openssl
-      pciutils
       python314
-      ripgrep
       sops
-      tcpdump
       tmux
-      tree
-      unzip
-      usbutils
-      wget
       wireguard-tools
-      zip
-    ];
+    ]);
   };
 }

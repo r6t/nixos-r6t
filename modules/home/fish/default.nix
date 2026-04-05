@@ -3,6 +3,7 @@
 let
   cfg = config.mine.home.fish;
   homeDir = userConfig.homeDirectory;
+  wrapHome = import ../../lib/mkPortableHomeConfig.nix { inherit isNixOS userConfig; };
 
   # Pure home-manager fish configuration
   fishConfig = {
@@ -220,12 +221,5 @@ in
   options.mine.home.fish.enable =
     lib.mkEnableOption "enable fish in home-manager";
 
-  config = lib.mkIf cfg.enable (
-    if isNixOS
-    then {
-      # NixOS: wrap in home-manager.users
-      home-manager.users.${userConfig.username} = fishConfig;
-    }
-    else fishConfig # Standalone home-manager: configure directly
-  );
+  config = lib.mkIf cfg.enable (wrapHome fishConfig);
 }

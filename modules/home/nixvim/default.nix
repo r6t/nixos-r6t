@@ -2,6 +2,8 @@
 
 let
   cfg = config.mine.home.nixvim;
+  wrapHome = import ../../lib/mkPortableHomeConfig.nix { inherit isNixOS userConfig; };
+  c = (import ../../lib/palette.nix).hex;
   ollamaCfg = cfg.opencode-ollama;
 
   # Build the opencode.json Ollama provider config when enabled
@@ -42,23 +44,10 @@ let
       text = builtins.toJSON {
         "$schema" = "https://opencode.ai/theme.json";
         defs = {
-          # Oxocarbon dark palette
-          base00 = "#161616"; # terminal background
-          base01 = "#262626"; # subtle background
-          base02 = "#393939"; # selection / hover
-          base03 = "#525252"; # comments / muted (unused — see coolGray)
-          coolGray = "#6f6f6f"; # IBM Carbon Gray 60 — visible muted text
-          base04 = "#dde1e6"; # secondary text
-          base05 = "#f2f4f8"; # primary text
-          teal = "#08bdba"; # primary accent
-          cyan = "#3ddbd9"; # secondary accent
-          blue = "#78a9ff"; # keywords / links
-          pink = "#ee5396"; # errors / warnings
-          lightpink = "#ff7eb6"; # emphases
-          green = "#42be65"; # success / added
-          violet = "#be95ff"; # types / info
-          lightblue = "#82cfff"; # numbers / subtle accent
-          darkblue = "#1a1f2e"; # bar/panel background tint
+          # Oxocarbon dark palette — from modules/lib/palette.nix
+          inherit (c) base00 base01 base02 base03 base04 base05
+            teal cyan blue pink lightpink green violet lightblue;
+          inherit (c) coolGray darkblue;
         };
         theme = {
           # agent color cycle: [secondary, accent, success, warning, primary, error, info]
@@ -129,7 +118,7 @@ let
     # formatters
     python3Packages.black
     python3Packages.isort
-    nodePackages.prettier
+    prettier
     shfmt
     go # provides gofmt and goimports
     rustfmt
@@ -889,43 +878,30 @@ in
   };
 
   config = lib.mkIf cfg.enable (
-    if isNixOS then {
-      # NixOS mode: configure via home-manager.users wrapper
-      # sops.secrets only works in NixOS context
-      sops.secrets = lib.mkIf cfg.enableSopsSecrets {
-        "BEDROCK_KEYS" = {
-          owner = userConfig.username;
-        };
-        "OPENROUTER_API_KEY" = {
-          owner = userConfig.username;
-        };
-      };
-
-      home-manager.users.${userConfig.username} = lib.mkMerge [
+    let
+      hmConfig = lib.mkMerge [
         {
           home.packages = nixvimPackages;
-          home.file = lib.mkMerge [
-            (lib.mkIf cfg.enableSopsSecrets {
-              ".config/fish/conf.d/90-vim-sops-secrets.fish" = {
-                text = builtins.readFile ./setVimSessionVars.fish;
-                executable = true;
-              };
-            })
-            opencodeOllamaConfig
-            opencodeThemeConfig
-          ];
+          home.file = lib.mkMerge (
+            lib.optional (isNixOS && cfg.enableSopsSecrets)
+              {
+                ".config/fish/conf.d/90-vim-sops-secrets.fish" = {
+                  text = builtins.readFile ./setVimSessionVars.fish;
+                  executable = true;
+                };
+              }
+            ++ [ opencodeOllamaConfig opencodeThemeConfig ]
+          );
         }
         nixvimConfig
       ];
-    } else
-    # Standalone home-manager mode: configure directly
-    # Note: sops secrets not available in standalone mode
-      lib.mkMerge [
-        {
-          home.packages = nixvimPackages;
-          home.file = lib.mkMerge [ opencodeOllamaConfig opencodeThemeConfig ];
-        }
-        nixvimConfig
-      ]
+    in
+    wrapHome hmConfig // lib.optionalAttrs isNixOS {
+      # sops.secrets only works in NixOS context
+      sops.secrets = lib.mkIf cfg.enableSopsSecrets {
+        "BEDROCK_KEYS" = { owner = userConfig.username; };
+        "OPENROUTER_API_KEY" = { owner = userConfig.username; };
+      };
+    }
   );
 }

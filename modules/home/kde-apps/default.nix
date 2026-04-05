@@ -1,4 +1,8 @@
-{ lib, config, pkgs, userConfig, ... }: {
+{ lib, config, pkgs, userConfig, ... }:
+let
+  palette = import ../../lib/palette.nix;
+in
+{
 
   options = {
     mine.home.kde-apps.enable =
@@ -312,8 +316,8 @@
             "kded5rc"."Module-browserintegrationreminder"."autoload" = false;
             "kded5rc"."Module-device_automounter"."autoload" = false;
             "kdeglobals"."DirSelect Dialog"."DirSelectDialog Size" = "640,480";
-            "kdeglobals"."General"."AccentColor" = "130,207,255"; # oxocarbon lightblue #82cfff
-            "kdeglobals"."General"."LastUsedCustomAccentColor" = "130,207,255";
+            "kdeglobals"."General"."AccentColor" = palette.rgb.lightblue; # oxocarbon lightblue
+            "kdeglobals"."General"."LastUsedCustomAccentColor" = palette.rgb.lightblue;
             "kdeglobals"."General"."TerminalApplication" = "alacritty";
             "kdeglobals"."General"."TerminalService" = "Alacritty.desktop";
             "kdeglobals"."KDE"."widgetStyle" = "BreezeDark";

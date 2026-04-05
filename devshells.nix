@@ -57,8 +57,8 @@ let
   ];
   nodeTools = with pkgs; [
     nodejs
-    nodePackages.prettier
-    nodePackages.eslint
+    prettier
+    eslint
   ];
 
   # --- Shell Helper Function ---

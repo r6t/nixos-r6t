@@ -174,6 +174,7 @@ in
       atuin.enable = true;
       fish.enable = true;
       git.enable = true;
+      git.signingPubKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEpfN0UYA2Bbn+F9IMMVrtIAI2M0vTTLMHWz4qQ8L5P0 r6t@nixos";
       home-manager.enable = true;
       nixvim.enable = true;
       ssh.enable = true;

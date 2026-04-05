@@ -1,4 +1,8 @@
 { lib, pkgs, modulesPath, ... }:
+
+let
+  commonPackages = import ../../modules/lib/common-packages.nix pkgs;
+in
 {
   imports = [
     "${modulesPath}/virtualisation/lxc-container.nix"
@@ -9,39 +13,18 @@
   boot.isContainer = true;
   system.stateVersion = "23.11";
 
-  environment.systemPackages = with pkgs; [
+  # Common set plus container-specific extras
+  environment.systemPackages = commonPackages ++ (with pkgs; [
     awscli2
     cloud-init
-    curl
-    dig
-    dig
     drill
-    ethtool
-    fd
-    git
-    git-remote-codecommit
-    gnumake
-    htop
     iotop
     iproute2
-    lshw
     mtr
-    neovim
-    netcat
     nethogs
     nettools
-    nmap
-    openssl
-    pciutils
-    ripgrep
-    tcpdump
     traceroute
-    tree
-    unzip
-    usbutils
-    wget
-    zip
-  ];
+  ]);
 
   mine.localization.enable = true;
 

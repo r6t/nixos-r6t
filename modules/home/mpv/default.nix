@@ -1,11 +1,4 @@
-{ lib, config, pkgs, userConfig, ... }: {
-
-  options = {
-    mine.home.mpv.enable =
-      lib.mkEnableOption "enable mpv in home-manager";
-  };
-
-  config = lib.mkIf config.mine.home.mpv.enable {
-    home-manager.users.${userConfig.username}.home.packages = with pkgs; [ mpv-unwrapped ];
-  };
+import ../../lib/mkHomePackageModule.nix {
+  name = "mpv";
+  packages = p: [ p.mpv-unwrapped ];
 }
