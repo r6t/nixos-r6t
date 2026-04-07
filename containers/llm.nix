@@ -18,6 +18,8 @@ in
     "d /var/lib/private 0700 root root -"
     "d /var/lib/private/open-webui 0700 root root -"
     "d /var/lib/private/llama-cpp 0700 root root -"
+    "d /var/cache/private 0700 root root -"
+    "d /var/cache/private/llama-cpp 0700 root root -"
   ];
 
   mine = {

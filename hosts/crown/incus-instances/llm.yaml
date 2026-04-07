@@ -17,7 +17,7 @@ devices:
     pci: 0000:0c:00.0
     type: gpu
   llama-cpp-cache:
-    path: /var/cache/llama-cpp
+    path: /var/cache/private/llama-cpp
     shift: "true"
     source: /mnt/crownstore/app-storage/llama-cpp-cache
     type: disk
