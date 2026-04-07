@@ -36,6 +36,13 @@ in
           hf-file = "Qwen3-14B-Q8_0.gguf";
           alias = "qwen3-14b";
         };
+        # Gemma 4 26B MoE (4B active params). UD-IQ4_XS fits 16GB VRAM with
+        # headroom for q8_0 KV cache at 16K context (~2.6GB free after model load).
+        "gemma4-26b" = {
+          hf-repo = "unsloth/gemma-4-26B-A4B-it-GGUF";
+          hf-file = "gemma-4-26B-A4B-it-UD-IQ4_XS.gguf";
+          alias = "gemma4-26b";
+        };
       };
     };
     open-webui = {
