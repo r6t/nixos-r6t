@@ -93,13 +93,15 @@ in
     # Declarative profile management — runs on every boot and nixos-rebuild
     systemd.services.incus-profile-sync = lib.mkIf (cfg.profileDir != null) {
       description = "Enforce incus profiles from nix-managed YAML files";
-      after = [ "incus.service" "incus-preseed.service" ];
-      wants = [ "incus.service" ];
+      after = [ "incus.service" "incus.socket" "incus-preseed.service" ];
+      wants = [ "incus.service" "incus.socket" ];
       wantedBy = [ "multi-user.target" ];
       # Trigger restart whenever YAML content changes in the nix store copy
       restartTriggers = [ profileStore ];
       serviceConfig = {
         Type = "oneshot";
+        # Wait up to 30s for incus daemon to become ready before syncing profiles
+        ExecStartPre = "${pkgs.bash}/bin/bash -c 'for i in $(seq 1 30); do ${pkgs.incus}/bin/incus info &>/dev/null && exit 0; sleep 1; done; echo incus-profile-sync: timed out waiting for incus; exit 1'";
         ExecStart = profileSyncScript;
       };
     };
