@@ -54,22 +54,15 @@ in
         "-ngl"
         "99"
         # Flash attention: disabled due to CUDA crashes on RTX 5060 Ti (compute 12.0).
-        # Upstream bug: https://github.com/ggml-org/llama.cpp/issues/21289
-        # Re-test with "auto" or "on" after llama.cpp updates; the ~5-10% generation
-        # speed gain is worth reclaiming once the kernel bug is fixed.
+        # Upstream bug: https://github.com/ggml-org/llama.cpp/issues/21289 (still open as of b8680).
+        # Re-enable with "auto" once the bug is fixed — ~5-10% generation speed gain.
+        # NOTE: gemma4 requires flash_attn for KV cache quantization; with flash_attn off,
+        # KV cache quantization flags are omitted and gemma4 uses f16 KV (~1.3 GB more VRAM).
         "--flash-attn"
         "off"
-        # KV cache quantization: q8_0 halves KV memory vs f16 with negligible
-        # quality loss. Frees VRAM headroom for larger context or bigger models.
-        # For even more aggressive savings, try q4_0 (quarter size, slight quality cost).
-        "--cache-type-k"
-        "q8_0"
-        "--cache-type-v"
-        "q8_0"
-        # Context window: 16384 tokens (~12K words). Fits the q8_0 KV cache (~340 MiB)
-        # in VRAM alongside a 14B Q8_0 model (~15 GiB) on 16 GiB VRAM, avoiding any
-        # PCIe round-trips. For heavier context needs, bump to 32768 but KV will spill
-        # to system RAM (~8 GB/s on this PCIe x4 link = slower generation).
+        # Context window: 16384 tokens (~12K words). With flash_attn off, KV cache uses f16
+        # (~680 MiB at 16K context) — fits alongside both qwen3-14b Q8_0 (~15 GiB) and
+        # gemma4-26b IQ4_XS (~12.5 GiB) on 16 GiB VRAM with comfortable headroom.
         "-c"
         "16384"
         # Parallel slots: 1 slot = all VRAM budget goes to one session.
