@@ -39,7 +39,9 @@ in
           alias = "qwen3-14b";
         };
         # Gemma 4 26B MoE (4B active params). UD-IQ4_XS fits 16GB VRAM with
-        # headroom for q8_0 KV cache at 16K context (~2.6GB free after model load).
+        # headroom for f16 KV cache at 32K context (~1.2 GB free after model load).
+        # KV quantization (q8_0) requires flash_attn, which is disabled due to
+        # an upstream CUDA bug on RTX 5060 Ti (see llama-cpp module extraFlags).
         "gemma4-26b" = {
           hf-repo = "unsloth/gemma-4-26B-A4B-it-GGUF";
           hf-file = "gemma-4-26B-A4B-it-UD-IQ4_XS.gguf";

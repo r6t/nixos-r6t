@@ -54,17 +54,24 @@ in
         "-ngl"
         "99"
         # Flash attention: disabled due to CUDA crashes on RTX 5060 Ti (compute 12.0).
-        # Upstream bug: https://github.com/ggml-org/llama.cpp/issues/21289 (still open as of b8680).
-        # Re-enable with "auto" once the bug is fixed — ~5-10% generation speed gain.
-        # NOTE: gemma4 requires flash_attn for KV cache quantization; with flash_attn off,
-        # KV cache quantization flags are omitted and gemma4 uses f16 KV (~1.3 GB more VRAM).
+        # Upstream bug: https://github.com/ggml-org/llama.cpp/issues/21289
+        # Fix commit de1aa6fa is merged upstream but not yet in nixpkgs as of b8680.
+        #
+        # TODO: once nixpkgs llama-cpp reaches the build containing de1aa6fa (post-b8680):
+        #   1. Change "--flash-attn" "off" -> "--flash-attn" "auto"
+        #   2. Add "--cache-type-k" "q8_0" "--cache-type-v" "q8_0"
+        #   3. Bump "-c" to "65536" (64K context fits comfortably with q8_0 KV on 16 GiB)
+        #   4. Update llm.nix comment and opencode.json context limit
+        # Benefits: ~5-10% generation speed, q8_0 KV halves cache VRAM, 64K context.
         "--flash-attn"
         "off"
-        # Context window: 16384 tokens (~12K words). With flash_attn off, KV cache uses f16
-        # (~680 MiB at 16K context) — fits alongside both qwen3-14b Q8_0 (~15 GiB) and
-        # gemma4-26b IQ4_XS (~12.5 GiB) on 16 GiB VRAM with comfortable headroom.
+        # Context window: 32768 tokens (~24K words). With flash_attn off, KV cache uses f16.
+        # Gemma4's hybrid SWA architecture keeps the SWA portion fixed regardless of context,
+        # so doubling from 16K to 32K only adds ~480 MiB VRAM (non-SWA KV scales linearly,
+        # SWA stays at ~300 MiB). Total at 32K: ~14.6 GiB — fits on 16 GiB with ~1.2 GiB headroom.
+        # With flash_attn + q8_0 KV, 64K would use ~14.8 GiB — upgrade when TODO above is done.
         "-c"
-        "16384"
+        "32768"
         # Parallel slots: 1 slot = all VRAM budget goes to one session.
         # Each additional slot reserves a full context window in the KV cache.
         "-np"
