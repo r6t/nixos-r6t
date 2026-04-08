@@ -292,16 +292,26 @@ To disable DNS challenge for a host (e.g. HTTP challenge), override `mine.caddy.
 
 Container filesystems are ephemeral — data persists via incus disk devices that bind-mount host directories into the container. Always use `shift: "true"` for UID/GID remapping in unprivileged containers.
 
-**DynamicUser services require `/var/lib/private/` mounts.** Many NixOS services (llama-cpp, open-webui, ntfy-sh, mollysocket) use systemd's `DynamicUser=true` with `StateDirectory`. Systemd stores data at `/var/lib/private/{service}` and bind-mounts it into the service namespace as `/var/lib/{service}`. If incus mounts host storage to `/var/lib/{service}` (the namespace path), the service will fail at startup with `status=238/STATE_DIRECTORY` because systemd finds a pre-existing public directory where it expects to create a private one.
+**DynamicUser services require mounting to the `private` path, not the namespace path.** Many NixOS services (llama-cpp, open-webui, ntfy-sh, mollysocket) use systemd's `DynamicUser=true` with `StateDirectory` and/or `CacheDirectory`. Systemd stores data under a private directory and bind-mounts it into the service namespace at the well-known path:
+
+| systemd directive | Private path (host-visible)    | Namespace path (service sees) |
+| ----------------- | ------------------------------ | ----------------------------- |
+| `StateDirectory`  | `/var/lib/private/{service}`   | `/var/lib/{service}`          |
+| `CacheDirectory`  | `/var/cache/private/{service}` | `/var/cache/{service}`        |
+
+If incus mounts host storage to the namespace path (e.g. `/var/lib/{service}`), the service fails at startup with `status=238/STATE_DIRECTORY` or `status=239/CACHE_DIRECTORY` because systemd finds a pre-existing public directory where it expects to create a private bind-mount.
 
 The correct pattern for DynamicUser services:
 
-1. In the container `.nix`, pre-create the private mount point:
+1. In the container `.nix`, pre-create the private mount points:
 
 ```nix
 systemd.tmpfiles.rules = [
   "d /var/lib/private 0700 root root -"
   "d /var/lib/private/{service} 0700 root root -"
+  # If the service also uses CacheDirectory:
+  "d /var/cache/private 0700 root root -"
+  "d /var/cache/private/{service} 0700 root root -"
 ];
 ```
 
@@ -313,9 +323,15 @@ systemd.tmpfiles.rules = [
   shift: "true"
   source: /mnt/crownstore/app-storage/{name}
   type: disk
+# If the service also uses CacheDirectory:
+{service}-cache:
+  path: /var/cache/private/{service}
+  shift: "true"
+  source: /mnt/crownstore/app-storage/{name}-cache
+  type: disk
 ```
 
-Services with static users (immich, jellyfin, audiobookshelf, PostgreSQL) do **not** use DynamicUser and should mount directly to `/var/lib/{service}`. Check the upstream NixOS module for `DynamicUser` or `StateDirectory` to determine which pattern applies.
+Services with static users (immich, jellyfin, audiobookshelf, PostgreSQL) do **not** use DynamicUser and should mount directly to `/var/lib/{service}`. Check the upstream NixOS module for `DynamicUser`, `StateDirectory`, or `CacheDirectory` to determine which pattern applies.
 
 ### Port Forwarding
 
@@ -407,6 +423,17 @@ python3 containers/relaunch.py spire   # Relaunch spire with new image
 python3 containers/build.py miniflux
 python3 containers/relaunch.py miniflux
 ```
+
+**Important:** `build.py` and `relaunch.py` only update the container image. They do **not** sync incus profiles. If you changed a `hosts/{host}/incus-instances/{name}.yaml`, you must run `nrs` first to push the updated profile into incus before relaunching — otherwise the container starts with the old profile.
+
+```fish
+# Profile change + image rebuild:
+nrs                                    # Syncs updated YAML profiles into incus
+python3 containers/build.py {name}    # Rebuild image (if .nix also changed)
+python3 containers/relaunch.py {name} # Relaunch picks up new profile + image
+```
+
+If only the profile YAML changed (no `.nix` changes), `nrs` + `relaunch.py` is sufficient — no image rebuild needed.
 
 ## Quick Reference
 
