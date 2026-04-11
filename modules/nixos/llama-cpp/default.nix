@@ -53,6 +53,9 @@ in
         # GPU offload: push all transformer layers to VRAM
         "-ngl"
         "99"
+        # Disable multimodal vision encoder — saves ~1.14 GiB VRAM on gemma4 (multimodal model).
+        # Not needed for text/coding use cases and causes OOM on 16 GiB cards.
+        "--no-mmproj"
         # Flash attention: disabled due to CUDA crashes on RTX 5060 Ti (compute 12.0).
         # Upstream bug: https://github.com/ggml-org/llama.cpp/issues/21289
         # Fix commit de1aa6fa is merged upstream but not yet in nixpkgs as of b8680.

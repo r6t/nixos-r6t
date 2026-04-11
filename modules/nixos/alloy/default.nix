@@ -2,10 +2,32 @@
 
 let
   cfg = config.mine.alloy;
+  syslogBlock = ''
+    // Syslog from network devices (e.g. Zyxel NWA210BE WAP at 192.168.6.8)
+    loki.source.syslog "network_devices" {
+      listener {
+        address  = "0.0.0.0:514"
+        protocol = "udp"
+      }
+      forward_to = [loki.process.syslog_relabel.receiver]
+    }
+
+    loki.process "syslog_relabel" {
+      forward_to = [loki.write.grafana_loki.receiver]
+
+      stage.static_labels {
+        values = {
+          source = "syslog",
+        }
+      }
+    }
+  '';
+
   alloyConfig = builtins.replaceStrings
     [ "@@LOKI_URL@@" "@@LOKI_TLS_INSECURE@@" ]
     [ cfg.lokiUrl (lib.boolToString cfg.lokiInsecureTls) ]
-    (builtins.readFile ./config.alloy);
+    (builtins.readFile ./config.alloy)
+  + (lib.optionalString cfg.syslogListen syslogBlock);
 in
 {
   options.mine.alloy = {
@@ -22,6 +44,12 @@ in
       type = lib.types.bool;
       default = false;
       description = "Skip TLS certificate verification for Loki. Use when pushing to an IP address where the cert won't match.";
+    };
+
+    syslogListen = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = "Listen for UDP syslog on port 514 and forward to Loki. Enable on the host closest to network devices sending syslog.";
     };
   };
 

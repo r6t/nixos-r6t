@@ -53,6 +53,7 @@
       enable = true;
       lokiUrl = "https://192.168.6.3/loki/api/v1/push";
       lokiInsecureTls = true;
+      syslogListen = true;
     };
     home-router = {
       enable = true;
@@ -77,7 +78,7 @@
       # Allow LAN to access the router host on specific ports
       nftablesAllowFromLan = {
         extraTcpPorts = [ 5201 8443 9000 9101 ]; # iperf3, incus, node-exporter, incus-metrics
-        extraUdpPorts = [ 5201 ]; # iperf3
+        extraUdpPorts = [ 514 5201 ]; # syslog, iperf3
       };
     };
 
