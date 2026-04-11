@@ -81,7 +81,11 @@
       makemkv.enable = true;
       mako.enable = false;
       mpv.enable = true;
-      nixvim.enable = true;
+      nixvim = {
+        enable = true;
+        enableSopsSecrets = true;
+        enableHaMcp = true;
+      };
       obs-studio.enable = true;
       obsidian.enable = true;
       orca-slicer.enable = true;

@@ -298,7 +298,11 @@ in
                 chain forward {
                   type filter hook forward priority 0; policy drop;
                   ct state { established, related } accept
-                  ct state invalid drop
+                  # Do not drop INVALID in the forward chain. Packets are marked INVALID
+                  # when their conntrack entry has expired (e.g. cloud server sends a FIN
+                  # or RST after conntrack tore down a half-closed TCP session for an IoT
+                  # device). Dropping them here silently kills legitimate return traffic.
+                  # The policy drop handles anything not explicitly accepted.
                   # LAN -> WAN
                   iifname "${cfg.lanInterface}" oifname "${cfg.wanInterface}" accept
                 }

@@ -13,3 +13,8 @@ end
 if test -r /run/secrets/OPENROUTER_API_KEY
   set -gx OPENROUTER_API_KEY (string trim (cat /run/secrets/OPENROUTER_API_KEY))
 end
+
+# Load Home Assistant MCP token
+if test -r /run/secrets/HA_MCP_TOKEN
+  set -gx HA_MCP_TOKEN (string trim (cat /run/secrets/HA_MCP_TOKEN))
+end

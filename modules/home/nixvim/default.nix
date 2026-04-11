@@ -9,30 +9,47 @@ let
   # Build the opencode.json Ollama provider config when enabled
   opencodeOllamaConfig = lib.mkIf ollamaCfg.enable {
     ".config/opencode/opencode.json" = {
-      text = builtins.toJSON {
-        "$schema" = "https://opencode.ai/config.json";
-        provider = {
-          ollama = {
-            npm = "@ai-sdk/openai-compatible";
-            name = "Ollama (local)";
-            options = {
-              inherit (ollamaCfg) baseURL;
+      text = builtins.toJSON (
+        {
+          "$schema" = "https://opencode.ai/config.json";
+        }
+        // lib.optionalAttrs cfg.enableHaMcp {
+          mcp = {
+            homeassistant = {
+              type = "remote";
+              url = "https://homeassistant.r6t.io/api/mcp";
+              enabled = true;
+              oauth = false;
+              headers = {
+                Authorization = "Bearer {env:HA_MCP_TOKEN}";
+              };
             };
-            models = lib.mapAttrs
-              (_id: m:
-                {
-                  inherit (m) name;
-                }
-                // lib.optionalAttrs (m.context != null || m.output != null) {
-                  limit =
-                    lib.optionalAttrs (m.context != null) { inherit (m) context; }
-                    // lib.optionalAttrs (m.output != null) { inherit (m) output; };
-                }
-              )
-              ollamaCfg.models;
           };
-        };
-      };
+        }
+        // {
+          provider = {
+            ollama = {
+              npm = "@ai-sdk/openai-compatible";
+              name = "Ollama (local)";
+              options = {
+                inherit (ollamaCfg) baseURL;
+              };
+              models = lib.mapAttrs
+                (_id: m:
+                  {
+                    inherit (m) name;
+                  }
+                  // lib.optionalAttrs (m.context != null || m.output != null) {
+                    limit =
+                      lib.optionalAttrs (m.context != null) { inherit (m) context; }
+                      // lib.optionalAttrs (m.output != null) { inherit (m) output; };
+                  }
+                )
+                ollamaCfg.models;
+            };
+          };
+        }
+      );
     };
   };
 
@@ -839,9 +856,11 @@ in
 
     enableSopsSecrets = lib.mkOption {
       type = lib.types.bool;
-      default = true;
-      description = "Whether to configure sops secrets for AI API keys (disable for work machines)";
+      default = false;
+      description = "Whether to configure sops secrets for AI API keys";
     };
+
+    enableHaMcp = lib.mkEnableOption "Home Assistant MCP server for OpenCode (requires HA_MCP_TOKEN sops secret)";
 
     opencode-ollama = {
       enable = lib.mkEnableOption "connect OpenCode to a local/remote Ollama instance";
@@ -898,10 +917,15 @@ in
     in
     wrapHome hmConfig // lib.optionalAttrs isNixOS {
       # sops.secrets only works in NixOS context
-      sops.secrets = lib.mkIf cfg.enableSopsSecrets {
-        "BEDROCK_KEYS" = { owner = userConfig.username; };
-        "OPENROUTER_API_KEY" = { owner = userConfig.username; };
-      };
+      sops.secrets = lib.mkIf cfg.enableSopsSecrets (
+        {
+          "BEDROCK_KEYS" = { owner = userConfig.username; };
+          "OPENROUTER_API_KEY" = { owner = userConfig.username; };
+        }
+        // lib.optionalAttrs cfg.enableHaMcp {
+          "HA_MCP_TOKEN" = { owner = userConfig.username; };
+        }
+      );
     }
   );
 }
