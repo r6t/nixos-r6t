@@ -70,6 +70,7 @@
       dhcpServer = {
         poolOffset = 11;
         poolSize = 79; # 11-89
+        staticLeases = import ./ip-reservations.nix;
       };
       dns = {
         nextdnsConfigFile = "/mnt/nextdns.conf";

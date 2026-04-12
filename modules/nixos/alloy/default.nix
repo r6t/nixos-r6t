@@ -3,7 +3,7 @@
 let
   cfg = config.mine.alloy;
   syslogBlock = ''
-    // Syslog from network devices (e.g. Zyxel NWA210BE WAP at 192.168.6.8)
+    // Syslog from network devices (e.g. UniFi Alien WAP at 192.168.6.8)
     loki.source.syslog "network_devices" {
       listener {
         address  = "0.0.0.0:514"

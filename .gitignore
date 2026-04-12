@@ -14,3 +14,4 @@ README.html
 .crush/
 NETWORK-MAP.md
 NETWORK_MAP.md
+hosts/saguaro/ip-reservations.nix

@@ -35,6 +35,19 @@
 - Repeated configurations are stored in modules, with host-specific details defined in hosts/
 - Use options in modules where it makes sense, hardcoding general config values in modules is ok if I'm unlikely to use other options across my workstations and servers.
 
+## HA API access
+
+Token is at `/run/secrets/HA_MCP_TOKEN`.
+
+```bash
+# Quick state check
+curl -s -H "Authorization: Bearer $(cat /run/secrets/HA_MCP_TOKEN)" https://homeassistant.r6t.io/api/
+
+# Get all entities of a domain
+curl -s -H "Authorization: Bearer $(cat /run/secrets/HA_MCP_TOKEN)" https://homeassistant.r6t.io/api/states \
+  | python3 -c "import json,sys; [print(s['entity_id'], s['state']) for s in json.load(sys.stdin) if s['entity_id'].startswith('light.')]"
+```
+
 ## Incus containers
 
 When working on incus container tasks (creating, modifying, or debugging LXC containers), read @docs/INCUS.md first. It documents the full pipeline from NixOS container definition through build, deployment, networking, and runtime configuration.

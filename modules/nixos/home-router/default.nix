@@ -54,6 +54,26 @@ in
         default = 79;
         description = "Number of DHCP addresses in pool";
       };
+
+      staticLeases = lib.mkOption {
+        type = lib.types.listOf (lib.types.submodule {
+          options = {
+            MACAddress = lib.mkOption {
+              type = lib.types.str;
+              description = "MAC address of the device";
+            };
+            Address = lib.mkOption {
+              type = lib.types.str;
+              description = "IP address to assign";
+            };
+          };
+        });
+        default = [ ];
+        example = [
+          { MACAddress = "aa:bb:cc:dd:ee:ff"; Address = "192.168.6.9"; }
+        ];
+        description = "Static DHCP leases (MAC to IP reservations)";
+      };
     };
 
     # DNS configuration
@@ -399,6 +419,15 @@ in
               DNS = [ cfg.lanGatewayIP ];
               EmitRouter = true;
             };
+
+            # Static DHCP leases (MAC -> IP reservations)
+            dhcpServerStaticLeases = map
+              (lease: {
+                dhcpServerStaticLeaseConfig = {
+                  inherit (lease) MACAddress Address;
+                };
+              })
+              cfg.dhcpServer.staticLeases;
           };
         };
 
