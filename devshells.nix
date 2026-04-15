@@ -47,11 +47,17 @@ let
   ];
   pythonTools = with pkgs; [
     (python3.withPackages (ps: with ps; [
-      pip
       black
-      pylint
+      chardet
       isort
       jq
+      lxml
+      openpyxl
+      pip
+      pylint
+      pypdf
+      python-docx
+      pyyaml
       yq
     ]))
   ];

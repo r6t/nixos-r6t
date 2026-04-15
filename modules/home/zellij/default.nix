@@ -166,6 +166,9 @@ let
       enableFishIntegration = false;
       extraConfig = oxocarbonTheme;
       settings = {
+        env = {
+          TERM = "xterm-256color";
+        };
         show_startup_tips = false;
         on_force_close = "detach";
         simplified_ui = true;

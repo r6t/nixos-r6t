@@ -10,6 +10,13 @@ let
     programs.alacritty = {
       enable = true;
       settings = {
+        cursor = {
+          style = {
+            shape = "Block";
+            blinking = "Never";
+          };
+          unfocused_hollow = true;
+        };
         window = {
           # macOS handles decorations differently
           decorations = if pkgs.stdenv.isDarwin then "buttonless" else "none";
