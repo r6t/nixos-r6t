@@ -71,13 +71,6 @@
     "tx.r6t.io" = { upstream = "http://localhost:9091"; };
   };
 
-  # Spire proxy: crown's caddy forwards to spire over tailnet.
-  # LAN containers resolve pid.r6t.io to crown (via dns-overrides wildcard),
-  # and crown proxies to spire using the tailscale MagicDNS name.
-  spire-proxy = {
-    "pid.r6t.io" = { upstream = "http://spire.r6t.io:1411"; };
-  };
-
   sts = {
     "sts.r6t.io" = { upstream = "http://localhost:47811"; };
     "stsb.r6t.io" = { upstream = "http://localhost:47812"; };

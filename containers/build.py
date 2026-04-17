@@ -21,9 +21,7 @@ INSTANCE_MAP_FILE = FLAKE_DIR / "hosts/crown/incus-instances/instance_map.json"
 
 # Containers that should be pushed to remote incus servers after local import.
 # Maps container name -> list of remote names (as configured via `incus remote`).
-REMOTE_TARGETS = {
-    "spire": ["saguaro"],
-}
+REMOTE_TARGETS: dict = {}
 
 
 def run(cmd, check=True):

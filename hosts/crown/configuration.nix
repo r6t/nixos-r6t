@@ -5,8 +5,7 @@ let
   gpu = import ./gpu.nix;
 
   # Containers whose caddy routes are served by crown's host caddy.
-  # Includes spire-proxy: crown proxies pid.r6t.io to spire over tailnet
-  # so LAN containers can reach PocketID without being on the tailnet.
+  # Spire runs on crown — caddy proxies to it via local proxy devices.
   crownContainers = [
     "audiobookshelf"
     "changedetection"
@@ -20,7 +19,7 @@ let
     "paperless"
     "pirate-ship"
     "searxng"
-    "spire-proxy"
+    "spire"
     "sts"
   ];
 

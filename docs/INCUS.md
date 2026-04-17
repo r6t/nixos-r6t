@@ -24,10 +24,8 @@ hosts/{host}/incus-instances/
 
 Two hosts run incus:
 
-- **crown** — primary compute server, runs most LXC containers and VMs
-- **saguaro** — router, runs Home Assistant VM and the spire monitoring container
-
-Images are built on crown. Containers targeting saguaro (e.g. spire) are automatically pushed via `build.py`'s `REMOTE_TARGETS` config.
+- **crown** — primary compute server, runs all LXCs
+- **saguaro** — router, runs Home Assistant VM only
 
 ## Directory Structure
 
@@ -58,23 +56,10 @@ containers/
 Incus profile YAML files define the runtime environment — how the container connects to the network, what host directories are mounted in, and what ports are exposed. Profiles are **declaratively managed** — `nixos-rebuild switch` automatically syncs all YAML profiles into incus, overwriting any local changes.
 
 ```
-hosts/crown/incus-instances/
-    audiobookshelf.yaml     Profile YAML for each instance
-    mv-seattle.yaml         Exit node with physical NIC passthrough
-    ...
-    instance_map.json       Maps instance names to build targets
-    seed/                   Cloud-init NoCloud seed files
-        miniflux.meta-data
-        miniflux.network-config
-        miniflux.user-data
-
 hosts/saguaro/incus-instances/
     haos.yaml               Home Assistant VM
-    spire.yaml              Monitoring + auth container
     seed/
-        spire.meta-data
-        spire.network-config
-        spire.user-data
+        (no LXC containers on saguaro)
 ```
 
 ### Build Tooling
@@ -274,17 +259,15 @@ Crown's caddy handles most `*.r6t.io` services directly (local containers via pr
 
 All caddy routes are declared in `containers/lib/caddy-routes.nix` — a single source of truth.
 
-**Host mode (crown)**: Caddy runs on the host. Routes from `caddy-routes.nix` generate `services.caddy.virtualHosts` at build time. The caddy module defaults to Route53 DNS challenge with credentials from an environment file. Crown proxies spire services (pid.r6t.io) to spire over the tailnet.
-
-**Container mode (spire)**: Caddy runs inside the container with nix-generated routes from the same `caddy-routes.nix` file. Used when the container manages its own TLS termination.
+**Host mode (crown)**: Caddy runs on the host. Routes from `caddy-routes.nix` generate `services.caddy.virtualHosts` at build time. The caddy module defaults to Route53 DNS challenge with credentials from an environment file. Crown proxies all services (including spire's grafana/loki/prometheus/pid) to containers via local proxy devices.
 
 To disable DNS challenge for a host (e.g. HTTP challenge), override `mine.caddy.globalConfig` to `""`.
 
 ### Service Access Patterns
 
-**From tailnet devices** (laptop, phone): `pid.r6t.io` → Route53 CNAME → spire's tailscale IP → spire's caddy → service. Direct, encrypted.
+**From tailnet devices** (laptop, phone): `pid.r6t.io` → Route53 CNAME → crown's tailscale IP → crown's caddy → service. Direct, encrypted.
 
-**From LAN containers** (immich, miniflux): `pid.r6t.io` → dnsmasq wildcard → `192.168.6.10` (crown) → crown's caddy → `spire.r6t.io:1411` (tailnet) → spire → service. LAN to crown, then encrypted over tailnet to spire.
+**From LAN containers** (immich, miniflux): `pid.r6t.io` → dnsmasq wildcard → `192.168.6.10` (crown) → crown's caddy → proxy device → spire container. All local.
 
 ## Common Patterns
 
@@ -379,14 +362,14 @@ Exit node containers (`tailnet-exit.nix`) auto-join the tailnet with `--advertis
 
 ```
 Crown host Alloy
-  ├── Host journald  ──→  loki.r6t.io (spire, via tailnet)
+  ├── Host journald  ──→  loki.r6t.io (spire, via caddy on localhost)
   └── /var/log/incus-journals/*.json  ──→  loki.r6t.io
 
 incus-log-collector service (crown)
   └── incus exec {name} -- journalctl --follow --output=json
       └── writes to /var/log/incus-journals/{name}.json per container
 
-Spire (saguaro)
+Spire (crown)
   ├── Grafana  ──  dashboards + OIDC via PocketID
   ├── Loki     ──  receives logs from crown's Alloy
   ├── Prometheus  ──  scrapes metrics
@@ -407,13 +390,12 @@ The `incus-nightly-rebuild` NixOS module runs `containers/build.py --nightly` at
 # On crown
 cd ~/git/nixos-r6t && git pull
 nrs                                    # Rebuild NixOS, syncs incus profiles
-python3 containers/build.py            # Build all images (pushes spire to saguaro)
+python3 containers/build.py            # Build all images
 python3 containers/relaunch.py         # Relaunch containers with newer images
 
 # On saguaro
 cd ~/git/nixos-r6t && git pull
 sudo nixos-rebuild switch --flake '.#saguaro'
-python3 containers/relaunch.py spire   # Relaunch spire with new image
 ```
 
 ### Single container update
