@@ -1,0 +1,55 @@
+config:
+  security.nesting: "true"
+  user.user-data: |
+    #cloud-config
+    datasource_list: [NoCloud, None]
+description: spire
+devices:
+  eth0:
+    name: eth0
+    nictype: bridged
+    parent: br1
+    type: nic
+  grafana-port:
+    connect: tcp:127.0.0.1:3099
+    listen: tcp:0.0.0.0:3099
+    type: proxy
+  loki-port:
+    connect: tcp:127.0.0.1:3030
+    listen: tcp:0.0.0.0:3030
+    type: proxy
+  monitoring-data:
+    path: /var/lib/monitoring
+    shift: "true"
+    source: /mnt/crownstore/app-storage/spire/monitoring
+    type: disk
+  pocket-id-data:
+    path: /var/lib/pocket-id
+    shift: "true"
+    source: /mnt/crownstore/app-storage/spire/pocket-id
+    type: disk
+  pocket-id-port:
+    connect: tcp:127.0.0.1:1411
+    listen: tcp:0.0.0.0:1411
+    type: proxy
+  prometheus-port:
+    connect: tcp:127.0.0.1:9001
+    listen: tcp:0.0.0.0:9001
+    type: proxy
+  root:
+    path: /
+    pool: default
+    type: disk
+  seed-meta-data:
+    path: /var/lib/cloud/seed/nocloud/meta-data
+    source: /home/r6t/git/nixos-r6t/hosts/crown/incus-instances/seed/spire.meta-data
+    type: disk
+  seed-network-config:
+    path: /var/lib/cloud/seed/nocloud/network-config
+    source: /home/r6t/git/nixos-r6t/hosts/crown/incus-instances/seed/spire.network-config
+    type: disk
+  seed-user-data:
+    path: /var/lib/cloud/seed/nocloud/user-data
+    source: /home/r6t/git/nixos-r6t/hosts/crown/incus-instances/seed/spire.user-data
+    type: disk
+name: spire
