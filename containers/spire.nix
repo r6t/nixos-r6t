@@ -23,7 +23,7 @@
     # Don't let tailscale overwrite resolv.conf — dnsmasq is the authoritative
     # resolver in this container and must serve *.r6t.io overrides.
     # MagicDNS hostnames (crown, mountainball) are forwarded via dnsmasq below.
-    tailscale.extraUpFlags = [ "--accept-dns=false" ];
+    tailscale.extraUpFlags = [ "--accept-dns=false" "--ephemeral" ];
 
     # Forward tailnet MagicDNS queries to Tailscale's resolver so Prometheus
     # can scrape bare hostnames (crown, mountainball) via the tailnet.
@@ -44,6 +44,20 @@
         APP_URL = "https://pid.r6t.io";
         TRUST_PROXY = true;
       };
+    };
+  };
+
+  # After tailscale deregisters its resolvconf interface (--accept-dns=false),
+  # regenerate resolv.conf so dnsmasq on 127.0.0.1 is restored as the resolver.
+  systemd.services.restore-resolv = {
+    description = "Restore resolv.conf to dnsmasq after tailscale deregisters DNS";
+    after = [ "tailscaled-autoconnect.service" "cloud-init.service" ];
+    wants = [ "tailscaled-autoconnect.service" ];
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = "/run/current-system/sw/bin/resolvconf -u";
+      RemainAfterExit = true;
     };
   };
 
