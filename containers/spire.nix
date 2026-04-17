@@ -36,6 +36,7 @@
   };
 
   mine = {
+    tailscale.authKeyFile = "/etc/tailscale/auth-key";
     monitoring-services = {
       enable = true;
       grafana.domain = "grafana.r6t.io";

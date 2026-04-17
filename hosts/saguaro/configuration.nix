@@ -51,8 +51,7 @@
 
     alloy = {
       enable = true;
-      lokiUrl = "https://192.168.6.3/loki/api/v1/push";
-      lokiInsecureTls = true;
+      lokiUrl = "https://loki.r6t.io/loki/api/v1/push";
       syslogListen = true;
     };
     home-router = {
@@ -74,6 +73,9 @@
       };
       dns = {
         nextdnsConfigFile = "/mnt/nextdns.conf";
+        # Route monitoring endpoints to crown's LAN IP so LAN clients
+        # don't need tailnet access to push logs/metrics.
+        dnsmasqAddresses = [ "/loki.r6t.io/192.168.6.10" ];
       };
 
       # Allow LAN to access the router host on specific ports

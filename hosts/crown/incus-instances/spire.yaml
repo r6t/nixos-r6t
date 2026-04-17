@@ -40,6 +40,11 @@ devices:
     path: /
     pool: default
     type: disk
+  tailscale-auth:
+    path: /etc/tailscale/auth-key
+    shift: "true"
+    source: /mnt/crownstore/Sync/app-config/tailscale/exit-node-auth-key
+    type: disk
   seed-meta-data:
     path: /var/lib/cloud/seed/nocloud/meta-data
     source: /home/r6t/git/nixos-r6t/hosts/crown/incus-instances/seed/spire.meta-data
