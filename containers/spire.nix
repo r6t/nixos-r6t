@@ -6,7 +6,6 @@
     ./lib/mullvad-dns.nix
     ../modules/nixos/monitoring-services/default.nix
     ../modules/nixos/prometheus-node-exporter/default.nix
-    ../modules/nixos/tailscale/default.nix
   ];
 
   networking.hostName = "spire";
@@ -37,6 +36,7 @@
   };
 
   mine = {
+    tailscale.enable = true;
     tailscale.authKeyFile = "/etc/tailscale/auth-key";
     monitoring-services = {
       enable = true;
