@@ -20,10 +20,7 @@
     services.tailscale = {
       enable = true;
       inherit (config.mine.tailscale) authKeyFile;
-      # Don't let tailscale overwrite resolv.conf — DNS is managed by the
-      # host's own resolver (dnsmasq in containers, resolved on hosts).
-      # MagicDNS forwarding is configured separately where needed.
-      extraDaemonFlags = [ "--accept-dns=false" ];
+
     };
 
     networking = {

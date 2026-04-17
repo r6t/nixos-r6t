@@ -11,12 +11,6 @@
 
   networking.hostName = "spire";
 
-  # Forward tailnet MagicDNS queries to Tailscale's resolver so Prometheus
-  # can scrape bare hostnames (crown, mountainball) via the tailnet.
-  # Tailscale DNS management is disabled (--accept-dns=false in the module)
-  # so dnsmasq remains the authoritative resolver and *.r6t.io overrides work.
-  services.dnsmasq.settings.server = [ "/cloudforest-darter.ts.net/100.100.100.100" ];
-
   # Match existing data ownership (r6t:users = 1000:100)
   users.users.pocket-id = {
     uid = lib.mkForce 1000;
@@ -25,20 +19,31 @@
     home = "/var/lib/pocket-id";
   };
 
-  services.pocket-id = {
-    enable = true;
-    user = "pocket-id";
-    group = "users";
+  services = {
+    # Don't let tailscale overwrite resolv.conf — dnsmasq is the authoritative
+    # resolver in this container and must serve *.r6t.io overrides.
+    # MagicDNS hostnames (crown, mountainball) are forwarded via dnsmasq below.
+    tailscale.extraUpFlags = [ "--accept-dns=false" ];
 
-    # Data directory mounted by Incus from persistent storage
-    dataDir = "/var/lib/pocket-id";
+    # Forward tailnet MagicDNS queries to Tailscale's resolver so Prometheus
+    # can scrape bare hostnames (crown, mountainball) via the tailnet.
+    dnsmasq.settings.server = [ "/cloudforest-darter.ts.net/100.100.100.100" ];
 
-    # ENCRYPTION_KEY and other secrets in this file on persistent storage
-    environmentFile = "/var/lib/pocket-id/pocket-id.env";
+    pocket-id = {
+      enable = true;
+      user = "pocket-id";
+      group = "users";
 
-    settings = {
-      APP_URL = "https://pid.r6t.io";
-      TRUST_PROXY = true;
+      # Data directory mounted by Incus from persistent storage
+      dataDir = "/var/lib/pocket-id";
+
+      # ENCRYPTION_KEY and other secrets in this file on persistent storage
+      environmentFile = "/var/lib/pocket-id/pocket-id.env";
+
+      settings = {
+        APP_URL = "https://pid.r6t.io";
+        TRUST_PROXY = true;
+      };
     };
   };
 
