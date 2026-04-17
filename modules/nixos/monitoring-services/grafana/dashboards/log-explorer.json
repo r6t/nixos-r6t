@@ -3,7 +3,7 @@
   "uid": "r6-log-explorer",
   "tags": ["nixos", "logs"],
   "timezone": "browser",
-  "schemaVersion": 37,
+  "schemaVersion": 38,
   "version": 1,
   "editable": true,
   "refresh": "30s",
@@ -17,13 +17,9 @@
         "refresh": 2,
         "sort": 1,
         "includeAll": true,
-        "allValue": ".+",
+        "allValue": ".*",
         "multi": true,
-        "current": {
-          "selected": true,
-          "text": ["All"],
-          "value": ["$__all"]
-        }
+        "current": {}
       },
       {
         "name": "unit",
@@ -33,221 +29,60 @@
         "refresh": 2,
         "sort": 1,
         "includeAll": true,
-        "allValue": ".+",
+        "allValue": ".*",
         "multi": true,
-        "current": {
-          "selected": true,
-          "text": ["All"],
-          "value": ["$__all"]
-        }
-      },
-      {
-        "name": "severity",
-        "type": "custom",
-        "query": "0,1,2,3,4,5,6,7",
-        "includeAll": true,
-        "allValue": ".+",
-        "multi": true,
-        "current": {
-          "selected": true,
-          "text": ["0", "1", "2", "3", "4", "5", "6"],
-          "value": ["0", "1", "2", "3", "4", "5", "6"]
-        },
-        "options": [
-          { "text": "0", "value": "0", "selected": true },
-          { "text": "1", "value": "1", "selected": true },
-          { "text": "2", "value": "2", "selected": true },
-          { "text": "3", "value": "3", "selected": true },
-          { "text": "4", "value": "4", "selected": true },
-          { "text": "5", "value": "5", "selected": true },
-          { "text": "6", "value": "6", "selected": true },
-          { "text": "7", "value": "7", "selected": false }
-        ]
-      },
-      {
-        "name": "search",
-        "type": "textbox",
-        "label": "Search",
-        "current": {
-          "selected": false,
-          "text": "",
-          "value": ""
-        }
+        "current": {}
       }
     ]
   },
-  "panels": [
-    {
-      "id": 1,
-      "type": "row",
-      "title": "Log Volume & Errors",
-      "collapsed": false,
-      "gridPos": { "x": 0, "y": 0, "w": 24, "h": 1 }
-    },
-    {
-      "id": 2,
-      "type": "timeseries",
-      "title": "Log Volume by Host",
-      "datasource": "Loki",
-      "gridPos": { "x": 0, "y": 1, "w": 12, "h": 8 },
-      "targets": [
-        {
-          "expr": "sum by (host) (count_over_time({host=~\"$host\", unit=~\"$unit\"} [$__auto]))",
-          "legendFormat": "{{host}}",
-          "refId": "A",
-          "queryType": "range"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "custom": {
-            "stacking": { "mode": "normal" },
-            "fillOpacity": 25,
-            "lineWidth": 1,
-            "pointSize": 5,
-            "showPoints": "never"
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "legend": { "displayMode": "table", "placement": "bottom" },
-        "tooltip": { "mode": "multi", "sort": "descending" }
-      }
-    },
-    {
-      "id": 3,
-      "type": "timeseries",
-      "title": "Error Rate",
-      "datasource": "Loki",
-      "gridPos": { "x": 12, "y": 1, "w": 12, "h": 8 },
-      "targets": [
-        {
-          "expr": "sum by (host) (count_over_time({host=~\"$host\", unit=~\"$unit\", severity=~\"[0-3]\"} [$__auto]))",
-          "legendFormat": "{{host}} errors",
-          "refId": "A",
-          "queryType": "range"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "custom": {
-            "fillOpacity": 25,
-            "lineWidth": 1,
-            "pointSize": 5,
-            "showPoints": "never"
-          },
-          "color": { "mode": "palette-classic" }
-        },
-        "overrides": []
-      },
-      "options": {
-        "legend": { "displayMode": "table", "placement": "bottom" },
-        "tooltip": { "mode": "multi", "sort": "descending" }
-      }
-    },
-    {
-      "id": 4,
-      "type": "timeseries",
-      "title": "Log Volume by Unit",
-      "datasource": "Loki",
-      "gridPos": { "x": 0, "y": 9, "w": 12, "h": 8 },
-      "targets": [
-        {
-          "expr": "topk(10, sum by (unit) (count_over_time({host=~\"$host\", unit=~\"$unit\"} [$__auto])))",
-          "legendFormat": "{{unit}}",
-          "refId": "A",
-          "queryType": "range"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "custom": {
-            "stacking": { "mode": "normal" },
-            "fillOpacity": 25,
-            "lineWidth": 1,
-            "pointSize": 5,
-            "showPoints": "never"
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "legend": { "displayMode": "table", "placement": "bottom" },
-        "tooltip": { "mode": "multi", "sort": "descending" }
-      }
-    },
-    {
-      "id": 5,
-      "type": "timeseries",
-      "title": "Container vs Host Logs",
-      "datasource": "Loki",
-      "gridPos": { "x": 12, "y": 9, "w": 12, "h": 8 },
-      "targets": [
-        {
-          "expr": "sum(count_over_time({source=\"incus\", host=~\"$host\"} [$__auto]))",
-          "legendFormat": "Containers",
-          "refId": "A",
-          "queryType": "range"
-        },
-        {
-          "expr": "sum(count_over_time({source=\"\", host=~\"$host\"} [$__auto]))",
-          "legendFormat": "Hosts",
-          "refId": "B",
-          "queryType": "range"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "custom": {
-            "stacking": { "mode": "normal" },
-            "fillOpacity": 25,
-            "lineWidth": 1,
-            "pointSize": 5,
-            "showPoints": "never"
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "legend": { "displayMode": "table", "placement": "bottom" },
-        "tooltip": { "mode": "multi", "sort": "descending" }
-      }
-    },
-    {
-      "id": 6,
-      "type": "row",
-      "title": "Log Stream",
-      "collapsed": false,
-      "gridPos": { "x": 0, "y": 17, "w": 24, "h": 1 }
-    },
-    {
-      "id": 7,
-      "type": "logs",
-      "title": "Logs",
-      "datasource": "Loki",
-      "gridPos": { "x": 0, "y": 18, "w": 24, "h": 16 },
-      "targets": [
-        {
-          "expr": "{host=~\"$host\", unit=~\"$unit\", severity=~\"$severity\"} |~ \"$search\"",
-          "refId": "A",
-          "queryType": "range"
-        }
-      ],
-      "options": {
-        "showLabels": true,
-        "showTime": true,
-        "wrapLogMessage": true,
-        "sortOrder": "Descending",
-        "enableLogDetails": true,
-        "prettifyLogMessage": false,
-        "dedupStrategy": "none"
-      }
-    }
-  ],
   "time": {
     "from": "now-1h",
     "to": "now"
   },
-  "timepicker": {}
+  "panels": [
+    {
+      "id": 1,
+      "type": "timeseries",
+      "title": "Log Volume Over Time",
+      "datasource": "Loki",
+      "gridPos": { "x": 0, "y": 0, "w": 24, "h": 8 },
+      "targets": [
+        {
+          "expr": "sum by (host) (count_over_time({host=~\"$host\", unit=~\"$unit\"}[$__interval]))",
+          "legendFormat": "{{host}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 80,
+            "showPoints": "never"
+          },
+          "color": { "mode": "palette-classic" }
+        }
+      }
+    },
+    {
+      "id": 2,
+      "type": "logs",
+      "title": "Log Stream",
+      "datasource": "Loki",
+      "gridPos": { "x": 0, "y": 8, "w": 24, "h": 16 },
+      "targets": [
+        {
+          "expr": "{host=~\"$host\", unit=~\"$unit\"}",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "showTime": true,
+        "showLabels": true,
+        "wrapLogMessage": true,
+        "sortOrder": "Descending",
+        "enableLogDetails": true
+      }
+    }
+  ]
 }

@@ -1,0 +1,328 @@
+{
+  "title": "r6 Router Health",
+  "uid": "r6-router-health",
+  "tags": ["nixos", "network", "router"],
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "version": 1,
+  "editable": true,
+  "refresh": "30s",
+  "templating": {
+    "list": [
+      {
+        "name": "exit_node",
+        "type": "query",
+        "datasource": "Prometheus",
+        "query": "label_values(wg_peer_transfer_rx_bytes, instance)",
+        "refresh": 2,
+        "sort": 1,
+        "includeAll": true,
+        "allValue": ".*",
+        "multi": true,
+        "current": {},
+        "options": []
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "row",
+      "title": "Router Core Metrics",
+      "collapsed": false,
+      "gridPos": { "x": 0, "y": 0, "w": 24, "h": 1 }
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "WAN Throughput",
+      "datasource": "Prometheus",
+      "gridPos": { "x": 0, "y": 1, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "rate(node_network_receive_bytes_total{instance=\"192.168.6.1:9000\",device=\"enp101s0\"}[$__rate_interval]) * 8",
+          "legendFormat": "Download",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(node_network_transmit_bytes_total{instance=\"192.168.6.1:9000\",device=\"enp101s0\"}[$__rate_interval]) * -8",
+          "legendFormat": "Upload",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bps",
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisPlacement": "right",
+            "fillOpacity": 10,
+            "showPoints": "never"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "Download" },
+            "properties": [
+              {
+                "id": "color",
+                "value": { "fixedColor": "#42be65", "mode": "fixed" }
+              }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "Upload" },
+            "properties": [
+              {
+                "id": "color",
+                "value": { "fixedColor": "#08bdba", "mode": "fixed" }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "LAN Throughput",
+      "datasource": "Prometheus",
+      "gridPos": { "x": 12, "y": 1, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "rate(node_network_receive_bytes_total{instance=\"192.168.6.1:9000\",device=\"enp100s0\"}[$__rate_interval]) * 8",
+          "legendFormat": "Download",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(node_network_transmit_bytes_total{instance=\"192.168.6.1:9000\",device=\"enp100s0\"}[$__rate_interval]) * -8",
+          "legendFormat": "Upload",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bps",
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisPlacement": "right",
+            "fillOpacity": 10,
+            "showPoints": "never"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "Download" },
+            "properties": [
+              {
+                "id": "color",
+                "value": { "fixedColor": "#42be65", "mode": "fixed" }
+              }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "Upload" },
+            "properties": [
+              {
+                "id": "color",
+                "value": { "fixedColor": "#08bdba", "mode": "fixed" }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Router Uptime",
+      "datasource": "Prometheus",
+      "gridPos": { "x": 0, "y": 9, "w": 6, "h": 4 },
+      "targets": [
+        {
+          "expr": "time() - node_boot_time_seconds{instance=\"192.168.6.1:9000\"}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "#08bdba", "value": null }]
+          }
+        }
+      },
+      "options": {
+        "textMode": "value",
+        "colorMode": "value",
+        "graphMode": "none"
+      }
+    },
+    {
+      "id": 5,
+      "type": "gauge",
+      "title": "Conntrack Usage",
+      "datasource": "Prometheus",
+      "gridPos": { "x": 6, "y": 9, "w": 6, "h": 4 },
+      "targets": [
+        {
+          "expr": "(node_nf_conntrack_entries{instance=\"192.168.6.1:9000\"} / node_nf_conntrack_entries_limit{instance=\"192.168.6.1:9000\"}) * 100",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "#42be65", "value": null },
+              { "color": "#ff7eb6", "value": 70 },
+              { "color": "#ee5396", "value": 90 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "CPU & Memory",
+      "datasource": "Prometheus",
+      "gridPos": { "x": 12, "y": 9, "w": 12, "h": 4 },
+      "targets": [
+        {
+          "expr": "100 - (avg(rate(node_cpu_seconds_total{instance=\"192.168.6.1:9000\",mode=\"idle\"}[$__rate_interval])) * 100)",
+          "legendFormat": "CPU",
+          "refId": "A"
+        },
+        {
+          "expr": "((node_memory_MemTotal_bytes{instance=\"192.168.6.1:9000\"} - node_memory_MemAvailable_bytes{instance=\"192.168.6.1:9000\"}) / node_memory_MemTotal_bytes{instance=\"192.168.6.1:9000\"}) * 100",
+          "legendFormat": "Mem",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "custom": { "showPoints": "never" }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "CPU" },
+            "properties": [
+              {
+                "id": "color",
+                "value": { "fixedColor": "#82cfff", "mode": "fixed" }
+              }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "Mem" },
+            "properties": [
+              {
+                "id": "color",
+                "value": { "fixedColor": "#78a9ff", "mode": "fixed" }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 7,
+      "type": "row",
+      "title": "Router Logs",
+      "collapsed": false,
+      "gridPos": { "x": 0, "y": 13, "w": 24, "h": 1 }
+    },
+    {
+      "id": 8,
+      "type": "logs",
+      "title": "Critical Router Logs",
+      "datasource": "Loki",
+      "gridPos": { "x": 0, "y": 14, "w": 24, "h": 8 },
+      "targets": [
+        {
+          "expr": "{host=\"saguaro\", unit=~\"router-health-check|wan-watchdog|dnsmasq|nextdns|nftables|cake-qos-.*\"}",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "showTime": true,
+        "showLabels": false,
+        "wrapLogMessage": true,
+        "sortOrder": "Descending"
+      }
+    },
+    {
+      "id": 9,
+      "type": "row",
+      "title": "WireGuard Exit Nodes",
+      "collapsed": true,
+      "gridPos": { "x": 0, "y": 22, "w": 24, "h": 1 }
+    },
+    {
+      "id": 10,
+      "type": "timeseries",
+      "title": "Peer Throughput",
+      "datasource": "Prometheus",
+      "gridPos": { "x": 0, "y": 23, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "rate(wg_peer_transfer_rx_bytes{instance=~\"$exit_node\"}[$__rate_interval]) * 8",
+          "legendFormat": "{{instance}} RX",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(wg_peer_transfer_tx_bytes{instance=~\"$exit_node\"}[$__rate_interval]) * 8",
+          "legendFormat": "{{instance}} TX",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bps",
+          "custom": { "fillOpacity": 10 }
+        }
+      }
+    },
+    {
+      "id": 11,
+      "type": "timeseries",
+      "title": "Last Handshake Age",
+      "datasource": "Prometheus",
+      "gridPos": { "x": 12, "y": 23, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "time() - wg_peer_last_handshake_seconds{instance=~\"$exit_node\"}",
+          "legendFormat": "{{instance}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "#42be65", "value": null },
+              { "color": "#ff7eb6", "value": 180 },
+              { "color": "#ee5396", "value": 600 }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}
