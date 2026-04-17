@@ -6,6 +6,7 @@
     ./lib/mullvad-dns.nix
     ../modules/nixos/monitoring-services/default.nix
     ../modules/nixos/prometheus-node-exporter/default.nix
+    ../modules/nixos/tailscale/default.nix
   ];
 
   networking.hostName = "spire";
