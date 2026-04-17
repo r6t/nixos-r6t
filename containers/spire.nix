@@ -11,6 +11,12 @@
 
   networking.hostName = "spire";
 
+  # Forward tailnet MagicDNS queries to Tailscale's resolver so Prometheus
+  # can scrape bare hostnames (crown, mountainball) via the tailnet.
+  # Tailscale DNS management is disabled (--accept-dns=false in the module)
+  # so dnsmasq remains the authoritative resolver and *.r6t.io overrides work.
+  services.dnsmasq.settings.server = [ "/cloudforest-darter.ts.net/100.100.100.100" ];
+
   # Match existing data ownership (r6t:users = 1000:100)
   users.users.pocket-id = {
     uid = lib.mkForce 1000;
