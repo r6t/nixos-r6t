@@ -30,13 +30,6 @@
       default = [ ];
       description = "Extra flags to pass to 'tailscale up'";
     };
-
-    magicDnsDomain = lib.mkOption {
-      type = lib.types.nullOr lib.types.str;
-      default = if config.boot.isContainer then "ts.net" else null;
-      example = "ts.net";
-      description = "Optional MagicDNS domain to forward via local dnsmasq (split-DNS). Defaults to 'ts.net' in containers.";
-    };
   };
 
   config = lib.mkIf config.mine.tailscale.enable {
@@ -49,9 +42,13 @@
         ++ [ "--accept-dns=${if config.mine.tailscale.acceptDns then "true" else "false"}" ];
     };
 
-    # Split-DNS for MagicDNS names via local dnsmasq
-    services.dnsmasq.settings.server = lib.mkIf (config.mine.tailscale.magicDnsDomain != null) [
-      "/${config.mine.tailscale.magicDnsDomain}/100.100.100.100"
+    # Automatically enable short-name resolution (ssh crown) in containers.
+    # We add the tailnet suffix to the search list and tell dnsmasq to 
+    # route those queries specifically to Tailscale.
+    networking.search = lib.mkIf config.boot.isContainer [ "cloudforest-darter.ts.net" ];
+
+    services.dnsmasq.settings.server = [
+      "/cloudforest-darter.ts.net/100.100.100.100"
     ];
 
     # For ephemeral nodes, logout on stop to ensure immediate removal from the tailnet

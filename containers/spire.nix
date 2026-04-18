@@ -3,7 +3,6 @@
 {
   imports = [
     ./lib/base.nix
-    ./lib/mullvad-dns.nix
     ../modules/nixos/monitoring-services/default.nix
     ../modules/nixos/prometheus-node-exporter/default.nix
     ../modules/nixos/tailscale/default.nix
@@ -54,8 +53,11 @@
         tokenUrl = "http://localhost:1411/api/oidc/token";
         apiUrl = "http://localhost:1411/api/oidc/userinfo";
       };
-      prometheus.scrapeTargets = [ "crown:9000" "mountainball:9000" "192.168.6.1:9000" ];
-      prometheus.incusMetricsTargets = [ "crown:9101" "192.168.6.1:9101" ];
+      prometheus = {
+        scrapeTargets = [ "crown:9000" "mountainball:9000" "192.168.6.1:9000" ];
+        containerScrapeTargets = [ "localhost:9000" ];
+        incusMetricsTargets = [ "crown:9101" "192.168.6.1:9101" ];
+      };
     };
     prometheus-node-exporter.enable = true;
   };

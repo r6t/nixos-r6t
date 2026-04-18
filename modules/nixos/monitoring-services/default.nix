@@ -98,8 +98,15 @@ in
       scrapeTargets = lib.mkOption {
         type = lib.types.listOf lib.types.str;
         default = [ ];
-        description = "List of node-exporter scrape targets (host:port format)";
+        description = "List of physical node-exporter scrape targets (host:port format)";
         example = [ "crown:9000" "mountainball:9000" "saguaro:9000" ];
+      };
+
+      containerScrapeTargets = lib.mkOption {
+        type = lib.types.listOf lib.types.str;
+        default = [ ];
+        description = "List of container node-exporter scrape targets (host:port format)";
+        example = [ "localhost:9000" ];
       };
 
       incusMetricsTargets = lib.mkOption {
@@ -184,7 +191,7 @@ in
           dashboards.settings.providers = [{
             name = "r6 nix-managed Dashboards";
             options.path = "${grafanaDashboardsDir}";
-            disableDeletion = true;
+            disableDeletion = false;
             updateIntervalSeconds = 30;
           }];
         };
@@ -272,6 +279,25 @@ in
               static_configs = [{
                 targets = cfg.prometheus.scrapeTargets;
               }];
+            }
+          ]
+          ++ lib.optionals (cfg.prometheus.containerScrapeTargets != [ ]) [
+            {
+              job_name = "r6-nix-containers";
+              honor_labels = true;
+              static_configs = [{
+                targets = cfg.prometheus.containerScrapeTargets;
+                labels = { is_lxc = "true"; };
+              }];
+              # Append (LXC) to the nodename metric label for all metrics from these targets
+              metric_relabel_configs = [
+                {
+                  source_labels = [ "nodename" ];
+                  regex = "(.*)";
+                  replacement = "$1 (LXC)";
+                  target_label = "nodename";
+                }
+              ];
             }
           ]
           ++ lib.optionals (cfg.prometheus.incusMetricsTargets != [ ]) [

@@ -13,7 +13,8 @@
         "name": "host",
         "type": "query",
         "datasource": "Prometheus",
-        "query": "label_values(node_uname_info, instance)",
+        "query": "query_result(node_uname_info)",
+        "regex": "/instance=\"(?<value>[^\"]+)\".*nodename=\"(?<text>[^\"]+)\"/",
         "refresh": 2,
         "sort": 1,
         "includeAll": true,
@@ -368,18 +369,42 @@
       }
     },
     {
+      "id": 60,
+      "type": "row",
+      "title": "Fleet DNS Activity (Local Resolvers)",
+      "collapsed": false,
+      "gridPos": { "x": 0, "y": 30, "w": 24, "h": 1 }
+    },
+    {
+      "id": 61,
+      "type": "timeseries",
+      "title": "DNS Query Volume by Host",
+      "datasource": "Loki",
+      "gridPos": { "x": 0, "y": 31, "w": 24, "h": 8 },
+      "targets": [
+        {
+          "expr": "sum by (host) (count_over_time({unit=\"dnsmasq.service\"} | regexp \"query\\\\[.*\\\\]\" [$__interval]))",
+          "legendFormat": "{{host}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "qps", "custom": { "fillOpacity": 10 } }
+      }
+    },
+    {
       "id": 40,
       "type": "row",
       "title": "Thermal Status",
       "collapsed": true,
-      "gridPos": { "x": 0, "y": 30, "w": 24, "h": 1 }
+      "gridPos": { "x": 0, "y": 39, "w": 24, "h": 1 }
     },
     {
       "id": 41,
       "type": "timeseries",
       "title": "Hardware Temperatures",
       "datasource": "Prometheus",
-      "gridPos": { "x": 0, "y": 31, "w": 24, "h": 8 },
+      "gridPos": { "x": 0, "y": 40, "w": 24, "h": 8 },
       "targets": [
         {
           "expr": "node_hwmon_temp_celsius{instance=~\"$host\"}",

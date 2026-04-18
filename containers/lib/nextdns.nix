@@ -16,6 +16,9 @@ _:
         "/mnt/nextdns.conf"
       ];
     };
+
+    # Forward all other queries to local NextDNS-CLI
+    dnsmasq.settings.server = [ "127.0.0.1#5353" ];
   };
 }
 

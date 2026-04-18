@@ -11,9 +11,13 @@
     "list": [
       {
         "name": "router",
-        "type": "constant",
-        "query": "192.168.6.1:9000",
-        "hide": 2
+        "type": "query",
+        "datasource": "Prometheus",
+        "query": "label_values(node_network_receive_bytes_total{device=\"enp101s0\"}, instance)",
+        "refresh": 2,
+        "sort": 1,
+        "includeAll": false,
+        "current": {}
       },
       {
         "name": "exit_node",
@@ -93,12 +97,12 @@
       "gridPos": { "x": 0, "y": 4, "w": 12, "h": 8 },
       "targets": [
         {
-          "expr": "rate(node_network_receive_bytes_total{instance=\"$router\",device=\"enp101s0\"}[$__rate_interval]) * 8",
+          "expr": "rate(node_network_receive_bytes_total{instance=\"$router\",device=\"enp101s0\"}[5m]) * 8",
           "legendFormat": "Download",
           "refId": "A"
         },
         {
-          "expr": "rate(node_network_transmit_bytes_total{instance=\"$router\",device=\"enp101s0\"}[$__rate_interval]) * -8",
+          "expr": "rate(node_network_transmit_bytes_total{instance=\"$router\",device=\"enp101s0\"}[5m]) * -8",
           "legendFormat": "Upload",
           "refId": "B"
         }
@@ -142,12 +146,12 @@
       "gridPos": { "x": 12, "y": 4, "w": 12, "h": 8 },
       "targets": [
         {
-          "expr": "rate(node_network_receive_bytes_total{instance=\"$router\",device=\"enp100s0\"}[$__rate_interval]) * 8",
+          "expr": "rate(node_network_receive_bytes_total{instance=\"$router\",device=\"enp100s0\"}[5m]) * 8",
           "legendFormat": "Download",
           "refId": "A"
         },
         {
-          "expr": "rate(node_network_transmit_bytes_total{instance=\"$router\",device=\"enp100s0\"}[$__rate_interval]) * -8",
+          "expr": "rate(node_network_transmit_bytes_total{instance=\"$router\",device=\"enp100s0\"}[5m]) * -8",
           "legendFormat": "Upload",
           "refId": "B"
         }

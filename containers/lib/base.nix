@@ -62,10 +62,8 @@ in
         no-negcache = true;
         dns-forward-max = 1500;
         domain-needed = true;
-        # needs 127.0.0.1#53 DNS to be provided
-        server = [
-          "127.0.0.1#5353"
-        ];
+        # Primary upstream server is provided by mullvad-dns.nix, 
+        # nextdns.nix, or tailscale module.
       };
     };
   };
