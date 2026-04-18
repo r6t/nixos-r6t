@@ -189,7 +189,7 @@ in
           ];
 
           dashboards.settings.providers = [{
-            name = "r6 nix-managed Dashboards";
+            name = "r6 Managed Dashboards (v2)";
             options.path = "${grafanaDashboardsDir}";
             disableDeletion = false;
             updateIntervalSeconds = 30;

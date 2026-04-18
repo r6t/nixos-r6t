@@ -91,14 +91,14 @@ in
       mine.tailscale = {
         enable = true;
         ephemeral = true;
-      };
-
-      services.tailscale = {
-        useRoutingFeatures = lib.mkForce "server";
         extraUpFlags = [
           "--advertise-exit-node"
           "--accept-routes"
         ];
+      };
+
+      services.tailscale = {
+        useRoutingFeatures = lib.mkForce "server";
       };
 
       networking = {

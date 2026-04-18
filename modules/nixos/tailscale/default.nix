@@ -51,36 +51,67 @@
       "/cloudforest-darter.ts.net/100.100.100.100"
     ];
 
-    # For ephemeral nodes, logout on stop to ensure immediate removal from the tailnet
-    systemd.services.tailscaled.serviceConfig.ExecStop = lib.mkIf config.mine.tailscale.ephemeral (
-      pkgs.writeShellScript "tailscale-logout" ''
-        ${config.services.tailscale.package}/bin/tailscale logout || true
-      ''
-    );
+    systemd.services = {
+      # For ephemeral nodes, logout on stop to ensure immediate removal from the tailnet
+      tailscaled.serviceConfig.ExecStop = lib.mkIf config.mine.tailscale.ephemeral (
+        pkgs.writeShellScript "tailscale-logout" ''
+          ${config.services.tailscale.package}/bin/tailscale logout || true
+        ''
+      );
 
-    # All containers benefit from syncing their Tailscale name from the cloud-init seed,
-    # preventing naming collisions (like -1 suffixes) and ensuring consistency.
-    systemd.services.tailscale-set-hostname = lib.mkIf config.boot.isContainer {
-      description = "Set Tailscale hostname from cloud-init seed";
-      after = [ "tailscaled.service" "cloud-final.service" ];
-      wants = [ "tailscaled.service" ];
-      wantedBy = [ "multi-user.target" ];
-      path = [ config.services.tailscale.package ];
-      script = ''
-        SEED="/var/lib/cloud/seed/nocloud/meta-data"
-        if [ -f "$SEED" ]; then
-          NAME=$(${pkgs.gnugrep}/bin/grep '^local-hostname:' "$SEED" | ${pkgs.coreutils}/bin/cut -d' ' -f2)
-          if [ -n "$NAME" ]; then
-            echo "Setting tailscale hostname to $NAME"
-            tailscale set --hostname="$NAME"
-            exit 0
+      # Explicitly run 'tailscale up' if an authKeyFile is provided.
+      # This is required for headless auto-joining on first boot or relaunch.
+      tailscale-autoconnect = lib.mkIf (config.mine.tailscale.authKeyFile != null) {
+        description = "Automatic Tailscale login";
+        after = [ "tailscaled.service" "network-online.target" ];
+        wants = [ "tailscaled.service" "network-online.target" ];
+        wantedBy = [ "multi-user.target" ];
+        path = [ config.services.tailscale.package ];
+        script = ''
+          # Wait for tailscaled to be ready
+          until tailscale status &>/dev/null || [ $? -ne 1 ]; do
+            sleep 1
+          done
+
+          # Check if already authenticated
+          if tailscale status | grep -q "Logged out"; then
+            echo "Authenticating with authKeyFile..."
+            tailscale up --authkey="$(cat ${config.mine.tailscale.authKeyFile})" ${lib.concatStringsSep " " config.services.tailscale.extraUpFlags}
+          else
+            echo "Already authenticated, ensuring flags are up to date..."
+            tailscale up ${lib.concatStringsSep " " config.services.tailscale.extraUpFlags}
           fi
-        fi
-        echo "WARNING: Could not read hostname from $SEED, skipping"
-      '';
-      serviceConfig = {
-        Type = "oneshot";
-        RemainAfterExit = true;
+        '';
+        serviceConfig = {
+          Type = "oneshot";
+          RemainAfterExit = true;
+        };
+      };
+
+      # All containers benefit from syncing their Tailscale name from the cloud-init seed,
+      # preventing naming collisions (like -1 suffixes) and ensuring consistency.
+      tailscale-set-hostname = lib.mkIf config.boot.isContainer {
+        description = "Set Tailscale hostname from cloud-init seed";
+        after = [ "tailscale-autoconnect.service" "tailscaled.service" "cloud-final.service" ];
+        wants = [ "tailscale-autoconnect.service" ];
+        wantedBy = [ "multi-user.target" ];
+        path = [ config.services.tailscale.package ];
+        script = ''
+          SEED="/var/lib/cloud/seed/nocloud/meta-data"
+          if [ -f "$SEED" ]; then
+            NAME=$(${pkgs.gnugrep}/bin/grep '^local-hostname:' "$SEED" | ${pkgs.coreutils}/bin/cut -d' ' -f2)
+            if [ -n "$NAME" ]; then
+              echo "Setting tailscale hostname to $NAME"
+              tailscale set --hostname="$NAME"
+              exit 0
+            fi
+          fi
+          echo "WARNING: Could not read hostname from $SEED, skipping"
+        '';
+        serviceConfig = {
+          Type = "oneshot";
+          RemainAfterExit = true;
+        };
       };
     };
 
