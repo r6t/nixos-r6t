@@ -279,6 +279,36 @@ in
               static_configs = [{
                 targets = cfg.prometheus.scrapeTargets;
               }];
+              relabel_configs = [
+                {
+                  source_labels = [ "__address__" ];
+                  # Extract hostname from address, handles IPs too
+                  regex = "([^:.]+).*";
+                  replacement = "$1";
+                  target_label = "nodename";
+                }
+                # Specific overrides for IPs or non-obvious names
+                {
+                  source_labels = [ "nodename" ];
+                  regex = "192\\.168\\.6\\.1";
+                  replacement = "saguaro";
+                  target_label = "nodename";
+                }
+              ];
+              metric_relabel_configs = [
+                {
+                  source_labels = [ "instance" ];
+                  regex = "([^:.]+).*";
+                  replacement = "$1";
+                  target_label = "nodename";
+                }
+                {
+                  source_labels = [ "instance" ];
+                  regex = "192\\.168\\.6\\.1:.*";
+                  replacement = "saguaro";
+                  target_label = "nodename";
+                }
+              ];
             }
           ]
           ++ lib.optionals (cfg.prometheus.containerScrapeTargets != [ ]) [
@@ -289,11 +319,19 @@ in
                 targets = cfg.prometheus.containerScrapeTargets;
                 labels = { is_lxc = "true"; };
               }];
-              # Append (LXC) to the nodename metric label for all metrics from these targets
+              relabel_configs = [
+                {
+                  source_labels = [ "__address__" ];
+                  # For containers, extract the name and set it as nodename
+                  regex = "([^:]+):.*";
+                  replacement = "$1 (LXC)";
+                  target_label = "nodename";
+                }
+              ];
               metric_relabel_configs = [
                 {
-                  source_labels = [ "nodename" ];
-                  regex = "(.*)";
+                  source_labels = [ "instance" ];
+                  regex = "([^:]+):.*";
                   replacement = "$1 (LXC)";
                   target_label = "nodename";
                 }
@@ -314,8 +352,14 @@ in
               relabel_configs = [
                 {
                   source_labels = [ "__address__" ];
-                  regex = "([^.]+).*";
+                  regex = "([^:.]+).*";
                   replacement = "$1";
+                  target_label = "nodename";
+                }
+                {
+                  source_labels = [ "nodename" ];
+                  regex = "192\\.168\\.6\\.1";
+                  replacement = "saguaro";
                   target_label = "nodename";
                 }
               ];

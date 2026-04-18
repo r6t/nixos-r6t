@@ -54,7 +54,7 @@
       };
       prometheus = {
         scrapeTargets = [ "crown:9000" "mountainball:9000" "192.168.6.1:9000" ];
-        containerScrapeTargets = [ "localhost:9000" ];
+        containerScrapeTargets = [ "spire:9000" ];
         incusMetricsTargets = [ "crown:9101" "192.168.6.1:9101" ];
       };
     };

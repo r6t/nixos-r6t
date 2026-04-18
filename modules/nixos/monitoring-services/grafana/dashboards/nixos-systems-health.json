@@ -4,9 +4,29 @@
   "tags": ["nixos", "systems"],
   "timezone": "browser",
   "schemaVersion": 38,
-  "version": 5,
+  "version": 6,
   "editable": true,
   "refresh": "30s",
+  "links": [
+    {
+      "title": "Incus Containers",
+      "url": "/d/r6-incus-containers",
+      "type": "link",
+      "icon": "dashboard"
+    },
+    {
+      "title": "Router Health",
+      "url": "/d/r6-router-health",
+      "type": "link",
+      "icon": "dashboard"
+    },
+    {
+      "title": "Log Explorer",
+      "url": "/d/r6-log-explorer",
+      "type": "link",
+      "icon": "dashboard"
+    }
+  ],
   "templating": {
     "list": [
       {
@@ -32,16 +52,42 @@
     {
       "id": 1,
       "type": "row",
-      "title": "System Overview",
+      "title": "Fleet Health Overview",
       "collapsed": false,
       "gridPos": { "x": 0, "y": 0, "w": 24, "h": 1 }
+    },
+    {
+      "id": 100,
+      "type": "stat",
+      "title": "Failed Systemd Units",
+      "datasource": "Prometheus",
+      "gridPos": { "x": 0, "y": 1, "w": 6, "h": 4 },
+      "targets": [
+        {
+          "expr": "sum by (nodename) (node_systemd_unit_state{instance=~\"$host\", state=\"failed\"}) or on() vector(0)",
+          "legendFormat": "{{nodename}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "#42be65", "value": null },
+              { "color": "#ee5396", "value": 1 }
+            ]
+          }
+        }
+      }
     },
     {
       "id": 11,
       "type": "stat",
       "title": "Uptime",
       "datasource": "Prometheus",
-      "gridPos": { "x": 0, "y": 1, "w": 4, "h": 4 },
+      "gridPos": { "x": 6, "y": 1, "w": 6, "h": 4 },
       "targets": [
         {
           "expr": "time() - node_boot_time_seconds{instance=~\"$host\"}",
@@ -67,10 +113,10 @@
     },
     {
       "id": 12,
-      "type": "stat",
+      "type": "gauge",
       "title": "CPU Usage",
       "datasource": "Prometheus",
-      "gridPos": { "x": 4, "y": 1, "w": 4, "h": 4 },
+      "gridPos": { "x": 12, "y": 1, "w": 6, "h": 4 },
       "targets": [
         {
           "expr": "100 - (avg by (instance, nodename) (rate(node_cpu_seconds_total{instance=~\"$host\",mode=\"idle\"}[$__rate_interval])) * 100)",
@@ -92,19 +138,14 @@
             ]
           }
         }
-      },
-      "options": {
-        "textMode": "value",
-        "colorMode": "value",
-        "graphMode": "area"
       }
     },
     {
       "id": 13,
-      "type": "stat",
+      "type": "gauge",
       "title": "Memory Usage",
       "datasource": "Prometheus",
-      "gridPos": { "x": 8, "y": 1, "w": 4, "h": 4 },
+      "gridPos": { "x": 18, "y": 1, "w": 6, "h": 4 },
       "targets": [
         {
           "expr": "((node_memory_MemTotal_bytes{instance=~\"$host\"} - node_memory_MemAvailable_bytes{instance=~\"$host\"}) / node_memory_MemTotal_bytes{instance=~\"$host\"}) * 100",
@@ -126,149 +167,47 @@
             ]
           }
         }
-      },
-      "options": {
-        "textMode": "value",
-        "colorMode": "value",
-        "graphMode": "area"
-      }
-    },
-    {
-      "id": 14,
-      "type": "stat",
-      "title": "Root FS Usage",
-      "datasource": "Prometheus",
-      "gridPos": { "x": 12, "y": 1, "w": 4, "h": 4 },
-      "targets": [
-        {
-          "expr": "100 - (node_filesystem_avail_bytes{instance=~\"$host\",mountpoint=\"/\"} / node_filesystem_size_bytes{instance=~\"$host\",mountpoint=\"/\"}) * 100",
-          "legendFormat": "{{nodename}}",
-          "refId": "A"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "percent",
-          "min": 0,
-          "max": 100,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              { "color": "#42be65", "value": null },
-              { "color": "#ff7eb6", "value": 80 },
-              { "color": "#ee5396", "value": 95 }
-            ]
-          }
-        }
-      },
-      "options": {
-        "textMode": "value",
-        "colorMode": "value",
-        "graphMode": "none"
-      }
-    },
-    {
-      "id": 15,
-      "type": "stat",
-      "title": "System Load (5m)",
-      "datasource": "Prometheus",
-      "gridPos": { "x": 16, "y": 1, "w": 4, "h": 4 },
-      "targets": [
-        {
-          "expr": "node_load5{instance=~\"$host\"}",
-          "legendFormat": "{{nodename}}",
-          "refId": "A"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": { "unit": "short", "color": { "mode": "palette-classic" } }
-      },
-      "options": {
-        "textMode": "value",
-        "colorMode": "value",
-        "graphMode": "none"
-      }
-    },
-    {
-      "id": 16,
-      "type": "stat",
-      "title": "Avg Temp",
-      "datasource": "Prometheus",
-      "gridPos": { "x": 20, "y": 1, "w": 4, "h": 4 },
-      "targets": [
-        {
-          "expr": "avg by (instance, nodename) (node_hwmon_temp_celsius{instance=~\"$host\"})",
-          "legendFormat": "{{nodename}}",
-          "refId": "A"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "celsius",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              { "color": "#82cfff", "value": null },
-              { "color": "#ff7eb6", "value": 65 },
-              { "color": "#ee5396", "value": 85 }
-            ]
-          }
-        }
-      },
-      "options": {
-        "textMode": "value",
-        "colorMode": "value",
-        "graphMode": "none"
       }
     },
     {
       "id": 50,
       "type": "row",
-      "title": "Hardware Health & Errors",
+      "title": "Resource Performance & Saturation",
       "collapsed": false,
       "gridPos": { "x": 0, "y": 5, "w": 24, "h": 1 }
     },
     {
-      "id": 51,
+      "id": 101,
       "type": "timeseries",
-      "title": "Correctable Memory Errors (EDAC)",
+      "title": "Disk Latency (Await)",
       "datasource": "Prometheus",
-      "gridPos": { "x": 0, "y": 6, "w": 12, "h": 6 },
+      "gridPos": { "x": 0, "y": 6, "w": 12, "h": 8 },
       "targets": [
         {
-          "expr": "sum by (instance, nodename) (node_edac_correctable_errors_total{instance=~\"$host\"})",
-          "legendFormat": "{{nodename}}",
+          "expr": "(rate(node_disk_read_time_seconds_total{instance=~\"$host\"}[5m]) + rate(node_disk_write_time_seconds_total{instance=~\"$host\"}[5m])) / (rate(node_disk_reads_completed_total{instance=~\"$host\"}[5m]) + rate(node_disk_writes_completed_total{instance=~\"$host\"}[5m]))",
+          "legendFormat": "{{nodename}} {{device}}",
           "refId": "A"
         }
       ],
       "fieldConfig": {
-        "defaults": { "unit": "short", "custom": { "drawStyle": "bars" } }
+        "defaults": { "unit": "s", "custom": { "fillOpacity": 10 } }
       }
     },
     {
-      "id": 52,
-      "type": "stat",
-      "title": "System Entropy",
+      "id": 102,
+      "type": "timeseries",
+      "title": "TCP Retransmissions",
       "datasource": "Prometheus",
-      "gridPos": { "x": 12, "y": 6, "w": 12, "h": 6 },
+      "gridPos": { "x": 12, "y": 6, "w": 12, "h": 8 },
       "targets": [
         {
-          "expr": "node_entropy_available_bits{instance=~\"$host\"}",
+          "expr": "rate(node_netstat_Tcp_RetransSegs{instance=~\"$host\"}[5m])",
           "legendFormat": "{{nodename}}",
           "refId": "A"
         }
       ],
       "fieldConfig": {
-        "defaults": {
-          "unit": "bits",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              { "color": "red", "value": null },
-              { "color": "green", "value": 256 }
-            ]
-          }
-        }
+        "defaults": { "unit": "short", "custom": { "fillOpacity": 10 } }
       }
     },
     {
@@ -276,14 +215,14 @@
       "type": "row",
       "title": "Storage & ZFS Details",
       "collapsed": false,
-      "gridPos": { "x": 0, "y": 12, "w": 24, "h": 1 }
+      "gridPos": { "x": 0, "y": 14, "w": 24, "h": 1 }
     },
     {
       "id": 21,
       "type": "timeseries",
       "title": "ZFS Pool Capacity (%)",
       "datasource": "Prometheus",
-      "gridPos": { "x": 0, "y": 13, "w": 12, "h": 8 },
+      "gridPos": { "x": 0, "y": 15, "w": 12, "h": 8 },
       "targets": [
         {
           "expr": "node_zfs_zpool_capacity_ratio{instance=~\"$host\"} * 100",
@@ -305,7 +244,7 @@
       "type": "timeseries",
       "title": "ZFS ARC Size",
       "datasource": "Prometheus",
-      "gridPos": { "x": 12, "y": 13, "w": 12, "h": 8 },
+      "gridPos": { "x": 12, "y": 15, "w": 12, "h": 8 },
       "targets": [
         {
           "expr": "node_zfs_arc_size{instance=~\"$host\"}",
@@ -320,16 +259,16 @@
     {
       "id": 30,
       "type": "row",
-      "title": "Network & Tailscale Details",
+      "title": "Network & Connectivity",
       "collapsed": false,
-      "gridPos": { "x": 0, "y": 21, "w": 24, "h": 1 }
+      "gridPos": { "x": 0, "y": 23, "w": 24, "h": 1 }
     },
     {
       "id": 31,
       "type": "timeseries",
       "title": "Physical Interface Throughput",
       "datasource": "Prometheus",
-      "gridPos": { "x": 0, "y": 22, "w": 12, "h": 8 },
+      "gridPos": { "x": 0, "y": 24, "w": 12, "h": 8 },
       "targets": [
         {
           "expr": "sum by (instance, nodename, device) (rate(node_network_receive_bytes_total{instance=~\"$host\",device!~\"lo|veth.*|br.*|incus.*|tailscale.*\"}[$__rate_interval])) * 8",
@@ -351,7 +290,7 @@
       "type": "timeseries",
       "title": "Tailscale Throughput",
       "datasource": "Prometheus",
-      "gridPos": { "x": 12, "y": 22, "w": 12, "h": 8 },
+      "gridPos": { "x": 12, "y": 24, "w": 12, "h": 8 },
       "targets": [
         {
           "expr": "sum by (instance, nodename) (rate(node_network_receive_bytes_total{instance=~\"$host\",device=\"tailscale0\"}[$__rate_interval])) * 8",
@@ -371,16 +310,16 @@
     {
       "id": 60,
       "type": "row",
-      "title": "Fleet DNS Activity (Local Resolvers)",
-      "collapsed": false,
-      "gridPos": { "x": 0, "y": 30, "w": 24, "h": 1 }
+      "title": "Fleet DNS Activity",
+      "collapsed": true,
+      "gridPos": { "x": 0, "y": 32, "w": 24, "h": 1 }
     },
     {
       "id": 61,
       "type": "timeseries",
       "title": "DNS Query Volume by Host",
       "datasource": "Loki",
-      "gridPos": { "x": 0, "y": 31, "w": 24, "h": 8 },
+      "gridPos": { "x": 0, "y": 33, "w": 24, "h": 8 },
       "targets": [
         {
           "expr": "sum by (host) (count_over_time({unit=\"dnsmasq.service\"} | regexp \"query\\\\[.*\\\\]\" [$__interval]))",
@@ -390,30 +329,6 @@
       ],
       "fieldConfig": {
         "defaults": { "unit": "qps", "custom": { "fillOpacity": 10 } }
-      }
-    },
-    {
-      "id": 40,
-      "type": "row",
-      "title": "Thermal Status",
-      "collapsed": true,
-      "gridPos": { "x": 0, "y": 39, "w": 24, "h": 1 }
-    },
-    {
-      "id": 41,
-      "type": "timeseries",
-      "title": "Hardware Temperatures",
-      "datasource": "Prometheus",
-      "gridPos": { "x": 0, "y": 40, "w": 24, "h": 8 },
-      "targets": [
-        {
-          "expr": "node_hwmon_temp_celsius{instance=~\"$host\"}",
-          "legendFormat": "{{nodename}} {{sensor}}",
-          "refId": "A"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": { "unit": "celsius", "custom": { "showPoints": "never" } }
       }
     }
   ]

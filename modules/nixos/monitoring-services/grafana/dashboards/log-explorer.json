@@ -4,9 +4,29 @@
   "tags": ["nixos", "logs"],
   "timezone": "browser",
   "schemaVersion": 38,
-  "version": 2,
+  "version": 3,
   "editable": true,
   "refresh": "30s",
+  "links": [
+    {
+      "title": "Systems Health",
+      "url": "/d/r6-nix-full",
+      "type": "link",
+      "icon": "dashboard"
+    },
+    {
+      "title": "Incus Containers",
+      "url": "/d/r6-incus-containers",
+      "type": "link",
+      "icon": "dashboard"
+    },
+    {
+      "title": "Router Health",
+      "url": "/d/r6-router-health",
+      "type": "link",
+      "icon": "dashboard"
+    }
+  ],
   "templating": {
     "list": [
       {
@@ -17,7 +37,7 @@
         "refresh": 2,
         "sort": 1,
         "includeAll": true,
-        "allValue": ".*",
+        "allValue": ".+",
         "multi": true,
         "current": {}
       },
@@ -29,7 +49,7 @@
         "refresh": 2,
         "sort": 1,
         "includeAll": true,
-        "allValue": ".*",
+        "allValue": ".+",
         "multi": true,
         "current": {}
       },
@@ -37,11 +57,11 @@
         "name": "source",
         "type": "query",
         "datasource": "Loki",
-        "query": "label_values(source)",
+        "query": "label_values({host=~\"$host\", unit=~\"$unit\"}, source)",
         "refresh": 2,
         "sort": 1,
         "includeAll": true,
-        "allValue": ".*",
+        "allValue": ".+",
         "multi": true,
         "current": {}
       },
@@ -80,28 +100,31 @@
     {
       "id": 10,
       "type": "row",
-      "title": "System Health Overview",
+      "title": "Fleet Logs Pulse",
       "collapsed": false,
       "gridPos": { "x": 0, "y": 0, "w": 24, "h": 1 }
     },
     {
       "id": 11,
       "type": "stat",
-      "title": "Errors (3 or lower)",
+      "title": "Critical/Errors",
       "datasource": "Loki",
       "gridPos": { "x": 0, "y": 1, "w": 8, "h": 4 },
       "targets": [
         {
-          "expr": "sum(count_over_time({host=~\"$host\", severity=~\"[0-3]\"} [$__range]))",
+          "expr": "sum(count_over_time({host=~\"$host\", severity=~\"[0-3]\"} [$__range])) or on() vector(0)",
           "refId": "A"
         }
       ],
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "fixed", "fixedColor": "#ee5396" },
+          "color": { "mode": "thresholds" },
           "thresholds": {
             "mode": "absolute",
-            "steps": [{ "color": "red", "value": null }]
+            "steps": [
+              { "color": "#42be65", "value": null },
+              { "color": "#ee5396", "value": 1 }
+            ]
           }
         }
       }
@@ -109,19 +132,17 @@
     {
       "id": 12,
       "type": "stat",
-      "title": "Warnings (4)",
+      "title": "Warnings",
       "datasource": "Loki",
       "gridPos": { "x": 8, "y": 1, "w": 8, "h": 4 },
       "targets": [
         {
-          "expr": "sum(count_over_time({host=~\"$host\", severity=\"4\"} [$__range]))",
+          "expr": "sum(count_over_time({host=~\"$host\", severity=\"4\"} [$__range])) or on() vector(0)",
           "refId": "A"
         }
       ],
       "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "fixed", "fixedColor": "#ff7eb6" }
-        }
+        "defaults": { "color": { "mode": "fixed", "fixedColor": "#ff7eb6" } }
       }
     },
     {
@@ -132,27 +153,25 @@
       "gridPos": { "x": 16, "y": 1, "w": 8, "h": 4 },
       "targets": [
         {
-          "expr": "count(sum by (unit) (count_over_time({host=~\"$host\"} [$__range])))",
+          "expr": "count(sum by (unit) (count_over_time({host=~\"$host\"} [$__range]))) or on() vector(0)",
           "refId": "A"
         }
       ],
       "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "fixed", "fixedColor": "#08bdba" }
-        }
+        "defaults": { "color": { "mode": "fixed", "fixedColor": "#08bdba" } }
       }
     },
     {
       "id": 40,
       "type": "row",
-      "title": "Critical System Events",
+      "title": "Critical Events (Filtered View)",
       "collapsed": false,
       "gridPos": { "x": 0, "y": 5, "w": 24, "h": 1 }
     },
     {
       "id": 41,
       "type": "logs",
-      "title": "Critical System Events (OOM, Segfaults, Panics)",
+      "title": "System Failures & Crashes",
       "datasource": "Loki",
       "gridPos": { "x": 0, "y": 6, "w": 24, "h": 6 },
       "targets": [
@@ -171,20 +190,20 @@
     {
       "id": 20,
       "type": "row",
-      "title": "Log Volume & Insights",
+      "title": "Log Rate & Anomaly Detection",
       "collapsed": false,
       "gridPos": { "x": 0, "y": 12, "w": 24, "h": 1 }
     },
     {
       "id": 1,
       "type": "timeseries",
-      "title": "Log Volume by Severity",
+      "title": "Log Volume by Host",
       "datasource": "Loki",
-      "gridPos": { "x": 0, "y": 13, "w": 16, "h": 8 },
+      "gridPos": { "x": 0, "y": 13, "w": 24, "h": 8 },
       "targets": [
         {
-          "expr": "sum by (severity) (count_over_time({host=~\"$host\", unit=~\"$unit\", source=~\"$source\", severity=~\"$severity\"} |~ \"$search\" [$__interval]))",
-          "legendFormat": "Level {{severity}}",
+          "expr": "sum by (host) (count_over_time({host=~\"$host\", unit=~\"$unit\", source=~\"$source\", severity=~\"$severity\"} |~ \"$search\" [$__interval]))",
+          "legendFormat": "{{host}}",
           "refId": "A"
         }
       ],
@@ -195,111 +214,23 @@
             "fillOpacity": 80,
             "stacking": { "mode": "normal", "group": "A" }
           },
-          "color": { "mode": "palette-classic" },
-          "overrides": [
-            {
-              "matcher": { "id": "byName", "options": "Level 0" },
-              "properties": [
-                {
-                  "id": "color",
-                  "value": { "fixedColor": "#ee5396", "mode": "fixed" }
-                }
-              ]
-            },
-            {
-              "matcher": { "id": "byName", "options": "Level 1" },
-              "properties": [
-                {
-                  "id": "color",
-                  "value": { "fixedColor": "#ee5396", "mode": "fixed" }
-                }
-              ]
-            },
-            {
-              "matcher": { "id": "byName", "options": "Level 2" },
-              "properties": [
-                {
-                  "id": "color",
-                  "value": { "fixedColor": "#ee5396", "mode": "fixed" }
-                }
-              ]
-            },
-            {
-              "matcher": { "id": "byName", "options": "Level 3" },
-              "properties": [
-                {
-                  "id": "color",
-                  "value": { "fixedColor": "#ee5396", "mode": "fixed" }
-                }
-              ]
-            },
-            {
-              "matcher": { "id": "byName", "options": "Level 4" },
-              "properties": [
-                {
-                  "id": "color",
-                  "value": { "fixedColor": "#ff7eb6", "mode": "fixed" }
-                }
-              ]
-            },
-            {
-              "matcher": { "id": "byName", "options": "Level 5" },
-              "properties": [
-                {
-                  "id": "color",
-                  "value": { "fixedColor": "#be95ff", "mode": "fixed" }
-                }
-              ]
-            },
-            {
-              "matcher": { "id": "byName", "options": "Level 6" },
-              "properties": [
-                {
-                  "id": "color",
-                  "value": { "fixedColor": "#08bdba", "mode": "fixed" }
-                }
-              ]
-            }
-          ]
+          "color": { "mode": "palette-classic" }
         }
-      }
-    },
-    {
-      "id": 21,
-      "type": "bargauge",
-      "title": "Top Noisy Units",
-      "datasource": "Loki",
-      "gridPos": { "x": 16, "y": 6, "w": 8, "h": 8 },
-      "targets": [
-        {
-          "expr": "topk(10, sum by (unit) (count_over_time({host=~\"$host\", source=~\"$source\"} [$__range])))",
-          "legendFormat": "{{unit}}",
-          "refId": "A"
-        }
-      ],
-      "options": {
-        "reduceOptions": {
-          "values": false,
-          "calcs": ["lastNotNull"],
-          "limit": 10
-        },
-        "orientation": "horizontal",
-        "displayMode": "gradient"
       }
     },
     {
       "id": 30,
       "type": "row",
-      "title": "Log Stream",
+      "title": "Live Stream",
       "collapsed": false,
-      "gridPos": { "x": 0, "y": 14, "w": 24, "h": 1 }
+      "gridPos": { "x": 0, "y": 21, "w": 24, "h": 1 }
     },
     {
       "id": 2,
       "type": "logs",
       "title": "Filtered Log Stream",
       "datasource": "Loki",
-      "gridPos": { "x": 0, "y": 15, "w": 24, "h": 20 },
+      "gridPos": { "x": 0, "y": 22, "w": 24, "h": 20 },
       "targets": [
         {
           "expr": "{host=~\"$host\", unit=~\"$unit\", source=~\"$source\", severity=~\"$severity\"} |~ \"$search\"",
