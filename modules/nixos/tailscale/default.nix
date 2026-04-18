@@ -42,7 +42,7 @@
       );
       # Use memory-only state for ephemeral nodes. This ensures machine keys aren't 
       # persisted to disk and triggers an automatic logout on service stop (Tailscale v1.30+).
-      extraFlags = lib.optionals config.mine.tailscale.ephemeral [ "--state=mem:" ];
+      extraDaemonFlags = lib.optionals config.mine.tailscale.ephemeral [ "--state=mem:" ];
     };
 
     # Automatically enable short-name resolution (ssh crown) in containers.
