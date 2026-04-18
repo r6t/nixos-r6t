@@ -15,7 +15,12 @@
     kernelModules = [ "vfio_pci" "vfio" "vfio_iommu_type1" ];
   };
 
-  networking.hostName = "saguaro";
+  networking = {
+    hostName = "saguaro";
+    extraHosts = ''
+      192.168.6.10 loki.r6t.io
+    '';
+  };
   nix.settings.use-cgroups = true;
   time.timeZone = "America/Los_Angeles";
   services.journald.extraConfig = "SystemMaxUse=500M";
@@ -73,9 +78,10 @@
       };
       dns = {
         nextdnsConfigFile = "/mnt/nextdns.conf";
-        # Route monitoring endpoints to crown's LAN IP so LAN clients
-        # don't need tailnet access to push logs/metrics.
-        dnsmasqAddresses = [ "/loki.r6t.io/192.168.6.10" ];
+        # Monitoring endpoints use the tailnet path for encryption between
+        # LAN devices (like mountainball -> crown). Saguaro uses a private
+        # short-circuit in networking.extraHosts above.
+        dnsmasqAddresses = [ ];
       };
 
       # Allow LAN to access the router host on specific ports

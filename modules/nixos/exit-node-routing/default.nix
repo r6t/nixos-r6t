@@ -88,7 +88,10 @@ in
 
     # Tailscale-specific configuration
     (lib.mkIf cfg.enableTailscale {
-      mine.tailscale.enable = true;
+      mine.tailscale = {
+        enable = true;
+        ephemeral = true;
+      };
 
       services.tailscale = {
         useRoutingFeatures = lib.mkForce "server";
@@ -97,9 +100,6 @@ in
           "--accept-routes"
         ];
       };
-
-      # Tailscale MagicDNS as secondary DNS for coordination server access
-      services.dnsmasq.settings.server = [ "100.100.100.100" ];
 
       networking = {
         # Static routes to keep tailnet traffic on tailscale interface
@@ -122,35 +122,6 @@ in
       };
 
       systemd.services = {
-        # Set tailscale hostname from cloud-init seed data.
-        # networking.hostName is "nixos" at nix eval time for shared container
-        # images, and NixOS activation writes that to /etc/hostname on every
-        # boot — overriding cloud-init. So we read the intended hostname
-        # directly from the NoCloud meta-data seed file instead.
-        tailscale-set-hostname = {
-          description = "Set Tailscale hostname from cloud-init seed";
-          after = [ "tailscaled-autoconnect.service" "cloud-final.service" ];
-          wants = [ "tailscaled-autoconnect.service" ];
-          wantedBy = [ "multi-user.target" ];
-          path = [ config.services.tailscale.package ];
-          script = ''
-            SEED="/var/lib/cloud/seed/nocloud/meta-data"
-            if [ -f "$SEED" ]; then
-              NAME=$(${pkgs.gnugrep}/bin/grep '^local-hostname:' "$SEED" | ${pkgs.coreutils}/bin/cut -d' ' -f2)
-              if [ -n "$NAME" ]; then
-                echo "Setting tailscale hostname to $NAME"
-                tailscale set --hostname="$NAME"
-                exit 0
-              fi
-            fi
-            echo "WARNING: Could not read hostname from $SEED, skipping"
-          '';
-          serviceConfig = {
-            Type = "oneshot";
-            RemainAfterExit = true;
-          };
-        };
-
         # GRO forwarding for exit node
         # https://tailscale.com/kb/1320/performance-best-practices#ethtool-configuration
         tailscale-network-optimizations = {

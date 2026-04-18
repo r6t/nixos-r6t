@@ -361,6 +361,7 @@ in
             # DNS Configuration only (DHCP handled by systemd-networkd)
             no-resolv = true;
             no-poll = true;
+            no-hosts = true;
             cache-size = 10000;
             no-negcache = true;
             dns-forward-max = 1500;

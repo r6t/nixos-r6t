@@ -20,15 +20,6 @@
   };
 
   services = {
-    # Don't let tailscale overwrite resolv.conf — dnsmasq is the authoritative
-    # resolver in this container and must serve *.r6t.io overrides.
-    # MagicDNS hostnames (crown, mountainball) are forwarded via dnsmasq below.
-    tailscale.extraUpFlags = [ "--accept-dns=false" "--ephemeral" ];
-
-    # Forward tailnet MagicDNS queries to Tailscale's resolver so Prometheus
-    # can scrape bare hostnames (crown, mountainball) via the tailnet.
-    dnsmasq.settings.server = [ "/cloudforest-darter.ts.net/100.100.100.100" ];
-
     pocket-id = {
       enable = true;
       user = "pocket-id";
@@ -47,23 +38,13 @@
     };
   };
 
-  # After tailscale deregisters its resolvconf interface (--accept-dns=false),
-  # regenerate resolv.conf so dnsmasq on 127.0.0.1 is restored as the resolver.
-  systemd.services.restore-resolv = {
-    description = "Restore resolv.conf to dnsmasq after tailscale deregisters DNS";
-    after = [ "tailscaled-autoconnect.service" "cloud-init.service" ];
-    wants = [ "tailscaled-autoconnect.service" ];
-    wantedBy = [ "multi-user.target" ];
-    serviceConfig = {
-      Type = "oneshot";
-      ExecStart = "/run/current-system/sw/bin/resolvconf -u";
-      RemainAfterExit = true;
-    };
-  };
-
   mine = {
-    tailscale.enable = true;
-    tailscale.authKeyFile = "/etc/tailscale/auth-key";
+    tailscale = {
+      enable = true;
+      ephemeral = true;
+      authKeyFile = "/etc/tailscale/auth-key";
+      extraUpFlags = [ "--accept-dns=false" ];
+    };
     monitoring-services = {
       enable = true;
       grafana.domain = "grafana.r6t.io";

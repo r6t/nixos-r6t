@@ -28,6 +28,11 @@ in
 
   mine.localization.enable = true;
 
+  # Default to LAN DNS overrides for performance, but containers
+  # on the tailnet (mine.tailscale.enable = true) should prefer
+  # the encrypted Tailscale path instead.
+  mine.dns-overrides.enable = lib.mkDefault (!config.mine.tailscale.enable);
+
   networking = {
     firewall.enable = true;
     useDHCP = false;
