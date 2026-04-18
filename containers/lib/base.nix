@@ -1,4 +1,4 @@
-{ lib, pkgs, modulesPath, ... }:
+{ lib, pkgs, modulesPath, config, ... }:
 
 let
   commonPackages = import ../../modules/lib/common-packages.nix pkgs;
