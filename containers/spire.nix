@@ -42,7 +42,6 @@
       enable = true;
       ephemeral = true;
       authKeyFile = "/etc/tailscale/auth-key";
-      extraUpFlags = [ "--accept-dns=false" ];
     };
     monitoring-services = {
       enable = true;

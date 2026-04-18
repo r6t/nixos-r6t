@@ -36,13 +36,17 @@
     services.tailscale = {
       enable = true;
       inherit (config.mine.tailscale) authKeyFile;
-      extraUpFlags =
+      extraUpFlags = lib.unique (
         config.mine.tailscale.extraUpFlags
-        ++ (lib.optionals config.mine.tailscale.ephemeral [ "--ephemeral" ])
-        ++ [ "--accept-dns=${if config.mine.tailscale.acceptDns then "true" else "false"}" ];
+        ++ [ "--accept-dns=${if config.mine.tailscale.acceptDns then "true" else "false"}" ]
+      );
+      # Use memory-only state for ephemeral nodes. This ensures machine keys aren't 
+      # persisted to disk and triggers an automatic logout on service stop (Tailscale v1.30+).
+      extraFlags = lib.optionals config.mine.tailscale.ephemeral [ "--state=mem:" ];
     };
 
     # Automatically enable short-name resolution (ssh crown) in containers.
+
     # We add the tailnet suffix to the search list and tell dnsmasq to 
     # route those queries specifically to Tailscale.
     networking.search = lib.mkIf config.boot.isContainer [ "cloudforest-darter.ts.net" ];
@@ -66,7 +70,7 @@
         after = [ "tailscaled.service" "network-online.target" ];
         wants = [ "tailscaled.service" "network-online.target" ];
         wantedBy = [ "multi-user.target" ];
-        path = [ config.services.tailscale.package pkgs.gnugrep ];
+        path = [ config.services.tailscale.package pkgs.gnugrep pkgs.coreutils ];
         script = ''
           # Wait for tailscaled to be ready (status returns 0 or 1 when daemon is alive)
           until tailscale status >/dev/null 2>&1 || [ $? -eq 1 ]; do

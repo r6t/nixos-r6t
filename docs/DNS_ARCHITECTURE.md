@@ -44,3 +44,4 @@ The fleet follows a "local-first" resolution strategy. Every host and container 
 
 - **Search Domains**: Managed centrally in `modules/nixos/tailscale/default.nix`. Containers with Tailscale enabled automatically receive `networking.search = [ "cloudforest-darter.ts.net" ];`.
 - **DNS Isolation**: Containers set `resolv.conf` to `127.0.0.1` and use `--accept-dns=false` for Tailscale to prevent upstream settings from poisoning the `dnsmasq` pattern.
+- **Ephemeral Connectivity**: Containers use `mine.tailscale.ephemeral = true`, which enables Tailscale's memory-only state mode (`--state=mem:`) and ensures immediate removal from the tailnet upon shutdown via `tailscale logout`.
