@@ -51,8 +51,8 @@
       grafana.oidc = {
         signoutRedirectUrl = "https://pid.r6t.io/";
         authUrl = "https://pid.r6t.io/authorize";
-        tokenUrl = "https://pid.r6t.io/api/oidc/token";
-        apiUrl = "https://pid.r6t.io/api/oidc/userinfo";
+        tokenUrl = "http://localhost:1411/api/oidc/token";
+        apiUrl = "http://localhost:1411/api/oidc/userinfo";
       };
       prometheus.scrapeTargets = [ "crown:9000" "mountainball:9000" "192.168.6.1:9000" ];
       prometheus.incusMetricsTargets = [ "crown:9101" "192.168.6.1:9101" ];
