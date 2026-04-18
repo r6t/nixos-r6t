@@ -4,7 +4,7 @@
   "tags": ["nixos", "systems"],
   "timezone": "browser",
   "schemaVersion": 38,
-  "version": 4,
+  "version": 5,
   "editable": true,
   "refresh": "30s",
   "templating": {
@@ -45,7 +45,7 @@
       "targets": [
         {
           "expr": "time() - node_boot_time_seconds{instance=~\"$host\"}",
-          "legendFormat": "{{instance}}",
+          "legendFormat": "{{nodename}}",
           "refId": "A"
         }
       ],
@@ -73,8 +73,8 @@
       "gridPos": { "x": 4, "y": 1, "w": 4, "h": 4 },
       "targets": [
         {
-          "expr": "100 - (avg by (instance) (rate(node_cpu_seconds_total{instance=~\"$host\",mode=\"idle\"}[$__rate_interval])) * 100)",
-          "legendFormat": "{{instance}}",
+          "expr": "100 - (avg by (instance, nodename) (rate(node_cpu_seconds_total{instance=~\"$host\",mode=\"idle\"}[$__rate_interval])) * 100)",
+          "legendFormat": "{{nodename}}",
           "refId": "A"
         }
       ],
@@ -108,7 +108,7 @@
       "targets": [
         {
           "expr": "((node_memory_MemTotal_bytes{instance=~\"$host\"} - node_memory_MemAvailable_bytes{instance=~\"$host\"}) / node_memory_MemTotal_bytes{instance=~\"$host\"}) * 100",
-          "legendFormat": "{{instance}}",
+          "legendFormat": "{{nodename}}",
           "refId": "A"
         }
       ],
@@ -142,7 +142,7 @@
       "targets": [
         {
           "expr": "100 - (node_filesystem_avail_bytes{instance=~\"$host\",mountpoint=\"/\"} / node_filesystem_size_bytes{instance=~\"$host\",mountpoint=\"/\"}) * 100",
-          "legendFormat": "{{instance}}",
+          "legendFormat": "{{nodename}}",
           "refId": "A"
         }
       ],
@@ -176,7 +176,7 @@
       "targets": [
         {
           "expr": "node_load5{instance=~\"$host\"}",
-          "legendFormat": "{{instance}}",
+          "legendFormat": "{{nodename}}",
           "refId": "A"
         }
       ],
@@ -197,8 +197,8 @@
       "gridPos": { "x": 20, "y": 1, "w": 4, "h": 4 },
       "targets": [
         {
-          "expr": "avg by (instance) (node_hwmon_temp_celsius{instance=~\"$host\"})",
-          "legendFormat": "{{instance}}",
+          "expr": "avg by (instance, nodename) (node_hwmon_temp_celsius{instance=~\"$host\"})",
+          "legendFormat": "{{nodename}}",
           "refId": "A"
         }
       ],
@@ -236,8 +236,8 @@
       "gridPos": { "x": 0, "y": 6, "w": 12, "h": 6 },
       "targets": [
         {
-          "expr": "sum by (instance) (node_edac_correctable_errors_total{instance=~\"$host\"})",
-          "legendFormat": "{{instance}}",
+          "expr": "sum by (instance, nodename) (node_edac_correctable_errors_total{instance=~\"$host\"})",
+          "legendFormat": "{{nodename}}",
           "refId": "A"
         }
       ],
@@ -254,7 +254,7 @@
       "targets": [
         {
           "expr": "node_entropy_available_bits{instance=~\"$host\"}",
-          "legendFormat": "{{instance}}",
+          "legendFormat": "{{nodename}}",
           "refId": "A"
         }
       ],
@@ -287,7 +287,7 @@
       "targets": [
         {
           "expr": "node_zfs_zpool_capacity_ratio{instance=~\"$host\"} * 100",
-          "legendFormat": "{{instance}}: {{zpool}}",
+          "legendFormat": "{{nodename}}: {{zpool}}",
           "refId": "A"
         }
       ],
@@ -309,7 +309,7 @@
       "targets": [
         {
           "expr": "node_zfs_arc_size{instance=~\"$host\"}",
-          "legendFormat": "{{instance}}",
+          "legendFormat": "{{nodename}}",
           "refId": "A"
         }
       ],
@@ -332,13 +332,13 @@
       "gridPos": { "x": 0, "y": 22, "w": 12, "h": 8 },
       "targets": [
         {
-          "expr": "sum by (instance, device) (rate(node_network_receive_bytes_total{instance=~\"$host\",device!~\"lo|veth.*|br.*|incus.*|tailscale.*\"}[$__rate_interval])) * 8",
-          "legendFormat": "{{instance}} {{device}} RX",
+          "expr": "sum by (instance, nodename, device) (rate(node_network_receive_bytes_total{instance=~\"$host\",device!~\"lo|veth.*|br.*|incus.*|tailscale.*\"}[$__rate_interval])) * 8",
+          "legendFormat": "{{nodename}} {{device}} RX",
           "refId": "A"
         },
         {
-          "expr": "sum by (instance, device) (rate(node_network_transmit_bytes_total{instance=~\"$host\",device!~\"lo|veth.*|br.*|incus.*|tailscale.*\"}[$__rate_interval])) * -8",
-          "legendFormat": "{{instance}} {{device}} TX",
+          "expr": "sum by (instance, nodename, device) (rate(node_network_transmit_bytes_total{instance=~\"$host\",device!~\"lo|veth.*|br.*|incus.*|tailscale.*\"}[$__rate_interval])) * -8",
+          "legendFormat": "{{nodename}} {{device}} TX",
           "refId": "B"
         }
       ],
@@ -354,13 +354,13 @@
       "gridPos": { "x": 12, "y": 22, "w": 12, "h": 8 },
       "targets": [
         {
-          "expr": "sum by (instance) (rate(node_network_receive_bytes_total{instance=~\"$host\",device=\"tailscale0\"}[$__rate_interval])) * 8",
-          "legendFormat": "{{instance}} RX",
+          "expr": "sum by (instance, nodename) (rate(node_network_receive_bytes_total{instance=~\"$host\",device=\"tailscale0\"}[$__rate_interval])) * 8",
+          "legendFormat": "{{nodename}} RX",
           "refId": "A"
         },
         {
-          "expr": "sum by (instance) (rate(node_network_transmit_bytes_total{instance=~\"$host\",device=\"tailscale0\"}[$__rate_interval])) * -8",
-          "legendFormat": "{{instance}} TX",
+          "expr": "sum by (instance, nodename) (rate(node_network_transmit_bytes_total{instance=~\"$host\",device=\"tailscale0\"}[$__rate_interval])) * -8",
+          "legendFormat": "{{nodename}} TX",
           "refId": "B"
         }
       ],
@@ -408,7 +408,7 @@
       "targets": [
         {
           "expr": "node_hwmon_temp_celsius{instance=~\"$host\"}",
-          "legendFormat": "{{instance}} {{sensor}}",
+          "legendFormat": "{{nodename}} {{sensor}}",
           "refId": "A"
         }
       ],

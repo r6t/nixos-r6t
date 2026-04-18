@@ -4,7 +4,7 @@
   "tags": ["nixos", "incus"],
   "timezone": "browser",
   "schemaVersion": 38,
-  "version": 3,
+  "version": 4,
   "editable": true,
   "refresh": "30s",
   "templating": {
@@ -13,7 +13,8 @@
         "name": "host",
         "type": "query",
         "datasource": "Prometheus",
-        "query": "label_values(incus_uptime_seconds, instance)",
+        "query": "query_result(incus_boot_time_seconds)",
+        "regex": "/instance=\"(?<value>[^\"]+)\".*nodename=\"(?<text>[^\"]+)\"/",
         "refresh": 2,
         "sort": 1,
         "includeAll": false,
@@ -24,7 +25,7 @@
         "name": "container",
         "type": "query",
         "datasource": "Prometheus",
-        "query": "label_values(incus_uptime_seconds{instance=~\"$host\"}, name)",
+        "query": "label_values(incus_boot_time_seconds{instance=~\"$host\"}, name)",
         "refresh": 2,
         "sort": 1,
         "includeAll": true,
@@ -54,7 +55,7 @@
       "gridPos": { "x": 0, "y": 1, "w": 6, "h": 4 },
       "targets": [
         {
-          "expr": "count(incus_uptime_seconds{instance=\"$host\"})",
+          "expr": "count(incus_boot_time_seconds{instance=\"$host\"})",
           "refId": "A"
         }
       ],
@@ -70,7 +71,7 @@
       "gridPos": { "x": 6, "y": 1, "w": 18, "h": 4 },
       "targets": [
         {
-          "expr": "incus_uptime_seconds{instance=\"$host\", name=~\"$container\"}",
+          "expr": "time() - incus_boot_time_seconds{instance=\"$host\", name=~\"$container\"}",
           "legendFormat": "{{name}}",
           "refId": "A"
         }
@@ -112,12 +113,12 @@
     {
       "id": 4,
       "type": "timeseries",
-      "title": "Memory Usage (RSS)",
+      "title": "Memory Usage (Active)",
       "datasource": "Prometheus",
       "gridPos": { "x": 12, "y": 6, "w": 12, "h": 8 },
       "targets": [
         {
-          "expr": "incus_memory_RSS_bytes{instance=\"$host\", name=~\"$container\"}",
+          "expr": "incus_memory_Active_bytes{instance=\"$host\", name=~\"$container\"}",
           "legendFormat": "{{name}}",
           "refId": "A"
         }
@@ -129,6 +130,7 @@
         }
       }
     },
+
     {
       "id": 30,
       "type": "row",
@@ -139,7 +141,7 @@
     {
       "id": 31,
       "type": "timeseries",
-      "title": "Network Throughput",
+      "title": "Network Throughput (Total)",
       "datasource": "Prometheus",
       "gridPos": { "x": 0, "y": 15, "w": 12, "h": 8 },
       "targets": [
@@ -161,7 +163,7 @@
     {
       "id": 32,
       "type": "timeseries",
-      "title": "Disk I/O Bandwidth",
+      "title": "Disk I/O Bandwidth (Total)",
       "datasource": "Prometheus",
       "gridPos": { "x": 12, "y": 15, "w": 12, "h": 8 },
       "targets": [
@@ -171,7 +173,7 @@
           "refId": "A"
         },
         {
-          "expr": "sum by (name) (rate(incus_disk_write_bytes_total{instance=\"$host\", name=~\"$container\"}[$__rate_interval])) * -1",
+          "expr": "sum by (name) (rate(incus_disk_written_bytes_total{instance=\"$host\", name=~\"$container\"}[$__rate_interval])) * -1",
           "legendFormat": "{{name}} Write",
           "refId": "B"
         }

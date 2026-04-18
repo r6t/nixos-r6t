@@ -311,6 +311,14 @@ in
               static_configs = [{
                 targets = cfg.prometheus.incusMetricsTargets;
               }];
+              relabel_configs = [
+                {
+                  source_labels = [ "__address__" ];
+                  regex = "([^.]+).*";
+                  replacement = "$1";
+                  target_label = "nodename";
+                }
+              ];
             }
           ];
         ruleFiles = [
