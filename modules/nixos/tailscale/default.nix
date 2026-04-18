@@ -66,10 +66,10 @@
         after = [ "tailscaled.service" "network-online.target" ];
         wants = [ "tailscaled.service" "network-online.target" ];
         wantedBy = [ "multi-user.target" ];
-        path = [ config.services.tailscale.package ];
+        path = [ config.services.tailscale.package pkgs.gnugrep ];
         script = ''
-          # Wait for tailscaled to be ready
-          until tailscale status &>/dev/null || [ $? -ne 1 ]; do
+          # Wait for tailscaled to be ready (status returns 0 or 1 when daemon is alive)
+          until tailscale status >/dev/null 2>&1 || [ $? -eq 1 ]; do
             sleep 1
           done
 
