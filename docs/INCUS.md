@@ -250,8 +250,9 @@ Exit nodes have dedicated physical NICs (Intel I226-V, pinned by PCI path as `ex
 
 Every container runs a local dnsmasq instance on port 53 that:
 
-1. Resolves `*.r6t.io` to crown's caddy IP (`192.168.6.10`) via `containers/lib/dns-overrides.nix`
+1. Resolves `*.r6t.io` to crown's caddy IP (`192.168.6.10`) via `containers/lib/dns-overrides.nix` (**LAN only**). Containers with Tailscale enabled bypass this to use the encrypted tailnet path.
 2. Forwards all other queries to an upstream resolver on port 5353 — either Mullvad DoT (`lib/mullvad-dns.nix`) or NextDNS (`lib/nextdns.nix`)
+3. **Split-DNS for MagicDNS**: Forwards `*.ts.net` queries directly to Tailscale's resolver at `100.100.100.100` (handled automatically by `mine.tailscale.magicDnsDomain`).
 
 Crown's caddy handles most `*.r6t.io` services directly (local containers via proxy devices). For services on spire (PocketID), crown's caddy proxies to spire over the tailnet using MagicDNS names (`http://spire.r6t.io:1411`).
 
@@ -341,7 +342,11 @@ If a CUDA crash inside one container wedges the GPU driver (kernel log shows `rp
 Containers that need to be reachable on the tailnet import the tailscale module:
 
 ```nix
-mine.tailscale.enable = true;
+mine.tailscale = {
+  enable = true;
+  ephemeral = true; # Auto-remove from tailnet on LXC stop
+  extraUpFlags = [ "--accept-dns=false" ]; # Preserve local dnsmasq pattern
+};
 ```
 
 For containers that should auto-join the tailnet (e.g. exit nodes):
@@ -350,7 +355,7 @@ For containers that should auto-join the tailnet (e.g. exit nodes):
 mine.tailscale.authKeyFile = "/etc/tailscale/auth-key";
 ```
 
-The auth key file is bind-mounted from host storage via the incus profile. Use an ephemeral + reusable key from Tailscale admin.
+The auth key file is bind-mounted from host storage via the incus profile. Use an ephemeral + reusable key from Tailscale admin. The `tailscale-set-hostname` service (centralized in the tailscale module) automatically ensures the node name matches the container's cloud-init hostname, preventing `-1` suffixes.
 
 ### Exit Nodes
 

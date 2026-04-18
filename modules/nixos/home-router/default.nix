@@ -119,6 +119,18 @@ in
       };
     };
 
+    mssClamping = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = "Enable TCP MSS clamping to prevent PMTU discovery issues on WAN";
+    };
+
+    flowOffload = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = "Enable nftables flow offloading for established connections (reduces CPU usage)";
+    };
+
     # Health check configuration
     healthCheck = {
       enable = lib.mkEnableOption "periodic router health checks logged to journald";
@@ -273,11 +285,31 @@ in
                 iifname "${cfg.lanInterface}" udp dport ${toString port} accept
               '')
               cfg.nftablesAllowFromLan.extraUdpPorts;
+
+            mssClampingRule = lib.optionalString cfg.mssClamping ''
+              chain forward_mss {
+                type filter hook forward priority 0; policy accept;
+                oifname "${cfg.wanInterface}" tcp flags syn tcp option maxseg size set rt mtu
+              }
+            '';
+
+            flowOffloadRule = lib.optionalString cfg.flowOffload ''
+              flowtable f {
+                hook ingress priority 0;
+                devices = { "${cfg.wanInterface}", "${cfg.lanInterface}" };
+              }
+              chain forward_offload {
+                type filter hook forward priority 5; policy accept;
+                ip protocol { tcp, udp } flow add @f
+              }
+            '';
           in
           {
             enable = true;
             ruleset = ''
               table inet filter {
+                ${mssClampingRule}
+                ${flowOffloadRule}
                 chain input {
                   type filter hook input priority 0; policy drop;
                   # Loopback always allowed
@@ -367,6 +399,9 @@ in
             dns-forward-max = 1500;
             domain-needed = true;
 
+            # Logging
+            log-queries = true;
+
             # Upstream DNS server
             server = [ cfg.dns.upstreamServer ];
           };
@@ -424,9 +459,7 @@ in
             # Static DHCP leases (MAC -> IP reservations)
             dhcpServerStaticLeases = map
               (lease: {
-                dhcpServerStaticLeaseConfig = {
-                  inherit (lease) MACAddress Address;
-                };
+                inherit (lease) MACAddress Address;
               })
               cfg.dhcpServer.staticLeases;
           };

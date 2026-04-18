@@ -4,7 +4,7 @@
   "tags": ["nixos", "logs"],
   "timezone": "browser",
   "schemaVersion": 38,
-  "version": 1,
+  "version": 2,
   "editable": true,
   "refresh": "30s",
   "templating": {
@@ -32,6 +32,43 @@
         "allValue": ".*",
         "multi": true,
         "current": {}
+      },
+      {
+        "name": "source",
+        "type": "query",
+        "datasource": "Loki",
+        "query": "label_values(source)",
+        "refresh": 2,
+        "sort": 1,
+        "includeAll": true,
+        "allValue": ".*",
+        "multi": true,
+        "current": {}
+      },
+      {
+        "name": "severity",
+        "type": "custom",
+        "query": "0,1,2,3,4,5,6,7",
+        "includeAll": true,
+        "allValue": ".*",
+        "multi": true,
+        "options": [
+          { "text": "0 - Emergency", "value": "0" },
+          { "text": "1 - Alert", "value": "1" },
+          { "text": "2 - Critical", "value": "2" },
+          { "text": "3 - Error", "value": "3" },
+          { "text": "4 - Warning", "value": "4" },
+          { "text": "5 - Notice", "value": "5" },
+          { "text": "6 - Info", "value": "6" },
+          { "text": "7 - Debug", "value": "7" }
+        ],
+        "current": {}
+      },
+      {
+        "name": "search",
+        "type": "textbox",
+        "defaultValue": "",
+        "label": "Search"
       }
     ]
   },
@@ -41,15 +78,113 @@
   },
   "panels": [
     {
-      "id": 1,
-      "type": "timeseries",
-      "title": "Log Volume Over Time",
+      "id": 10,
+      "type": "row",
+      "title": "System Health Overview",
+      "collapsed": false,
+      "gridPos": { "x": 0, "y": 0, "w": 24, "h": 1 }
+    },
+    {
+      "id": 11,
+      "type": "stat",
+      "title": "Errors (3 or lower)",
       "datasource": "Loki",
-      "gridPos": { "x": 0, "y": 0, "w": 24, "h": 8 },
+      "gridPos": { "x": 0, "y": 1, "w": 8, "h": 4 },
       "targets": [
         {
-          "expr": "sum by (host) (count_over_time({host=~\"$host\", unit=~\"$unit\"}[$__interval]))",
-          "legendFormat": "{{host}}",
+          "expr": "sum(count_over_time({host=~\"$host\", severity=~\"[0-3]\"} [$__range]))",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "fixed", "fixedColor": "#ee5396" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "red", "value": null }]
+          }
+        }
+      }
+    },
+    {
+      "id": 12,
+      "type": "stat",
+      "title": "Warnings (4)",
+      "datasource": "Loki",
+      "gridPos": { "x": 8, "y": 1, "w": 8, "h": 4 },
+      "targets": [
+        {
+          "expr": "sum(count_over_time({host=~\"$host\", severity=\"4\"} [$__range]))",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "fixed", "fixedColor": "#ff7eb6" }
+        }
+      }
+    },
+    {
+      "id": 13,
+      "type": "stat",
+      "title": "Active Units",
+      "datasource": "Loki",
+      "gridPos": { "x": 16, "y": 1, "w": 8, "h": 4 },
+      "targets": [
+        {
+          "expr": "count(sum by (unit) (count_over_time({host=~\"$host\"} [$__range])))",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "fixed", "fixedColor": "#08bdba" }
+        }
+      }
+    },
+    {
+      "id": 40,
+      "type": "row",
+      "title": "Critical System Events",
+      "collapsed": false,
+      "gridPos": { "x": 0, "y": 5, "w": 24, "h": 1 }
+    },
+    {
+      "id": 41,
+      "type": "logs",
+      "title": "Critical System Events (OOM, Segfaults, Panics)",
+      "datasource": "Loki",
+      "gridPos": { "x": 0, "y": 6, "w": 24, "h": 6 },
+      "targets": [
+        {
+          "expr": "{host=~\"$host\"} |~ \"(?i)out of memory|oom-kill|segfault|failed with result|core dumped|panic|kernel oops\"",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "showTime": true,
+        "showLabels": true,
+        "wrapLogMessage": true,
+        "sortOrder": "Descending"
+      }
+    },
+    {
+      "id": 20,
+      "type": "row",
+      "title": "Log Volume & Insights",
+      "collapsed": false,
+      "gridPos": { "x": 0, "y": 12, "w": 24, "h": 1 }
+    },
+    {
+      "id": 1,
+      "type": "timeseries",
+      "title": "Log Volume by Severity",
+      "datasource": "Loki",
+      "gridPos": { "x": 0, "y": 13, "w": 16, "h": 8 },
+      "targets": [
+        {
+          "expr": "sum by (severity) (count_over_time({host=~\"$host\", unit=~\"$unit\", source=~\"$source\", severity=~\"$severity\"} |~ \"$search\" [$__interval]))",
+          "legendFormat": "Level {{severity}}",
           "refId": "A"
         }
       ],
@@ -58,21 +193,116 @@
           "custom": {
             "drawStyle": "bars",
             "fillOpacity": 80,
-            "showPoints": "never"
+            "stacking": { "mode": "normal", "group": "A" }
           },
-          "color": { "mode": "palette-classic" }
+          "color": { "mode": "palette-classic" },
+          "overrides": [
+            {
+              "matcher": { "id": "byName", "options": "Level 0" },
+              "properties": [
+                {
+                  "id": "color",
+                  "value": { "fixedColor": "#ee5396", "mode": "fixed" }
+                }
+              ]
+            },
+            {
+              "matcher": { "id": "byName", "options": "Level 1" },
+              "properties": [
+                {
+                  "id": "color",
+                  "value": { "fixedColor": "#ee5396", "mode": "fixed" }
+                }
+              ]
+            },
+            {
+              "matcher": { "id": "byName", "options": "Level 2" },
+              "properties": [
+                {
+                  "id": "color",
+                  "value": { "fixedColor": "#ee5396", "mode": "fixed" }
+                }
+              ]
+            },
+            {
+              "matcher": { "id": "byName", "options": "Level 3" },
+              "properties": [
+                {
+                  "id": "color",
+                  "value": { "fixedColor": "#ee5396", "mode": "fixed" }
+                }
+              ]
+            },
+            {
+              "matcher": { "id": "byName", "options": "Level 4" },
+              "properties": [
+                {
+                  "id": "color",
+                  "value": { "fixedColor": "#ff7eb6", "mode": "fixed" }
+                }
+              ]
+            },
+            {
+              "matcher": { "id": "byName", "options": "Level 5" },
+              "properties": [
+                {
+                  "id": "color",
+                  "value": { "fixedColor": "#be95ff", "mode": "fixed" }
+                }
+              ]
+            },
+            {
+              "matcher": { "id": "byName", "options": "Level 6" },
+              "properties": [
+                {
+                  "id": "color",
+                  "value": { "fixedColor": "#08bdba", "mode": "fixed" }
+                }
+              ]
+            }
+          ]
         }
       }
     },
     {
-      "id": 2,
-      "type": "logs",
-      "title": "Log Stream",
+      "id": 21,
+      "type": "bargauge",
+      "title": "Top Noisy Units",
       "datasource": "Loki",
-      "gridPos": { "x": 0, "y": 8, "w": 24, "h": 16 },
+      "gridPos": { "x": 16, "y": 6, "w": 8, "h": 8 },
       "targets": [
         {
-          "expr": "{host=~\"$host\", unit=~\"$unit\"}",
+          "expr": "topk(10, sum by (unit) (count_over_time({host=~\"$host\", source=~\"$source\"} [$__range])))",
+          "legendFormat": "{{unit}}",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": ["lastNotNull"],
+          "limit": 10
+        },
+        "orientation": "horizontal",
+        "displayMode": "gradient"
+      }
+    },
+    {
+      "id": 30,
+      "type": "row",
+      "title": "Log Stream",
+      "collapsed": false,
+      "gridPos": { "x": 0, "y": 14, "w": 24, "h": 1 }
+    },
+    {
+      "id": 2,
+      "type": "logs",
+      "title": "Filtered Log Stream",
+      "datasource": "Loki",
+      "gridPos": { "x": 0, "y": 15, "w": 24, "h": 20 },
+      "targets": [
+        {
+          "expr": "{host=~\"$host\", unit=~\"$unit\", source=~\"$source\", severity=~\"$severity\"} |~ \"$search\"",
           "refId": "A"
         }
       ],

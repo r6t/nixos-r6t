@@ -4,11 +4,17 @@
   "tags": ["nixos", "network", "router"],
   "timezone": "browser",
   "schemaVersion": 38,
-  "version": 1,
+  "version": 4,
   "editable": true,
   "refresh": "30s",
   "templating": {
     "list": [
+      {
+        "name": "router",
+        "type": "constant",
+        "query": "192.168.6.1:9000",
+        "hide": 2
+      },
       {
         "name": "exit_node",
         "type": "query",
@@ -32,24 +38,67 @@
     {
       "id": 1,
       "type": "row",
-      "title": "Router Core Metrics",
+      "title": "Core System Status",
       "collapsed": false,
       "gridPos": { "x": 0, "y": 0, "w": 24, "h": 1 }
     },
     {
-      "id": 2,
-      "type": "timeseries",
-      "title": "WAN Throughput",
+      "id": 12,
+      "type": "stat",
+      "title": "Service Status",
       "datasource": "Prometheus",
-      "gridPos": { "x": 0, "y": 1, "w": 12, "h": 8 },
+      "gridPos": { "x": 0, "y": 1, "w": 24, "h": 3 },
       "targets": [
         {
-          "expr": "rate(node_network_receive_bytes_total{instance=\"192.168.6.1:9000\",device=\"enp101s0\"}[$__rate_interval]) * 8",
+          "expr": "node_systemd_unit_state{instance=\"$router\",name=\"dnsmasq.service\",state=\"active\"}",
+          "legendFormat": "dnsmasq",
+          "refId": "A"
+        },
+        {
+          "expr": "node_systemd_unit_state{instance=\"$router\",name=\"nextdns.service\",state=\"active\"}",
+          "legendFormat": "NextDNS",
+          "refId": "B"
+        },
+        {
+          "expr": "node_systemd_unit_state{instance=\"$router\",name=\"cake-qos-egress.service\",state=\"active\"}",
+          "legendFormat": "CAKE Egress",
+          "refId": "C"
+        },
+        {
+          "expr": "node_systemd_unit_state{instance=\"$router\",name=\"cake-qos-ingress.service\",state=\"active\"}",
+          "legendFormat": "CAKE Ingress",
+          "refId": "D"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            {
+              "options": {
+                "0": { "color": "#ee5396", "index": 0, "text": "DOWN" },
+                "1": { "color": "#42be65", "index": 1, "text": "UP" }
+              },
+              "type": "value"
+            }
+          ]
+        }
+      },
+      "options": { "orientation": "horizontal", "textMode": "name" }
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "WAN Throughput (enp101s0)",
+      "datasource": "Prometheus",
+      "gridPos": { "x": 0, "y": 4, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "rate(node_network_receive_bytes_total{instance=\"$router\",device=\"enp101s0\"}[$__rate_interval]) * 8",
           "legendFormat": "Download",
           "refId": "A"
         },
         {
-          "expr": "rate(node_network_transmit_bytes_total{instance=\"192.168.6.1:9000\",device=\"enp101s0\"}[$__rate_interval]) * -8",
+          "expr": "rate(node_network_transmit_bytes_total{instance=\"$router\",device=\"enp101s0\"}[$__rate_interval]) * -8",
           "legendFormat": "Upload",
           "refId": "B"
         }
@@ -57,7 +106,6 @@
       "fieldConfig": {
         "defaults": {
           "unit": "bps",
-          "color": { "mode": "palette-classic" },
           "custom": {
             "axisPlacement": "right",
             "fillOpacity": 10,
@@ -89,17 +137,17 @@
     {
       "id": 3,
       "type": "timeseries",
-      "title": "LAN Throughput",
+      "title": "LAN Throughput (enp100s0)",
       "datasource": "Prometheus",
-      "gridPos": { "x": 12, "y": 1, "w": 12, "h": 8 },
+      "gridPos": { "x": 12, "y": 4, "w": 12, "h": 8 },
       "targets": [
         {
-          "expr": "rate(node_network_receive_bytes_total{instance=\"192.168.6.1:9000\",device=\"enp100s0\"}[$__rate_interval]) * 8",
+          "expr": "rate(node_network_receive_bytes_total{instance=\"$router\",device=\"enp100s0\"}[$__rate_interval]) * 8",
           "legendFormat": "Download",
           "refId": "A"
         },
         {
-          "expr": "rate(node_network_transmit_bytes_total{instance=\"192.168.6.1:9000\",device=\"enp100s0\"}[$__rate_interval]) * -8",
+          "expr": "rate(node_network_transmit_bytes_total{instance=\"$router\",device=\"enp100s0\"}[$__rate_interval]) * -8",
           "legendFormat": "Upload",
           "refId": "B"
         }
@@ -107,7 +155,6 @@
       "fieldConfig": {
         "defaults": {
           "unit": "bps",
-          "color": { "mode": "palette-classic" },
           "custom": {
             "axisPlacement": "right",
             "fillOpacity": 10,
@@ -137,121 +184,189 @@
       }
     },
     {
-      "id": 4,
-      "type": "stat",
-      "title": "Router Uptime",
-      "datasource": "Prometheus",
-      "gridPos": { "x": 0, "y": 9, "w": 6, "h": 4 },
+      "id": 100,
+      "type": "row",
+      "title": "DNS Server Stats (dnsmasq)",
+      "collapsed": false,
+      "gridPos": { "x": 0, "y": 12, "w": 24, "h": 1 }
+    },
+    {
+      "id": 101,
+      "type": "bargauge",
+      "title": "Top 10 Requested Domains (Last 1h)",
+      "datasource": "Loki",
+      "gridPos": { "x": 0, "y": 13, "w": 8, "h": 8 },
       "targets": [
         {
-          "expr": "time() - node_boot_time_seconds{instance=\"192.168.6.1:9000\"}",
+          "expr": "sum by (domain) (count_over_time({unit=\"dnsmasq.service\", host=\"saguaro\"} | regexp \"query\\\\[(?P<type>.*)\\\\] (?P<domain>.*) from\" [$__interval]))",
+          "legendFormat": "{{domain}}",
           "refId": "A"
         }
       ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "s",
-          "color": { "mode": "thresholds" },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [{ "color": "#08bdba", "value": null }]
-          }
-        }
-      },
       "options": {
-        "textMode": "value",
-        "colorMode": "value",
-        "graphMode": "none"
+        "reduceOptions": {
+          "values": false,
+          "calcs": ["lastNotNull"],
+          "limit": 10
+        },
+        "orientation": "horizontal",
+        "displayMode": "gradient",
+        "showUnfilled": true
       }
     },
     {
-      "id": 5,
-      "type": "gauge",
-      "title": "Conntrack Usage",
-      "datasource": "Prometheus",
-      "gridPos": { "x": 6, "y": 9, "w": 6, "h": 4 },
+      "id": 103,
+      "type": "bargauge",
+      "title": "Top 10 Clients (Last 1h)",
+      "datasource": "Loki",
+      "gridPos": { "x": 8, "y": 13, "w": 8, "h": 8 },
       "targets": [
         {
-          "expr": "(node_nf_conntrack_entries{instance=\"192.168.6.1:9000\"} / node_nf_conntrack_entries_limit{instance=\"192.168.6.1:9000\"}) * 100",
+          "expr": "sum by (client) (count_over_time({unit=\"dnsmasq.service\", host=\"saguaro\"} | regexp \"from (?P<client>[0-9.]+)\" [$__interval]))",
+          "legendFormat": "{{client}}",
           "refId": "A"
         }
       ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "percent",
-          "min": 0,
-          "max": 100,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              { "color": "#42be65", "value": null },
-              { "color": "#ff7eb6", "value": 70 },
-              { "color": "#ee5396", "value": 90 }
-            ]
-          }
-        }
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": ["lastNotNull"],
+          "limit": 10
+        },
+        "orientation": "horizontal",
+        "displayMode": "gradient",
+        "showUnfilled": true
       }
     },
     {
-      "id": 6,
+      "id": 102,
       "type": "timeseries",
-      "title": "CPU & Memory",
-      "datasource": "Prometheus",
-      "gridPos": { "x": 12, "y": 9, "w": 12, "h": 4 },
+      "title": "DNS Query Volume by Type",
+      "datasource": "Loki",
+      "gridPos": { "x": 16, "y": 13, "w": 8, "h": 8 },
       "targets": [
         {
-          "expr": "100 - (avg(rate(node_cpu_seconds_total{instance=\"192.168.6.1:9000\",mode=\"idle\"}[$__rate_interval])) * 100)",
-          "legendFormat": "CPU",
+          "expr": "sum by (type) (count_over_time({unit=\"dnsmasq.service\", host=\"saguaro\"} | regexp \"query\\\\[(?P<type>.*)\\\\] (?P<domain>.*) from\" [$__interval]))",
+          "legendFormat": "{{type}}",
           "refId": "A"
-        },
-        {
-          "expr": "((node_memory_MemTotal_bytes{instance=\"192.168.6.1:9000\"} - node_memory_MemAvailable_bytes{instance=\"192.168.6.1:9000\"}) / node_memory_MemTotal_bytes{instance=\"192.168.6.1:9000\"}) * 100",
-          "legendFormat": "Mem",
-          "refId": "B"
         }
       ],
       "fieldConfig": {
-        "defaults": {
-          "unit": "percent",
-          "min": 0,
-          "max": 100,
-          "custom": { "showPoints": "never" }
+        "defaults": { "unit": "qps", "custom": { "fillOpacity": 10 } }
+      }
+    },
+    {
+      "id": 13,
+      "type": "row",
+      "title": "Bufferbloat & QoS (CAKE Effectiveness)",
+      "collapsed": false,
+      "gridPos": { "x": 0, "y": 21, "w": 24, "h": 1 }
+    },
+    {
+      "id": 14,
+      "type": "timeseries",
+      "title": "CAKE Packets Dropped (Lower is Better)",
+      "datasource": "Prometheus",
+      "gridPos": { "x": 0, "y": 22, "w": 12, "h": 7 },
+      "targets": [
+        {
+          "expr": "rate(node_qdisc_drops_total{instance=\"$router\"}[$__rate_interval])",
+          "legendFormat": "{{device}} ({{kind}})",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "pps", "custom": { "fillOpacity": 20 } }
+      }
+    },
+    {
+      "id": 15,
+      "type": "timeseries",
+      "title": "CAKE Backlog (Queue Pressure)",
+      "datasource": "Prometheus",
+      "gridPos": { "x": 12, "y": 22, "w": 12, "h": 7 },
+      "targets": [
+        {
+          "expr": "node_qdisc_backlog{instance=\"$router\"}",
+          "legendFormat": "{{device}} bytes",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "decbytes", "custom": { "fillOpacity": 20 } }
+      }
+    },
+    {
+      "id": 200,
+      "type": "row",
+      "title": "Network Security (nftables)",
+      "collapsed": false,
+      "gridPos": { "x": 0, "y": 29, "w": 24, "h": 1 }
+    },
+    {
+      "id": 201,
+      "type": "timeseries",
+      "title": "Firewall Packet Throughput by Chain",
+      "datasource": "Prometheus",
+      "gridPos": { "x": 0, "y": 30, "w": 24, "h": 7 },
+      "targets": [
+        {
+          "expr": "sum by (table, chain) (rate(node_nftables_chain_packets_total{instance=\"$router\"}[$__rate_interval]))",
+          "legendFormat": "{{table}}:{{chain}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "pps", "custom": { "fillOpacity": 10 } }
+      }
+    },
+    {
+      "id": 16,
+      "type": "row",
+      "title": "Interface Reliability",
+      "collapsed": true,
+      "gridPos": { "x": 0, "y": 37, "w": 24, "h": 1 }
+    },
+    {
+      "id": 17,
+      "type": "timeseries",
+      "title": "Interface Errors & Drops",
+      "datasource": "Prometheus",
+      "gridPos": { "x": 0, "y": 38, "w": 24, "h": 7 },
+      "targets": [
+        {
+          "expr": "rate(node_network_receive_errs_total{instance=\"$router\"}[$__rate_interval])",
+          "legendFormat": "{{device}} RX Error",
+          "refId": "A"
         },
-        "overrides": [
-          {
-            "matcher": { "id": "byName", "options": "CPU" },
-            "properties": [
-              {
-                "id": "color",
-                "value": { "fixedColor": "#82cfff", "mode": "fixed" }
-              }
-            ]
-          },
-          {
-            "matcher": { "id": "byName", "options": "Mem" },
-            "properties": [
-              {
-                "id": "color",
-                "value": { "fixedColor": "#78a9ff", "mode": "fixed" }
-              }
-            ]
-          }
-        ]
+        {
+          "expr": "rate(node_network_transmit_errs_total{instance=\"$router\"}[$__rate_interval])",
+          "legendFormat": "{{device}} TX Error",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(node_network_receive_drop_total{instance=\"$router\"}[$__rate_interval])",
+          "legendFormat": "{{device}} RX Drop",
+          "refId": "C"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "pps", "custom": { "showPoints": "always" } }
       }
     },
     {
       "id": 7,
       "type": "row",
-      "title": "Router Logs",
-      "collapsed": false,
-      "gridPos": { "x": 0, "y": 13, "w": 24, "h": 1 }
+      "title": "Router Logs & Health Checks",
+      "collapsed": true,
+      "gridPos": { "x": 0, "y": 45, "w": 24, "h": 1 }
     },
     {
       "id": 8,
       "type": "logs",
       "title": "Critical Router Logs",
       "datasource": "Loki",
-      "gridPos": { "x": 0, "y": 14, "w": 24, "h": 8 },
+      "gridPos": { "x": 0, "y": 46, "w": 24, "h": 8 },
       "targets": [
         {
           "expr": "{host=\"saguaro\", unit=~\"router-health-check|wan-watchdog|dnsmasq|nextdns|nftables|cake-qos-.*\"}",
@@ -270,14 +385,14 @@
       "type": "row",
       "title": "WireGuard Exit Nodes",
       "collapsed": true,
-      "gridPos": { "x": 0, "y": 22, "w": 24, "h": 1 }
+      "gridPos": { "x": 0, "y": 54, "w": 24, "h": 1 }
     },
     {
       "id": 10,
       "type": "timeseries",
       "title": "Peer Throughput",
       "datasource": "Prometheus",
-      "gridPos": { "x": 0, "y": 23, "w": 12, "h": 8 },
+      "gridPos": { "x": 0, "y": 55, "w": 12, "h": 8 },
       "targets": [
         {
           "expr": "rate(wg_peer_transfer_rx_bytes{instance=~\"$exit_node\"}[$__rate_interval]) * 8",
@@ -291,10 +406,7 @@
         }
       ],
       "fieldConfig": {
-        "defaults": {
-          "unit": "bps",
-          "custom": { "fillOpacity": 10 }
-        }
+        "defaults": { "unit": "bps", "custom": { "fillOpacity": 10 } }
       }
     },
     {
@@ -302,7 +414,7 @@
       "type": "timeseries",
       "title": "Last Handshake Age",
       "datasource": "Prometheus",
-      "gridPos": { "x": 12, "y": 23, "w": 12, "h": 8 },
+      "gridPos": { "x": 12, "y": 55, "w": 12, "h": 8 },
       "targets": [
         {
           "expr": "time() - wg_peer_last_handshake_seconds{instance=~\"$exit_node\"}",

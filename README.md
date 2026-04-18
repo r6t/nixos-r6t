@@ -2,15 +2,22 @@
 
 ![](./docs/nixos-r6t-flake.drawio.svg)
 
-### Development and use
+### NixOS and Home Manager
 
 I typically generate NixOS and home-manager config in the same step, and then upgrade into the latest with:
 
-```
-nixos-rebuild switch --flake .#hostname
+```fish
+nrs
 ```
 
-Because this is a common task, it typically runs via [`nrs`](https://github.com/r6t/nixos-r6t/blob/bddac92b6da1879f021f0b3f7875e4dd65acefe0/modules/home/fish/default.nix#L72) which takes care of flake path and hostname automatically.
+`nrs` is a [fish alias](https://github.com/r6t/nixos-r6t/blob/bddac92b6da1879f021f0b3f7875e4dd65acefe0/modules/home/fish/default.nix#L72) that runs `sudo nixos-rebuild switch --flake .` with the correct hostname.
+
+### Design Principles
+
+- **Encrypted Local Traffic**: Tailscale-enabled devices and containers bypass LAN DNS overrides to route `*.r6t.io` traffic through the encrypted Tailscale tunnel, even when on the same physical network.
+- **Privacy-First DNS**: Containers use a local `dnsmasq` instance on port 53, forwarding to DoT/NextDNS on port 5353, with split-DNS routing for `.ts.net` MagicDNS names.
+- **High-Utility Observability**: A centralized monitoring stack (Grafana/Loki/Prometheus) provides deep insights into router health (CAKE QoS, DNS patterns), system resources (ZFS, thermals), and container lifecycles.
+- **Ephemeral Infrastructure**: LXC containers are treated as cattle — `mine.tailscale.ephemeral` ensures they are immediately removed from the tailnet upon deletion.
 
 ### Containers
 
