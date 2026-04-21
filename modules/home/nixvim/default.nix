@@ -799,8 +799,8 @@ let
         oil.enable = true;
         treesitter = {
           enable = true;
-          folding.enable = false;
-          settings.indent.enable = true;
+          highlight.enable = true;
+          indent.enable = true;
         };
         treesitter-textobjects = {
           enable = true;
