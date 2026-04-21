@@ -801,6 +801,32 @@ let
           enable = true;
           highlight.enable = true;
           indent.enable = true;
+          grammarPackages = with pkgs.vimPlugins.nvim-treesitter.builtGrammars; [
+            bash
+            css
+            dockerfile
+            fish
+            go
+            gomod
+            hcl
+            html
+            javascript
+            json
+            lua
+            make
+            markdown
+            markdown_inline
+            nix
+            python
+            regex
+            rust
+            toml
+            typescript
+            vim
+            vimdoc
+            xml
+            yaml
+          ];
         };
         treesitter-textobjects = {
           enable = true;
