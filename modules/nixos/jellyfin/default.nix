@@ -1,32 +1,20 @@
 { lib, config, pkgs, ... }:
 
 {
-  options = {
-    mine.jellyfin = {
-      enable = lib.mkEnableOption "jellyfin server module";
-      logDir = lib.mkOption {
-        type = lib.types.str;
-        default = "/var/lib/jellyfin/log";
-        description = "Directory where Jellyfin will write its logs.";
-      };
-      dataDir = lib.mkOption {
-        type = lib.types.str;
-        default = "/var/lib/jellyfin";
-        description = "Directory where Jellyfin will store its media data.";
-      };
-      cacheDir = lib.mkOption {
-        type = lib.types.str;
-        default = "/var/cache/jellyfin";
-        description = "Directory where Jellyfin will store its cache files.";
-      };
-      configDir = lib.mkOption {
-        type = lib.types.str;
-        default = "/var/lib/jellyfin/config";
-        description = "Directory for Jellyfin configuration files.";
-      };
-    };
-  };
+  options.mine.jellyfin.enable = lib.mkEnableOption "jellyfin server module";
 
+  # Thin wrapper — encodes only flake-specific opinions:
+  #   * uid 1000, gid 100 (users) matches the bind-mounted data ownership on crownstore
+  #   * openFirewall (LAN access on 8096/8920, 1900/7359)
+  #   * pins the ffmpeg + web packages into systemPackages for ad-hoc debugging
+  #
+  # Everything else (paths, transcoding, hardwareAcceleration, forceEncodingConfig)
+  # is set directly via services.jellyfin.* in containers/jellyfin.nix.
+  # Upstream defaults for paths are already correct:
+  #   dataDir   = /var/lib/jellyfin
+  #   configDir = /var/lib/jellyfin/config
+  #   cacheDir  = /var/cache/jellyfin
+  #   logDir    = /var/lib/jellyfin/log
   config = lib.mkIf config.mine.jellyfin.enable {
     users.users.jellyfin = {
       uid = 1000;
@@ -40,7 +28,6 @@
       user = "jellyfin";
       group = "users";
       openFirewall = true;
-      inherit (config.mine.jellyfin) logDir dataDir cacheDir configDir;
     };
 
     environment.systemPackages = [
