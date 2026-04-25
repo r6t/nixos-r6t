@@ -43,12 +43,6 @@
       inherit (config.mine.jellyfin) logDir dataDir cacheDir configDir;
     };
 
-    # Symlinks for compatibility with migrated Docker paths
-    systemd.tmpfiles.rules = [
-      "L /cache - - - - /var/cache/jellyfin"
-      "L /config - - - - /var/lib/jellyfin"
-    ];
-
     environment.systemPackages = [
       pkgs.jellyfin
       pkgs.jellyfin-web
