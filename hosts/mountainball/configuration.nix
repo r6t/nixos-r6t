@@ -34,14 +34,36 @@
   services.fprintd.enable = false;
 
   # Touchpad: PIXA3854:00 093A:0274 (Framework 13 AMD built-in trackpad)
-  home-manager.users.${userConfig.username}.programs.plasma.input.touchpads = [
-    {
-      name = "PIXA3854:00 093A:0274 Touchpad";
-      vendorId = "093a";
-      productId = "0274";
-      naturalScroll = true;
-    }
-  ];
+  home-manager.users.${userConfig.username} = {
+    programs.plasma.input.touchpads = [
+      {
+        name = "PIXA3854:00 093A:0274 Touchpad";
+        vendorId = "093a";
+        productId = "0274";
+        naturalScroll = true;
+      }
+    ];
+
+    programs.fish.interactiveShellInit = ''
+      # Load Qobuz credentials if available
+      if test -r /run/secrets/qobuz/user
+        set -gx QOBUZ_USER (string trim (cat /run/secrets/qobuz/user))
+      end
+      if test -r /run/secrets/qobuz/password
+        set -gx QOBUZ_PASSWORD (string trim (cat /run/secrets/qobuz/password))
+      end
+    '';
+  };
+
+  # set secrets
+  sops.secrets = {
+    "qobuz/user" = {
+      owner = userConfig.username;
+    };
+    "qobuz/password" = {
+      owner = userConfig.username;
+    };
+  };
 
   system.stateVersion = "23.11";
 

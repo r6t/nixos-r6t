@@ -7,6 +7,7 @@ in
   imports = [
     "${modulesPath}/virtualisation/lxc-container.nix"
     ../../modules/nixos/localization/default.nix
+    ../../modules/nixos/tailscale/default.nix
     ./dns-overrides.nix
   ];
 

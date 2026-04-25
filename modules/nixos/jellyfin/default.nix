@@ -6,7 +6,7 @@
       enable = lib.mkEnableOption "jellyfin server module";
       logDir = lib.mkOption {
         type = lib.types.str;
-        default = "/var/log/jellyfin";
+        default = "/var/lib/jellyfin/log";
         description = "Directory where Jellyfin will write its logs.";
       };
       dataDir = lib.mkOption {
@@ -21,19 +21,34 @@
       };
       configDir = lib.mkOption {
         type = lib.types.str;
-        default = "/etc/jellyfin";
+        default = "/var/lib/jellyfin/config";
         description = "Directory for Jellyfin configuration files.";
       };
     };
   };
 
   config = lib.mkIf config.mine.jellyfin.enable {
+    users.users.jellyfin = {
+      uid = 1000;
+      group = "users";
+      isSystemUser = true;
+      home = "/var/lib/jellyfin";
+    };
+
     services.jellyfin = {
       enable = true;
-      user = 1000;
-      group = 100;
+      user = "jellyfin";
+      group = "users";
+      openFirewall = true;
       inherit (config.mine.jellyfin) logDir dataDir cacheDir configDir;
     };
+
+    # Symlinks for compatibility with migrated Docker paths
+    systemd.tmpfiles.rules = [
+      "L /cache - - - - /var/cache/jellyfin"
+      "L /config - - - - /var/lib/jellyfin"
+    ];
+
     environment.systemPackages = [
       pkgs.jellyfin
       pkgs.jellyfin-web
