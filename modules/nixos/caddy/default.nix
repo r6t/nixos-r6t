@@ -95,7 +95,8 @@ in
         enable = true;
         package = pkgs.caddy.withPlugins {
           plugins = [ "github.com/caddy-dns/route53@v1.6.0" ];
-          hash = "sha256-d+4iacugZSUlHpMXau/mwvO9Lgd3h5dH1nCUq8qmYeQ=";
+          # hash = "sha256-d+4iacugZSUlHpMXau/mwvO9Lgd3h5dH1nCUq8qmYeQ=";
+          hash = "sha256-kaX1VGjHgGuWlfHGe/u4O3JZnJokMLVjtoa9kVsAAok=";
         };
       }
 
