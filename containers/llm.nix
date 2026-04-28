@@ -33,19 +33,13 @@ in
       host = "0.0.0.0";
       modelsDir = "/var/lib/llama-cpp/models";
       modelsPreset = {
+        # Qwen3-14B Q6_K: ~12.1 GiB weights, fits comfortably on 16 GiB with
+        # room for q8_0 KV cache at 64K context. Dense model, excellent for
+        # coding and agentic use. Supports /think and /no_think mode switching.
         "qwen3-14b" = {
           hf-repo = "unsloth/Qwen3-14B-GGUF";
-          hf-file = "Qwen3-14B-Q8_0.gguf";
+          hf-file = "Qwen3-14B-Q6_K.gguf";
           alias = "qwen3-14b";
-        };
-        # Gemma 4 26B MoE (4B active params). UD-IQ4_XS fits 16GB VRAM with
-        # headroom for f16 KV cache at 32K context (~1.2 GB free after model load).
-        # KV quantization (q8_0) requires flash_attn, which is disabled due to
-        # an upstream CUDA bug on RTX 5060 Ti (see llama-cpp module extraFlags).
-        "gemma4-26b" = {
-          hf-repo = "unsloth/gemma-4-26B-A4B-it-GGUF";
-          hf-file = "gemma-4-26B-A4B-it-UD-IQ4_XS.gguf";
-          alias = "gemma4-26b";
         };
       };
     };

@@ -39,8 +39,8 @@ in
       example = lib.literalExpression ''
         {
           "qwen3-14b" = {
-            hf-repo = "Qwen/Qwen3-14B-GGUF";
-            hf-file = "qwen3-14b-q8_0.gguf";
+            hf-repo = "unsloth/Qwen3-14B-GGUF";
+            hf-file = "Qwen3-14B-Q6_K.gguf";
             alias = "qwen3-14b";
           };
         }
@@ -53,28 +53,20 @@ in
         # GPU offload: push all transformer layers to VRAM
         "-ngl"
         "99"
-        # Disable multimodal vision encoder — saves ~1.14 GiB VRAM on gemma4 (multimodal model).
-        # Not needed for text/coding use cases and causes OOM on 16 GiB cards.
-        "--no-mmproj"
-        # Flash attention: disabled due to CUDA crashes on RTX 5060 Ti (compute 12.0).
-        # Upstream bug: https://github.com/ggml-org/llama.cpp/issues/21289
-        # Fix commit de1aa6fa is merged upstream but not yet in nixpkgs as of b8680.
-        #
-        # TODO: once nixpkgs llama-cpp reaches the build containing de1aa6fa (post-b8680):
-        #   1. Change "--flash-attn" "off" -> "--flash-attn" "auto"
-        #   2. Add "--cache-type-k" "q8_0" "--cache-type-v" "q8_0"
-        #   3. Bump "-c" to "65536" (64K context fits comfortably with q8_0 KV on 16 GiB)
-        #   4. Update llm.nix comment and opencode.json context limit
-        # Benefits: ~5-10% generation speed, q8_0 KV halves cache VRAM, 64K context.
+        # Flash attention: enabled. Fix for CUDA buffer overlap crash on RTX 5060 Ti
+        # (compute 12.0) landed in llama.cpp commit de1aa6fa, present in nixpkgs b8733+.
         "--flash-attn"
-        "off"
-        # Context window: 32768 tokens (~24K words). With flash_attn off, KV cache uses f16.
-        # Gemma4's hybrid SWA architecture keeps the SWA portion fixed regardless of context,
-        # so doubling from 16K to 32K only adds ~480 MiB VRAM (non-SWA KV scales linearly,
-        # SWA stays at ~300 MiB). Total at 32K: ~14.6 GiB — fits on 16 GiB with ~1.2 GiB headroom.
-        # With flash_attn + q8_0 KV, 64K would use ~14.8 GiB — upgrade when TODO above is done.
+        "auto"
+        # KV cache quantization: q8_0 halves KV cache VRAM vs f16.
+        # Requires flash_attn (enabled above).
+        "--cache-type-k"
+        "q8_0"
+        "--cache-type-v"
+        "q8_0"
+        # Context window: 65536 tokens (~48K words). Qwen3-14B Q6_K uses ~12.1 GiB
+        # weights; q8_0 KV at 64K adds ~2 GiB — fits on 16 GiB with ~1.5 GiB headroom.
         "-c"
-        "32768"
+        "65536"
         # Parallel slots: 1 slot = all VRAM budget goes to one session.
         # Each additional slot reserves a full context window in the KV cache.
         "-np"
@@ -83,7 +75,7 @@ in
       description = ''
         Extra CLI flags passed to llama-server.
         Defaults are tuned for a single-user coding workflow on a 16 GiB GPU:
-        full GPU offload, quantized KV cache, 16K context, one parallel slot.
+        full GPU offload, q8_0 KV cache, 64K context, one parallel slot.
       '';
     };
   };

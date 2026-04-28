@@ -215,6 +215,18 @@ let
           end,
         })
 
+        -- Auto-hover on CursorHold: show LSP documentation after updatetime (100ms) of no movement.
+        -- Only fires in normal mode when an LSP client is attached to avoid noisy popups in
+        -- non-LSP buffers. Manual trigger remains available via <leader>lh.
+        vim.api.nvim_create_autocmd("CursorHold", {
+          group = vim.api.nvim_create_augroup("lsp_auto_hover", { clear = true }),
+          callback = function()
+            if #vim.lsp.get_clients({ bufnr = 0 }) > 0 then
+              vim.lsp.buf.hover()
+            end
+          end,
+        })
+
         -- Fix for zellij.nvim health check
         vim.health = vim.health or {}
         vim.health.report_start = vim.health.report_start or function() end
@@ -441,7 +453,6 @@ let
         }
         {
           # Shows function signatures, types, and documentation in a float window
-          # TODO: Experiment with auto-hover on CursorHold after getting used to manual trigger
           action = "<cmd>lua vim.lsp.buf.hover()<CR>";
           key = "<leader>lh";
           options.desc = "LSP Hover documentation";
@@ -637,7 +648,7 @@ let
         swapfile = false;
         tabstop = 2;
         undofile = true;
-        updatetime = 100;
+        updatetime = 200;
       };
 
       plugins = {
