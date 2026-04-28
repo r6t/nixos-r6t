@@ -15,7 +15,7 @@ let
     # Dense. Best all-rounder: coding, agentic tool calling, multi-turn chat.
     # Supports /think and /no_think per prompt. 64K ctx ~14.1 GiB total.
     qwen3-14b = {
-      modelFile = /var/lib/llama-cpp/models/Qwen3-14B-Q6_K.gguf;
+      modelFile = "/var/lib/llama-cpp/models/Qwen3-14B-Q6_K.gguf";
       hfRepo = "unsloth/Qwen3-14B-GGUF";
       hfFile = "Qwen3-14B-Q6_K.gguf";
       contextSize = 65536;
@@ -25,7 +25,7 @@ let
     # Mistral's coding-specialized model. Agentic software dev tasks.
     # 32K ctx (not 64K) required for VRAM headroom. 32K ctx ~14.5 GiB total.
     devstral-small-2 = {
-      modelFile = /var/lib/llama-cpp/models/Devstral-Small-2-24B-Instruct-2512-Q4_K_M.gguf;
+      modelFile = "/var/lib/llama-cpp/models/Devstral-Small-2-24B-Instruct-2512-Q4_K_M.gguf";
       hfRepo = "unsloth/Devstral-Small-2-24B-Instruct-2512-GGUF";
       hfFile = "Devstral-Small-2-24B-Instruct-2512-Q4_K_M.gguf";
       contextSize = 32768;
@@ -35,7 +35,7 @@ let
     # Dense 14B. Outperforms DeepSeek-R1-70B on math/coding benchmarks.
     # Best for hard algorithmic problems. English-only. 64K ctx ~14.0 GiB total.
     phi4-reasoning-plus = {
-      modelFile = /var/lib/llama-cpp/models/Phi-4-reasoning-plus-Q6_K.gguf;
+      modelFile = "/var/lib/llama-cpp/models/Phi-4-reasoning-plus-Q6_K.gguf";
       hfRepo = "unsloth/Phi-4-reasoning-plus-GGUF";
       hfFile = "Phi-4-reasoning-plus-Q6_K.gguf";
       contextSize = 65536;
@@ -45,7 +45,7 @@ let
     # MoE (4B active params). Newest model (Mar 2026). General chat, creative tasks.
     # Less proven for agentic coding vs Qwen3/Devstral. 64K ctx ~14.5 GiB total.
     gemma4-26b = {
-      modelFile = /var/lib/llama-cpp/models/gemma-4-26B-A4B-it-UD-IQ4_XS.gguf;
+      modelFile = "/var/lib/llama-cpp/models/gemma-4-26B-A4B-it-UD-IQ4_XS.gguf";
       hfRepo = "unsloth/gemma-4-26B-A4B-it-GGUF";
       hfFile = "gemma-4-26B-A4B-it-UD-IQ4_XS.gguf";
       contextSize = 65536;
@@ -88,7 +88,7 @@ in
     llama-cpp = {
       enable = true;
       host = "0.0.0.0";
-      modelsDir = /var/lib/llama-cpp/models;
+      modelsDir = "/var/lib/llama-cpp/models";
       inherit (activeModel) modelFile hfRepo hfFile contextSize extraFlags;
     };
     open-webui = {

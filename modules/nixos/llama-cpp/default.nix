@@ -20,7 +20,7 @@ in
     };
 
     modelFile = lib.mkOption {
-      type = lib.types.nullOr lib.types.path;
+      type = lib.types.nullOr lib.types.str;
       default = null;
       description = ''
         Path to a GGUF model file to load eagerly at startup.
@@ -53,7 +53,7 @@ in
     };
 
     modelsDir = lib.mkOption {
-      type = lib.types.nullOr lib.types.path;
+      type = lib.types.nullOr lib.types.str;
       default = null;
       description = ''
         Directory where GGUF model files are stored. Used as the storage
@@ -108,8 +108,7 @@ in
   config = lib.mkIf cfg.enable {
     services.llama-cpp = {
       enable = true;
-      inherit (cfg) host port modelsDir modelsPreset;
-      model = cfg.modelFile;
+      inherit (cfg) host port modelsPreset;
       extraFlags = [
         # GPU offload: push all transformer layers to VRAM
         "-ngl"
@@ -140,6 +139,8 @@ in
         "1"
       ]
       ++ cfg.extraFlags
+      ++ lib.optionals (cfg.modelFile != null) [ "--model" cfg.modelFile ]
+      ++ lib.optionals (cfg.modelsDir != null) [ "--models-dir" cfg.modelsDir ]
       ++ lib.optionals (cfg.hfRepo != null) [ "--hf-repo" cfg.hfRepo ]
       ++ lib.optionals (cfg.hfFile != null) [ "--hf-file" cfg.hfFile ];
       openFirewall = true;
