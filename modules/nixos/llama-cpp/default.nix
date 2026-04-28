@@ -19,12 +19,47 @@ in
       description = "Port for llama-server to listen on.";
     };
 
+    modelFile = lib.mkOption {
+      type = lib.types.nullOr lib.types.path;
+      default = null;
+      description = ''
+        Path to a GGUF model file to load eagerly at startup.
+        When set, passed as --model to llama-server. The model is loaded
+        immediately on service start, eliminating cold-start latency on
+        the first request. Use this for single-model dedicated setups.
+        Mutually exclusive with modelsPreset router mode.
+      '';
+      example = "/var/lib/llama-cpp/models/Qwen3-14B-Q6_K.gguf";
+    };
+
+    hfRepo = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      description = ''
+        HuggingFace repository to auto-download the model from if modelFile
+        does not exist on disk yet. Combined with hfFile. Once downloaded,
+        the file is cached at modelsDir and loaded from there on subsequent starts.
+      '';
+      example = "unsloth/Qwen3-14B-GGUF";
+    };
+
+    hfFile = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      description = ''
+        HuggingFace filename to download. Used with hfRepo.
+      '';
+      example = "Qwen3-14B-Q6_K.gguf";
+    };
+
     modelsDir = lib.mkOption {
       type = lib.types.nullOr lib.types.path;
       default = null;
       description = ''
-        Directory containing GGUF model files.
-        When set, passed as --model-store to llama-server.
+        Directory where GGUF model files are stored. Used as the storage
+        location for HuggingFace auto-downloads. All models accumulate here
+        across container rebuilds via the persistent bind-mount.
+        When set, passed as --models-dir to llama-server.
       '';
     };
 
@@ -32,9 +67,10 @@ in
       type = lib.types.nullOr (lib.types.attrsOf (lib.types.attrsOf lib.types.str));
       default = null;
       description = ''
-        Declarative model preset configuration for HuggingFace auto-download.
+        Declarative model preset configuration for the llama-server router mode.
         Each key is a model alias, with attrs for hf-repo, hf-file, etc.
-        Passed to services.llama-cpp.modelsPreset.
+        Models are loaded on-demand (cold start on first request per model).
+        Use modelFile instead for eager single-model loading.
       '';
       example = lib.literalExpression ''
         {
@@ -47,35 +83,24 @@ in
       '';
     };
 
+    contextSize = lib.mkOption {
+      type = lib.types.int;
+      default = 65536;
+      description = ''
+        Context window size in tokens passed as -c to llama-server.
+        Override per model when VRAM headroom requires a smaller context
+        (e.g. 32768 for larger 24B models at 4-bit quant on 16 GiB).
+      '';
+    };
+
     extraFlags = lib.mkOption {
       type = lib.types.listOf lib.types.str;
-      default = [
-        # GPU offload: push all transformer layers to VRAM
-        "-ngl"
-        "99"
-        # Flash attention: enabled. Fix for CUDA buffer overlap crash on RTX 5060 Ti
-        # (compute 12.0) landed in llama.cpp commit de1aa6fa, present in nixpkgs b8733+.
-        "--flash-attn"
-        "auto"
-        # KV cache quantization: q8_0 halves KV cache VRAM vs f16.
-        # Requires flash_attn (enabled above).
-        "--cache-type-k"
-        "q8_0"
-        "--cache-type-v"
-        "q8_0"
-        # Context window: 65536 tokens (~48K words). Qwen3-14B Q6_K uses ~12.1 GiB
-        # weights; q8_0 KV at 64K adds ~2 GiB — fits on 16 GiB with ~1.5 GiB headroom.
-        "-c"
-        "65536"
-        # Parallel slots: 1 slot = all VRAM budget goes to one session.
-        # Each additional slot reserves a full context window in the KV cache.
-        "-np"
-        "1"
-      ];
+      default = [ ];
       description = ''
-        Extra CLI flags passed to llama-server.
-        Defaults are tuned for a single-user coding workflow on a 16 GiB GPU:
-        full GPU offload, q8_0 KV cache, 64K context, one parallel slot.
+        Additional CLI flags appended to the base llama-server flags.
+        The base flags (GPU offload, flash-attn, KV quant, context, priority,
+        cache-reuse, parallel slots) are always applied. Use this for
+        model-specific flags like --jinja.
       '';
     };
   };
@@ -83,7 +108,40 @@ in
   config = lib.mkIf cfg.enable {
     services.llama-cpp = {
       enable = true;
-      inherit (cfg) host port extraFlags modelsDir modelsPreset;
+      inherit (cfg) host port modelsDir modelsPreset;
+      model = cfg.modelFile;
+      extraFlags = [
+        # GPU offload: push all transformer layers to VRAM
+        "-ngl"
+        "99"
+        # Flash attention: fix for CUDA buffer overlap crash on RTX 5060 Ti
+        # (compute 12.0), landed in llama.cpp de1aa6fa, nixpkgs b8733+.
+        "--flash-attn"
+        "auto"
+        # KV cache quantization: q8_0 halves KV cache VRAM vs f16.
+        "--cache-type-k"
+        "q8_0"
+        "--cache-type-v"
+        "q8_0"
+        # Context window — override via contextSize option.
+        "-c"
+        (toString cfg.contextSize)
+        # Physical micro-batch: faster prefill on long prompts.
+        "-ub"
+        "2048"
+        # High process priority — GPU is dedicated to LLM inference.
+        "--prio"
+        "2"
+        # KV prefix reuse across requests (system prompt caching).
+        "--cache-reuse"
+        "256"
+        # Single parallel slot — all VRAM to one session.
+        "-np"
+        "1"
+      ]
+      ++ cfg.extraFlags
+      ++ lib.optionals (cfg.hfRepo != null) [ "--hf-repo" cfg.hfRepo ]
+      ++ lib.optionals (cfg.hfFile != null) [ "--hf-file" cfg.hfFile ];
       openFirewall = true;
     };
   };
