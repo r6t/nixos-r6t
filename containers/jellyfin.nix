@@ -11,9 +11,13 @@
 
   mine.jellyfin.enable = true;
 
-  # Let Nix own encoding.xml. The NixOS jellyfin module derives TranscodingTempPath
-  # from cacheDir (/var/cache/jellyfin) on every restart, so the /cache and /config
-  # path drift from the legacy Docker layout cannot return. No GPU in this LXC and
-  # most playback is direct-play, so upstream transcoding defaults are fine.
-  services.jellyfin.forceEncodingConfig = true;
+  # No GPU in this LXC; hardwareAcceleration stays off (upstream default).
+  # Jellyfin creates encoding.xml from its own defaults on first run, which
+  # correctly uses `cacheDir/transcodes` (i.e. /var/cache/jellyfin/transcodes).
+  #
+  # Note: services.jellyfin.forceEncodingConfig has no effect unless
+  # hardwareAcceleration.enable = true — the upstream module gates the
+  # preStart script behind HWAccel. If GPU ever gets added to this LXC,
+  # set hardwareAcceleration.enable = true AND forceEncodingConfig = true
+  # to put Nix in charge of encoding.xml.
 }

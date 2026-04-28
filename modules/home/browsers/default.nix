@@ -20,14 +20,7 @@
       ];
       programs.firefox = {
         enable = true;
-        # TODO: migrate Firefox profile to XDG path. Home-manager flipped the
-        # default to "$XDG_CONFIG_HOME/mozilla/firefox" in 26.05. To migrate:
-        # close Firefox, move ~/.mozilla/firefox to ~/.config/mozilla/firefox,
-        # reinstall native messaging hosts (not moved automatically), then
-        # change this to: configPath = "${config.xdg.configHome}/mozilla/firefox";
-        # - Release note: https://nix-community.github.io/home-manager/release-notes.xhtml#sec-release-26.05-state-version-changes
-        # - Option:       https://nix-community.github.io/home-manager/options.xhtml#opt-programs.firefox.configPath
-        configPath = ".mozilla/firefox";
+        configPath = ".config/mozilla/firefox";
         profiles."default" = {
           id = 0;
           search = {

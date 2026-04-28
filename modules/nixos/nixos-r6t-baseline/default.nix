@@ -11,14 +11,6 @@ in
   };
 
   config = lib.mkIf config.mine.nixos-r6t-baseline.enable {
-    # TODO: migrate to dbus-broker. Pinning classic dbus-daemon because the
-    # nixpkgs default flipped to dbus-broker in 26.05. Remove this line and use
-    # `nixos-rebuild boot` + reboot on each host (the switch inhibitor blocks
-    # live-switching dbus implementations).
-    # - Option:        https://nixos.org/manual/nixos/stable/options#opt-services.dbus.implementation
-    # - Nixpkgs PR:    https://github.com/NixOS/nixpkgs/pull/512050
-    # - dbus-broker:   https://github.com/bus1/dbus-broker/wiki
-    services.dbus.implementation = "dbus";
 
     # SSH brute-force protection
     services.fail2ban = {
