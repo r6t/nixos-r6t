@@ -7,26 +7,6 @@ in
   options.mine.open-webui = {
     enable = lib.mkEnableOption "enable open-webui";
 
-    auth = lib.mkOption {
-      type = lib.types.bool;
-      default = true;
-      description = ''
-        Enable user authentication. When true, users must log in. The first
-        registered user automatically becomes admin. Set to false for a
-        single-user setup with no login prompt.
-      '';
-    };
-
-    enableSignup = lib.mkOption {
-      type = lib.types.bool;
-      default = true;
-      description = ''
-        Allow new users to self-register. Only meaningful when auth = true.
-        Set to false after initial setup to prevent new registrations and
-        require admin to create accounts manually.
-      '';
-    };
-
     host = lib.mkOption {
       type = lib.types.str;
       default = "127.0.0.1";
@@ -121,8 +101,7 @@ in
           ANONYMIZED_TELEMETRY = "False";
           DO_NOT_TRACK = "True";
           SCARF_NO_ANALYTICS = "True";
-          WEBUI_AUTH = if cfg.auth then "True" else "False";
-          ENABLE_SIGNUP = if cfg.enableSignup then "True" else "False";
+          WEBUI_AUTH = "False"; # single-user, no login prompt
         }
         // lib.optionalAttrs (cfg.ollamaUrl != "") {
           OLLAMA_API_BASE_URL = cfg.ollamaUrl;
