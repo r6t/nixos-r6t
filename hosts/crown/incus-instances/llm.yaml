@@ -16,6 +16,15 @@ devices:
     gputype: physical
     pci: 0000:0c:00.0
     type: gpu
+  nvidia-uvm:
+    path: /dev/nvidia-uvm
+    source: /dev/nvidia-uvm
+    type: unix-char
+  nvidia-uvm-tools:
+    path: /dev/nvidia-uvm-tools
+    source: /dev/nvidia-uvm-tools
+    type: unix-char
+
   llama-cpp-cache:
     path: /var/cache/private/llama-cpp
     shift: "true"
@@ -39,10 +48,10 @@ devices:
     shift: "true"
     source: /mnt/crownstore/app-storage/open-webui
     type: disk
-  openrouter-key:
-    path: /etc/openrouter.key
+  open-webui-env:
+    path: /etc/oi.env
     readonly: "true"
-    source: /mnt/crownstore/Sync/app-config/open-webui/openrouter.key
+    source: /mnt/crownstore/Sync/app-config/open-webui/oi.env
     type: disk
   root:
     path: /

@@ -22,8 +22,8 @@ let
   # ---------------------------------------------------------------------------
   models = {
     # PRIMARY: Best quality that fits 16 GiB at Q4_K_M.
-    # Dense 24B. Weights: ~14.3 GiB, leaving ~1.7 GiB for KV cache.
-    # With q8_0 KV quant: 16–24K usable context. 128K native window.
+    # Dense 24B. Weights: ~13.3 GiB on GPU + 0.36 GiB CPU, leaving ~2.35 GiB for KV.
+    # With q8_0 KV quant: 24K context (2.01 GiB KV) leaves ~690 MiB headroom. 128K native window.
     # Vision via mmproj (llama.cpp libmtmd). Strong multimodal: DocVQA 94.1,
     # MMMU 64.0, ChartQA 86.2, MM-MT-Bench 7.3. Best text quality (MMLU 80.6)
     # of any model that fits 16 GiB at Q4. Apache 2.0.
@@ -31,7 +31,7 @@ let
       modelFile = "/var/lib/llama-cpp/models/Mistral-Small-3.1-24B-Instruct-2503-Q4_K_M.gguf";
       hfRepo = "unsloth/Mistral-Small-3.1-24B-Instruct-2503-GGUF";
       hfFile = "Mistral-Small-3.1-24B-Instruct-2503-Q4_K_M.gguf";
-      contextSize = 32768; # 32K — fits with q8_0 KV in ~1.7 GiB headroom.
+      contextSize = 24576; # 24K — 2.01 GiB KV at q8_0; 13.3 GiB weights = 15.31 GiB total, ~690 MiB headroom.
       extraFlags = [ "--jinja" ];
     };
 
@@ -106,11 +106,10 @@ in
         # OpenRouter — full model catalogue available in the UI picker.
         "https://openrouter.ai/api/v1"
       ];
-      # API keys injected at runtime via environmentFile — not set here.
-      # Bind-mounted from host at /mnt/crownstore/Sync/app-config/open-webui/openrouter.key
-      # File must contain: OPENAI_API_KEYS=none;sk-or-v1-yourkey
-      # Mounted at /etc (not /run) to avoid being shadowed by systemd's tmpfs on /run.
-      environmentFile = "/etc/openrouter.key";
+      # Secrets and OAuth config injected at runtime via environmentFile.
+      # Bind-mounted from host at /mnt/crownstore/Sync/app-config/open-webui/oi.env
+      # Contains: OPENAI_API_KEYS, OAuth/OIDC config (Pocket ID), etc.
+      environmentFile = "/etc/oi.env";
     };
   };
 }
