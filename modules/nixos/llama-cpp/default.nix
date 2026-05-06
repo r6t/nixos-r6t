@@ -116,24 +116,6 @@ in
       '';
     };
 
-    kvCacheQuant = lib.mkOption {
-      type = lib.types.enum [ "f16" "q8_0" "q4_0" ];
-      default = "q8_0";
-      description = "Quantization type for KV cache (halves VRAM usage per step down).";
-    };
-
-    batchSize = lib.mkOption {
-      type = lib.types.int;
-      default = 2048;
-      description = "Batch size for prompt processing (-b).";
-    };
-
-    ubatchSize = lib.mkOption {
-      type = lib.types.int;
-      default = 2048;
-      description = "Micro-batch size for prompt processing (-ub).";
-    };
-
     extraFlags = lib.mkOption {
       type = lib.types.listOf lib.types.str;
       default = [ ];
