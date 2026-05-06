@@ -109,7 +109,8 @@ in
       # API keys injected at runtime via environmentFile — not set here.
       # Bind-mounted from host at /mnt/crownstore/Sync/app-config/open-webui/openrouter.key
       # File must contain: OPENAI_API_KEYS=none;sk-or-v1-yourkey
-      environmentFile = "/run/openrouter.key";
+      # Mounted at /etc (not /run) to avoid being shadowed by systemd's tmpfs on /run.
+      environmentFile = "/etc/openrouter.key";
     };
   };
 }
