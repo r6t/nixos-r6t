@@ -108,11 +108,12 @@ in
         }
         // lib.optionalAttrs (cfg.openaiApiUrls != [ ]) {
           OPENAI_API_BASE_URLS = lib.concatStringsSep ";" cfg.openaiApiUrls;
-          # Keys are joined in the same order as URLs. When using environmentFile
-          # for the real keys, this sets a placeholder that the file will override.
-          OPENAI_API_KEYS = lib.concatStringsSep ";" (
-            if cfg.openaiApiKeys != [ ] then cfg.openaiApiKeys else [ "none" ]
-          );
+          # Only set OPENAI_API_KEYS here when keys are explicitly provided AND no
+          # environmentFile is in use. systemd applies Environment= after EnvironmentFile=,
+          # so a placeholder here would override the real key from the file.
+        }
+        // lib.optionalAttrs (cfg.openaiApiUrls != [ ] && cfg.openaiApiKeys != [ ] && cfg.environmentFile == null) {
+          OPENAI_API_KEYS = lib.concatStringsSep ";" cfg.openaiApiKeys;
         }
         // lib.optionalAttrs (cfg.imageGenerationUrl != "") {
           # A1111-compatible image generation via stable-diffusion.cpp sd-server.

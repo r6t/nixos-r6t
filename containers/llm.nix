@@ -22,8 +22,8 @@ let
   # ---------------------------------------------------------------------------
   models = {
     # PRIMARY: Best quality that fits 16 GiB at Q4_K_M.
-    # Dense 24B. Weights: ~13.3 GiB on GPU + 0.36 GiB CPU, leaving ~2.35 GiB for KV.
-    # With q8_0 KV quant: 24K context (2.01 GiB KV) leaves ~690 MiB headroom. 128K native window.
+    # Dense 24B. Weights: 13.3 GiB GPU + 0.36 GiB CPU. Compute graph: ~1.17 GiB.
+    # Remaining for KV: ~1.24 GiB → 16K context at q8_0 (1.34 GiB) is the safe ceiling.
     # Vision via mmproj (llama.cpp libmtmd). Strong multimodal: DocVQA 94.1,
     # MMMU 64.0, ChartQA 86.2, MM-MT-Bench 7.3. Best text quality (MMLU 80.6)
     # of any model that fits 16 GiB at Q4. Apache 2.0.
@@ -31,7 +31,7 @@ let
       modelFile = "/var/lib/llama-cpp/models/Mistral-Small-3.1-24B-Instruct-2503-Q4_K_M.gguf";
       hfRepo = "unsloth/Mistral-Small-3.1-24B-Instruct-2503-GGUF";
       hfFile = "Mistral-Small-3.1-24B-Instruct-2503-Q4_K_M.gguf";
-      contextSize = 24576; # 24K — 2.01 GiB KV at q8_0; 13.3 GiB weights = 15.31 GiB total, ~690 MiB headroom.
+      contextSize = 16384; # 16K — measured safe max: 15712 MiB free, 13302 weights, 1168 compute = ~1242 MiB for KV.
       extraFlags = [ "--jinja" ];
     };
 
