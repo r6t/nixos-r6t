@@ -84,6 +84,19 @@
             }
           ];
         };
+        # living room HTPC — gamescope session + image generation
+        hedgehog = nixpkgs.lib.nixosSystem {
+          specialArgs = { inherit userConfig inputs outputs; isNixOS = true; };
+          modules = [
+            ./hosts/hedgehog/configuration.nix
+            {
+              nixpkgs.config = {
+                allowUnfree = true;
+                cudaSupport = true;
+              };
+            }
+          ];
+        };
         # router + appliances
         saguaro = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit userConfig inputs outputs; isNixOS = true; };

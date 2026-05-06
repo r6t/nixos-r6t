@@ -1,4 +1,4 @@
-{ inputs, lib, ... }:
+{ inputs, lib, pkgs, ... }:
 
 {
   imports = [
@@ -39,6 +39,42 @@
       systemd-networkd-wait-online.enable = lib.mkForce false;
       nix-daemon.serviceConfig = {
         CPUQuota = "800%";
+      };
+
+      # Watchdog: restart haos VM if its USB NIC (enp0s13f0u3c2) disappears.
+      # The Zigbee stick and HA NIC are now on separate USB root hubs, so this should
+      # rarely trigger — it is a last-resort backstop for any future USB disruption.
+      haos-nic-watchdog = {
+        description = "Restart haos VM when USB NIC enp0s13f0u3c2 disappears";
+        after = [ "incus.service" "incus.socket" ];
+        wants = [ "incus.service" ];
+        wantedBy = [ "multi-user.target" ];
+        serviceConfig = {
+          Type = "simple";
+          Restart = "always";
+          RestartSec = "10s";
+        };
+        path = [ pkgs.incus pkgs.coreutils ];
+        script = ''
+          echo "haos-nic-watchdog: starting, monitoring /sys/class/net/enp0s13f0u3c2"
+          while true; do
+            if [ ! -e /sys/class/net/enp0s13f0u3c2 ]; then
+              echo "haos-nic-watchdog: enp0s13f0u3c2 absent — waiting 8s for USB re-enumeration"
+              sleep 8
+              # Check haos is actually running before restarting
+              state=$(incus list haos --format csv --columns s 2>/dev/null | head -1)
+              if [ "$state" = "RUNNING" ]; then
+                echo "haos-nic-watchdog: restarting haos VM to re-attach NIC"
+                incus restart haos
+                echo "haos-nic-watchdog: restart complete, sleeping 30s before resuming watch"
+                sleep 30
+              else
+                echo "haos-nic-watchdog: haos not running (state: $state), skipping restart"
+              fi
+            fi
+            sleep 60
+          done
+        '';
       };
     };
   };

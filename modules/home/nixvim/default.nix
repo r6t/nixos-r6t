@@ -5,6 +5,56 @@ let
   wrapHome = import ../../lib/mkPortableHomeConfig.nix { inherit isNixOS userConfig; };
   c = (import ../../lib/palette.nix).hex;
   ollamaCfg = cfg.opencode-ollama;
+  llamaCfg = cfg.opencode-llamacpp;
+
+  # Build the opencode.json llama-cpp provider config when enabled.
+  # llama-server exposes a fully OpenAI-compatible /v1 endpoint — same provider
+  # structure as Ollama but pointing at llama-server's port (default 8080).
+  opencodeLocalConfig = lib.mkIf llamaCfg.enable {
+    ".config/opencode/opencode.json" = {
+      text = builtins.toJSON (
+        {
+          "$schema" = "https://opencode.ai/config.json";
+        }
+        // lib.optionalAttrs cfg.enableHaMcp {
+          mcp = {
+            homeassistant = {
+              type = "remote";
+              url = "https://homeassistant.r6t.io/api/mcp";
+              enabled = true;
+              oauth = false;
+              headers = {
+                Authorization = "Bearer {env:HA_MCP_TOKEN}";
+              };
+            };
+          };
+        }
+        // {
+          provider = {
+            llamacpp = {
+              npm = "@ai-sdk/openai-compatible";
+              name = "llama.cpp (local)";
+              options = {
+                inherit (llamaCfg) baseURL;
+              };
+              models = lib.mapAttrs
+                (_id: m:
+                  {
+                    inherit (m) name;
+                  }
+                  // lib.optionalAttrs (m.context != null && m.output != null) {
+                    # opencode schema requires BOTH context and output when limit is present.
+                    # Omit limit entirely if either field is null — partial limit is invalid.
+                    limit = { inherit (m) context output; };
+                  }
+                )
+                llamaCfg.models;
+            };
+          };
+        }
+      );
+    };
+  };
 
   # Build the opencode.json Ollama provider config when enabled
   opencodeOllamaConfig = lib.mkIf ollamaCfg.enable {
@@ -39,10 +89,10 @@ let
                   {
                     inherit (m) name;
                   }
-                  // lib.optionalAttrs (m.context != null || m.output != null) {
-                    limit =
-                      lib.optionalAttrs (m.context != null) { inherit (m) context; }
-                      // lib.optionalAttrs (m.output != null) { inherit (m) output; };
+                  // lib.optionalAttrs (m.context != null && m.output != null) {
+                    # opencode schema requires BOTH context and output when limit is present.
+                    # Omit limit entirely if either field is null — partial limit is invalid.
+                    limit = { inherit (m) context output; };
                   }
                 )
                 ollamaCfg.models;
@@ -899,6 +949,39 @@ in
 
     enableHaMcp = lib.mkEnableOption "Home Assistant MCP server for OpenCode (requires HA_MCP_TOKEN sops secret)";
 
+    opencode-llamacpp = {
+      enable = lib.mkEnableOption "connect OpenCode to a local llama-server (llama.cpp) instance";
+
+      baseURL = lib.mkOption {
+        type = lib.types.str;
+        default = "http://127.0.0.1:8080/v1";
+        description = "llama-server OpenAI-compatible API endpoint.";
+      };
+
+      models = lib.mkOption {
+        type = lib.types.attrsOf (lib.types.submodule {
+          options = {
+            name = lib.mkOption {
+              type = lib.types.str;
+              description = "Display name shown in OpenCode model picker.";
+            };
+            context = lib.mkOption {
+              type = lib.types.nullOr lib.types.int;
+              default = null;
+              description = "Max input context tokens (null = provider default).";
+            };
+            output = lib.mkOption {
+              type = lib.types.nullOr lib.types.int;
+              default = null;
+              description = "Max output tokens (null = provider default).";
+            };
+          };
+        });
+        default = { };
+        description = "llama-server models to expose to OpenCode. Keys are model aliases (must match llama-server --alias or model name).";
+      };
+    };
+
     opencode-ollama = {
       enable = lib.mkEnableOption "connect OpenCode to a local/remote Ollama instance";
 
@@ -946,7 +1029,7 @@ in
                   executable = true;
                 };
               }
-            ++ [ opencodeOllamaConfig opencodeThemeConfig ]
+            ++ [ opencodeLocalConfig opencodeOllamaConfig opencodeThemeConfig ]
           );
         }
         nixvimConfig
@@ -954,15 +1037,15 @@ in
     in
     wrapHome hmConfig // lib.optionalAttrs isNixOS {
       # sops.secrets only works in NixOS context
-      sops.secrets = lib.mkIf cfg.enableSopsSecrets (
-        {
-          "BEDROCK_KEYS" = { owner = userConfig.username; };
-          "OPENROUTER_API_KEY" = { owner = userConfig.username; };
-        }
-        // lib.optionalAttrs cfg.enableHaMcp {
-          "HA_MCP_TOKEN" = { owner = userConfig.username; };
-        }
-      );
+      sops.secrets = lib.mkIf cfg.enableSopsSecrets {
+        "BEDROCK_KEYS" = { owner = userConfig.username; };
+        "OPENROUTER_API_KEY" = { owner = userConfig.username; };
+        # HA_MCP_TOKEN is always provisioned when sops secrets are enabled, regardless
+        # of enableHaMcp. This allows project-level opencode.json files (e.g. in
+        # ~/git/appdaemons) to use {env:HA_MCP_TOKEN} without it being in the global
+        # opencode.json. The fish sops-secrets script loads it into the environment.
+        "HA_MCP_TOKEN" = { owner = userConfig.username; };
+      };
     }
   );
 }

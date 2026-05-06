@@ -44,6 +44,19 @@ in
       description = ''
         Enable GSP (GPU System Processor) firmware.
         Required for RTX 50 series, recommended for RTX 40 series.
+        Disable (set false) if the GPU fails to initialize over Thunderbolt on AMD USB4
+        hosts where the PCIe link briefly drops during enumeration.
+      '';
+    };
+
+    allowExternalGpu = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = ''
+        Enable support for Thunderbolt/USB4 eGPUs.
+        Sets hardware.nvidia.prime.allowExternalGpu = true, which instructs the NVIDIA
+        driver to accept externally-attached GPUs. Required for eGPU use; without it
+        the driver may refuse to initialize the GPU on some configurations.
       '';
     };
   };
@@ -77,6 +90,7 @@ in
         gsp.enable = cfg.gspFirmware;
       };
       nvidia-container-toolkit.enable = cfg.containerToolkit;
+      nvidia.prime.allowExternalGpu = cfg.allowExternalGpu;
     };
 
     nixpkgs.config = {

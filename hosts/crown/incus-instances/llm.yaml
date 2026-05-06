@@ -39,6 +39,11 @@ devices:
     shift: "true"
     source: /mnt/crownstore/app-storage/open-webui
     type: disk
+  openrouter-key:
+    path: /run/openrouter.key
+    readonly: "true"
+    source: /mnt/crownstore/Sync/app-config/open-webui/openrouter.key
+    type: disk
   root:
     path: /
     pool: default

@@ -2,60 +2,56 @@ let
   gpu = import ../hosts/crown/gpu.nix;
 
   # ---------------------------------------------------------------------------
-  # Model catalogue (16 GiB RTX 5060 Ti, verified April 2026).
+  # Model catalogue (16 GiB RTX 5060 Ti, verified May 2026).
   # All models accumulate on persistent storage at:
   #   crown host:    /mnt/crownstore/app-storage/llama-cpp/models/
   #   container:     /var/lib/llama-cpp/models/
   # Pre-download: drop the GGUF into the host path above.
   # On first start, llama-server auto-downloads from HF if not present.
   #
+  # Role: general-purpose chat, document Q&A, creative writing, vision.
+  # Coding is handled by mountainball (R9700 32GB, separate model).
+  #
+  # VRAM budget at Q4_K_M on 16 GiB:
+  #   weights + mmproj vision encoder + KV cache + framework overhead
+  #   Minimum acceptable quant: Q4_K_M (no IQ3/Q3/IQ2).
+  #   contextSize is set per-model based on remaining VRAM after weights.
+  #   kvCacheQuant = "q8_0" halves KV VRAM vs f16 with near-zero quality loss.
+  #
   # To switch models, change `activeModel` to one of the keys below.
   # ---------------------------------------------------------------------------
   models = {
-    # Dense. Best all-rounder: coding, agentic tool calling, multi-turn chat.
-    # Supports /think and /no_think per prompt. 64K ctx ~14.1 GiB total.
-    qwen3-14b = {
-      modelFile = "/var/lib/llama-cpp/models/Qwen3-14B-Q6_K.gguf";
-      hfRepo = "unsloth/Qwen3-14B-GGUF";
-      hfFile = "Qwen3-14B-Q6_K.gguf";
-      contextSize = 65536;
-      extraFlags = [ ];
-    };
-
-    # Mistral's coding-specialized model. Agentic software dev tasks.
-    # 32K ctx (not 64K) required for VRAM headroom. 32K ctx ~14.5 GiB total.
-    devstral-small-2 = {
-      modelFile = "/var/lib/llama-cpp/models/Devstral-Small-2-24B-Instruct-2512-Q4_K_M.gguf";
-      hfRepo = "unsloth/Devstral-Small-2-24B-Instruct-2512-GGUF";
-      hfFile = "Devstral-Small-2-24B-Instruct-2512-Q4_K_M.gguf";
-      contextSize = 32768;
+    # PRIMARY: Best quality that fits 16 GiB at Q4_K_M.
+    # Dense 24B. Weights: ~14.3 GiB, leaving ~1.7 GiB for KV cache.
+    # With q8_0 KV quant: 16–24K usable context. 128K native window.
+    # Vision via mmproj (llama.cpp libmtmd). Strong multimodal: DocVQA 94.1,
+    # MMMU 64.0, ChartQA 86.2, MM-MT-Bench 7.3. Best text quality (MMLU 80.6)
+    # of any model that fits 16 GiB at Q4. Apache 2.0.
+    mistral-small-3-1-24b = {
+      modelFile = "/var/lib/llama-cpp/models/Mistral-Small-3.1-24B-Instruct-2503-Q4_K_M.gguf";
+      hfRepo = "unsloth/Mistral-Small-3.1-24B-Instruct-2503-GGUF";
+      hfFile = "Mistral-Small-3.1-24B-Instruct-2503-Q4_K_M.gguf";
+      contextSize = 32768; # 32K — fits with q8_0 KV in ~1.7 GiB headroom.
       extraFlags = [ "--jinja" ];
     };
 
-    # Dense 14B. Outperforms DeepSeek-R1-70B on math/coding benchmarks.
-    # Best for hard algorithmic problems. English-only. 64K ctx ~14.0 GiB total.
-    phi4-reasoning-plus = {
-      modelFile = "/var/lib/llama-cpp/models/Phi-4-reasoning-plus-Q6_K.gguf";
-      hfRepo = "unsloth/Phi-4-reasoning-plus-GGUF";
-      hfFile = "Phi-4-reasoning-plus-Q6_K.gguf";
-      contextSize = 65536;
+    # ALTERNATIVE: Best vision/document quality. Use when OCR, chart reading,
+    # or document extraction is the primary task.
+    # Dense 7B. Weights: ~8.1 GiB at Q8_0, leaving ~7.9 GiB for KV cache.
+    # With q8_0 KV quant: 48K+ usable context. DocVQA 95.7 (best in class),
+    # ChartQA 87.3, TextVQA 84.9. Weaker on general reasoning vs 24B models.
+    qwen2-5-vl-7b = {
+      modelFile = "/var/lib/llama-cpp/models/Qwen2.5-VL-7B-Instruct-Q8_0.gguf";
+      hfRepo = "unsloth/Qwen2.5-VL-7B-Instruct-GGUF";
+      hfFile = "Qwen2.5-VL-7B-Instruct-Q8_0.gguf";
+      contextSize = 32768; # Conservative default; can push to 65536 at q8_0 KV.
       extraFlags = [ "--jinja" ];
-    };
-
-    # MoE (4B active params). Newest model (Mar 2026). General chat, creative tasks.
-    # Less proven for agentic coding vs Qwen3/Devstral. 64K ctx ~14.5 GiB total.
-    gemma4-26b = {
-      modelFile = "/var/lib/llama-cpp/models/gemma-4-26B-A4B-it-UD-IQ4_XS.gguf";
-      hfRepo = "unsloth/gemma-4-26B-A4B-it-GGUF";
-      hfFile = "gemma-4-26B-A4B-it-UD-IQ4_XS.gguf";
-      contextSize = 65536;
-      extraFlags = [ ];
     };
   };
 
   # Change this one line to switch models:
-  # qwen3-14b | devstral-small-2 | phi4-reasoning-plus | gemma4-26b
-  activeModel = models.qwen3-14b;
+  # mistral-small-3-1-24b (primary) | qwen2-5-vl-7b (best vision)
+  activeModel = models.mistral-small-3-1-24b;
 
 in
 {
@@ -90,11 +86,30 @@ in
       host = "0.0.0.0";
       modelsDir = "/var/lib/llama-cpp/models";
       inherit (activeModel) modelFile hfRepo hfFile contextSize extraFlags;
+      # q8_0 KV quantization: halves KV cache VRAM vs f16, near-zero quality
+      # loss, and preserves the fused flash attention kernel (symmetric K/V).
+      # Essential for 24B models on 16 GiB to achieve usable context windows.
+      kvCacheQuant = "q8_0";
+      # CUDA GPU acceleration. The llama-cpp package gets CUDA support
+      # automatically when nixpkgs.config.cudaSupport = true (set by
+      # mine.nvidia-cuda above). This flag enables the required service
+      # hardening overrides: disabling MemoryDenyWriteExecute (CUDA PTX JIT
+      # requires W+X pages), PrivateUsers, and granting render/video group access.
+      cuda = true;
     };
     open-webui = {
       enable = true;
       host = "0.0.0.0";
-      openaiApiUrl = "http://localhost:8080/v1";
+      openaiApiUrls = [
+        # Local llama-server (no key required)
+        "http://localhost:8080/v1"
+        # OpenRouter — full model catalogue available in the UI picker.
+        "https://openrouter.ai/api/v1"
+      ];
+      # API keys injected at runtime via environmentFile — not set here.
+      # Bind-mounted from host at /mnt/crownstore/Sync/app-config/open-webui/openrouter.key
+      # File must contain: OPENAI_API_KEYS=none;sk-or-v1-yourkey
+      environmentFile = "/run/openrouter.key";
     };
   };
 }
