@@ -32,7 +32,11 @@ let
       hfRepo = "unsloth/Mistral-Small-3.1-24B-Instruct-2503-GGUF";
       hfFile = "Mistral-Small-3.1-24B-Instruct-2503-Q4_K_M.gguf";
       contextSize = 16384; # 16K — measured safe max: 15712 MiB free, 13302 weights, 1168 compute = ~1242 MiB for KV.
-      extraFlags = [ "--jinja" ];
+      # --no-mmproj-offload: keep vision encoder (mmproj, ~1 GiB) on CPU. On 16 GiB
+      # there is no VRAM left for mmproj after weights + KV + compute graph — loading
+      # it on GPU aborts with GGML_ASSERT(buffer) failed. CPU mmproj makes vision
+      # prompts slow but allows the LLM to serve text requests at full GPU speed.
+      extraFlags = [ "--jinja" "--no-mmproj-offload" ];
     };
 
     # ALTERNATIVE: Best vision/document quality. Use when OCR, chart reading,
