@@ -101,7 +101,7 @@ in
           ANONYMIZED_TELEMETRY = "False";
           DO_NOT_TRACK = "True";
           SCARF_NO_ANALYTICS = "True";
-          WEBUI_AUTH = "False"; # single-user, no login prompt
+          WEBUI_AUTH = "True";
         }
         // lib.optionalAttrs (cfg.ollamaUrl != "") {
           OLLAMA_API_BASE_URL = cfg.ollamaUrl;

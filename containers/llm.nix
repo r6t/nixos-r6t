@@ -90,6 +90,10 @@ in
       # loss, and preserves the fused flash attention kernel (symmetric K/V).
       # Essential for 24B models on 16 GiB to achieve usable context windows.
       kvCacheQuant = "q8_0";
+      # Reduce ubatch from default 2048 to free compute graph VRAM.
+      # At 2048: compute graph ~1072 MiB — exceeds headroom after weights + KV.
+      # At 512: compute graph ~268 MiB — fits with ~100 MiB spare.
+      ubatchSize = 512;
       # CUDA GPU acceleration. The llama-cpp package gets CUDA support
       # automatically when nixpkgs.config.cudaSupport = true (set by
       # mine.nvidia-cuda above). This flag enables the required service
