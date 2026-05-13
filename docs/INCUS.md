@@ -323,9 +323,12 @@ App containers on crown expose ports to the host via incus proxy devices. Crown'
 
 ### GPU Passthrough
 
-Crown's GPU is the AMD Radeon AI PRO R9700 (RDNA 4 / GFX1201) at PCI `0000:0e:00.0`.
-Crown also has the Ryzen Phoenix iGPU (`0000:ca:00.0`) bound to amdgpu — the `pci:`
+Crown's GPU is the AMD Radeon AI PRO R9700 (RDNA 4 / GFX1201) at PCI `0000:0d:00.0`.
+Crown also has the Ryzen Phoenix iGPU (`0000:c9:00.0`) bound to amdgpu — the `pci:`
 filter on the gpu device is required to keep the iGPU out of GPU containers.
+
+Note: PCI BDFs can shift by ±1 across reboots when devices are added/removed.
+Verify with `lspci -D -nn | grep -iE 'VGA|3D'` after any hardware change.
 
 For ROCm workloads (currently just llm), add a GPU device + `/dev/kfd` passthrough:
 
@@ -334,7 +337,7 @@ For ROCm workloads (currently just llm), add a GPU device + `/dev/kfd` passthrou
 gpu:
   gid: "303"
   gputype: physical
-  pci: 0000:0e:00.0
+  pci: 0000:0d:00.0
   type: gpu
 # /dev/kfd (AMD Kernel Fusion Driver) is a single host-wide char device that
 # ROCm requires for compute. It is NOT exposed by `gputype: physical`, which

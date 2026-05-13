@@ -136,7 +136,7 @@ in
       # public R9700 + llama.cpp benchmark in 2025-2026 uses Vulkan rather
       # than ROCm/HIP — Vulkan is more stable and frequently faster on this
       # generation. The Phoenix iGPU is excluded from the container by the
-      # incus profile's `pci: 0000:0e:00.0` filter, which restricts the
+      # incus profile's `pci: 0000:0d:00.0` filter, which restricts the
       # exposed render nodes. Vulkan does not need /dev/kfd (only renderD*),
       # so the kfd unix-char device in the profile is harmless dead weight
       # but kept in case we swap back to ROCm for testing.
