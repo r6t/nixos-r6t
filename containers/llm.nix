@@ -61,14 +61,18 @@ let
         "0.0"
         "--repeat-penalty"
         "1.0"
-        # Built-in n-gram speculative decoder. Verifier-checked, so output
-        # distribution is identical to non-spec decode (no quality loss).
-        # For agentic / coding workloads with repeated tokens (JSON braces,
-        # identifiers, file paths, tool-call schemas) the cache hits often,
-        # giving +30-100% effective gen tok/s. For pure conversation closer
-        # to +0-20%. Cost: ~0.5-1 GB extra compute buffer (we have headroom).
-        "--spec-type"
-        "ngram-mod"
+        # NOTE on speculative decoding: --spec-type ngram-mod looked promising
+        # in research but Qwen3.6's hybrid GatedDeltaNet attention does NOT
+        # support partial KV sequence removal (the verification primitive that
+        # spec decoding needs). llama-server logs at startup:
+        #   common_speculative_is_compat: the target context does not support
+        #     partial sequence removal
+        #   srv load_model: speculative decoding not supported by this context
+        # The same architecture limitation also forces full prompt re-processing
+        # on every request and disables --cache-reuse. Nothing software-side can
+        # work around this until upstream llama.cpp (or Qwen) ships a different
+        # KV implementation for hybrid layers. Don't add --spec-type for this
+        # model. (For non-hybrid models like Qwen3-Coder-30B-A3B it would work.)
       ];
     };
 

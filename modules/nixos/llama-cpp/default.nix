@@ -294,6 +294,17 @@ in
           # the incus profile bind-mounts that to host-side storage so the
           # cache survives container relaunches as well as service restarts.
           MESA_SHADER_CACHE_DIR = "/var/cache/llama-cpp/mesa-shaders";
+
+          # RADV_PERFTEST=nogttspill: confirmed 4.5× speedup on R9700 (gfx1201)
+          # with Mesa 26.0.5 + Qwen3.6-27B Q6_K — without it, generation drops
+          # from ~21 tok/s to ~4.8 tok/s in measured A/B testing in this LXC.
+          # Tells RADV not to spill model weight allocations from VRAM to GTT
+          # (host-mapped GPU-visible RAM) when VRAM pressure is reported, which
+          # otherwise causes catastrophic per-token PCIe round-trips during
+          # decode. The community claim that this flag is a no-op on RDNA 4
+          # (llama.cpp Discussion #21043, Mar 2026) does NOT hold for our
+          # configuration — keep it set.
+          RADV_PERFTEST = "nogttspill";
         })
         (lib.optionalAttrs (cfg.rocm && cfg.rocmVisibleDevices != null) {
           # Restrict ROCm to a specific GPU by index. Use when multiple AMD GPUs
