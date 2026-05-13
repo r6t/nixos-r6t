@@ -158,6 +158,11 @@ in
         CPU-only build. Required for AMD GPU acceleration on RDNA and CDNA cards.
         Automatically disables MemoryDenyWriteExecute (ROCm JIT requires W+X pages)
         and sets RADV_PERFTEST=nogttspill for better Vulkan/display performance.
+
+        Mutually exclusive with `vulkan`. On RDNA 4 (gfx1201, R9700) the Vulkan
+        backend is currently more stable and frequently faster than ROCm/HIP for
+        llama.cpp inference; prefer `vulkan = true` unless you specifically need
+        HIP-only features.
       '';
     };
 
@@ -172,16 +177,49 @@ in
       '';
       example = "1";
     };
+
+    vulkan = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = ''
+        Use the Vulkan backend (pkgs.llama-cpp-vulkan) instead of the default
+        CPU-only build. Works across AMD, Intel, and NVIDIA GPUs via the platform's
+        Vulkan driver (RADV on AMD, ANV on Intel, NV proprietary on NVIDIA).
+
+        Recommended for AMD RDNA 4 (gfx1201, e.g. R9700) where the community has
+        converged on Vulkan over ROCm/HIP for stability and throughput in 2026.
+        Confirmed working configurations on R9700 routinely report 30-100+ tok/s
+        with K-quant models.
+
+        Unlike ROCm, Vulkan does NOT require /dev/kfd — only /dev/dri/renderD*.
+        Sets RADV_PERFTEST=nogttspill (recommended for all RADV users by llama.cpp
+        Vulkan maintainers) and applies the same service hardening relaxations as
+        ROCm (the DynamicUser sandbox still blocks GPU access without them).
+
+        Mutually exclusive with `rocm`.
+      '';
+    };
   };
 
   config = lib.mkIf cfg.enable {
+    assertions = [
+      {
+        assertion = !(cfg.rocm && cfg.vulkan);
+        message = "mine.llama-cpp: `rocm` and `vulkan` are mutually exclusive — pick one GPU backend.";
+      }
+    ];
+
     services.llama-cpp = {
       enable = true;
       inherit (cfg) host port modelsPreset;
 
-      # ROCm/HIP backend for AMD GPU acceleration. The default nixpkgs llama-cpp
-      # package is CPU-only; llama-cpp-rocm includes libggml-hip.so for RDNA/CDNA.
-      package = if cfg.rocm then pkgs.llama-cpp-rocm else pkgs.llama-cpp;
+      # GPU backend selection. The default nixpkgs llama-cpp is CPU-only.
+      #   - llama-cpp-rocm:    libggml-hip.so for RDNA/CDNA via ROCm/HIP.
+      #   - llama-cpp-vulkan:  libggml-vulkan.so for any Vulkan-capable GPU.
+      package =
+        if cfg.rocm then pkgs.llama-cpp-rocm
+        else if cfg.vulkan then pkgs.llama-cpp-vulkan
+        else pkgs.llama-cpp;
 
       extraFlags = [
         # GPU offload: push all transformer layers to VRAM.
@@ -224,10 +262,13 @@ in
     };
 
     # GPU-specific service hardening overrides.
-    # Both CUDA (PTX JIT) and ROCm (HIP JIT) require W+X memory pages at runtime.
-    # The upstream nixpkgs service sets MemoryDenyWriteExecute=true and PrivateUsers=true.
-    # Must be disabled for either backend to allow JIT and GPU device access.
-    systemd.services.llama-cpp = lib.mkIf (cfg.rocm || cfg.cuda) {
+    # CUDA (PTX JIT) and ROCm (HIP JIT) require W+X memory pages at runtime.
+    # The upstream nixpkgs unit sets MemoryDenyWriteExecute=true and PrivateUsers=true.
+    # Vulkan does not JIT in the same way, but the DynamicUser sandbox still
+    # blocks /dev/dri access without these relaxations, and PrivateUsers=true
+    # breaks render/video group propagation. Apply the same overrides for all
+    # three GPU backends.
+    systemd.services.llama-cpp = lib.mkIf (cfg.rocm || cfg.cuda || cfg.vulkan) {
       # network.target is not sufficient for internet connectivity — the upstream
       # unit only sets After=network.target. HuggingFace auto-download fails at
       # boot unless we wait for an actual routable connection.
@@ -237,16 +278,17 @@ in
         MemoryDenyWriteExecute = lib.mkForce false;
         PrivateUsers = lib.mkForce false;
         # GPU compute requires access to /dev/kfd (ROCm) or /dev/nvidia* (CUDA) and
-        # /dev/dri/renderD* (both). The DynamicUser sandbox needs these group memberships.
+        # /dev/dri/renderD* (all backends, including Vulkan). The DynamicUser sandbox
+        # needs these group memberships.
         SupplementaryGroups = [ "render" "video" ];
       };
 
       environment = lib.mkMerge [
-        (lib.optionalAttrs cfg.rocm {
+        (lib.optionalAttrs (cfg.rocm || cfg.vulkan) {
           # RADV_PERFTEST=nogttspill: recommended for all RADV (AMD Vulkan) users by the
           # llama.cpp Vulkan benchmark maintainer. Fixes performance issues on AMD cards
-          # including RDNA 4 (GFX1201). Applied even with ROCm backend since the display
-          # compositor still uses RADV and this affects the overall GPU environment.
+          # including RDNA 4 (GFX1201). Applied for both Vulkan (the actual backend) and
+          # ROCm (since the display compositor still uses RADV when present).
           RADV_PERFTEST = "nogttspill";
         })
         (lib.optionalAttrs (cfg.rocm && cfg.rocmVisibleDevices != null) {

@@ -323,19 +323,43 @@ App containers on crown expose ports to the host via incus proxy devices. Crown'
 
 ### GPU Passthrough
 
-For CUDA workloads (immich, llm), add a GPU device to the profile:
+Crown's GPU is the AMD Radeon AI PRO R9700 (RDNA 4 / GFX1201) at PCI `0000:0e:00.0`.
+Crown also has the Ryzen Phoenix iGPU (`0000:ca:00.0`) bound to amdgpu — the `pci:`
+filter on the gpu device is required to keep the iGPU out of GPU containers.
+
+For ROCm workloads (currently just llm), add a GPU device + `/dev/kfd` passthrough:
 
 ```yaml
+# Per-GPU DRM nodes (/dev/dri/card* + /dev/dri/renderD*) for the R9700 only.
 gpu:
   gid: "303"
   gputype: physical
-  pci: 0000:0c:00.0
+  pci: 0000:0e:00.0
   type: gpu
+# /dev/kfd (AMD Kernel Fusion Driver) is a single host-wide char device that
+# ROCm requires for compute. It is NOT exposed by `gputype: physical`, which
+# only handles per-GPU DRM nodes. Pass it through explicitly as a unix-char.
+kfd:
+  path: /dev/kfd
+  source: /dev/kfd
+  type: unix-char
 ```
 
-For **containers** (not VMs), `gputype: physical` passes GPU device nodes (`/dev/nvidia*`, `/dev/dri/*`) into the container. Multiple containers can share the same physical GPU simultaneously — VRAM is shared, not partitioned. The `pci:` filter selects which GPU when a host has multiple. Note that `physical` is the incus default when `gputype` is omitted.
+Inside the container, the llama-cpp module enables ROCm via `mine.llama-cpp.rocm = true`,
+which selects `pkgs.llama-cpp-rocm` and applies the required service hardening overrides
+(disables `MemoryDenyWriteExecute` for HIP JIT, disables `PrivateUsers`, grants
+`render`/`video` group access). No host-side ROCm packages are needed — the host only
+provides the kernel driver and device nodes.
 
-If a CUDA crash inside one container wedges the GPU driver (kernel log shows `rpcRmApiFree_GSP: GspRmFree failed`), other containers may fail to get NVIDIA device nodes on next launch. Restart all GPU containers (or reboot the host) to recover.
+For **containers** (not VMs), `gputype: physical` passes GPU device nodes (`/dev/dri/*`)
+into the container. Multiple containers can share the same physical GPU simultaneously
+— VRAM is shared, not partitioned. The `pci:` filter selects which GPU when a host has
+multiple (essential on crown to exclude the iGPU). Note that `physical` is the incus
+default when `gputype` is omitted.
+
+ROCm only sees a GPU when both `/dev/kfd` AND a render node for that GPU are present,
+so the `pci:` filter on the gpu device transitively also restricts which GPUs ROCm
+will enumerate inside the container — even though `/dev/kfd` itself is host-wide.
 
 ### Tailscale Access
 

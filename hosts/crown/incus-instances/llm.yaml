@@ -12,14 +12,15 @@ devices:
     parent: br1
     type: nic
   # AMD Radeon AI Pro R9700 32GB passthrough (RDNA 4 / GFX1201).
-  # `gputype: physical` exposes /dev/dri/card* and /dev/dri/renderD* for this GPU
-  # into the container with gid=303 (render group inside the LXC).
-  # TODO: confirm PCI address with `lspci -D | grep -iE 'amd|radeon|vga|3d'`
-  # after physical install — placeholder reuses the slot the NVIDIA card occupied.
+  # `gputype: physical` with `pci:` filter exposes ONLY this GPU's
+  # /dev/dri/card* and /dev/dri/renderD* into the container (gid=303).
+  # Crown also has the Ryzen Phoenix iGPU (HawkPoint, 0000:ca:00.0) — the
+  # pci filter is essential to keep it out of the container so ROCm only
+  # sees the R9700.
   gpu:
     gid: "303"
     gputype: physical
-    pci: 0000:0c:00.0
+    pci: 0000:0e:00.0
     type: gpu
   # /dev/kfd (AMD Kernel Fusion Driver) is a single host-wide char device that
   # ROCm requires for compute. It is NOT exposed by `gputype: physical`, which
