@@ -29,6 +29,12 @@
         };
         search = {
           autocomplete = "duckduckgo";
+          # Allow the JSON result format alongside the default HTML. Required by
+          # Open WebUI's web search integration — without `json` here, queries
+          # like /search?q=foo&format=json return HTTP 403. The instance is
+          # behind caddy + (eventually) auth, so exposing the JSON API does not
+          # broaden trust beyond what the web UI already provides.
+          formats = [ "html" "json" ];
         };
       };
 

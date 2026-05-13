@@ -47,6 +47,14 @@ let
                     # Omit limit entirely if either field is null — partial limit is invalid.
                     limit = { inherit (m) context output; };
                   }
+                  // lib.optionalAttrs (m.variants != { }) {
+                    # opencode `variants` per model. Each variant's attrs are
+                    # spread into the model's `options` (and from there into
+                    # the request body for OpenAI-compatible providers) when
+                    # the user selects that variant via /models or
+                    # variant_cycle.
+                    inherit (m) variants;
+                  }
                 )
                 llamaCfg.models;
             };
@@ -974,6 +982,26 @@ in
               type = lib.types.nullOr lib.types.int;
               default = null;
               description = "Max output tokens (null = provider default).";
+            };
+            variants = lib.mkOption {
+              type = lib.types.attrsOf (lib.types.attrsOf lib.types.anything);
+              default = { };
+              description = ''
+                Per-model variants. Each key is a variant name (selectable in
+                opencode via the `variant_cycle` keybind), each value is an
+                attrset of options merged into the model's `options` when that
+                variant is active. For OpenAI-compatible providers, opencode
+                spreads these keys directly into the request body — so this is
+                the place to set llama-server-specific extras like
+                `chat_template_kwargs = { enable_thinking = true; }` to enable
+                Qwen3 thinking mode for one variant while leaving the server
+                default (`--reasoning off`) for the others.
+              '';
+              example = lib.literalExpression ''
+                {
+                  thinking.chat_template_kwargs = { enable_thinking = true; };
+                }
+              '';
             };
           };
         });

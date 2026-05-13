@@ -116,8 +116,35 @@
         # HA MCP is intentionally NOT enabled globally here.
         # It is only active when opencode is run from ~/git/appdaemons, via the
         # project-level opencode.json in that repo (not managed by this flake).
-        # No local llama-server runs on mountainball anymore — opencode talks
-        # to remote providers (or to crown's llm container) instead.
+
+        # opencode -> remote llama-server on crown via caddy + Route53.
+        # Crown's container runs Qwen3.6-27B Q6_K with `--reasoning off` as the
+        # global default (fast chat for open-webui). The `thinking` variant
+        # below re-enables thinking on a per-request basis through the chat
+        # template kwarg — opencode merges variant attrs into the request body,
+        # llama-server reads chat_template_kwargs from the body and applies
+        # them to the jinja template.
+        opencode-llamacpp = {
+          enable = true;
+          baseURL = "https://llm.r6t.io/v1";
+          models = {
+            # Model id MUST match the alias llama-server reports at /v1/models.
+            # Currently that's the full HF repo string. Verify with:
+            #   curl -s https://llm.r6t.io/v1/models | jq '.data[].id'
+            "unsloth/Qwen3.6-27B-GGUF" = {
+              name = "Qwen3.6-27B (crown)";
+              context = 131072;
+              output = 32768;
+              variants = {
+                # default variant gets no extras — server's --reasoning off
+                # applies, fast direct responses.
+                # `thinking` flips Qwen3.6 reasoning on for this request only.
+                # Cycle variants in opencode with the variant_cycle keybind.
+                thinking.chat_template_kwargs = { enable_thinking = true; };
+              };
+            };
+          };
+        };
       };
       obs-studio.enable = true;
       obsidian.enable = true;
