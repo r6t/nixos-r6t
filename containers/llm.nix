@@ -1,3 +1,5 @@
+{ lib, ... }:
+
 let
   # ---------------------------------------------------------------------------
   # Model catalogue (32 GiB Radeon AI Pro R9700, RDNA 4 / GFX1201, Vulkan).
@@ -11,8 +13,6 @@ let
   # backend for opencode. Vision deliberately disabled (--no-mmproj) to free
   # VRAM for context length and quality; web search is a tool the agent calls
   # and returns text, so vision is not needed for it.
-  #
-  # Coding is handled separately by mountainball (also R9700 32 GB).
   #
   # Quant selection on 32 GiB at Q6_K (deep-dive May 2026):
   #   Q8_0    KLD 0.0038, ~28.6 GB weights — leaves <4 GB for KV+graph, no headroom
@@ -104,6 +104,13 @@ in
     ./lib/base.nix
     ./lib/mullvad-dns.nix
   ];
+
+  # open-webui has a non-OSI source-available license (Open WebUI License) that
+  # nixpkgs flags as unfree. Allow it (and only it) for this container build.
+  # The flake-level `allowUnfree = true` set on host nixosConfigurations does
+  # not propagate to container builds, which evaluate nixpkgs separately.
+  nixpkgs.config.allowUnfreePredicate = pkg:
+    builtins.elem (lib.getName pkg) [ "open-webui" ];
 
   networking.hostName = "llm";
 
