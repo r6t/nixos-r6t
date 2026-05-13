@@ -292,9 +292,9 @@ in
           RADV_PERFTEST = "nogttspill";
         })
         (lib.optionalAttrs (cfg.rocm && cfg.rocmVisibleDevices != null) {
-          # Restrict ROCm to a specific GPU by index. Use when multiple AMD GPUs are
-          # present (e.g. mountainball: 780M iGPU + R9700 eGPU) to ensure llama-server
-          # uses the discrete eGPU rather than the integrated graphics.
+          # Restrict ROCm to a specific GPU by index. Use when multiple AMD GPUs
+          # are present and inference must land on a particular one (e.g. an iGPU
+          # + discrete GPU laptop).
           ROCR_VISIBLE_DEVICES = cfg.rocmVisibleDevices;
         })
       ];

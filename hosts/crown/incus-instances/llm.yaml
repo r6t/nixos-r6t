@@ -11,16 +11,23 @@ devices:
     nictype: bridged
     parent: br1
     type: nic
-  # AMD Radeon AI Pro R9700 32GB passthrough (RDNA 4 / GFX1201).
-  # `gputype: physical` with `pci:` filter exposes ONLY this GPU's
-  # /dev/dri/card* and /dev/dri/renderD* into the container (gid=303).
-  # Crown also has the Ryzen Phoenix iGPU (HawkPoint, 0000:c9:00.0) — the
-  # pci filter is essential to keep it out of the container so the GPU
-  # backend only sees the R9700.
+  # AMD Radeon AI Pro R9700 32 GB passthrough (RDNA 4 / GFX1201).
+  # `gputype: physical` with vendorid+productid filter exposes ONLY this
+  # specific GPU model's /dev/dri/card* and /dev/dri/renderD* into the
+  # container (gid=303). Crown also has the Ryzen Phoenix iGPU (HawkPoint,
+  # productid 1900) — filtering by productid 7551 (Navi 48) excludes it.
+  #
+  # Why productid over pci: BDFs can shift when PCI topology changes
+  # (NVMe additions, kernel enumeration order, etc.) and the upstream
+  # switch port BDFs that appear in /sys/class/drm/by-path/ symlinks are
+  # not the same as the device's own BDF — easy to misread.
+  # productid is bulletproof until the GPU is physically replaced.
+  # Verify with `incus info --resources` (under "GPUs:") after hardware changes.
   gpu:
     gid: "303"
     gputype: physical
-    pci: 0000:0d:00.0
+    vendorid: "1002"
+    productid: "7551"
     type: gpu
   # /dev/kfd (AMD Kernel Fusion Driver) is a single host-wide char device that
   # ROCm requires for compute. It is NOT exposed by `gputype: physical`, which

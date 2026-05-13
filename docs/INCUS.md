@@ -323,22 +323,47 @@ App containers on crown expose ports to the host via incus proxy devices. Crown'
 
 ### GPU Passthrough
 
-Crown's GPU is the AMD Radeon AI PRO R9700 (RDNA 4 / GFX1201) at PCI `0000:0d:00.0`.
-Crown also has the Ryzen Phoenix iGPU (`0000:c9:00.0`) bound to amdgpu — the `pci:`
-filter on the gpu device is required to keep the iGPU out of GPU containers.
+Crown has two AMD GPUs visible to amdgpu:
 
-Note: PCI BDFs can shift by ±1 across reboots when devices are added/removed.
-Verify with `lspci -D -nn | grep -iE 'VGA|3D'` after any hardware change.
+- **Radeon AI PRO R9700** (RDNA 4 / gfx1201, Navi 48) — PCI vendorid `1002`, productid `7551`. Used for LLM inference.
+- **Ryzen Phoenix iGPU** (HawkPoint1) — PCI vendorid `1002`, productid `1900`. Must be excluded from GPU containers.
 
-For ROCm workloads (currently just llm), add a GPU device + `/dev/kfd` passthrough:
+#### Filter the GPU device by vendorid + productid (preferred)
+
+Use **vendorid + productid** rather than `pci:` to identify the GPU. PCI BDFs can shift
+across reboots when PCI topology changes (NVMe additions, kernel enumeration order, etc.),
+and the upstream switch port BDFs in `/sys/class/drm/by-path/pci-*` symlink names are NOT
+the same as the device's own BDF — easy to misread. Product IDs are stable until the GPU
+is physically replaced.
 
 ```yaml
 # Per-GPU DRM nodes (/dev/dri/card* + /dev/dri/renderD*) for the R9700 only.
+# Filter by AMD vendorid + Navi 48 productid — survives any PCI topology change.
 gpu:
   gid: "303"
   gputype: physical
-  pci: 0000:0d:00.0
+  vendorid: "1002"
+  productid: "7551"
   type: gpu
+```
+
+To verify product IDs after a hardware change:
+
+```fish
+lspci -D -nn | grep -iE 'VGA|3D'
+# Look for the [vendor:device] tag at the end of the line, e.g. [1002:7551]
+incus info --resources | grep -A4 'GPUs:'
+```
+
+`pci:` filtering is also valid (and necessary if you need to disambiguate two identical
+GPU models) but should be a fallback. For NVIDIA hosts use `vendorid: "10de"` + the
+appropriate device ID.
+
+#### ROCm-specific extras
+
+For ROCm workloads, also pass through `/dev/kfd` as a unix-char device:
+
+```yaml
 # /dev/kfd (AMD Kernel Fusion Driver) is a single host-wide char device that
 # ROCm requires for compute. It is NOT exposed by `gputype: physical`, which
 # only handles per-GPU DRM nodes. Pass it through explicitly as a unix-char.
@@ -348,21 +373,26 @@ kfd:
   type: unix-char
 ```
 
-Inside the container, the llama-cpp module enables ROCm via `mine.llama-cpp.rocm = true`,
-which selects `pkgs.llama-cpp-rocm` and applies the required service hardening overrides
-(disables `MemoryDenyWriteExecute` for HIP JIT, disables `PrivateUsers`, grants
-`render`/`video` group access). No host-side ROCm packages are needed — the host only
-provides the kernel driver and device nodes.
+Inside the container, set `mine.llama-cpp.rocm = true` (selects `pkgs.llama-cpp-rocm`)
+**or** `mine.llama-cpp.vulkan = true` (selects `pkgs.llama-cpp-vulkan`). Both apply the
+required service hardening overrides — disable `MemoryDenyWriteExecute` (HIP JIT requires
+W+X pages), disable `PrivateUsers`, grant `render`/`video` group access. No host-side
+ROCm packages are needed — the host only provides the kernel driver and device nodes.
+
+On RDNA 4 (R9700), the Vulkan backend is currently more stable and frequently faster
+than ROCm/HIP for llama.cpp inference. Crown's llm container uses Vulkan; mountainball
+uses ROCm.
+
+#### Backend behavior
 
 For **containers** (not VMs), `gputype: physical` passes GPU device nodes (`/dev/dri/*`)
 into the container. Multiple containers can share the same physical GPU simultaneously
-— VRAM is shared, not partitioned. The `pci:` filter selects which GPU when a host has
-multiple (essential on crown to exclude the iGPU). Note that `physical` is the incus
-default when `gputype` is omitted.
+— VRAM is shared, not partitioned. `physical` is the incus default when `gputype` is omitted.
 
-ROCm only sees a GPU when both `/dev/kfd` AND a render node for that GPU are present,
-so the `pci:` filter on the gpu device transitively also restricts which GPUs ROCm
-will enumerate inside the container — even though `/dev/kfd` itself is host-wide.
+ROCm only sees a GPU when both `/dev/kfd` AND a render node for that GPU are present, so
+the gpu device's filter transitively restricts which GPUs ROCm will enumerate inside the
+container — even though `/dev/kfd` itself is host-wide. Vulkan only needs render nodes
+(no `/dev/kfd`).
 
 ### Tailscale Access
 

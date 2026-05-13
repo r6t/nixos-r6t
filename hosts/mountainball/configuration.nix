@@ -1,4 +1,4 @@
-{ inputs, userConfig, pkgs, ... }:
+{ inputs, userConfig, ... }:
 {
   imports = [
     inputs.home-manager.nixosModules.home-manager
@@ -22,8 +22,8 @@
   systemd = {
     services = {
       nix-daemon.serviceConfig = {
-        # Limit CPU usage to 50% for 16 vCPU
-        # long builds (nvidia lxcs) impacted general service availability
+        # Limit CPU usage to 50% for 16 vCPU and bound RAM use, so long
+        # builds don't impact general desktop responsiveness.
         CPUQuota = "800%";
         MemoryMax = "80%";
         MemoryHigh = "70%";
@@ -69,147 +69,12 @@
 
   time.timeZone = "America/Los_Angeles";
 
-  # Force amdgpu PCIe Gen 3 speed. Applied in base config because it is harmless when
-  # no eGPU is present (option only takes effect if amdgpu initializes a second device).
-  # AMD USB4 controllers may otherwise fall back to PCIe Gen 1 on the eGPU link.
-  boot.extraModprobeConfig = ''
-    options amdgpu pcie_gen_cap=0x40000
-  '';
-
-  # PCIe hotplug kernel parameters for Thunderbolt eGPU.
-  # Applied in base config — harmless when undocked, required when docked.
-  # pcie_ports=native: Linux owns native PCIe hotplug control instead of firmware.
-  # hpmmiosize/hpmmioprefsize: large MMIO windows so ReBAR can be negotiated over TB.
-  boot.kernelParams = [
-    "pcie_ports=native"
-    "pci=hpmmiosize=128M,hpmmioprefsize=64G"
-  ];
-
-  # eGPU docked mode — select "egpu" specialisation from the boot menu when at the desk.
-  # Default boot (no specialisation) is AMD iGPU-only undocked laptop mode.
-  # See docs/GAMING.md for full rationale and workflow.
-  #
-  # Hardware: Radeon AI Pro R9700 32GB in TH3P4G3 V3 enclosure via Thunderbolt 4.
-  # Both host iGPU (Radeon 780M) and eGPU (R9700) use amdgpu — no driver complexity.
-  #
-  # TODO: After first docked boot, check whether KWin auto-selects R9700 without
-  # KWIN_DRM_DEVICES (AMD+AMD may work without it). If so, dissolve this specialisation
-  # entirely and move mine.ollama into base config.
-  specialisation.egpu.configuration = {
-    system.nixos.tags = [ "egpu" ];
-
-    # AMD+AMD dual-GPU: both iGPU and eGPU use amdgpu, KWin manages them uniformly.
-    # card0 = R9700 eGPU (desk monitor), card1 = Radeon 780M iGPU (laptop display).
-    # When undocked, card0 does not exist and KWin skips it, using card1 (780M) only.
-    # Verify card numbers after first docked boot:
-    #   ls -la /dev/dri/by-path/ — confirm which PCI address is card0 vs card1
-    #   qdbus org.kde.KWin /KWin supportInformation | grep "OpenGL renderer"
-    environment.sessionVariables = {
-      KWIN_DRM_DEVICES = "/dev/dri/card0:/dev/dri/card1";
-    };
-
-    # The eGPU enclosure (Intel TBT5) is enrolled in bolt with iommu policy, but
-    # the PCIe tunnel completes ~11s after boot — after amdgpu has already finished
-    # its initial probe. When the R9700 appears late, the PCIe bridge windows are
-    # undersized (258M instead of 32G+) because hpmmioprefsize only applies at
-    # initial hotplug bridge setup. Fix: when the Navi 10 upstream switch port
-    # (1002:1478) appears, remove it and rescan so the kernel reallocates the bridge
-    # windows at full size before amdgpu probes the R9700.
-    services.udev.extraRules = ''
-      ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x1002", ATTR{device}=="0x1478", \
-        RUN+="${pkgs.bash}/bin/bash -c 'sleep 1 && echo 1 > /sys/bus/pci/devices/0000:05:00.0/remove && sleep 1 && echo 1 > /sys/bus/pci/rescan'"
-    '';
-
-    # llama-server for local LLM inference on the R9700 32GB.
-    # Kept in specialisation so llama-server does not start without the eGPU.
-    #
-    # Model: Qwen3.6-27B Q8_0 — the most Claude-like local option per harness-bench.
-    # 15/16 with opencode at Q8. ~27GB VRAM — fits on 32GB with headroom.
-    # Q8 over Q4: better on hard long-chain reasoning tasks (the ones that matter).
-    # 32GB is the right card for this — a 24GB card forces Q4 or a smaller model.
-    # Supports /think per-prompt extended thinking (Qwen3 native feature).
-    # --jinja: required for correct Qwen3 tool-use prompt formatting.
-    # To switch models: change hfRepo/hfFile and rebuild.
-    mine.llama-cpp = {
-      enable = true;
-      host = "127.0.0.1";
-      hfRepo = "unsloth/Qwen3.6-27B-GGUF";
-      hfFile = "Qwen3.6-27B-Q8_0.gguf";
-      contextSize = 131072;
-      extraFlags = [ "--jinja" ];
-
-      # Use the ROCm/HIP backend (pkgs.llama-cpp-rocm) for R9700 GPU acceleration.
-      # Without this, the default nixpkgs llama-cpp package is CPU-only.
-      rocm = true;
-
-      # Restrict ROCm to the R9700 eGPU. On mountainball with two amdgpu devices,
-      # ROCm device index 0 = R9700 (eGPU, higher performance), index 1 = 780M iGPU.
-      # Verify with: rocminfo | grep -A5 "Agent [0-9]" after first docked boot.
-      # If inference lands on the wrong GPU, swap to "1".
-      rocmVisibleDevices = "1";
-    };
-
-    # Wire opencode to the local llama-server. Written directly via home.file
-    # rather than through mine.home.nixvim.opencode-llamacpp because specialisation
-    # configs cannot access custom mine.* options from home-manager modules.
-    # opencode schema requires both context and output when limit is present.
-    home-manager.users.${userConfig.username}.home.file.".config/opencode/opencode.json".text =
-      builtins.toJSON {
-        "$schema" = "https://opencode.ai/config.json";
-        provider = {
-          llamacpp = {
-            npm = "@ai-sdk/openai-compatible";
-            name = "llama.cpp (local)";
-            options.baseURL = "http://127.0.0.1:8080/v1";
-            models = {
-              # Key must match the model alias as reported by llama-server /v1/models.
-              # Supports /think for extended reasoning (type in opencode prompt).
-              "Qwen3.6-27B-Q8_0" = {
-                name = "Qwen3.6-27B Q8 (local R9700)";
-                limit = {
-                  context = 131072;
-                  output = 32768;
-                };
-              };
-            };
-          };
-        };
-      };
-
-    # Stop llama-cpp while Steam is running to free R9700 VRAM for games.
-    # Polls every 3s for the steam process; stops llama-cpp.service when found,
-    # restarts it when steam exits. Works for both terminal and GUI launcher launches.
-    # This is a system-level service (not user-level) so it can manage llama-cpp.service.
-    systemd.services.llama-cpp-steam-inhibit = {
-      description = "Stop llama-cpp while Steam is running";
-      after = [ "llama-cpp.service" ];
-      wantedBy = [ "multi-user.target" ];
-      path = [ pkgs.procps pkgs.systemd ];
-      serviceConfig = {
-        Type = "simple";
-        Restart = "always";
-        RestartSec = "5s";
-        User = "root";
-        ExecStart = pkgs.writeShellScript "llama-cpp-steam-inhibit" ''
-          while true; do
-            if pgrep -x steam > /dev/null 2>&1; then
-              if systemctl is-active --quiet llama-cpp.service; then
-                echo "Steam detected — stopping llama-cpp.service"
-                systemctl stop llama-cpp.service
-              fi
-              # Wait for steam to fully exit
-              while pgrep -x steam > /dev/null 2>&1; do
-                sleep 3
-              done
-              echo "Steam exited — restarting llama-cpp.service"
-              systemctl start llama-cpp.service
-            fi
-            sleep 3
-          done
-        '';
-      };
-    };
-  };
+  # Mountainball is iGPU-only (Radeon 780M / gfx1103, RDNA 3). It used to host an
+  # R9700 eGPU via Thunderbolt and ran local LLM inference docked at a desk; the
+  # R9700 has since moved to crown for headless inference. The previous eGPU
+  # specialisation (PCIe hotplug params, KWIN_DRM_DEVICES, llama-cpp +
+  # llama-cpp-steam-inhibit, Navi 10 switch-port udev rule) was deleted with that
+  # hardware change. See git history if reviving an eGPU here ever comes up.
 
   # modules
   mine = {
@@ -251,7 +116,8 @@
         # HA MCP is intentionally NOT enabled globally here.
         # It is only active when opencode is run from ~/git/appdaemons, via the
         # project-level opencode.json in that repo (not managed by this flake).
-        # opencode-llamacpp is in the egpu specialisation — server only runs there.
+        # No local llama-server runs on mountainball anymore — opencode talks
+        # to remote providers (or to crown's llm container) instead.
       };
       obs-studio.enable = true;
       obsidian.enable = true;
