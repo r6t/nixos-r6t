@@ -41,7 +41,17 @@ in
       "net.ipv6.conf.all.forwarding" = 1;
     };
     kernelModules = [ "kvm-amd" "kvm" ];
-    kernelParams = [ "kvm-amd" "kvm" "reboot=efi" ];
+    kernelParams = [
+      "kvm-amd"
+      "kvm"
+      "reboot=efi"
+      # Force PCIe Active State Power Management to performance mode. This
+      # measurably improves GPU decode throughput on the R9700 (~+10% gen
+      # tok/s in llama.cpp benchmarks on RDNA 4 / gfx1201). Cost: a few extra
+      # watts on the PCIe link. Crown is a server, not a laptop on battery —
+      # the tradeoff is heavily in favor of performance.
+      "pcie_aspm.policy=performance"
+    ];
     supportedFilesystems = [ "zfs" ];
   };
 

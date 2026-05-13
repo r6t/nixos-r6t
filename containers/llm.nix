@@ -61,6 +61,14 @@ let
         "0.0"
         "--repeat-penalty"
         "1.0"
+        # Built-in n-gram speculative decoder. Verifier-checked, so output
+        # distribution is identical to non-spec decode (no quality loss).
+        # For agentic / coding workloads with repeated tokens (JSON braces,
+        # identifiers, file paths, tool-call schemas) the cache hits often,
+        # giving +30-100% effective gen tok/s. For pure conversation closer
+        # to +0-20%. Cost: ~0.5-1 GB extra compute buffer (we have headroom).
+        "--spec-type"
+        "ngram-mod"
       ];
     };
 
@@ -126,6 +134,9 @@ in
 
   # Precreate private state dirs (root-owned. systemd will manage perms for DynamicUser)
   # These appear in the rootfs so Incus can bind-mount to them before systemd starts.
+  # Mesa shader cache subdir does NOT need to be precreated — systemd's
+  # CacheDirectory= ensures /var/cache/llama-cpp is writable by the DynamicUser,
+  # and Mesa creates the mesa-shaders/ subdir on first run.
   systemd.tmpfiles.rules = [
     "d /var/lib/private 0700 root root -"
     "d /var/lib/private/open-webui 0700 root root -"

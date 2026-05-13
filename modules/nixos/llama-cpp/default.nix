@@ -156,8 +156,7 @@ in
       description = ''
         Use the ROCm/HIP backend (pkgs.llama-cpp-rocm) instead of the default
         CPU-only build. Required for AMD GPU acceleration on RDNA and CDNA cards.
-        Automatically disables MemoryDenyWriteExecute (ROCm JIT requires W+X pages)
-        and sets RADV_PERFTEST=nogttspill for better Vulkan/display performance.
+        Automatically disables MemoryDenyWriteExecute (ROCm JIT requires W+X pages).
 
         Mutually exclusive with `vulkan`. On RDNA 4 (gfx1201, R9700) the Vulkan
         backend is currently more stable and frequently faster than ROCm/HIP for
@@ -192,9 +191,10 @@ in
         with K-quant models.
 
         Unlike ROCm, Vulkan does NOT require /dev/kfd — only /dev/dri/renderD*.
-        Sets RADV_PERFTEST=nogttspill (recommended for all RADV users by llama.cpp
-        Vulkan maintainers) and applies the same service hardening relaxations as
-        ROCm (the DynamicUser sandbox still blocks GPU access without them).
+        Applies the same service hardening relaxations as ROCm (the DynamicUser
+        sandbox still blocks GPU access without them) and sets MESA_SHADER_CACHE_DIR
+        into systemd's CacheDirectory so the Mesa pipeline cache persists across
+        service restarts (massive cold-start improvement after the first warmup).
 
         Mutually exclusive with `rocm`.
       '';
@@ -284,12 +284,16 @@ in
       };
 
       environment = lib.mkMerge [
-        (lib.optionalAttrs (cfg.rocm || cfg.vulkan) {
-          # RADV_PERFTEST=nogttspill: recommended for all RADV (AMD Vulkan) users by the
-          # llama.cpp Vulkan benchmark maintainer. Fixes performance issues on AMD cards
-          # including RDNA 4 (GFX1201). Applied for both Vulkan (the actual backend) and
-          # ROCm (since the display compositor still uses RADV when present).
-          RADV_PERFTEST = "nogttspill";
+        (lib.optionalAttrs cfg.vulkan {
+          # Persist the Mesa pipeline (SPIR-V → ISA) shader cache across service
+          # restarts. Without this, the first prompt after a fresh container or
+          # service start spends ~20s recompiling shaders for every unique
+          # compute shape — measured cold pp ≈ 1 tok/s vs warm ≈ 145 tok/s on
+          # Qwen3.6-27B Q6_K. systemd's CacheDirectory provides /var/cache/llama-cpp
+          # (resolves to /var/cache/private/llama-cpp under DynamicUser=true);
+          # the incus profile bind-mounts that to host-side storage so the
+          # cache survives container relaunches as well as service restarts.
+          MESA_SHADER_CACHE_DIR = "/var/cache/llama-cpp/mesa-shaders";
         })
         (lib.optionalAttrs (cfg.rocm && cfg.rocmVisibleDevices != null) {
           # Restrict ROCm to a specific GPU by index. Use when multiple AMD GPUs
