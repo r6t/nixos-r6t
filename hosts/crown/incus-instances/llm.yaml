@@ -29,14 +29,6 @@ devices:
     vendorid: "1002"
     productid: "7551"
     type: gpu
-  # /dev/kfd (AMD Kernel Fusion Driver) is a single host-wide char device that
-  # ROCm requires for compute. It is NOT exposed by `gputype: physical`, which
-  # only handles per-GPU DRM nodes. Pass it through explicitly as a unix-char.
-  kfd:
-    path: /dev/kfd
-    source: /dev/kfd
-    type: unix-char
-
   llama-cpp-cache:
     path: /var/cache/private/llama-cpp
     shift: "true"

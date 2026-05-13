@@ -379,6 +379,12 @@ required service hardening overrides — disable `MemoryDenyWriteExecute` (HIP J
 W+X pages), disable `PrivateUsers`, grant `render`/`video` group access. No host-side
 ROCm packages are needed — the host only provides the kernel driver and device nodes.
 
+**Vulkan-specific setup**: the Vulkan backend additionally needs `hardware.graphics.enable
+= true` inside the container so Mesa + RADV ICD JSONs are present at
+`/run/opengl-driver/`. Without it llama-server starts cleanly but reports "no usable GPU
+found" because the Vulkan loader has nothing to load. ROCm does not need this — it
+talks to `/dev/kfd` directly without the Mesa/Vulkan loader path.
+
 On RDNA 4 (R9700), the Vulkan backend is currently more stable and frequently faster
 than ROCm/HIP for llama.cpp inference. Crown's llm container uses Vulkan; mountainball
 uses ROCm.

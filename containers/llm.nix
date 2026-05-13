@@ -112,6 +112,16 @@ in
   nixpkgs.config.allowUnfreePredicate = pkg:
     builtins.elem (lib.getName pkg) [ "open-webui" ];
 
+  # Vulkan/Mesa userspace inside the container. The Vulkan loader (libvulkan)
+  # needs ICD JSON files describing the available Vulkan implementations, and
+  # the driver shared libraries those JSONs point at. On NixOS this is set up
+  # by `hardware.graphics.enable = true`, which populates /run/opengl-driver/.
+  # Without it, llama-cpp-vulkan starts cleanly but reports "no usable GPU
+  # found" because the loader has no ICD to load — even though /dev/kfd and
+  # /dev/dri/renderD* are passed through by the incus profile.
+  # 32-bit support is not needed in a headless server container.
+  hardware.graphics.enable = true;
+
   networking.hostName = "llm";
 
   # Precreate private state dirs (root-owned. systemd will manage perms for DynamicUser)
@@ -144,9 +154,11 @@ in
       # than ROCm/HIP — Vulkan is more stable and frequently faster on this
       # generation. The Phoenix iGPU is excluded from the container by the
       # incus profile's vendorid/productid filter (1002:7551 = Navi 48 only),
-      # so the GPU backend only sees the R9700. Vulkan does not need /dev/kfd
-      # (only renderD*), so the kfd unix-char device in the profile is
-      # harmless dead weight but kept in case we swap back to ROCm for testing.
+      # so the GPU backend only sees the R9700. Vulkan needs only the GPU's
+      # render node (already exposed by `gputype: physical`); /dev/kfd is not
+      # required and is intentionally not passed through. To switch back to
+      # ROCm: set `rocm = true; vulkan = false` here AND add a `kfd:` unix-char
+      # device to the incus profile.
       vulkan = true;
     };
     open-webui = {
