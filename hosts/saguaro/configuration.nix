@@ -105,7 +105,6 @@
       wanInterface = "enp101s0";
       extraInterfaces = [
         "enp0s13f0u3c2" # USB NIC for Home Assistant VM
-        "enp0s13f0u1c2" # USB NIC for LXC passthrough
       ];
       dhcpServer = {
         poolOffset = 11;

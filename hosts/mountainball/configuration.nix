@@ -82,7 +82,7 @@
   # hpmmiosize/hpmmioprefsize: large MMIO windows so ReBAR can be negotiated over TB.
   boot.kernelParams = [
     "pcie_ports=native"
-    "pci=hpmmiosize=128M,hpmmioprefsize=16G"
+    "pci=hpmmiosize=128M,hpmmioprefsize=64G"
   ];
 
   # eGPU docked mode — select "egpu" specialisation from the boot menu when at the desk.
@@ -107,6 +107,18 @@
     environment.sessionVariables = {
       KWIN_DRM_DEVICES = "/dev/dri/card0:/dev/dri/card1";
     };
+
+    # The eGPU enclosure (Intel TBT5) is enrolled in bolt with iommu policy, but
+    # the PCIe tunnel completes ~11s after boot — after amdgpu has already finished
+    # its initial probe. When the R9700 appears late, the PCIe bridge windows are
+    # undersized (258M instead of 32G+) because hpmmioprefsize only applies at
+    # initial hotplug bridge setup. Fix: when the Navi 10 upstream switch port
+    # (1002:1478) appears, remove it and rescan so the kernel reallocates the bridge
+    # windows at full size before amdgpu probes the R9700.
+    services.udev.extraRules = ''
+      ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x1002", ATTR{device}=="0x1478", \
+        RUN+="${pkgs.bash}/bin/bash -c 'sleep 1 && echo 1 > /sys/bus/pci/devices/0000:05:00.0/remove && sleep 1 && echo 1 > /sys/bus/pci/rescan'"
+    '';
 
     # llama-server for local LLM inference on the R9700 32GB.
     # Kept in specialisation so llama-server does not start without the eGPU.
@@ -134,7 +146,7 @@
       # ROCm device index 0 = R9700 (eGPU, higher performance), index 1 = 780M iGPU.
       # Verify with: rocminfo | grep -A5 "Agent [0-9]" after first docked boot.
       # If inference lands on the wrong GPU, swap to "1".
-      rocmVisibleDevices = "0";
+      rocmVisibleDevices = "1";
     };
 
     # Wire opencode to the local llama-server. Written directly via home.file

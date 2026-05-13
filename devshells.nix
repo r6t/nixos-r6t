@@ -88,6 +88,8 @@ let
   awsBase = {
     nativeBuildInputs = baseTools ++ (with pkgs; [
       awscli2
+      aws-cdk-cli
+      cfn-nag
       nodejs_20
       ssm-session-manager-plugin
     ]);

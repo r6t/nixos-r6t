@@ -116,6 +116,17 @@ in
       '';
     };
 
+    flashAttn = lib.mkOption {
+      type = lib.types.enum [ "auto" "on" "off" ];
+      default = "auto";
+      description = ''
+        Flash attention mode (--flash-attn). "auto" enables FA when the backend
+        supports it natively. Set to "off" on hardware where FA triggers CUDA
+        driver crashes (e.g. Blackwell sm_120 GSP firmware instability on
+        RTX 50 series). Disabling FA costs ~4–10% throughput.
+      '';
+    };
+
     extraFlags = lib.mkOption {
       type = lib.types.listOf lib.types.str;
       default = [ ];
@@ -178,9 +189,9 @@ in
         "99"
         # Flash attention: confirmed real gains on RDNA 4 (GFX1201 / KHR_coopmat):
         # +4-11% prefill throughput, +4% generation throughput vs no-FA.
-        # 'auto' enables FA when the backend supports it natively.
+        # Configurable because Blackwell GSP firmware can crash under FA load.
         "--flash-attn"
-        "auto"
+        cfg.flashAttn
         # KV cache quantization: symmetric type required for fused flash attention
         # kernel. q8_0 halves VRAM vs f16 with near-zero quality loss.
         "--cache-type-k"
@@ -217,6 +228,11 @@ in
     # The upstream nixpkgs service sets MemoryDenyWriteExecute=true and PrivateUsers=true.
     # Must be disabled for either backend to allow JIT and GPU device access.
     systemd.services.llama-cpp = lib.mkIf (cfg.rocm || cfg.cuda) {
+      # network.target is not sufficient for internet connectivity — the upstream
+      # unit only sets After=network.target. HuggingFace auto-download fails at
+      # boot unless we wait for an actual routable connection.
+      after = [ "network-online.target" ];
+      wants = [ "network-online.target" ];
       serviceConfig = {
         MemoryDenyWriteExecute = lib.mkForce false;
         PrivateUsers = lib.mkForce false;

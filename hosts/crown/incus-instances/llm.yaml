@@ -11,18 +11,22 @@ devices:
     nictype: bridged
     parent: br1
     type: nic
+  # AMD Radeon AI Pro R9700 32GB passthrough (RDNA 4 / GFX1201).
+  # `gputype: physical` exposes /dev/dri/card* and /dev/dri/renderD* for this GPU
+  # into the container with gid=303 (render group inside the LXC).
+  # TODO: confirm PCI address with `lspci -D | grep -iE 'amd|radeon|vga|3d'`
+  # after physical install — placeholder reuses the slot the NVIDIA card occupied.
   gpu:
     gid: "303"
     gputype: physical
     pci: 0000:0c:00.0
     type: gpu
-  nvidia-uvm:
-    path: /dev/nvidia-uvm
-    source: /dev/nvidia-uvm
-    type: unix-char
-  nvidia-uvm-tools:
-    path: /dev/nvidia-uvm-tools
-    source: /dev/nvidia-uvm-tools
+  # /dev/kfd (AMD Kernel Fusion Driver) is a single host-wide char device that
+  # ROCm requires for compute. It is NOT exposed by `gputype: physical`, which
+  # only handles per-GPU DRM nodes. Pass it through explicitly as a unix-char.
+  kfd:
+    path: /dev/kfd
+    source: /dev/kfd
     type: unix-char
 
   llama-cpp-cache:

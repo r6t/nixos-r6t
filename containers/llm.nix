@@ -1,8 +1,6 @@
 let
-  gpu = import ../hosts/crown/gpu.nix;
-
   # ---------------------------------------------------------------------------
-  # Model catalogue (16 GiB RTX 5060 Ti, verified May 2026).
+  # Model catalogue (32 GiB Radeon AI Pro R9700, RDNA 4 / GFX1201).
   # All models accumulate on persistent storage at:
   #   crown host:    /mnt/crownstore/app-storage/llama-cpp/models/
   #   container:     /var/lib/llama-cpp/models/
@@ -10,58 +8,51 @@ let
   # On first start, llama-server auto-downloads from HF if not present.
   #
   # Role: general-purpose chat, document Q&A, creative writing, vision.
-  # Coding is handled by mountainball (R9700 32GB, separate model).
+  # Coding is handled by mountainball (also R9700 32 GB, separate model).
   #
-  # VRAM budget at Q4_K_M on 16 GiB:
-  #   weights + mmproj vision encoder + KV cache + framework overhead
-  #   Minimum acceptable quant: Q4_K_M (no IQ3/Q3/IQ2).
+  # VRAM budget at Q8_0 on 32 GiB:
+  #   weights + KV cache + framework overhead + (optional) mmproj vision encoder
   #   contextSize is set per-model based on remaining VRAM after weights.
   #   kvCacheQuant = "q8_0" halves KV VRAM vs f16 with near-zero quality loss.
   #
   # To switch models, change `activeModel` to one of the keys below.
   # ---------------------------------------------------------------------------
   models = {
-    # PRIMARY: Best quality that fits 16 GiB at Q4_K_M.
-    # Dense 24B. Weights: 13.3 GiB GPU + 0.36 GiB CPU. Compute graph: ~1.17 GiB.
-    # Remaining for KV: ~1.24 GiB → 16K context at q8_0 (1.34 GiB) is the safe ceiling.
-    # Vision via mmproj (llama.cpp libmtmd). Strong multimodal: DocVQA 94.1,
-    # MMMU 64.0, ChartQA 86.2, MM-MT-Bench 7.3. Best text quality (MMLU 80.6)
-    # of any model that fits 16 GiB at Q4. Apache 2.0.
-    mistral-small-3-1-24b = {
-      modelFile = "/var/lib/llama-cpp/models/Mistral-Small-3.1-24B-Instruct-2503-Q4_K_M.gguf";
-      hfRepo = "unsloth/Mistral-Small-3.1-24B-Instruct-2503-GGUF";
-      hfFile = "Mistral-Small-3.1-24B-Instruct-2503-Q4_K_M.gguf";
-      contextSize = 16384; # 16K — measured safe max: 15712 MiB free, 13302 weights, 1168 compute = ~1242 MiB for KV.
-      # --no-mmproj-offload: keep vision encoder (mmproj, ~1 GiB) on CPU. On 16 GiB
-      # there is no VRAM left for mmproj after weights + KV + compute graph — loading
-      # it on GPU aborts with GGML_ASSERT(buffer) failed. CPU mmproj makes vision
-      # prompts slow but allows the LLM to serve text requests at full GPU speed.
-      extraFlags = [ "--jinja" "--no-mmproj-offload" ];
+    # PRIMARY: Best general-purpose model that fits 32 GiB at Q8_0.
+    # Dense 27B. Weights ~27 GiB at Q8_0. Most Claude-like local option per
+    # harness-bench (15/16 with opencode at Q8). Same model mountainball uses.
+    # Supports /think per-prompt extended thinking (Qwen3 native feature).
+    # --jinja: required for correct Qwen3 tool-use prompt formatting.
+    qwen3-6-27b = {
+      modelFile = "/var/lib/llama-cpp/models/Qwen3.6-27B-Q8_0.gguf";
+      hfRepo = "unsloth/Qwen3.6-27B-GGUF";
+      hfFile = "Qwen3.6-27B-Q8_0.gguf";
+      contextSize = 131072; # 128K — 32 GiB easily holds this at q8_0 KV.
+      extraFlags = [ "--jinja" ];
     };
 
     # ALTERNATIVE: Best vision/document quality. Use when OCR, chart reading,
     # or document extraction is the primary task.
-    # Dense 7B. Weights: ~8.1 GiB at Q8_0, leaving ~7.9 GiB for KV cache.
-    # With q8_0 KV quant: 48K+ usable context. DocVQA 95.7 (best in class),
-    # ChartQA 87.3, TextVQA 84.9. Weaker on general reasoning vs 24B models.
+    # Dense 7B. Weights ~8.1 GiB at Q8_0, leaving ample VRAM for KV cache.
+    # DocVQA 95.7 (best in class), ChartQA 87.3, TextVQA 84.9. Weaker on
+    # general reasoning vs 27B.
     qwen2-5-vl-7b = {
       modelFile = "/var/lib/llama-cpp/models/Qwen2.5-VL-7B-Instruct-Q8_0.gguf";
       hfRepo = "unsloth/Qwen2.5-VL-7B-Instruct-GGUF";
       hfFile = "Qwen2.5-VL-7B-Instruct-Q8_0.gguf";
-      contextSize = 32768; # Conservative default; can push to 65536 at q8_0 KV.
+      contextSize = 65536;
       extraFlags = [ "--jinja" ];
     };
   };
 
   # Change this one line to switch models:
-  # mistral-small-3-1-24b (primary) | qwen2-5-vl-7b (best vision)
-  activeModel = models.mistral-small-3-1-24b;
+  # qwen3-6-27b (primary) | qwen2-5-vl-7b (best vision)
+  activeModel = models.qwen3-6-27b;
 
 in
 {
   imports = [
     ../modules/nixos/llama-cpp/default.nix
-    ../modules/nixos/nvidia-cuda/default.nix
     ../modules/nixos/open-webui/default.nix
     ./lib/base.nix
     ./lib/mullvad-dns.nix
@@ -80,11 +71,6 @@ in
   ];
 
   mine = {
-    nvidia-cuda = {
-      enable = true;
-      package = gpu.driverPackage;
-      installCudaToolkit = false;
-    };
     llama-cpp = {
       enable = true;
       host = "0.0.0.0";
@@ -92,18 +78,20 @@ in
       inherit (activeModel) modelFile hfRepo hfFile contextSize extraFlags;
       # q8_0 KV quantization: halves KV cache VRAM vs f16, near-zero quality
       # loss, and preserves the fused flash attention kernel (symmetric K/V).
-      # Essential for 24B models on 16 GiB to achieve usable context windows.
       kvCacheQuant = "q8_0";
-      # Reduce ubatch from default 2048 to free compute graph VRAM.
-      # At 2048: compute graph ~1072 MiB — exceeds headroom after weights + KV.
-      # At 512: compute graph ~268 MiB — fits with ~100 MiB spare.
-      ubatchSize = 512;
-      # CUDA GPU acceleration. The llama-cpp package gets CUDA support
-      # automatically when nixpkgs.config.cudaSupport = true (set by
-      # mine.nvidia-cuda above). This flag enables the required service
-      # hardening overrides: disabling MemoryDenyWriteExecute (CUDA PTX JIT
-      # requires W+X pages), PrivateUsers, and granting render/video group access.
-      cuda = true;
+      # Default ubatch (2048) — 32 GiB R9700 has plenty of room for the
+      # compute graph at this size, and prefill throughput benefits significantly.
+      ubatchSize = 2048;
+      # Flash attention: confirmed real gains on RDNA 4 (GFX1201 / KHR_coopmat).
+      # +4-11% prefill, +4% generation throughput vs no-FA.
+      flashAttn = "auto";
+      # ROCm/HIP backend for AMD GPU acceleration. Selects pkgs.llama-cpp-rocm
+      # (default nixpkgs llama-cpp is CPU-only) and applies service hardening
+      # overrides: disables MemoryDenyWriteExecute (HIP JIT requires W+X pages),
+      # disables PrivateUsers, grants render/video group access, sets
+      # RADV_PERFTEST=nogttspill.
+      rocm = true;
+      # Crown is single-GPU (R9700 only) — no rocmVisibleDevices restriction needed.
     };
     open-webui = {
       enable = true;

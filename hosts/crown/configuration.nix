@@ -2,7 +2,6 @@
 
 let
   allCaddyRoutes = import ../../containers/lib/caddy-routes.nix;
-  gpu = import ./gpu.nix;
 
   # Containers whose caddy routes are served by crown's host caddy.
   # Spire runs on crown — caddy proxies to it via local proxy devices.
@@ -161,7 +160,7 @@ in
       systemd-networkd-wait-online.enable = lib.mkForce false;
       nix-daemon.serviceConfig = {
         # Limit CPU usage to 50% for 16 vCPU
-        # long builds (nvidia lxcs) impacted general service availability
+        # long GPU container builds impacted general service availability
         CPUQuota = "800%";
       };
     };
@@ -210,10 +209,10 @@ in
     };
 
     nix.enable = true;
-    nvidia-cuda = {
-      enable = true;
-      package = gpu.driverPackage;
-    };
+    # GPU: AMD Radeon AI Pro R9700 32 GB (RDNA 4 / GFX1201).
+    # amdgpu is in-kernel and needs no driver package or host module.
+    # ROCm userspace ships inside the llm container via pkgs.llama-cpp-rocm —
+    # the host only needs to expose /dev/kfd and /dev/dri/renderD* through incus.
     prometheus-node-exporter.enable = true;
     rdfind.enable = true;
     sops.enable = true;
