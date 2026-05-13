@@ -49,18 +49,27 @@ let
         # Disable the multimodal projector entirely (text-only inference).
         # Frees ~1 GiB VRAM that would otherwise hold the vision encoder.
         "--no-mmproj"
-        # Qwen3 "precise coding" sampler (per official model card recommendations).
-        # For chattier creative use via open-webui, override per-request.
-        "--temp"
-        "0.6"
-        "--top-p"
-        "0.95"
-        "--top-k"
-        "20"
-        "--min-p"
-        "0.0"
-        "--repeat-penalty"
-        "1.0"
+        # Disable thinking by default at the server level. Qwen3.6's official
+        # model card states it "does not officially support the soft switch of
+        # Qwen3, i.e., /think and /nothink" — the only way to control thinking
+        # is the chat template's enable_thinking jinja kwarg. Default-on is bad
+        # for open-webui chat: every response generates hundreds of invisible
+        # <think> tokens (unbounded — `--reasoning-budget -1` is the default)
+        # before any visible content streams. Clients that want reasoning can
+        # opt in per-request via OpenAI extra_body:
+        #   {"chat_template_kwargs": {"enable_thinking": true}}
+        # opencode/Qwen-Agent set this when reasoning is desired.
+        # NOTE: llama-server's `--chat-template-kwargs '{"enable_thinking":...}'`
+        # is deprecated; `--reasoning on|off` is the supported equivalent.
+        "--reasoning"
+        "off"
+        # Sampler flags intentionally NOT set here. Qwen recommends different
+        # presets per mode (thinking-general / thinking-precise / instruct) and
+        # clients should set what they need. open-webui has its own UI sliders;
+        # opencode's config.json sets per-provider samplers. Leaving the server
+        # at llama-server defaults (temp 0.8, top_p 0.95, top_k 40, min_p 0.05)
+        # produces reasonable instruct-mode chat without coding the wrong
+        # preset into every conversation.
         # NOTE on speculative decoding: --spec-type ngram-mod looked promising
         # in research but Qwen3.6's hybrid GatedDeltaNet attention does NOT
         # support partial KV sequence removal (the verification primitive that
@@ -91,15 +100,10 @@ let
       contextSize = 65536;
       extraFlags = [
         "--jinja"
-        # Qwen3-Coder sampler (per official model card).
-        "--temp"
-        "0.7"
-        "--top-p"
-        "0.8"
-        "--top-k"
-        "20"
-        "--repeat-penalty"
-        "1.05"
+        # Sampler flags intentionally NOT set — clients should set per-request.
+        # Qwen3-Coder is non-thinking by design (no <think> blocks); thinking
+        # toggle does not apply. Recommended sampler from the model card if a
+        # client wants to set it: temp=0.7, top_p=0.8, top_k=20, repeat=1.05.
       ];
     };
   };
