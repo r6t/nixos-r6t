@@ -160,8 +160,18 @@ in
       };
       incus = {
         # Wait for storage pool before starting incus...
-        requires = [ "mnt-crownstore.mount" ];
-        after = [ "mnt-crownstore.mount" ];
+        requires = [
+          "mnt-crownstore.mount"
+          "mnt-thunderbay-8TBx2dA.mount"
+          "mnt-thunderbay-8TBx2dC.mount"
+          "mnt-thunderbay-8TBx2dD.mount"
+        ];
+        after = [
+          "mnt-crownstore.mount"
+          "mnt-thunderbay-8TBx2dA.mount"
+          "mnt-thunderbay-8TBx2dC.mount"
+          "mnt-thunderbay-8TBx2dD.mount"
+        ];
         serviceConfig = {
           # ... and double check that it's there
           ExecStartPre = "${pkgs.coreutils}/bin/test -d /mnt/crownstore/incus";

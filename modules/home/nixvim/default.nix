@@ -791,7 +791,7 @@ let
         dressing.enable = true;
         fugitive.enable = true;
         fzf-lua.enable = true;
-        git-conflict.enable = true;
+        git-conflict.enable = false; # upstream akinsho/git-conflict.nvim has no LICENSE file — see docs/NIXVIM.md
         gitsigns = {
           enable = true;
           settings = {

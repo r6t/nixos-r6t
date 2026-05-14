@@ -116,6 +116,37 @@ in
       '';
     };
 
+    cacheRamMiB = lib.mkOption {
+      type = lib.types.int;
+      default = 8192;
+      description = ''
+        Disk-backed prompt cache size in MiB (--cache-ram). llama-server's own
+        default is 8192. Set to 0 to disable, -1 for unlimited.
+
+        Whether to enable this is **model-architecture-specific**:
+
+        - **Standard transformers** (Llama, Mistral, Gemma, Qwen3-Coder dense,
+          most others) support partial KV cache sequence removal, which is the
+          mechanism that `--cache-reuse` relies on to skip re-prefill across
+          requests with a shared prefix. For these the disk-backed cache is a
+          big win for multi-turn chat — leave at the default 8192 or higher.
+
+        - **Hybrid attention models** (Qwen3.6, Qwen3-Next, RWKV-style SSM
+          variants) cannot do partial sequence removal because their recurrent
+          layers carry rolled-up state. llama-server silently disables cache
+          reuse for them and forces full prompt re-processing on every turn.
+          The disk-backed cache is then **pure overhead** — measured in
+          production, llama-server wrote 150-200 MiB of KV state per turn to
+          the cache path and never read it back. The serialization itself was
+          slow (5-30 seconds per turn, despite NVMe sequential bandwidth being
+          1.8 GB/s — likely an O(n²) or lock-contended code path in llama.cpp
+          for hybrid models). **Always set 0 for hybrid models.**
+
+        See https://github.com/ggml-org/llama.cpp/pull/13194#issuecomment-2868343055
+        for the upstream context on why hybrid attention disables cache reuse.
+      '';
+    };
+
     flashAttn = lib.mkOption {
       type = lib.types.enum [ "auto" "on" "off" ];
       default = "auto";
@@ -247,8 +278,16 @@ in
         "--prio"
         "2"
         # KV prefix reuse across requests (system prompt caching).
+        # Silently ignored on hybrid-attention models (Qwen3.6, Qwen3-Next, etc.)
+        # because their KV layers don't support partial sequence removal.
+        # Standard transformer models still benefit from this for chat workloads.
         "--cache-reuse"
         "256"
+        # Disk-backed prompt cache size in MiB. See `cacheRamMiB` option doc
+        # for the model-architecture-specific guidance. tl;dr: 0 for hybrid
+        # models (Qwen3.6 etc.), 8192 (default) for standard transformers.
+        "--cache-ram"
+        (toString cfg.cacheRamMiB)
         # Single parallel slot — all VRAM to one session.
         "-np"
         "1"

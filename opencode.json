@@ -1,4 +1,10 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "instructions": ["docs/INCUS.md", "docs/OPENWEBUI.md", "docs/THEMING.md"]
+  "instructions": [
+    "docs/INCUS.md",
+    "docs/LLM-HOSTING-TUNING.md",
+    "docs/NIXVIM.md",
+    "docs/OPENWEBUI.md",
+    "docs/THEMING.md"
+  ]
 }

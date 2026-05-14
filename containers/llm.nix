@@ -14,7 +14,21 @@ let
   # VRAM for context length and quality; web search is a tool the agent calls
   # and returns text, so vision is not needed for it.
   #
-  # Quant selection on 32 GiB at Q6_K (deep-dive May 2026):
+  # MODEL ARCHITECTURE MATTERS MORE THAN QUALITY for perceived multi-turn UX
+  # on llama.cpp as of May 2026:
+  #   - Hybrid attention (Qwen3.6 GatedDeltaNet, Qwen3-Next, RWKV-style):
+  #       partial KV sequence removal NOT supported → --cache-reuse silently
+  #       disabled → every turn does a full re-prefill of the entire chat
+  #       history → multi-turn TTFT is multi-second, "feels slow".
+  #       See llama.cpp issue #22940 (patch exists but unmerged as of May 14).
+  #   - Standard transformers (dense or pure-attention MoE):
+  #       partial KV sequence removal works → --cache-reuse hits → turn-N
+  #       prefill is sub-second once the prefix is cached. Feels like Ollama.
+  #   - SWA + global attention (Gemma 4): cache reuse works only on
+  #       llama.cpp build >= b8819 (PR #22288 merged 2026-04-24) AND only
+  #       when --swa-full is passed. Older builds = same TTFT pain as hybrid.
+  #
+  # Quant selection on 32 GiB at Q6_K (deep-dive May 2026, Qwen3.6-27B-specific):
   #   Q8_0    KLD 0.0038, ~28.6 GB weights — leaves <4 GB for KV+graph, no headroom
   #   Q6_K    KLD 0.0072, ~22.5 GB weights — best quality/headroom balance
   #   Q5_K_M  KLD 0.0108, ~19.7 GB weights — only if pushing 256K+ context
@@ -44,6 +58,11 @@ let
       hfRepo = "unsloth/Qwen3.6-27B-GGUF";
       hfFile = "Qwen3.6-27B-Q6_K.gguf";
       contextSize = 131072; # 128K — comfortable headroom at Q6 + q8 KV.
+      # Hybrid GatedDeltaNet attention does not support partial KV sequence
+      # removal, so --cache-reuse is silently disabled and the disk cache is
+      # never read back. Production journal showed 150-200 MiB written per
+      # turn taking 5-30s of dead time before prefill could begin. Disable.
+      cacheRamMiB = 0;
       extraFlags = [
         "--jinja"
         # Disable the multimodal projector entirely (text-only inference).
@@ -98,6 +117,10 @@ let
       hfRepo = "unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF";
       hfFile = "Qwen3-Coder-30B-A3B-Instruct-UD-Q6_K_XL.gguf";
       contextSize = 65536;
+      # Standard MoE transformer (not hybrid) — partial KV sequence removal
+      # works and --cache-reuse provides real multi-turn speedup. Keep the
+      # llama-server default disk cache at 8192 MiB.
+      cacheRamMiB = 8192;
       extraFlags = [
         "--jinja"
         # Sampler flags intentionally NOT set — clients should set per-request.
@@ -106,10 +129,123 @@ let
         # client wants to set it: temp=0.7, top_p=0.8, top_k=20, repeat=1.05.
       ];
     };
+
+    # FAST CHAT PRIMARY (recommended once llama.cpp >= b8819 is in nixpkgs):
+    # Gemma 4 26B-A4B is a MoE (3.8B active / 26B total) using alternating
+    # local SWA + global attention with Shared KV Cache. Crucially this is
+    # NOT a hybrid GatedDeltaNet model — partial KV sequence removal works
+    # via the upstream PR #22288 fix (merged 2026-04-24, llama.cpp build
+    # b8819+), so multi-turn cache reuse actually delivers "Ollama-snappy"
+    # follow-up turns on the R9700. Reporter measured ~13× warm prefill
+    # speedup on Gemma 4 with --swa-full.
+    #
+    # Quality (per unsloth model card, May 2026): MMLU-Pro 82.6, LiveCodeBench
+    # v6 77.1, GPQA Diamond 82.3, Tau2 (tool use, avg of 3) 68.2, AIME 2026
+    # 88.3. LMArena ~1452 for the dense 31B sibling. Native tool calling.
+    # Optional thinking via enable_thinking jinja kwarg (default off).
+    #
+    # Performance prediction on R9700 Vulkan: MoE with only 3.8B active
+    # params streamed per token → 6-8× faster decode than Qwen3.6-27B Q6_K.
+    # JohnTDI-cpu's Qwen3.5-35B-A3B benchmark hit 149-164 t/s decode on the
+    # R9700; expect Gemma 4 26B-A4B in the 110-160 t/s range.
+    #
+    # PREREQUISITES before flipping activeModel here:
+    #   1. nixpkgs llama-cpp-vulkan must be build b8819+ (currently b8770).
+    #      Without the PR #22288 fix you get the SAME multi-turn re-prefill
+    #      penalty that hurts on Qwen3.6. Bump nixpkgs or overlay-pin first.
+    #   2. The `--swa-full` flag below is REQUIRED for cache reuse to work
+    #      correctly on SWA models per PR #22288. Without it the SWA layers
+    #      drop their KV state every turn.
+    gemma4-26b-a4b = {
+      modelFile = "/var/lib/llama-cpp/models/gemma-4-26B-A4B-it-UD-Q6_K_XL.gguf";
+      hfRepo = "unsloth/gemma-4-26B-A4B-it-GGUF";
+      hfFile = "gemma-4-26B-A4B-it-UD-Q6_K_XL.gguf";
+      contextSize = 131072; # 128K — comfortable at 21.7 GB weights + q8 KV
+      # Standard SWA+global attention (not hybrid DeltaNet): cache reuse
+      # works, disk cache is beneficial for prefix reuse across sessions.
+      cacheRamMiB = 8192;
+      extraFlags = [
+        "--jinja"
+        # Text-only — Gemma 4 has a vision encoder we don't need.
+        "--no-mmproj"
+        # REQUIRED for proper cache reuse on SWA models per llama.cpp PR
+        # #22288 (https://github.com/ggml-org/llama.cpp/pull/22288). Without
+        # this the sliding-window layers force a re-prefill every turn for
+        # the same reason Qwen3.6 hybrid attention does.
+        "--swa-full"
+        # Disable thinking by default at the server level. Clients can opt
+        # in per-request via chat_template_kwargs.enable_thinking = true.
+        # Same pattern as our Qwen3.6 preset.
+        "--reasoning"
+        "off"
+      ];
+    };
+
+    # FALLBACK 1: Gemma 4 31B dense. Same SWA + global attention as the MoE
+    # but pure dense — multi-turn cache reuse works the same way (via PR
+    # #22288), prefill/decode is bandwidth-bound at the 24-26 t/s range
+    # (similar to Qwen3.6 dense, but WITH working cache reuse so turn-N
+    # TTFT is sub-second instead of multi-second).
+    #
+    # When to switch here: if Gemma 4 26B-A4B's MoE routing produces
+    # inconsistent answers turn-to-turn and you want the determinism of a
+    # dense model with proper Gemma 4 quality. Or if the MoE variant turns
+    # out to hit a separate cache-reuse bug (#21831) that #22288 didn't
+    # close. LMArena 1452.
+    #
+    # SAME PREREQUISITES as gemma4-26b-a4b: llama.cpp b8819+ and --swa-full.
+    gemma4-31b = {
+      modelFile = "/var/lib/llama-cpp/models/gemma-4-31B-it-Q5_K_M.gguf";
+      hfRepo = "unsloth/gemma-4-31B-it-GGUF";
+      hfFile = "gemma-4-31B-it-Q5_K_M.gguf";
+      contextSize = 65536; # 64K — 20 GB weights + q8 KV at 128K is tight
+      cacheRamMiB = 8192;
+      extraFlags = [
+        "--jinja"
+        "--no-mmproj"
+        "--swa-full"
+        "--reasoning"
+        "off"
+      ];
+    };
+
+    # FALLBACK 2: Mistral Devstral-Small-2 24B Dense (Dec 2025 / Feb 2026
+    # update). Standard dense transformer — proper KV cache reuse, no SWA
+    # quirks, "snappy multi-turn" without needing the b8819 upstream fix.
+    # Pure coding-focused tuning (similar lineage to Codestral). Less
+    # academic-benchmark-strong than Gemma 4 / Qwen3.6 on MMLU-Pro etc.,
+    # but tight on real-world dev tasks. No public Aider polyglot result
+    # for this exact build yet — bring your own A/B vs Qwen3-Coder.
+    #
+    # When to switch here: A/B testing Mistral vs Qwen coding-family on
+    # your own opencode workflow, or when you want a dense (deterministic)
+    # standard-transformer coding model that doesn't depend on the SWA fix.
+    devstral-small-2-24b = {
+      modelFile = "/var/lib/llama-cpp/models/Devstral-Small-2-24B-Instruct-2512-UD-Q6_K_XL.gguf";
+      hfRepo = "unsloth/Devstral-Small-2-24B-Instruct-2512-GGUF";
+      hfFile = "Devstral-Small-2-24B-Instruct-2512-UD-Q6_K_XL.gguf";
+      contextSize = 131072; # 128K native — dense KV at q8 leaves headroom.
+      cacheRamMiB = 8192;
+      extraFlags = [
+        "--jinja"
+        # Mistral's recommended sampler (per model card): temp=0.15 for
+        # code, default 0.7 otherwise. Leaving samplers unset here lets
+        # clients (opencode, open-webui) choose per-request.
+      ];
+    };
   };
 
-  # Change this one line to switch models:
-  # qwen3-6-27b (primary orchestrator) | qwen3-coder-30b-a3b (fast builder)
+  # Change this one line to switch models. Available presets:
+  #   qwen3-6-27b           dense hybrid, slowest multi-turn TTFT,
+  #                           highest single-shot quality
+  #   qwen3-coder-30b-a3b   MoE standard, fast multi-turn, coding-tuned
+  #                           non-thinking, snappy opencode backend
+  #   gemma4-26b-a4b        MoE SWA, fastest decode (110-160 t/s expected
+  #                           on R9700), needs llama.cpp b8819+ & --swa-full
+  #   gemma4-31b            dense SWA, ~25 t/s decode but snappy turn-N
+  #                           TTFT, deterministic fallback to MoE Gemma 4
+  #   devstral-small-2-24b  dense Mistral coder, snappy multi-turn,
+  #                           A/B alternative to qwen3-coder-30b-a3b
   activeModel = models.qwen3-6-27b;
 
 in
@@ -158,7 +294,7 @@ in
       enable = true;
       host = "0.0.0.0";
       modelsDir = "/var/lib/llama-cpp/models";
-      inherit (activeModel) modelFile hfRepo hfFile contextSize extraFlags;
+      inherit (activeModel) modelFile hfRepo hfFile contextSize cacheRamMiB extraFlags;
       # q8_0 KV quantization: halves KV cache VRAM vs f16, near-zero quality
       # loss, and preserves the fused flash attention kernel (symmetric K/V).
       kvCacheQuant = "q8_0";
