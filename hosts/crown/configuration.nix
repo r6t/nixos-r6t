@@ -160,17 +160,21 @@ in
       };
       incus = {
         # Wait for storage pool before starting incus...
+        # Unit name escape: systemd encodes `-` in paths as `\x2d`, so
+        # `/mnt/thunderbay/8TB-A` becomes `mnt-thunderbay-8TB\x2dA.mount`.
+        # In a Nix string the backslash needs doubling (`\\x2d`). Verify
+        # with: systemd-escape -p /mnt/thunderbay/8TB-A
         requires = [
           "mnt-crownstore.mount"
-          "mnt-thunderbay-8TBx2dA.mount"
-          "mnt-thunderbay-8TBx2dC.mount"
-          "mnt-thunderbay-8TBx2dD.mount"
+          "mnt-thunderbay-8TB\\x2dA.mount"
+          "mnt-thunderbay-8TB\\x2dC.mount"
+          "mnt-thunderbay-8TB\\x2dD.mount"
         ];
         after = [
           "mnt-crownstore.mount"
-          "mnt-thunderbay-8TBx2dA.mount"
-          "mnt-thunderbay-8TBx2dC.mount"
-          "mnt-thunderbay-8TBx2dD.mount"
+          "mnt-thunderbay-8TB\\x2dA.mount"
+          "mnt-thunderbay-8TB\\x2dC.mount"
+          "mnt-thunderbay-8TB\\x2dD.mount"
         ];
         serviceConfig = {
           # ... and double check that it's there
