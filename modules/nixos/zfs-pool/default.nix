@@ -116,6 +116,17 @@ in
     # Enable ZFS support
     boot.supportedFilesystems = [ "zfs" ];
 
+    # Don't force-import the root pool during early boot. This flake only
+    # uses ZFS for data pools mounted by the systemd services below — root
+    # filesystems are LUKS-encrypted ext4. There is no ZFS root pool to
+    # force-import, so this option has no practical effect, but setting it
+    # explicitly silences the upstream warning that nudges all ZFS users
+    # toward the safer 26.11 default (no `-f` on zpool import during
+    # initrd). If a future host adds a ZFS root and ever fails to boot
+    # because the pool wasn't cleanly exported, add `zfs_force=1` to the
+    # kernel cmdline once to recover — that's the upstream recommendation.
+    boot.zfs.forceImportRoot = false;
+
     # Systemd configuration for pool management, snapshots, and delegation
     systemd = {
       services = lib.mkMerge [
