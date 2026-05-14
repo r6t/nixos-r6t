@@ -67,6 +67,25 @@ When convenient, try one of these properly-licensed alternatives:
 Process: flip the chosen plugin's `.enable = true;`, `nrs`, test on a real
 conflict, decide before committing.
 
+## Removed: `zellij-nvim`
+
+Provided unified `<C-h/j/k/l>` navigation between vim windows and zellij
+panes. Upstream `Lilja/zellij.nvim` has no LICENSE file AND the repository
+is archived (no longer maintained), so it's not getting a license added
+retroactively. Removed from `extraPlugins` in the nixvim block.
+
+Day-to-day impact: vim's built-in `<C-w>h/j/k/l` still moves between vim
+windows; zellij's own keybinds still move between zellij panes; you just
+have to use the right one for the right boundary instead of a single
+unified keystroke.
+
+### TODO: evaluate a replacement
+
+`smart-splits.nvim` (MIT) is the maintained successor that most former
+`zellij.nvim` users moved to. It also handles tmux, wezterm, and kitty
+seamlessly. Add as `smart-splits.enable = true;` (or via `extraPlugins`)
+when convenient.
+
 ## Related docs
 
 - `docs/LLM-HOSTING-TUNING.md` — opencode + local llama-server integration

@@ -224,7 +224,9 @@ let
         opencode-nvim
         oxocarbon-nvim
         snacks-nvim
-        zellij-nvim
+        # zellij-nvim removed: upstream Lilja/zellij.nvim has no LICENSE file
+        # and the repo is archived. See docs/NIXVIM.md for context and the
+        # smart-splits.nvim (MIT) replacement TODO.
         nvim-lspconfig
       ];
 
@@ -284,14 +286,6 @@ let
             end
           end,
         })
-
-        -- Fix for zellij.nvim health check
-        vim.health = vim.health or {}
-        vim.health.report_start = vim.health.report_start or function() end
-        vim.health.report_ok = vim.health.report_ok or function() end
-        vim.health.report_warn = vim.health.report_warn or function() end
-        vim.health.report_error = vim.health.report_error or function() end
-        vim.health.report_info = vim.health.report_info or function() end
       '';
       globals = {
         mapleader = " ";
