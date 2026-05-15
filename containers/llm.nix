@@ -246,7 +246,7 @@ let
   #                           TTFT, deterministic fallback to MoE Gemma 4
   #   devstral-small-2-24b  dense Mistral coder, snappy multi-turn,
   #                           A/B alternative to qwen3-coder-30b-a3b
-  activeModel = models.qwen3-6-27b;
+  activeModel = models.gemma4-26b-a4b;
 
 in
 {
