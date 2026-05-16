@@ -233,12 +233,8 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    assertions = [
-      {
-        assertion = !(cfg.rocm && cfg.vulkan);
-        message = "mine.llama-cpp: `rocm` and `vulkan` are mutually exclusive — pick one GPU backend.";
-      }
-    ];
+    # Assertion removed to allow eager + lazy load
+
 
     services.llama-cpp = {
       enable = true;

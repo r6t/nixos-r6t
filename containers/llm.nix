@@ -2,7 +2,6 @@
 
 let
   models = {
-    # 1. Quality fallback / one-shot Q&A
     qwen3-6-27b = {
       modelFile = "/var/lib/llama-cpp/models/Qwen3.6-27B-Q6_K.gguf";
       hfRepo = "unsloth/Qwen3.6-27B-GGUF";
@@ -12,7 +11,6 @@ let
       extraFlags = [ "--jinja" "--no-mmproj" "--reasoning" "off" ];
     };
 
-    # 2. MoE Standard, coding-optimized, non-thinking, fast multi-turn
     qwen3-coder-30b-a3b = {
       modelFile = "/var/lib/llama-cpp/models/Qwen3-Coder-30B-A3B-Instruct-UD-Q6_K_XL.gguf";
       hfRepo = "unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF";
@@ -22,7 +20,6 @@ let
       extraFlags = [ "--jinja" "--no-mmproj" ];
     };
 
-    # 3. MoE SWA Primary, snappy multi-turn (needs --swa-full)
     gemma4-26b-a4b = {
       modelFile = "/var/lib/llama-cpp/models/gemma-4-26B-A4B-it-UD-Q6_K_XL.gguf";
       hfRepo = "unsloth/gemma-4-26B-A4B-it-GGUF";
@@ -32,7 +29,6 @@ let
       extraFlags = [ "--jinja" "--no-mmproj" "--swa-full" "--reasoning" "off" ];
     };
 
-    # 4. Dense SWA fallback (deterministic alternative to MoE Gemma)
     gemma4-31b = {
       modelFile = "/var/lib/llama-cpp/models/gemma-4-31B-it-Q5_K_M.gguf";
       hfRepo = "unsloth/gemma-4-31B-it-GGUF";
@@ -42,7 +38,6 @@ let
       extraFlags = [ "--jinja" "--no-mmproj" "--swa-full" "--reasoning" "off" ];
     };
 
-    # 5. Dense Standard (The Balanced Best Choice)
     devstral-small-2-24b = {
       modelFile = "/var/lib/llama-cpp/models/Devstral-Small-2-24B-Instruct-2512-UD-Q6_K_XL.gguf";
       hfRepo = "unsloth/Devstral-Small-2-24B-Instruct-2512-GGUF";
@@ -53,8 +48,9 @@ let
     };
   };
 
-  # Set active to the best balanced model
-  activeModel = models.devstral-small-2-24b;
+  # Preload the best coding model
+  preloadedModel = models.qwen3-coder-30b-a3b;
+
 in
 {
   imports = [
@@ -78,7 +74,10 @@ in
       enable = true;
       host = "0.0.0.0";
       modelsDir = "/var/lib/llama-cpp/models";
-      inherit (activeModel) modelFile hfRepo hfFile contextSize cacheRamMiB extraFlags;
+      # Eagerly load the coder
+      inherit (preloadedModel) modelFile hfRepo hfFile contextSize cacheRamMiB extraFlags;
+      # Expose ALL as presets for Router Mode
+      modelsPreset = models;
       kvCacheQuant = "q8_0";
       ubatchSize = 2048;
       flashAttn = "auto";
