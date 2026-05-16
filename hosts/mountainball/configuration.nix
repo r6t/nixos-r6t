@@ -1,4 +1,9 @@
 { inputs, userConfig, ... }:
+let
+  # Pull activeModel from the shared config so the opencode context window
+  # always matches what llama-server on crown is actually configured to use.
+  crownLlm = import ../../containers/llm-config.nix;
+in
 {
   imports = [
     inputs.home-manager.nixosModules.home-manager
@@ -118,7 +123,7 @@
         # project-level opencode.json in that repo (not managed by this flake).
 
         # opencode -> remote llama-server on crown via caddy + Route53.
-        # Crown's container runs Qwen3.6-27B Q6_K with `--reasoning off` as the
+        # Crown's container runs Qwen3.6-35B-A3B UD-Q4_K_M with `--reasoning off` as the
         # global default (fast chat for open-webui). The `thinking` variant
         # below re-enables thinking on a per-request basis through the chat
         # template kwarg — opencode merges variant attrs into the request body,
@@ -131,9 +136,9 @@
             # Model id MUST match the alias llama-server reports at /v1/models.
             # Currently that's the full HF repo string. Verify with:
             #   curl -s https://llm.r6t.io/v1/models | jq '.data[].id'
-            "unsloth/Qwen3.6-27B-GGUF" = {
-              name = "Qwen3.6-27B (crown)";
-              context = 131072;
+            "unsloth/Qwen3.6-35B-A3B-GGUF" = {
+              name = "Qwen3.6 35B-A3B (crown)";
+              context = crownLlm.activeModel.contextSize;
               output = 32768;
               variants = {
                 # default variant gets no extras — server's --reasoning off
