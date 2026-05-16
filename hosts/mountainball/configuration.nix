@@ -2,7 +2,7 @@
 let
   # Pull activeModel from the shared config so the opencode context window
   # always matches what llama-server on crown is actually configured to use.
-  crownLlm = import ../../containers/llm-config.nix;
+  crownLlm = import ../../containers/lib/llm-config.nix;
 in
 {
   imports = [

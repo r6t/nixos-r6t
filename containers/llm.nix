@@ -4,7 +4,7 @@ let
   # All model definitions and activeModel live in llm-config.nix so that
   # hosts/mountainball/configuration.nix can import activeModel.contextSize
   # and keep the opencode provider limit in sync without duplication.
-  llmCfg = import ./llm-config.nix;
+  llmCfg = import ./lib/llm-config.nix;
   inherit (llmCfg) activeModel;
 in
 {
