@@ -4,12 +4,10 @@ let
   cfg = config.mine.home.nixvim;
   wrapHome = import ../../lib/mkPortableHomeConfig.nix { inherit isNixOS userConfig; };
   c = (import ../../lib/palette.nix).hex;
-  ollamaCfg = cfg.opencode-ollama;
   llamaCfg = cfg.opencode-llamacpp;
 
-  # Build the opencode.json llama-cpp provider config when enabled.
-  # llama-server exposes a fully OpenAI-compatible /v1 endpoint — same provider
-  # structure as Ollama but pointing at llama-server's port (default 8080).
+  # Build the opencode.json provider config when enabled.
+  # Crown's llama-server exposes a fully OpenAI-compatible /v1 endpoint.
   opencodeLocalConfig = lib.mkIf llamaCfg.enable {
     ".config/opencode/opencode.json" = {
       text = builtins.toJSON (
@@ -64,57 +62,10 @@ let
     };
   };
 
-  # Build the opencode.json Ollama provider config when enabled
-  opencodeOllamaConfig = lib.mkIf ollamaCfg.enable {
-    ".config/opencode/opencode.json" = {
-      text = builtins.toJSON (
-        {
-          "$schema" = "https://opencode.ai/config.json";
-        }
-        // lib.optionalAttrs cfg.enableHaMcp {
-          mcp = {
-            homeassistant = {
-              type = "remote";
-              url = "https://homeassistant.r6t.io/api/mcp";
-              enabled = true;
-              oauth = false;
-              headers = {
-                Authorization = "Bearer {env:HA_MCP_TOKEN}";
-              };
-            };
-          };
-        }
-        // {
-          provider = {
-            ollama = {
-              npm = "@ai-sdk/openai-compatible";
-              name = "Ollama (local)";
-              options = {
-                inherit (ollamaCfg) baseURL;
-              };
-              models = lib.mapAttrs
-                (_id: m:
-                  {
-                    inherit (m) name;
-                  }
-                  // lib.optionalAttrs (m.context != null && m.output != null) {
-                    # opencode schema requires BOTH context and output when limit is present.
-                    # Omit limit entirely if either field is null — partial limit is invalid.
-                    limit = { inherit (m) context output; };
-                  }
-                )
-                ollamaCfg.models;
-            };
-          };
-        }
-      );
-    };
-  };
-
   # Opencode oxocarbon theme + tui config
   # Theme file goes to ~/.config/opencode/themes/oxocarbon.json
   # tui.json goes to ~/.config/opencode/tui.json
-  opencodeThemeConfig = {
+  opencodeThemeConfig = lib.mkIf llamaCfg.enable {
     ".config/opencode/themes/oxocarbon.json" = {
       text = builtins.toJSON {
         "$schema" = "https://opencode.ai/theme.json";
@@ -1004,45 +955,15 @@ in
       };
     };
 
-    opencode-ollama = {
-      enable = lib.mkEnableOption "connect OpenCode to a local/remote Ollama instance";
 
-      baseURL = lib.mkOption {
-        type = lib.types.str;
-        default = "http://127.0.0.1:11434/v1";
-        description = "Ollama OpenAI-compatible API endpoint.";
-      };
-
-      models = lib.mkOption {
-        type = lib.types.attrsOf (lib.types.submodule {
-          options = {
-            name = lib.mkOption {
-              type = lib.types.str;
-              description = "Display name shown in OpenCode model picker.";
-            };
-            context = lib.mkOption {
-              type = lib.types.nullOr lib.types.int;
-              default = null;
-              description = "Max input context tokens (null = provider default).";
-            };
-            output = lib.mkOption {
-              type = lib.types.nullOr lib.types.int;
-              default = null;
-              description = "Max output tokens (null = provider default).";
-            };
-          };
-        });
-        default = { };
-        description = "Ollama models to expose to OpenCode. Keys are Ollama model IDs.";
-      };
-    };
   };
 
   config = lib.mkIf cfg.enable (
     let
       hmConfig = lib.mkMerge [
         {
-          home.packages = nixvimPackages;
+          home.packages = nixvimPackages
+            ++ lib.optional llamaCfg.enable pkgs.opencode;
           home.file = lib.mkMerge (
             lib.optional (isNixOS && cfg.enableSopsSecrets)
               {
@@ -1051,7 +972,7 @@ in
                   executable = true;
                 };
               }
-            ++ [ opencodeLocalConfig opencodeOllamaConfig opencodeThemeConfig ]
+            ++ [ opencodeLocalConfig opencodeThemeConfig ]
           );
         }
         nixvimConfig
