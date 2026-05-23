@@ -9,10 +9,10 @@
     home-manager.users.${userConfig.username}.programs.ssh = {
       enable = true;
       enableDefaultConfig = false;
-      matchBlocks = {
+      settings = {
         "git-codecommit.*.amazonaws.com" = {
-          user = "APKAYS2NW3CVZZ7ZOA5Y";
-          identityFile = "/home/${userConfig.username}/.ssh/misc-keys/cc_ryan_codecommit_rsa";
+          User = "APKAYS2NW3CVZZ7ZOA5Y";
+          IdentityFile = "/home/${userConfig.username}/.ssh/misc-keys/cc_ryan_codecommit_rsa";
         };
       };
     };
