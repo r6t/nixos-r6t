@@ -45,12 +45,6 @@ in
       "kvm-amd"
       "kvm"
       "reboot=efi"
-      # Force PCIe Active State Power Management to performance mode. This
-      # measurably improves GPU decode throughput on the R9700 (~+10% gen
-      # tok/s in llama.cpp benchmarks on RDNA 4 / gfx1201). Cost: a few extra
-      # watts on the PCIe link. Crown is a server, not a laptop on battery —
-      # the tradeoff is heavily in favor of performance.
-      "pcie_aspm.policy=performance"
     ];
     supportedFilesystems = [ "zfs" ];
   };
@@ -233,10 +227,6 @@ in
     };
 
     nix.enable = true;
-    # GPU: AMD Radeon AI Pro R9700 32 GB (RDNA 4 / GFX1201).
-    # amdgpu is in-kernel and needs no driver package or host module.
-    # ROCm userspace ships inside the llm container via pkgs.llama-cpp-rocm —
-    # the host only needs to expose /dev/kfd and /dev/dri/renderD* through incus.
     prometheus-node-exporter.enable = true;
     rdfind.enable = true;
     sops.enable = true;

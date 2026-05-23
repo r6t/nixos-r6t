@@ -25,7 +25,7 @@
   };
 
   llm = {
-    "llm.r6t.io" = { upstream = "http://localhost:8088"; };
+    "llm.r6t.io" = { upstream = "http://goldenball:8080"; };
     "oi.r6t.io" = { upstream = "http://localhost:8087"; };
   };
 

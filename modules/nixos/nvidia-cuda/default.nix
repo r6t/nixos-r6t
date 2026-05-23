@@ -8,6 +8,18 @@ in
   options.mine.nvidia-cuda = {
     enable = lib.mkEnableOption "configure nvidia gpu for cuda";
 
+    open = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = ''
+        Use the open-source NVIDIA kernel module ( Nouveau fork in kernel).
+        Set to false for the proprietary driver. The open and proprietary
+        kernel modules share identical user-space binaries for CUDA, NVENC,
+        and Vulkan — the only difference is the kernel module itself.
+        The open module is preferred for headless/server setups.
+      '';
+    };
+
     package = lib.mkOption {
       type = lib.types.enum [ "production" "stable" "latest" ];
       default = "production";
@@ -85,7 +97,7 @@ in
             config.boot.kernelPackages.nvidiaPackages.production;
         modesetting.enable = true;
         powerManagement.enable = false;
-        open = true;
+        inherit (cfg) open;
         nvidiaSettings = false;
         gsp.enable = cfg.gspFirmware;
       };

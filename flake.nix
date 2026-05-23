@@ -30,6 +30,10 @@
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    comfyui-nix = {
+      url = "github:utensils/comfyui-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     ssh-keys = {
       url = "https://github.com/r6t.keys";
       flake = false;
@@ -75,6 +79,20 @@
           specialArgs = { inherit userConfig inputs outputs; isNixOS = true; };
           modules = [
             ./hosts/mountainball/configuration.nix
+            {
+              nixpkgs.config = {
+                allowUnfree = true;
+                # temporary allow recent EOL
+                permittedInsecurePackages = [ "electron-36.9.5" ];
+              };
+            }
+          ];
+        };
+        # laptop — ASUS ROG Z13 AI Max 395 (GZ302), Strix Halo
+        goldenball = nixpkgs.lib.nixosSystem {
+          specialArgs = { inherit userConfig inputs outputs; isNixOS = true; };
+          modules = [
+            ./hosts/goldenball/configuration.nix
             {
               nixpkgs.config = {
                 allowUnfree = true;
