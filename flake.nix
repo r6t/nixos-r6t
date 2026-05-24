@@ -88,7 +88,7 @@
             }
           ];
         };
-        # laptop — ASUS ROG Z13 AI Max 395 (GZ302), Strix Halo
+        # laptop — ASUS ROG Z13 GZ302 Strix Halo
         goldenball = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit userConfig inputs outputs; isNixOS = true; };
           modules = [

@@ -349,5 +349,52 @@ in
         })
       ];
     };
+
+    # Allow members of the wheel group to start/stop llama-cpp without a
+    # password prompt. Used by the llama-cpp-toggle script below.
+    security.polkit.extraConfig = ''
+      polkit.addRule(function(action, subject) {
+        if (
+          (action.id === "org.freedesktop.systemd1.manage-units" ||
+           action.id === "org.freedesktop.systemd1.manage-unit-files") &&
+          action.lookup("unit") === "llama-cpp.service" &&
+          subject.isInGroup("wheel")
+        ) {
+          return polkit.Result.YES;
+        }
+      });
+    '';
+
+    # Toggle script + .desktop entry for the KDE app launcher.
+    # The script is also the executable called by the SNI tray daemon
+    # (mine.home.kde-apps.llamaCppLauncher) for manual CLI use.
+    # Use mine.home.kde-apps.llamaCppLauncher = true on a host to get a
+    # proper system-tray icon (SNI daemon) alongside wifi/bluetooth/volume.
+    environment.systemPackages =
+      let
+        toggleScript = pkgs.writeShellScriptBin "llama-cpp-toggle" ''
+          if systemctl is-active --quiet llama-cpp.service; then
+            systemctl stop llama-cpp.service
+            notify-send --urgency=normal --icon=media-playback-stop \
+              "llama-cpp" "Service stopped — GPU RAM freed"
+          else
+            systemctl start llama-cpp.service
+            notify-send --urgency=normal --icon=media-playback-start \
+              "llama-cpp" "Service starting — model loading (~15s)"
+          fi
+        '';
+        desktopEntry = pkgs.makeDesktopItem {
+          name = "llama-cpp-toggle";
+          desktopName = "LLaMA Server Toggle";
+          comment = "Start or stop the local llama-cpp inference server";
+          exec = "${toggleScript}/bin/llama-cpp-toggle";
+          # preferences-devices-cpu: chip/CPU icon — visually distinct in the panel,
+          # appropriate for "local inference engine running on this hardware".
+          icon = "preferences-devices-cpu";
+          categories = [ "Utility" "Science" ];
+          keywords = [ "llama" "ai" "llm" "inference" ];
+        };
+      in
+      [ toggleScript desktopEntry ];
   };
 }
