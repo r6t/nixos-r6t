@@ -1,4 +1,4 @@
-{ lib, ... }:
+{ ... }:
 
 {
   imports = [
@@ -8,10 +8,9 @@
     ./lib/mullvad-dns.nix
   ];
 
-  nixpkgs.config.allowUnfreePredicate = pkg:
-    builtins.elem (lib.getName pkg) [ "open-webui" ];
+  nixpkgs.config.allowUnfree = true;
 
-  hardware.graphics.enable = false;
+  hardware.graphics.enable = true;
 
   networking.hostName = "llm";
 
@@ -25,13 +24,23 @@
 
   mine = {
     llama-cpp = {
-      enable = false;
+      enable = true;
+      cuda = true;
+      host = "0.0.0.0";
+      port = 8080;
+      modelsDir = "/var/lib/llama-cpp/models";
+      hfRepo = "unsloth/Qwen3-14B-GGUF";
+      hfFile = "Qwen3-14B-Q6_K.gguf";
+      contextSize = 65536; # 64K context
+      cacheRamMiB = 8192; # Standard dense model supports full KV prefix reuse!
+      kvCacheQuant = "q8_0";
+      extraFlags = [ "--jinja" "--no-mmproj" "--reasoning" "off" ];
     };
     open-webui = {
       enable = true;
       host = "0.0.0.0";
       openaiApiUrls = [
-        "https://llm.r6t.io/v1"
+        "http://localhost:8080/v1"
         "https://openrouter.ai/api/v1"
       ];
       environmentFile = "/etc/oi.env";

@@ -22,6 +22,8 @@ in
   boot = {
     kernelPackages = lib.mkDefault pkgs.linuxPackages_latest;
 
+    initrd.luks.devices."luks-4c181c40-b517-4477-b5b2-ddb63e56e552".device = "/dev/disk/by-uuid/4c181c40-b517-4477-b5b2-ddb63e56e552";
+
     kernelParams = [
       # Disable GFXOFF (bit 15) and STUTTER_MODE (bit 17) — prevents
       # microstuttering on high-refresh external displays while keeping all
@@ -40,14 +42,14 @@ in
       "amd_pstate=guided"
 
       # Hibernation resume target (encrypted swap — update UUID after install)
-      "resume=UUID=2816b186-2633-4e3c-996c-f6ea67bb8147"
+      "resume=UUID=189690e7-6c8a-47ac-a378-a1a99ed87e3b"
 
       # Disable panel adaptive brightness (causes timing issues on external displays)
       "amdgpu.abmlevel=0"
     ];
 
     # Device used for resume from hibernation
-    resumeDevice = "/dev/disk/by-uuid/2816b186-2633-4e3c-996c-f6ea67bb8147";
+    resumeDevice = "/dev/disk/by-uuid/189690e7-6c8a-47ac-a378-a1a99ed87e3b";
   };
 
   hardware.graphics = {
@@ -126,7 +128,7 @@ in
     };
   };
 
-  system.stateVersion = "23.11";
+  system.stateVersion = "25.05";
   time.timeZone = "America/Los_Angeles";
 
   # ---------------------------------------------------------------------------

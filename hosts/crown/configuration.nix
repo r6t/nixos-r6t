@@ -227,6 +227,14 @@ in
     };
 
     nix.enable = true;
+    nvidia-cuda = {
+      enable = true;
+      open = true; # Open-source driver is preferred for headless/server setups (crown)
+      allowExternalGpu = true; # Connected via Thunderbolt eGPU
+      gspFirmware = true; # Required for RTX 50 series (RTX 5060 Ti)
+      containerToolkit = true; # Required for Incus container GPU passthrough
+      installCudaToolkit = false; # We are running AI inside the container, not host
+    };
     prometheus-node-exporter.enable = true;
     rdfind.enable = true;
     sops.enable = true;

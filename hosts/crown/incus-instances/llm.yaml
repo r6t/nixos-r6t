@@ -1,5 +1,7 @@
 config:
-  limits.memory: 8GiB
+  limits.memory: 32GiB
+  nvidia.driver.capabilities: all
+  nvidia.runtime: "true"
   security.nesting: "true"
   user.user-data: |
     #cloud-config
@@ -11,6 +13,12 @@ devices:
     nictype: bridged
     parent: br1
     type: nic
+  gpu:
+    gid: "303"
+    gputype: physical
+    vendorid: "10de"
+    productid: "2d04"
+    type: gpu
   llama-cpp-cache:
     path: /var/cache/private/llama-cpp
     shift: "true"
