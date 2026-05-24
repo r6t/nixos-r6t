@@ -9,7 +9,6 @@
     environment.systemPackages = with pkgs; [ asusctl ];
     services.asusd = {
       enable = true;
-      enableUserService = true;
     };
     # The upstream service file has no [Install] section and relies on D-Bus
     # activation, but no D-Bus .service activation file is shipped. Force it

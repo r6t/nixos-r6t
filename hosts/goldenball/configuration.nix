@@ -113,10 +113,10 @@ in
 
   powerManagement.cpuFreqGovernor = lib.mkDefault "schedutil";
 
-  systemd.sleep.extraConfig = ''
-    HibernateDelaySec=30m
-    SuspendState=freeze
-  '';
+  systemd.sleep.settings.Sleep = {
+    HibernateDelaySec = "30m";
+    SuspendState = "freeze";
+  };
 
   networking = {
     enableIPv6 = false;
