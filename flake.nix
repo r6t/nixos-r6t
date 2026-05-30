@@ -11,7 +11,6 @@
     nix-flatpak.url = "github:gmodena/nix-flatpak";
     nixvim = {
       url = "github:nix-community/nixvim";
-      inputs.nixpkgs.follows = "nixpkgs";
     };
     nixos-generators = {
       url = "github:nix-community/nixos-generators";

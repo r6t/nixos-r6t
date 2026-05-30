@@ -17,25 +17,29 @@ in
   # Role: workstation + local LLM (vulkan, on-demand)
   # ---------------------------------------------------------------------------
 
-  # GZ302EA detachable keyboard dock (USB, 0B05:1A30) — palm rejection / cursor jumping.
+  # GZ302EA detachable keyboard dock (USB, 0B05:1A30) and tablet body (0B05:18C6).
   #
-  # ROOT CAUSE: the dock's HID interfaces are claimed by the `hid-asus` kernel driver,
-  # which exposes the touchpad without proper multi-touch contact axes (no pressure,
-  # no contact size, no width). Without those axes, libinput cannot do palm rejection
-  # — palm contacts look identical to finger contacts and move the cursor freely.
-  # `hid-asus` also exposes a parallel REL_X/Y "Mouse" subdevice that bypasses DWT.
+  # TWO GOALS in tension:
+  #   1. Keyboard backlight brightness control (Fn keys + KDE slider / UPower)
+  #      Requires hid_asus to claim 18C6 (tablet N-KEY) → creates
+  #      /sys/class/leds/asus::kbd_backlight for UPower/KDE and asusctl leds.
+  #   2. Touchpad palm rejection on the dock (1A30)
+  #      Requires hid-multitouch to claim 1A30.0004 (the touchpad interface)
+  #      with full ABS_MT axes. hid_asus claims it without proper MT axes,
+  #      breaking libinput palm detection.
   #
-  # FIX: blacklist `hid_asus` entirely. The dock then enumerates under `hid-multitouch`
-  # which exposes the device with proper internal-touchpad characteristics (full ABS_MT
-  # axes, INPUT_PROP_BUTTONPAD, integration=internal), restoring palm detection and
-  # DWT pairing with the keyboard.
+  # SOLUTION: allow hid_asus to load (not blacklisted), but use a udev rule to
+  # immediately rebind the touchpad interface (0003:0B05:1A30.0004) from
+  # hid_asus to hid-multitouch after hid_asus claims it.
   #
-  # Tradeoff: lose ASUS-specific HID functionality (RGB control via hid-asus, some
-  # hotkeys). RGB is recoverable via asusctl over the platform driver path.
+  # Device map (confirmed via /proc/bus/input/devices + sysfs):
+  #   0003:0B05:18C6.0006-.0007  tablet N-KEY keyboard  → hid_asus (kbd_backlight)
+  #   0003:0B05:1A30.0001-.0003  dock keyboard/media/RF  → hid_asus (fine as-is)
+  #   0003:0B05:1A30.0004        dock touchpad           → hid-multitouch (rebind)
+  #   0003:0B05:1A30.0005        dock misc               → hid_asus (fine as-is)
   #
-  # Source: r/FlowZ13 NixOS user k7_u (2025-05): "All other issues were solved by
-  # blacklisting hid-asus kernel module" on the Z13 395+.
-  # Linux Mint Forums thread: https://forums.linuxmint.com/viewtopic.php?t=422004
+  # Source: r/FlowZ13 NixOS user k7_u (2025-05): original blacklist approach.
+  # Linux Mint Forums: https://forums.linuxmint.com/viewtopic.php?t=422004
 
   # Force ID_INPUT_TOUCHPAD_INTEGRATION=internal on the dock touchpad via udev hwdb.
   # systemd's 65-integration.rules sets the property to "external" because the dock's
@@ -59,17 +63,8 @@ in
     })
   ];
 
-  # Suppress the spurious Mouse (REL_X/Y) subdevice. With hid_asus blacklisted this
-  # may no longer be exposed at all; if it is, libinput ignores it cleanly.
-  # Touchpad (ABS_MT) is unaffected — it handles all cursor movement.
-  # Upstream tracking: libinput issue #1103, #1283.
-
   boot = {
     kernelPackages = lib.mkDefault pkgs.linuxPackages_latest;
-
-    # Blacklist hid_asus so the GZ302EA dock falls back to hid-multitouch (full
-    # MT axes for proper palm rejection). See touchpad note above.
-    blacklistedKernelModules = [ "hid_asus" ];
 
     initrd.luks.devices."luks-4c181c40-b517-4477-b5b2-ddb63e56e552".device = "/dev/disk/by-uuid/4c181c40-b517-4477-b5b2-ddb63e56e552";
 
@@ -97,11 +92,15 @@ in
 
       # dcdebugmask: disable PSR + PSR-SU + Panel Replay + Stutter for DCN 3.5.1.
       #   0x002 = DC_DISABLE_STUTTER  (DRAM stutter low-power mode)
-      #   0x010 = DC_DISABLE_PSR      (Panel Self-Refresh; transitively disables PSR-SU)
+      #   0x010 = DC_DISABLE_PSR      (Panel Self-Refresh)
+      #   0x200 = DC_DISABLE_PSR_SU   (PSR with Selective Update — distinct from full PSR;
+      #           VRR=Automatic causes the compositor to issue flips during PSR-SU transitions
+      #           which races the eDP vblank IRQ and triggers flip_done timed out on DCN 3.5.1.
+      #           Confirmed by th3cavalry/strix-halo-linux-setup and Arch BBS community reports.)
       #   0x400 = DC_DISABLE_REPLAY   (Panel Replay — new in DCN 3.5+, broken on Z13)
-      # Sum = 0x412. The interaction between PSR-SU/Panel Replay and FreeSync VRR
-      # is what races the vblank IRQ and causes the page-flip timeout.
-      "amdgpu.dcdebugmask=0x412"
+      # Sum = 0x612. Source: community reports (2025-2026) — no upstream kernel fix exists
+      # for DCN 3.5.1 flip_done timeouts as of kernel 7.0/7.1-rc; these are mitigations.
+      "amdgpu.dcdebugmask=0x612"
 
       # Disable scatter-gather display on this APU. Strix Halo's iGPU shares system
       # RAM via GTT for display surfaces; sg_display=1 (default) hits a class of
@@ -147,7 +146,17 @@ in
     # MediaTek MT7925 Wi-Fi: load driver at boot to survive cold boots after
     # failed s2idle resume; disable ASPM for stability.
     kernelModules = [ "mt7925e" ];
-    extraModprobeConfig = "options mt7925e disable_aspm=1";
+    extraModprobeConfig = ''
+      options mt7925e disable_aspm=1
+      # cwsr_enable=0: disable Compute Wavefront Save-Restore in the amdgpu kernel
+      # module (not a Vulkan/userspace setting — amdgpu owns the display engine and
+      # GPU hardware regardless of which Vulkan driver is used in userspace).
+      # Prevents GPU hangs from register file sync issues on Strix Halo (RDNA 3.5 /
+      # gfx1151) in 2025-2026 kernels. Reported by th3cavalry/strix-halo-linux-setup
+      # and corroborated by r/FlowZ13 silent-freeze reports. Low risk: CWSR is only
+      # needed for ROCm compute checkpoint/restore, not for display or gaming.
+      options amdgpu cwsr_enable=0
+    '';
   };
 
   hardware.graphics = {
@@ -184,6 +193,16 @@ in
   # (1022:158d, 1022:158e) use DPIA adapters that crash ~10 min after boot
   # if the router enters runtime suspend. Intel PCIe switches inside the hub
   # (8086:0b26, 8086:15ef) must not enter D3cold (hotplugged, fail to wake).
+  #
+  # GZ302EA dock: ignore phantom REL Mouse subdevice from hid_asus. The dock
+  # exposes both a Mouse and a Touchpad; the Mouse bypasses libinput DWT
+  # suppression. Ignoring it is safe — ABS_MT Touchpad handles all cursor
+  # movement. Upstream libinput issue #1103 / #1283.
+  #
+  # GZ302EA dock touchpad: rebind hid_asus → hid-multitouch for proper ABS_MT
+  # axes. hid_asus claims 0003:0B05:1A30.0004 without proper MT axes, breaking
+  # palm rejection. The RUN unbind/bind restores hid-multitouch on that
+  # interface. See device map comment at top of file.
   services = {
     udev.extraRules = ''
       ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x1022", ATTR{device}=="0x158d", ATTR{power/control}="on"
@@ -191,13 +210,11 @@ in
       ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x8086", ATTR{device}=="0x0b26", ATTR{d3cold_allowed}="0"
       ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x8086", ATTR{device}=="0x15ef", ATTR{d3cold_allowed}="0"
 
-      # GZ302EA dock (0B05:1A30): tell libinput to ignore the spurious Mouse (REL_X/Y)
-      # subdevice. The dock exposes both a Mouse and a Touchpad from the same HID
-      # interface. DWT does not apply to pointer/mouse devices, so palm contact during
-      # typing generates REL cursor movement that bypasses all libinput suppression.
-      # Ignoring the Mouse node entirely is safe: the Touchpad (ABS_MT) handles all
-      # cursor movement correctly. Upstream libinput issue #1103 / #1283.
-      SUBSYSTEM=="input", ATTRS{id/vendor}=="0b05", ATTRS{id/product}=="1a30", ENV{ID_INPUT_MOUSE}=="1", ENV{ID_INPUT_TOUCHPAD}!="1", ENV{LIBINPUT_IGNORE_DEVICE}="1"
+      SUBSYSTEM=="input", ATTRS{idVendor}=="0b05", ATTRS{idProduct}=="1a30", ENV{ID_INPUT_MOUSE}=="1", ENV{ID_INPUT_TOUCHPAD}!="1", ENV{LIBINPUT_IGNORE_DEVICE}="1"
+
+      ACTION=="add", SUBSYSTEM=="hid", KERNELS=="0003:0B05:1A30.0004", DRIVER=="hid_asus", \
+        RUN{builtin}="kmod load hid-multitouch", \
+        RUN+="/bin/sh -c 'echo 0003:0B05:1A30.0004 > /sys/bus/hid/drivers/hid_asus/unbind && echo 0003:0B05:1A30.0004 > /sys/bus/hid/drivers/hid-multitouch/bind'"
     '';
 
     libinput = {
@@ -320,7 +337,108 @@ in
     };
 
     alloy.enable = false;
-    asusctl.enable = true;
+    asusctl = {
+      enable = true;
+      # GZ302EA has two aura USB devices:
+      #   1a30 — detachable keyboard dock (drives keyboard backlight)
+      #   18c6 — tablet body (drives the back-panel window light)
+      # Written as read-only Nix store symlinks; asusd cannot overwrite at runtime.
+      # The 18c6 device has power_zones: [r#None] in aura_support.ron — no separate
+      # power-off zone exists for the window light; colour black + brightness Off
+      # is the correct way to disable it.
+      auraConfigs = {
+        "1a30" = ''
+          (
+              config_name: "aura_1a30.ron",
+              brightness: High,
+              current_mode: Static,
+              builtins: {
+                  Static: (
+                      mode: Static,
+                      zone: r#None,
+                      colour1: (r: 255, g: 255, b: 255,),
+                      colour2: (r: 0, g: 0, b: 0,),
+                      speed: Med,
+                      direction: Right,
+                  ),
+                  Breathe: (
+                      mode: Breathe,
+                      zone: r#None,
+                      colour1: (r: 255, g: 255, b: 255,),
+                      colour2: (r: 0, g: 0, b: 0,),
+                      speed: Med,
+                      direction: Right,
+                  ),
+                  Pulse: (
+                      mode: Pulse,
+                      zone: r#None,
+                      colour1: (r: 255, g: 255, b: 255,),
+                      colour2: (r: 0, g: 0, b: 0,),
+                      speed: Med,
+                      direction: Right,
+                  ),
+              },
+              multizone_on: false,
+              enabled: (
+                  states: [
+                      (
+                          zone: Keyboard,
+                          boot: true,
+                          awake: true,
+                          sleep: true,
+                          shutdown: true,
+                      ),
+                  ],
+              ),
+          )
+        '';
+        "18c6" = ''
+          (
+              config_name: "aura_18c6.ron",
+              brightness: Off,
+              current_mode: Static,
+              builtins: {
+                  Static: (
+                      mode: Static,
+                      zone: r#None,
+                      colour1: (r: 0, g: 0, b: 0,),
+                      colour2: (r: 0, g: 0, b: 0,),
+                      speed: Med,
+                      direction: Right,
+                  ),
+                  Breathe: (
+                      mode: Breathe,
+                      zone: r#None,
+                      colour1: (r: 0, g: 0, b: 0,),
+                      colour2: (r: 0, g: 0, b: 0,),
+                      speed: Med,
+                      direction: Right,
+                  ),
+                  Pulse: (
+                      mode: Pulse,
+                      zone: r#None,
+                      colour1: (r: 0, g: 0, b: 0,),
+                      colour2: (r: 0, g: 0, b: 0,),
+                      speed: Med,
+                      direction: Right,
+                  ),
+              },
+              multizone_on: false,
+              enabled: (
+                  states: [
+                      (
+                          zone: Keyboard,
+                          boot: false,
+                          awake: false,
+                          sleep: false,
+                          shutdown: false,
+                      ),
+                  ],
+              ),
+          )
+        '';
+      };
+    };
     bluetooth.enable = true;
     bolt.enable = true;
     bootloader.enable = true;
@@ -395,12 +513,17 @@ in
         "kwinrc"."Compositing"."MaxFPS" = 180;
         "kwinrc"."Compositing"."RefreshRate" = 180;
 
-        # VRR policy 2 = Always: allow the display to vary refresh rate freely
-        # between 48–180 Hz (confirmed in panel EDID) during all rendering, not
-        # just fullscreen. Eliminates frame-boundary tearing during window moves.
-        # Requires amdgpu.freesync_video=1 (set in kernelParams above) to enable
-        # FreeSync support in the amdgpu DRM driver for eDP connectors.
-        "kwinrc"."Output eDP-1"."VrrPolicy" = 2;
+        # VRR policy 1 = Automatic: activate FreeSync/VRR only for fullscreen apps
+        # (games). The display still runs at its full 180 Hz refresh rate at all
+        # times; Automatic just means the adaptive-sync feature (variable refresh
+        # rate) is only engaged when a game has direct scanout. This avoids the
+        # DCN 3.5.1 flip_done timeout that triggers when VrrPolicy=2 (Always)
+        # causes the compositor to issue adaptive-sync flips during normal desktop
+        # compositing — a known amdgpu kernel bug with no upstream fix as of
+        # kernel 7.0/7.1-rc (confirmed by multiple community reports, 2025-2026).
+        # Requires amdgpu.freesync_video=1 (set in kernelParams above) to expose
+        # VRR capability to userspace for fullscreen use.
+        "kwinrc"."Output eDP-1"."VrrPolicy" = 1;
 
         # plasma-manager's typed touchpad option doesn't expose KDE's
         # DisableEventsOnExternalMouse setting, so write it directly via configFile.

@@ -168,6 +168,7 @@ let
   # Shared nixvim configuration
   nixvimConfig = {
     programs.nixvim = {
+      version.enableNixpkgsReleaseCheck = false;
       defaultEditor = true;
       enable = true;
       extraPlugins = with pkgs.vimPlugins; [
