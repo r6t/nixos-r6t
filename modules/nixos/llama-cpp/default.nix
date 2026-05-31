@@ -108,11 +108,14 @@ in
 
     ubatchSize = lib.mkOption {
       type = lib.types.int;
-      default = 2048;
+      default = 1024;
       description = ''
         Physical micro-batch size (-ub) for GPU kernel dispatch during prompt
         processing. Higher values improve prefill throughput on long prompts.
-        2048 is a good default; reduce to 512 if VRAM is extremely tight.
+        1024 is the tuned optimum for AMD RDNA 3.5 / Strix Halo (gfx1151) on
+        RADV — benchmarked by lhl/strix-halo-testing. For discrete RDNA 4
+        (R9700) or NVIDIA, 2048 is reasonable; reduce to 512 if VRAM is
+        extremely tight.
       '';
     };
 
@@ -273,12 +276,6 @@ in
         # High process priority — GPU is dedicated to LLM inference.
         "--prio"
         "2"
-        # KV prefix reuse across requests (system prompt caching).
-        # Silently ignored on hybrid-attention models (Qwen3.6, Qwen3-Next, etc.)
-        # because their KV layers don't support partial sequence removal.
-        # Standard transformer models still benefit from this for chat workloads.
-        "--cache-reuse"
-        "256"
         # Disk-backed prompt cache size in MiB. See `cacheRamMiB` option doc
         # for the model-architecture-specific guidance. tl;dr: 0 for hybrid
         # models (Qwen3.6 etc.), 8192 (default) for standard transformers.
@@ -321,25 +318,14 @@ in
       environment = lib.mkMerge [
         (lib.optionalAttrs cfg.vulkan {
           # Persist the Mesa pipeline (SPIR-V → ISA) shader cache across service
-          # restarts. Without this, the first prompt after a fresh container or
-          # service start spends ~20s recompiling shaders for every unique
-          # compute shape — measured cold pp ≈ 1 tok/s vs warm ≈ 145 tok/s on
-          # Qwen3.6-27B Q6_K. systemd's CacheDirectory provides /var/cache/llama-cpp
-          # (resolves to /var/cache/private/llama-cpp under DynamicUser=true);
-          # the incus profile bind-mounts that to host-side storage so the
-          # cache survives container relaunches as well as service restarts.
+          # restarts. Without this, the first prompt after a fresh service start
+          # spends ~20s recompiling shaders for every unique compute shape —
+          # measured cold pp ≈ 1 tok/s vs warm ≈ 145 tok/s on Qwen3.6-27B Q6_K.
+          # systemd's CacheDirectory provides /var/cache/llama-cpp (resolves to
+          # /var/cache/private/llama-cpp under DynamicUser=true); the incus
+          # profile bind-mounts that to host-side storage so the cache survives
+          # container relaunches as well as service restarts.
           MESA_SHADER_CACHE_DIR = "/var/cache/llama-cpp/mesa-shaders";
-
-          # RADV_PERFTEST=nogttspill: confirmed 4.5× speedup on R9700 (gfx1201)
-          # with Mesa 26.0.5 + Qwen3.6-27B Q6_K — without it, generation drops
-          # from ~21 tok/s to ~4.8 tok/s in measured A/B testing in this LXC.
-          # Tells RADV not to spill model weight allocations from VRAM to GTT
-          # (host-mapped GPU-visible RAM) when VRAM pressure is reported, which
-          # otherwise causes catastrophic per-token PCIe round-trips during
-          # decode. The community claim that this flag is a no-op on RDNA 4
-          # (llama.cpp Discussion #21043, Mar 2026) does NOT hold for our
-          # configuration — keep it set.
-          RADV_PERFTEST = "nogttspill";
         })
         (lib.optionalAttrs (cfg.rocm && cfg.rocmVisibleDevices != null) {
           # Restrict ROCm to a specific GPU by index. Use when multiple AMD GPUs

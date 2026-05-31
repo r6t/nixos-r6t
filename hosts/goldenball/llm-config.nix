@@ -3,54 +3,74 @@
 # llama-server service config and the opencode provider model limits.
 #
 # Hardware: AMD Radeon 8060S (RDNA 3.5 / gfx1151), Strix Halo unified RAM.
-# GPU-accessible RAM: ~96 GB (ttm.pages_limit=25165824).
+# GPU-accessible RAM: ~104 GB (ttm.pages_limit=27262976, leaves 24 GB for OS).
 # Backend: Vulkan (RADV) — ROCm HIP segfaults on gfx1151.
-# Bandwidth: ~256 GB/s LPDDR5X (vs crown's 640 GB/s GDDR6).
+# Bandwidth: ~256 GB/s LPDDR5X (memory clock fixed at 1000 MHz = 8000 MT/s).
+# ubatch: 1024 (RADV-tuned optimum for gfx1151 per lhl/strix-halo-testing).
 #
-# VRAM budget per model:
-#   weights + KV_cache(q8_0) + compute_graph ≤ ~92 GB (leaving 4 GB for OS/Mesa)
+# VRAM budget: weights + KV(q8_0) + compute ≤ ~100 GB (llama.cpp sees 102400 MiB)
 #
-# Decode speed reference at ~256 GB/s bandwidth (estimated):
-#   Qwen3-57B-A14B Q6_K  (~47 GB, ~14B active): ~30–40 tok/s
-#   Qwen3.6-35B-A3B Q4KM (~20 GB, ~3B active):  ~80–100 tok/s  (bandwidth-limited by weights)
-#   Qwen3-32B Q8_0        (~34 GB, 32B dense):  ~45–55 tok/s
+# Decode speed reference at ~256 GB/s bandwidth (70% efficiency measured):
+#   Qwen3.6-35B-A3B UD-Q4_K_M (~23 GB, ~3B active, MTP-2): ~40–60 tok/s est.
+#   Qwen3.6-35B-A3B UD-Q4_K_M (~23 GB, ~3B active, no MTP): ~25–35 tok/s est.
+#   Qwen3.6-27B Q6_K           (~21 GB, 27B dense):          ~8–9 tok/s measured
+#   Qwen3-57B-A14B Q6_K        (~47 GB, ~14B active):        ~25–35 tok/s est.
+#   Qwen3-32B Q8_0             (~34 GB, 32B dense):          ~12–15 tok/s est.
+#
+# MTP (Multi-Token Prediction): Qwen3.6-35B-A3B has MTP draft heads baked into
+# the MTP-GGUF. Enable with --spec-type draft-mtp --spec-draft-n-max 2.
+# Unsloth claims 1.5-2× decode speedup. Community data on gfx1151 via ROCm
+# shows ~1.4× confirmed; Vulkan MTP not yet independently benchmarked on this
+# chip but uses the same llama.cpp MTP code path (PR #22673, merged 2026-05-16).
+#
+# Hybrid GDN attention note: both Qwen3.6 models use GatedDeltaNet hybrid
+# attention (3 GDN layers per 1 standard attention layer). llama.cpp cannot do
+# partial KV sequence removal, so full re-prefill happens every turn.
+# cacheRamMiB=0 is mandatory — the disk cache writes 150-200 MiB per turn and
+# never reads back (pure overhead). --cache-reuse is silently ignored for these
+# models by llama.cpp regardless of flag value.
 
 let
   models = {
-    # ── Primary: largest quality model that fits comfortably ─────────────────
+    # ── Primary: Qwen3.6-35B-A3B MTP ────────────────────────────────────────
+    # MoE (3B active / 35B total) with MTP draft heads for speculative decoding.
+    # Best agentic coding benchmark scores of any Qwen3.6 variant — evaluated
+    # via OpenCode specifically on SkillsBench (28.7 avg5) and Terminal-Bench
+    # 2.0 (51.5). MTP-2 expected to deliver ~1.5-2× decode speedup over the
+    # non-MTP UD-Q4_K_M.
+    # Full 262K native context: only 10 standard attention layers → KV cache is
+    # tiny (~1.5 GB at q8_0, 262K ctx) despite the large context window.
+    # cacheRamMiB=0: hybrid GDN prevents KV reuse; disk cache is pure overhead.
+    qwen3-6-35b-a3b-mtp = {
+      hfRepo = "unsloth/Qwen3.6-35B-A3B-MTP-GGUF";
+      hfFile = "Qwen3.6-35B-A3B-UD-Q4_K_XL.gguf"; # 22.9 GB
+      contextSize = 262144; # 256K native — ~1.5 GB KV q8_0; weights ~23 GB; total ~30 GB
+      cacheRamMiB = 0; # hybrid GDN: cache writes but never reads — pure overhead
+      extraFlags = [ "--jinja" "--no-mmproj" "--reasoning" "off" "--spec-type" "draft-mtp" "--spec-draft-n-max" "3" ];
+    };
+
+    # ── Fallback: Qwen3.6-27B dense ─────────────────────────────────────────
+    # Dense 27B model. Slower decode than 35B-A3B (~8-9 tok/s measured at 256
+    # GB/s bandwidth-limited) but slightly higher quant precision at Q6_K.
+    # Useful if MTP causes issues or for comparison testing.
+    # Also uses hybrid GDN — same full re-prefill penalty per turn.
+    qwen3-6-27b = {
+      hfRepo = "unsloth/Qwen3.6-27B-GGUF";
+      hfFile = "Qwen3.6-27B-Q6_K.gguf"; # 22.5 GB
+      contextSize = 262144; # 256K native — ~4.3 GB KV q8_0; weights ~21 GB; total ~30 GB
+      cacheRamMiB = 0; # hybrid GDN: cache writes but never reads — pure overhead
+      extraFlags = [ "--jinja" "--no-mmproj" "--reasoning" "off" ];
+    };
+
+    # ── High quality MoE: Qwen3-57B-A14B (standard transformer) ─────────────
     # Standard MoE transformer — full KV cache reuse between turns (snappy
-    # multi-turn). 14B active params vs the 35B hybrid's ~3B — noticeably
-    # better reasoning and coding. Fits at 96 GB with generous context headroom.
+    # multi-turn, unlike the Qwen3.6 hybrid GDN models). 14B active params.
+    # Fits at 104 GB with generous context headroom.
     qwen3-57b-a14b = {
       hfRepo = "unsloth/Qwen3-57B-A14B-GGUF";
       hfFile = "Qwen3-57B-A14B-Q6_K.gguf";
       contextSize = 131072; # 128K — ~3 GB KV q8_0; weights ~47 GB; total ~52 GB
       cacheRamMiB = 8192;
-      extraFlags = [ "--jinja" "--no-mmproj" "--reasoning" "off" ];
-    };
-
-    # ── Tuned 27B: GatedDeltaNet hybrid model (Z13 primary) ─────────────────
-    # Fast dense model tuned for Strix Halo unified LPDDR5X memory.
-    # Q6_K quant represents the optimal sweet spot for 27B-class quality.
-    # cacheRamMiB=0: GatedDeltaNet hybrid attention prevents partial KV cache sequence removal,
-    # making prompt caching pure overhead (re-prefill on every turn).
-    qwen3-6-27b = {
-      hfRepo = "unsloth/Qwen3.6-27B-GGUF";
-      hfFile = "Qwen3.6-27B-Q6_K.gguf";
-      contextSize = 131072; # 128K context is very fast & highly capable on Z13's large RAM
-      cacheRamMiB = 0;
-      extraFlags = [ "--jinja" "--no-mmproj" "--reasoning" "off" ];
-    };
-
-    # ── Fast: same model as crown — proven, hybrid GDN ───────────────────────
-    # Faster decode than 57B (fewer active params, smaller weight footprint).
-    # cacheRamMiB=0: hybrid GDN attention makes prompt cache pure overhead
-    # (no partial KV sequence removal — full re-prefill every turn).
-    qwen3-6-35b-a3b = {
-      hfRepo = "unsloth/Qwen3.6-35B-A3B-GGUF";
-      hfFile = "Qwen3.6-35B-A3B-UD-Q4_K_M.gguf";
-      contextSize = 262144; # 256K — ~1.4 GB KV q4_0; weights ~20 GB; total ~24 GB
-      cacheRamMiB = 0; # hybrid GDN: cache writes but never reads — pure overhead
       extraFlags = [ "--jinja" "--no-mmproj" "--reasoning" "off" ];
     };
 
@@ -78,7 +98,7 @@ let
   # hosts/goldenball/configuration.nix reads activeModel for both the
   # llama-server service flags and the opencode provider context limit.
   # ─────────────────────────────────────────────────────────────────────────────
-  activeModel = models.qwen3-6-27b;
+  activeModel = models.qwen3-6-35b-a3b-mtp;
 in
 {
   inherit models activeModel;

@@ -130,9 +130,9 @@ in
       "iommu=pt"
 
       # GPU-accessible system RAM limit (shared with OS, not reserved).
-      # 96 GB ceiling for large LLM inference; leaves 32 GB for OS/KDE/browsers.
-      # 25165824 = 96 GB / 4 KB page size.
-      "ttm.pages_limit=25165824"
+      # 104 GB ceiling for large LLM inference; leaves 24 GB for OS/KDE/browsers.
+      # 27262976 = 104 GB / 4 KB page size.
+      "ttm.pages_limit=27262976"
 
       "amd_pstate=guided"
 
@@ -314,7 +314,7 @@ in
             # Model id must match what llama-server reports at /v1/models.
             # Verify: curl -s http://127.0.0.1:8080/v1/models | jq '.data[].id'
             "${localLlm.activeModel.hfRepo}" = {
-              name = "Qwen3.6 27B (goldenball)";
+              name = "Qwen3.6 35B-A3B MTP (goldenball)";
               context = localLlm.activeModel.contextSize;
               output = 32768;
               variants = {
