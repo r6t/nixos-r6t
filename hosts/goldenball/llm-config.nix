@@ -46,7 +46,22 @@ let
       hfFile = "Qwen3.6-35B-A3B-UD-Q4_K_XL.gguf"; # 22.9 GB
       contextSize = 262144; # 256K native — ~1.5 GB KV q8_0; weights ~23 GB; total ~30 GB
       cacheRamMiB = 0; # hybrid GDN: cache writes but never reads — pure overhead
-      extraFlags = [ "--jinja" "--no-mmproj" "--reasoning" "off" "--spec-type" "draft-mtp" "--spec-draft-n-max" "3" ];
+      extraFlags = [
+        "--jinja"
+        "--no-mmproj"
+        "--reasoning"
+        "off"
+        "--spec-type"
+        "draft-mtp"
+        "--spec-draft-n-max"
+        "2"
+        # Reduce micro-batch from module default (1024) to limit peak GPU burst
+        # duration per MTP verification cycle. Shorter bursts give the DCN 3.5.1
+        # display engine more frequent idle windows between compute passes,
+        # reducing the probability of a flip_done timeout after inference.
+        "-ub"
+        "512"
+      ];
     };
 
     # ── Fallback: Qwen3.6-27B dense ─────────────────────────────────────────

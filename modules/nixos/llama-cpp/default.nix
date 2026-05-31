@@ -326,6 +326,15 @@ in
           # profile bind-mounts that to host-side storage so the cache survives
           # container relaunches as well as service restarts.
           MESA_SHADER_CACHE_DIR = "/var/cache/llama-cpp/mesa-shaders";
+          # Prevent RADV from spilling GPU buffer allocations into GTT under
+          # perceived memory pressure. On discrete RDNA 4 (R9700) this produces
+          # a measured 4.5× decode speedup by avoiding PCIe round-trips.
+          # On Strix Halo unified memory (goldenball) VRAM and GTT share the
+          # same physical LPDDR5X, so there is no PCIe penalty — but the flag
+          # still affects how RADV manages memory pressure during heavy MTP
+          # inference bursts. Removing it coincided with increased display
+          # engine flip_done timeouts after inference; restored as a mitigation.
+          RADV_PERFTEST = "nogttspill";
         })
         (lib.optionalAttrs (cfg.rocm && cfg.rocmVisibleDevices != null) {
           # Restrict ROCm to a specific GPU by index. Use when multiple AMD GPUs
