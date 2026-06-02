@@ -40,6 +40,8 @@ in
     useNetworkd = false;
     nameservers = lib.mkDefault [ "127.0.0.1" ];
     interfaces = { };
+    # useLocalResolver: openresolv prepend name_servers='127.0.0.1 ::1'
+    resolvconf.useLocalResolver = true;
   };
 
   services = {
