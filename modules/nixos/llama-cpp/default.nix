@@ -1,6 +1,10 @@
-{ lib, config, pkgs, ... }:
+{ lib, config, pkgs, outputs, ... }:
 let
   cfg = config.mine.llama-cpp;
+  # Custom flake-output package: charlie12345/rocmfp4-llama fork compiled with
+  # ROCmFP4 quant support for gfx1151 (Strix Halo). Built per-system from
+  # pkgs/rocmfp4-llama/package.nix and exposed at outputs.packages.
+  rocmfp4Package = outputs.packages.${pkgs.stdenv.hostPlatform.system}.rocmfp4-llama;
 in
 {
 
@@ -30,6 +34,21 @@ in
         Mutually exclusive with modelsPreset router mode.
       '';
       example = "/var/lib/llama-cpp/models/Qwen3-14B-Q6_K.gguf";
+    };
+
+    alias = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      description = ''
+        Model name advertised by llama-server at /v1/models. When unset,
+        llama-server defaults to the basename of `modelFile` or to `hfRepo`
+        when auto-downloading. Set this when you need a stable, predictable
+        model ID for clients (e.g. opencode provider keys) that doesn't change
+        when the underlying GGUF file is renamed or replaced.
+
+        Passed as --alias to llama-server.
+      '';
+      example = "qwen3.6-35b-a3b-mtp-rocmfp4-lean";
     };
 
     hfRepo = lib.mkOption {
@@ -233,21 +252,67 @@ in
         Mutually exclusive with `rocm`.
       '';
     };
+
+    rocmfp4 = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = ''
+        Use the ROCmFP4 fork of llama.cpp (charlie12345/rocmfp4-llama) instead
+        of any nixpkgs-provided package. Builds from source via this flake's
+        `pkgs/rocmfp4-llama/package.nix` derivation; the resulting binary
+        contains both HIP/ROCm and Vulkan backends in one image.
+
+        Specifically targeted at AMD Strix Halo (gfx1151) — adds custom 4-bit
+        quantization formats (Q4_0_ROCMFP4, Q4_0_ROCMFP4_FAST) and tensor-aware
+        STRIX / STRIX_LEAN presets. Reported decode on Qwen3.6-35B-A3B-MTP at
+        262K context: 80-104 tok/s short, 70-89 tok/s sustained (vs ~22-45
+        tok/s on stock Vulkan llama.cpp on the same hardware).
+
+        Runtime backend is selected by the `-dev` flag at server startup; the
+        rocmfp4 option here just selects which compiled binary to use.
+
+        Requires HSA_OVERRIDE_GFX_VERSION=11.5.1 and
+        GGML_HIP_ENABLE_UNIFIED_MEMORY=1 (set automatically by this module
+        when rocmfp4 = true).
+
+        Mutually exclusive with `rocm`, `vulkan`, and `cuda` (the binary
+        already includes both HIP and Vulkan).
+
+        Note: experimental research build. Numbers are
+        hardware/driver/model/prompt sensitive. Pinned to a specific upstream
+        commit; bump `rev` + `hash` in pkgs/rocmfp4-llama/package.nix to
+        track the branch.
+      '';
+    };
   };
 
   config = lib.mkIf cfg.enable {
-    # Assertion removed to allow eager + lazy load
-
+    # Mutual-exclusion assertions for GPU backend options. Only one of
+    # cuda/rocm/vulkan/rocmfp4 may be true at a time. rocmfp4 is mutex with
+    # rocm and vulkan because the rocmfp4 binary already contains both HIP
+    # and Vulkan backends; the dual setting would be ambiguous.
+    assertions = [
+      {
+        assertion =
+          (lib.count (x: x) [ cfg.cuda cfg.rocm cfg.vulkan cfg.rocmfp4 ]) <= 1;
+        message = ''
+          mine.llama-cpp: only one of `cuda`, `rocm`, `vulkan`, `rocmfp4` may
+          be enabled at a time.
+        '';
+      }
+    ];
 
     services.llama-cpp = {
       enable = true;
       inherit (cfg) host port modelsPreset;
 
       # GPU backend selection. The default nixpkgs llama-cpp is CPU-only.
-      #   - llama-cpp-rocm:    libggml-hip.so for RDNA/CDNA via ROCm/HIP.
-      #   - llama-cpp-vulkan:  libggml-vulkan.so for any Vulkan-capable GPU.
+      #   - llama-cpp-rocm:   libggml-hip.so for RDNA/CDNA via ROCm/HIP.
+      #   - llama-cpp-vulkan: libggml-vulkan.so for any Vulkan-capable GPU.
+      #   - rocmfp4Package:   custom fork with ROCmFP4 quants + dual HIP/Vulkan.
       package =
-        if cfg.rocm then pkgs.llama-cpp-rocm
+        if cfg.rocmfp4 then rocmfp4Package
+        else if cfg.rocm then pkgs.llama-cpp-rocm
         else if cfg.vulkan then pkgs.llama-cpp-vulkan
         else pkgs.llama-cpp;
 
@@ -289,7 +354,8 @@ in
       ++ lib.optionals (cfg.modelFile != null) [ "--model" cfg.modelFile ]
       ++ lib.optionals (cfg.modelsDir != null) [ "--models-dir" cfg.modelsDir ]
       ++ lib.optionals (cfg.hfRepo != null) [ "--hf-repo" cfg.hfRepo ]
-      ++ lib.optionals (cfg.hfFile != null) [ "--hf-file" cfg.hfFile ];
+      ++ lib.optionals (cfg.hfFile != null) [ "--hf-file" cfg.hfFile ]
+      ++ lib.optionals (cfg.alias != null) [ "--alias" cfg.alias ];
       openFirewall = true;
     };
 
@@ -299,8 +365,8 @@ in
     # Vulkan does not JIT in the same way, but the DynamicUser sandbox still
     # blocks /dev/dri access without these relaxations, and PrivateUsers=true
     # breaks render/video group propagation. Apply the same overrides for all
-    # three GPU backends.
-    systemd.services.llama-cpp = lib.mkIf (cfg.rocm || cfg.cuda || cfg.vulkan) {
+    # GPU backends including the rocmfp4 fork (which is HIP-based + Vulkan).
+    systemd.services.llama-cpp = lib.mkIf (cfg.rocm || cfg.cuda || cfg.vulkan || cfg.rocmfp4) {
       # network.target is not sufficient for internet connectivity — the upstream
       # unit only sets After=network.target. HuggingFace auto-download fails at
       # boot unless we wait for an actual routable connection.
@@ -316,7 +382,10 @@ in
       };
 
       environment = lib.mkMerge [
-        (lib.optionalAttrs cfg.vulkan {
+        # Vulkan path env (also applied for rocmfp4 because the dual-backend
+        # binary embeds the Vulkan code path and benefits from the Mesa cache
+        # even when the runtime backend is ROCm0).
+        (lib.optionalAttrs (cfg.vulkan || cfg.rocmfp4) {
           # Persist the Mesa pipeline (SPIR-V → ISA) shader cache across service
           # restarts. Without this, the first prompt after a fresh service start
           # spends ~20s recompiling shaders for every unique compute shape —
@@ -341,6 +410,19 @@ in
           # are present and inference must land on a particular one (e.g. an iGPU
           # + discrete GPU laptop).
           ROCR_VISIBLE_DEVICES = cfg.rocmVisibleDevices;
+        })
+        # ROCmFP4 fork-specific env vars (per upstream STRIX-HALO-QUICKSTART.md).
+        (lib.optionalAttrs cfg.rocmfp4 {
+          # Force gfx11.5.1 ISA selection on Strix Halo. The chip reports as
+          # gfx1151 but ROCm 7.x device libraries are keyed on gfx11.5.1; this
+          # override is required for the HIP runtime to pick the correct
+          # bitcode at JIT time. Removing it crashes with "no HIP GPUs are
+          # available" or generates wrong-arch kernels.
+          HSA_OVERRIDE_GFX_VERSION = "11.5.1";
+          # Allow HIP allocations to span unified-memory pages (Strix Halo
+          # CPU+GPU share LPDDR5X). Without this, HIP rejects allocations
+          # larger than the GTT carve-out.
+          GGML_HIP_ENABLE_UNIFIED_MEMORY = "1";
         })
       ];
     };

@@ -1,6 +1,7 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "instructions": [
+    "docs/GOLDENBALL_FREEZES.md",
     "docs/INCUS.md",
     "docs/LLM-HOSTING-TUNING.md",
     "docs/NIXVIM.md",

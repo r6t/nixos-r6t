@@ -233,7 +233,7 @@ in
       allowExternalGpu = true; # Connected via Thunderbolt eGPU
       gspFirmware = true; # Required for RTX 50 series (RTX 5060 Ti)
       containerToolkit = true; # Required for Incus container GPU passthrough
-      installCudaToolkit = false; # We are running AI inside the container, not host
+      installCudaToolkit = false; # Workloads run in LXC, not host
     };
     prometheus-node-exporter.enable = true;
     rdfind.enable = true;

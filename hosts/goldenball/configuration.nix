@@ -176,12 +176,15 @@ in
   systemd = {
     tmpfiles.rules = [
       "L+    /opt/rocm/hip   -    -    -     -    ${pkgs.rocmPackages.clr}"
+      # Manually-quantized GGUFs (e.g. ROCmFP4 STRIX_LEAN) live here. Owned by
+      # r6t:users 0755 so scripts/quantize-rocmfp4-strix.fish can write the
+      # output without sudo, and the DynamicUser=true llama-cpp.service can
+      # still read --model paths inside (world-traversable + world-readable).
+      # Cannot use /var/cache/llama-cpp/ for this: that's systemd's
+      # CacheDirectory under DynamicUser, mode 0700 dynamic-UID, unreachable
+      # from outside the service namespace.
+      "d /var/lib/llama-cpp-models 0755 r6t users -"
     ];
-
-    sleep.settings.Sleep = {
-      HibernateDelaySec = "30m";
-      SuspendState = "freeze";
-    };
 
     # services.llama-cpp from nixpkgs always installs with WantedBy=multi-user.target.
     # Override to prevent auto-start at boot — use `systemctl start llama-cpp` or the
@@ -206,7 +209,9 @@ in
   services = {
     udev.extraRules = ''
       ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x1022", ATTR{device}=="0x158d", ATTR{power/control}="on"
+      ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x1022", ATTR{device}=="0x158d", ATTR{d3cold_allowed}="0"
       ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x1022", ATTR{device}=="0x158e", ATTR{power/control}="on"
+      ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x1022", ATTR{device}=="0x158e", ATTR{d3cold_allowed}="0"
       ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x8086", ATTR{device}=="0x0b26", ATTR{d3cold_allowed}="0"
       ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x8086", ATTR{device}=="0x15ef", ATTR{d3cold_allowed}="0"
 
@@ -230,12 +235,12 @@ in
 
     # Strix Halo only supports S0 (s2idle) and S4 (hibernate) — no S3 deep sleep.
     # s2idle is unreliable on battery. On AC: stay in s2idle so the machine
-    # remains reachable. On battery: suspend-then-hibernate after 30 min.
+    # remains reachable. On battery: lid close triggers suspend only, no hibernate.
     # NOTE: KDE PowerDevil (modules/home/kde-apps) enforces its own sleep policy
     # via whenSleepingEnter. These logind settings are a fallback (pre-login,
     # PowerDevil crash). Keep both in sync.
     logind.settings.Login = {
-      HandleLidSwitch = "suspend-then-hibernate";
+      HandleLidSwitch = "suspend";
       HandleLidSwitchExternalPower = "suspend";
       HandleLidSwitchDocked = "ignore";
     };
@@ -313,7 +318,10 @@ in
           models = {
             # Model id must match what llama-server reports at /v1/models.
             # Verify: curl -s http://127.0.0.1:8080/v1/models | jq '.data[].id'
-            "${localLlm.activeModel.hfRepo}" = {
+            # For ROCmFP4 presets this is the `--alias` value; for HF-fetched
+            # presets it's the `hfRepo`. localLlm.activeModel.modelId
+            # abstracts both.
+            "${localLlm.activeModel.modelId}" = {
               name = "Qwen3.6 35B-A3B MTP (goldenball)";
               context = localLlm.activeModel.contextSize;
               output = 32768;
@@ -455,22 +463,36 @@ in
     kde.tablet = true;
 
     # Local llama-server — Vulkan backend for Radeon 8060S (gfx1151).
-    # ROCm HIP segfaults on gfx1151 Strix Halo (ollama #13589 / llama.cpp).
-    # Vulkan via RADV is the stable GPU path on this generation.
+    # GPU LLM inference. Two backends configured here:
+    #   - rocmfp4 = true:  charlie12345/rocmfp4-llama fork — HIP+Vulkan combined
+    #     binary with custom Q4_0_ROCMFP4_STRIX{,_LEAN} quants. Reports 80-104
+    #     tok/s decode on Qwen3.6-35B-A3B-MTP at 262K context (~2× the stock
+    #     Vulkan number). Requires a one-time quantization step:
+    #         ./scripts/quantize-rocmfp4-strix.fish --profile lean
+    #     Stock ROCm on gfx1151 was historically unstable but the fork's HIP
+    #     code path is reported stable on Strix Halo as of 2026-05.
+    #   - vulkan = true:   pkgs.llama-cpp-vulkan via RADV. Stable historical
+    #     baseline. Use this when the rocmfp4 build breaks or you want to A/B
+    #     compare against the ROCmFP4 numbers.
+    # Pick one (mutually exclusive). Active model is set via
+    # localLlm.activeModel in hosts/goldenball/llm-config.nix.
+    #
     # Service is defined but NOT started at boot — start on demand:
     #   systemctl start llama-cpp   (loads model into GPU RAM, ~15s)
     #   systemctl stop llama-cpp    (frees GPU RAM for ComfyUI / gaming)
-    # Active model: set localLlm.activeModel in hosts/goldenball/llm-config.nix
     # The SNI tray daemon (mine.home.kde-apps.llamaCppLauncher = true) registers
     # a system-tray icon alongside wifi/bluetooth/volume for one-click toggle.
     llama-cpp = {
       enable = true;
-      vulkan = true;
+      rocmfp4 = true;
       host = "0.0.0.0";
       port = 8080;
-      hfRepo = localLlm.activeModel.hfRepo;
-      hfFile = localLlm.activeModel.hfFile;
+      modelFile = localLlm.activeModel.modelFile or null;
+      hfRepo = localLlm.activeModel.hfRepo or null;
+      hfFile = localLlm.activeModel.hfFile or null;
+      alias = localLlm.activeModel.alias or null;
       contextSize = localLlm.activeModel.contextSize;
+      ubatchSize = localLlm.activeModel.ubatchSize or 1024;
       cacheRamMiB = localLlm.activeModel.cacheRamMiB;
       extraFlags = localLlm.activeModel.extraFlags;
     };
@@ -513,17 +535,16 @@ in
         "kwinrc"."Compositing"."MaxFPS" = 180;
         "kwinrc"."Compositing"."RefreshRate" = 180;
 
-        # VRR policy 1 = Automatic: activate FreeSync/VRR only for fullscreen apps
-        # (games). The display still runs at its full 180 Hz refresh rate at all
-        # times; Automatic just means the adaptive-sync feature (variable refresh
-        # rate) is only engaged when a game has direct scanout. This avoids the
-        # DCN 3.5.1 flip_done timeout that triggers when VrrPolicy=2 (Always)
-        # causes the compositor to issue adaptive-sync flips during normal desktop
-        # compositing — a known amdgpu kernel bug with no upstream fix as of
-        # kernel 7.0/7.1-rc (confirmed by multiple community reports, 2025-2026).
+        # VRR policy 0 = Never: fully disable VRR/FreeSync on the eDP panel.
+        # Previously set to 1 (Automatic) but DCN 3.5.1 flip_done timeouts still
+        # trigger even in Automatic mode — observed Jun 4 2026 within 100s of KWin
+        # startup during idle Plasma desktop init (no GPU load, no USB4 dock, no
+        # llama-cpp). This is the strongest remaining software mitigation.
+        # Trade: loses adaptive sync in games (Rocket League etc. will run at fixed
+        # 180 Hz). Set back to 1 if an upstream kernel fix lands for DCN 3.5.1.
         # Requires amdgpu.freesync_video=1 (set in kernelParams above) to expose
-        # VRR capability to userspace for fullscreen use.
-        "kwinrc"."Output eDP-1"."VrrPolicy" = 1;
+        # VRR capability to userspace — kept enabled so we can re-enable VRR later.
+        "kwinrc"."Output eDP-1"."VrrPolicy" = 0;
 
         # plasma-manager's typed touchpad option doesn't expose KDE's
         # DisableEventsOnExternalMouse setting, so write it directly via configFile.

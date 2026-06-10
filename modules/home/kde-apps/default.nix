@@ -199,8 +199,10 @@ in
 
             # NOTE: PowerDevil blocks logind lid-switch handling and enforces sleep
             # policy here instead. Logind settings (hosts/*/configuration.nix) serve as
-            # fallback. Keep both in sync. systemd.sleep.extraConfig defines HOW
-            # suspend-then-hibernate works (HibernateDelaySec, SuspendState).
+            # fallback. Keep both in sync.
+            # Lid close always triggers s2idle suspend — no hibernate.
+            # Low battery (<30%) + idle 5 min → hibernate (safety net).
+            # Ctrl+Meta+L → explicit hibernate on demand.
             powerdevil = {
               AC = {
                 autoSuspend.action = "nothing";
@@ -215,16 +217,16 @@ in
                 };
                 powerButtonAction = "sleep";
                 turnOffDisplay.idleTimeout = 300;
-                whenSleepingEnter = "hybridSleep"; # suspend-then-hibernate on battery
+                whenSleepingEnter = "standby"; # s2idle on battery — no hibernate
               };
               lowBattery = {
                 autoSuspend = {
                   action = "hibernate";
-                  idleTimeout = 300;
+                  idleTimeout = 300; # 300s idle at <30% battery → hibernate
                 };
                 powerButtonAction = "hibernate";
                 turnOffDisplay.idleTimeout = 120;
-                whenSleepingEnter = "hybridSleep";
+                whenSleepingEnter = "standby"; # s2idle, no hibernate
               };
             };
             session = {
@@ -302,7 +304,7 @@ in
               "org_kde_powerdevil"."Decrease Keyboard Brightness" = "Keyboard Brightness Down";
               "org_kde_powerdevil"."Decrease Screen Brightness" = "Monitor Brightness Down";
               "org_kde_powerdevil"."Decrease Screen Brightness Small" = "Shift+Monitor Brightness Down";
-              "org_kde_powerdevil"."Hibernate" = "Hibernate";
+              "org_kde_powerdevil"."Hibernate" = [ "Meta+Power" "Ctrl+Meta+L" ];
               "org_kde_powerdevil"."Increase Keyboard Brightness" = "Keyboard Brightness Up";
               "org_kde_powerdevil"."Increase Screen Brightness" = "Monitor Brightness Up";
               "org_kde_powerdevil"."Increase Screen Brightness Small" = "Shift+Monitor Brightness Up";

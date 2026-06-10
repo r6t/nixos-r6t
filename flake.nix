@@ -2,7 +2,7 @@
   description = "r6t nixos systems configuration flake";
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    flake-utils.url = "github:numtide/flake-utils";
+    flake-parts.url = "github:hercules-ci/flake-parts";
     home-manager = {
       url = "github:nix-community/home-manager/master";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -39,171 +39,194 @@
     };
   };
 
-  outputs = { self, nixos-generators, nixpkgs, flake-utils, pre-commit-hooks, ... } @inputs:
-    let
-      userConfig = {
-        username = "r6t";
-        homeDirectory = "/home/r6t";
-      };
-      inherit (self) outputs;
-      linuxSystem = "x86_64-linux";
-    in
-    flake-utils.lib.eachSystem [ "x86_64-linux" "aarch64-darwin" ]
-      (system:
-        {
-          # Devshells for both Linux and macOS
-          devShells = import ./devshells.nix {
-            pkgs = import nixpkgs { inherit system; };
-            inherit self nixpkgs;
-          };
-        }
-      ) // {
-      # Bare-metal hosts
-      nixosConfigurations = {
-        # cold storage
-        barrel = nixpkgs.lib.nixosSystem {
-          specialArgs = { inherit userConfig inputs outputs; isNixOS = true; };
-          modules = [
-            ./hosts/barrel/configuration.nix
-          ];
-        };
-        # primary server
-        crown = nixpkgs.lib.nixosSystem {
-          specialArgs = { inherit userConfig inputs outputs; isNixOS = true; };
-          modules = [
-            ./hosts/crown/configuration.nix
-          ];
-        };
-        mountainball = nixpkgs.lib.nixosSystem {
-          specialArgs = { inherit userConfig inputs outputs; isNixOS = true; };
-          modules = [
-            ./hosts/mountainball/configuration.nix
-            {
-              nixpkgs.config = {
-                allowUnfree = true;
-                # temporary allow recent EOL
-                permittedInsecurePackages = [ "electron-36.9.5" ];
-              };
-            }
-          ];
-        };
-        # laptop — ASUS ROG Z13 GZ302 Strix Halo
-        goldenball = nixpkgs.lib.nixosSystem {
-          specialArgs = { inherit userConfig inputs outputs; isNixOS = true; };
-          modules = [
-            ./hosts/goldenball/configuration.nix
-            {
-              nixpkgs.config = {
-                allowUnfree = true;
-                # temporary allow recent EOL
-                permittedInsecurePackages = [ "electron-36.9.5" ];
-              };
-            }
-          ];
-        };
-        # living room HTPC — gamescope session + image generation
-        hedgehog = nixpkgs.lib.nixosSystem {
-          specialArgs = { inherit userConfig inputs outputs; isNixOS = true; };
-          modules = [
-            ./hosts/hedgehog/configuration.nix
-            {
-              nixpkgs.config = {
-                allowUnfree = true;
-                cudaSupport = true;
-              };
-            }
-          ];
-        };
-        # router + appliances
-        saguaro = nixpkgs.lib.nixosSystem {
-          specialArgs = { inherit userConfig inputs outputs; isNixOS = true; };
-          modules = [
-            ./hosts/saguaro/configuration.nix
-          ];
+  outputs = inputs@{ self, nixpkgs, flake-parts, nixos-generators, pre-commit-hooks, ... }:
+    flake-parts.lib.mkFlake { inherit inputs; } {
+      systems = [ "x86_64-linux" "aarch64-darwin" ];
+
+      # Per-system outputs (devShells, packages, checks).
+      perSystem = { system, ... }: {
+        # Devshells for both Linux and macOS.
+        devShells = import ./devshells.nix {
+          pkgs = import nixpkgs { inherit system; };
+          inherit self nixpkgs;
         };
       };
 
-      # Container images — auto-generated from containers/*.nix
-      # Each file produces two outputs: {name} (rootfs) and {name}-metadata
-      # Build with: nix build .#<name>  or  nix build .#<name>-metadata
-      packages.${linuxSystem} =
+      # System-agnostic outputs (nixosConfigurations, homeManagerModules) plus
+      # x86_64-linux-only outputs that depend on `outputs` (containers, checks).
+      flake =
         let
-          containerDir = ./containers;
-          containerFiles = builtins.filter
-            (f: nixpkgs.lib.hasSuffix ".nix" f)
-            (builtins.attrNames (builtins.readDir containerDir));
-
-          mkImage = file:
-            let
-              name = builtins.replaceStrings [ ".nix" ] [ "" ] file;
-              module = containerDir + "/${file}";
-            in
-            [
-              {
-                inherit name;
-                value = nixos-generators.nixosGenerate {
-                  system = linuxSystem;
-                  format = "lxc";
-                  modules = [ module ];
-                  specialArgs = { inherit outputs userConfig inputs; };
-                };
-              }
-              {
-                name = "${name}-metadata";
-                value = nixos-generators.nixosGenerate {
-                  system = linuxSystem;
-                  format = "lxc-metadata";
-                  modules = [ module ];
-                  specialArgs = { inherit outputs userConfig inputs; };
-                };
-              }
-            ];
+          userConfig = {
+            username = "r6t";
+            homeDirectory = "/home/r6t";
+          };
+          inherit (self) outputs;
+          linuxSystem = "x86_64-linux";
         in
-        builtins.listToAttrs (builtins.concatMap mkImage containerFiles);
+        {
+          # Bare-metal hosts
+          nixosConfigurations = {
+            # cold storage
+            barrel = nixpkgs.lib.nixosSystem {
+              specialArgs = { inherit userConfig inputs outputs; isNixOS = true; };
+              modules = [
+                ./hosts/barrel/configuration.nix
+              ];
+            };
+            # primary server
+            crown = nixpkgs.lib.nixosSystem {
+              specialArgs = { inherit userConfig inputs outputs; isNixOS = true; };
+              modules = [
+                ./hosts/crown/configuration.nix
+              ];
+            };
+            mountainball = nixpkgs.lib.nixosSystem {
+              specialArgs = { inherit userConfig inputs outputs; isNixOS = true; };
+              modules = [
+                ./hosts/mountainball/configuration.nix
+                {
+                  nixpkgs.config = {
+                    allowUnfree = true;
+                    # temporary allow recent EOL
+                    permittedInsecurePackages = [ "electron-36.9.5" "electron-39.8.10" ];
+                  };
+                }
+              ];
+            };
+            # laptop — ASUS ROG Z13 GZ302 Strix Halo
+            goldenball = nixpkgs.lib.nixosSystem {
+              specialArgs = { inherit userConfig inputs outputs; isNixOS = true; };
+              modules = [
+                ./hosts/goldenball/configuration.nix
+                {
+                  nixpkgs.config = {
+                    allowUnfree = true;
+                    # temporary allow recent EOL
+                    permittedInsecurePackages = [ "electron-36.9.5" "electron-39.8.10" ];
+                  };
+                }
+              ];
+            };
+            # living room HTPC — gamescope session + image generation
+            hedgehog = nixpkgs.lib.nixosSystem {
+              specialArgs = { inherit userConfig inputs outputs; isNixOS = true; };
+              modules = [
+                ./hosts/hedgehog/configuration.nix
+                {
+                  nixpkgs.config = {
+                    allowUnfree = true;
+                    cudaSupport = true;
+                  };
+                }
+              ];
+            };
+            # router + appliances
+            saguaro = nixpkgs.lib.nixosSystem {
+              specialArgs = { inherit userConfig inputs outputs; isNixOS = true; };
+              modules = [
+                ./hosts/saguaro/configuration.nix
+              ];
+            };
+          };
 
-      # Pre-commit
-      checks.${linuxSystem} = {
-        pre-commit-check = pre-commit-hooks.lib.${linuxSystem}.run {
-          src = ./.;
-          hooks = {
-            nixpkgs-fmt.enable = true;
-            statix = {
-              enable = true;
-              settings = {
-                # git-hooks.nix's argv serializer joins list entries with literal
-                # spaces into a single `--ignore X Y Z` arg, but statix only
-                # accepts ONE positional after its options — so passing multiple
-                # ignore paths breaks the invocation with "unexpected argument".
-                # Use a single glob that matches every file we need to skip.
-                # hardware-configuration.nix files are auto-generated by
-                # nixos-generate-config and emit unfixable W20 "repeated keys"
-                # warnings; the glob below matches both hosts.
-                ignore = [ "*hardware-configuration.nix" ];
+          # Container images and custom packages — exposed at flake-level
+          # because they depend on `outputs` (cycle would form if put in
+          # perSystem). x86_64-linux only.
+          # Build with: nix build .#<name>  or  nix build .#<name>-metadata
+          packages.${linuxSystem} =
+            let
+              # Custom packages (rocmfp4-llama, etc.) — explicit attribute set.
+              # Built per-system via callPackage with the matching pkgs instance.
+              pkgs = import nixpkgs {
+                system = linuxSystem;
+                config.allowUnfree = true;
+              };
+
+              customPackages = {
+                rocmfp4-llama = pkgs.callPackage ./pkgs/rocmfp4-llama/package.nix { };
+              };
+
+              # Auto-generated container images from containers/*.nix.
+              # Each file produces two outputs: {name} (rootfs) and {name}-metadata.
+              containerDir = ./containers;
+              containerFiles = builtins.filter
+                (f: nixpkgs.lib.hasSuffix ".nix" f)
+                (builtins.attrNames (builtins.readDir containerDir));
+
+              mkImage = file:
+                let
+                  name = builtins.replaceStrings [ ".nix" ] [ "" ] file;
+                  module = containerDir + "/${file}";
+                in
+                [
+                  {
+                    inherit name;
+                    value = nixos-generators.nixosGenerate {
+                      system = linuxSystem;
+                      format = "lxc";
+                      modules = [ module ];
+                      specialArgs = { inherit outputs userConfig inputs; };
+                    };
+                  }
+                  {
+                    name = "${name}-metadata";
+                    value = nixos-generators.nixosGenerate {
+                      system = linuxSystem;
+                      format = "lxc-metadata";
+                      modules = [ module ];
+                      specialArgs = { inherit outputs userConfig inputs; };
+                    };
+                  }
+                ];
+
+              containerPackages = builtins.listToAttrs
+                (builtins.concatMap mkImage containerFiles);
+            in
+            customPackages // containerPackages;
+
+          # Pre-commit
+          checks.${linuxSystem} = {
+            pre-commit-check = pre-commit-hooks.lib.${linuxSystem}.run {
+              src = ./.;
+              hooks = {
+                nixpkgs-fmt.enable = true;
+                statix = {
+                  enable = true;
+                  settings = {
+                    # git-hooks.nix's argv serializer joins list entries with literal
+                    # spaces into a single `--ignore X Y Z` arg, but statix only
+                    # accepts ONE positional after its options — so passing multiple
+                    # ignore paths breaks the invocation with "unexpected argument".
+                    # Use a single glob that matches every file we need to skip.
+                    # hardware-configuration.nix files are auto-generated by
+                    # nixos-generate-config and emit unfixable W20 "repeated keys"
+                    # warnings; the glob below matches both hosts.
+                    ignore = [ "*hardware-configuration.nix" ];
+                  };
+                };
+                deadnix = {
+                  enable = true;
+                  excludes = [ ".*hardware-configuration\\.nix$" ];
+                };
+                prettier.enable = true;
+                black.enable = true;
+                isort.enable = true;
+                eslint.enable = true;
+                pylint.enable = true;
               };
             };
-            deadnix = {
-              enable = true;
-              excludes = [ ".*hardware-configuration\\.nix$" ];
-            };
-            prettier.enable = true;
-            black.enable = true;
-            isort.enable = true;
-            eslint.enable = true;
-            pylint.enable = true;
+          };
+
+          # Export home-manager modules for use by other flakes (e.g., nix-work-r6t)
+          # These portable modules work on any system (NixOS, macOS, other Linux)
+          homeManagerModules = {
+            fish = import ./modules/home/fish/default.nix;
+            nixvim = import ./modules/home/nixvim/default.nix;
+            zellij = import ./modules/home/zellij/default.nix;
+            git = import ./modules/home/git/default.nix;
+            atuin = import ./modules/home/atuin/default.nix;
+            alacritty = import ./modules/home/alacritty/default.nix;
           };
         };
-      };
-
-      # Export home-manager modules for use by other flakes (e.g., nix-work-r6t)
-      # These portable modules work on any system (NixOS, macOS, other Linux)
-      homeManagerModules = {
-        fish = import ./modules/home/fish/default.nix;
-        nixvim = import ./modules/home/nixvim/default.nix;
-        zellij = import ./modules/home/zellij/default.nix;
-        git = import ./modules/home/git/default.nix;
-        atuin = import ./modules/home/atuin/default.nix;
-        alacritty = import ./modules/home/alacritty/default.nix;
-      };
     };
 }
-
