@@ -11,7 +11,6 @@
   ];
 
   boot = {
-    initrd.luks.reusePassphrases = true;
     resumeDevice = "/dev/mapper/luks-swap";
     kernelParams = [
       "resume=UUID=dea57a9c-895b-407d-b45f-f4cea665864f"
