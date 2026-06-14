@@ -90,7 +90,8 @@ in
       # 0xffff7fff is the kernel default; mask off the three above to reach 0xfff73fff.
       "amdgpu.ppfeaturemask=0xfff73fff"
 
-      # dcdebugmask: disable PSR + PSR-SU + Panel Replay + Stutter for DCN 3.5.1.
+      # dcdebugmask: disable PSR + PSR-SU + Panel Replay + Stutter + MPO + Pipe Split for DCN 3.5.1.
+      #   0x001 = DC_DISABLE_PIPE_SPLIT
       #   0x002 = DC_DISABLE_STUTTER  (DRAM stutter low-power mode)
       #   0x010 = DC_DISABLE_PSR      (Panel Self-Refresh)
       #   0x200 = DC_DISABLE_PSR_SU   (PSR with Selective Update — distinct from full PSR;
@@ -98,9 +99,10 @@ in
       #           which races the eDP vblank IRQ and triggers flip_done timed out on DCN 3.5.1.
       #           Confirmed by th3cavalry/strix-halo-linux-setup and Arch BBS community reports.)
       #   0x400 = DC_DISABLE_REPLAY   (Panel Replay — new in DCN 3.5+, broken on Z13)
-      # Sum = 0x612. Source: community reports (2025-2026) — no upstream kernel fix exists
+      #   0x1000 = DC_DISABLE_MPO     (Multi-Plane Overlay — critical for page-flip stability)
+      # Sum = 0x1613. Source: community reports (2025-2026) — no upstream kernel fix exists
       # for DCN 3.5.1 flip_done timeouts as of kernel 7.0/7.1-rc; these are mitigations.
-      "amdgpu.dcdebugmask=0x612"
+      "amdgpu.dcdebugmask=0x1613"
 
       # Disable scatter-gather display on this APU. Strix Halo's iGPU shares system
       # RAM via GTT for display surfaces; sg_display=1 (default) hits a class of
@@ -115,15 +117,23 @@ in
       # Disable panel adaptive brightness (causes timing issues on external displays)
       "amdgpu.abmlevel=0"
 
-      # Enable FreeSync video / VRR support in the amdgpu DRM driver for the eDP
-      # panel (Tianma TL134ADXP03, native 48–180 Hz range). The KWin VRR policy
-      # alone is not enough — the kernel driver must also expose VRR capability
-      # to userspace. Without freesync_video=1 KWin's VrrPolicy=Always is a no-op.
-      # NOTE: this is the canonical way to enable FreeSync on AMD eDP panels.
-      # The strix-halo research suggested removing it as redundant on
-      # native-FreeSync panels, but on this hardware specifically it is required;
-      # KWin's VRR config silently does nothing without it.
-      "amdgpu.freesync_video=1"
+      # Hard-disable FreeSync video / VRR support at the kernel level.
+      # Previous mitigations in KWin (VrrPolicy=0) were insufficient; disabling it
+      # here prevents the driver from exposing the capability entirely.
+      "amdgpu.freesync_video=0"
+
+      # Disable GPU PCIe Link Power Management (ASPM). Transitions between L0/L1
+      # states can trigger timing-sensitive hangs in the display engine.
+      "amdgpu.aspm=0"
+
+      # Temporarily disable PCIe ASPM globally as a diagnostic. The USB4 root
+      # link at 00:01.2 still dropped with amdgpu.aspm=0 and all USB4 root/host-
+      # router power pins active, then logged an inconsistent common-clock
+      # configuration while re-enumerating. This can increase idle power use and
+      # reduce battery life even when USB4 is unplugged.
+      # TODO: If this prevents the cascade, replace it with a USB4-scoped
+      # mitigation instead of leaving global ASPM disabled.
+      "pcie_aspm=off"
 
       # IOMMU passthrough: zero-cost translation for GPU compute while keeping
       # IOMMU active for USB4 PCIe tunneling and device isolation.
@@ -247,6 +257,14 @@ in
   };
 
   powerManagement.cpuFreqGovernor = lib.mkDefault "schedutil";
+
+  environment.sessionVariables = {
+    # Disable KWin hardware overlays. MPO (Multi-Plane Overlays) on DCN 3.5.1
+    # is a primary trigger for page-flip timeouts. This environment variable
+    # acts as a userspace complement to the amdgpu.dcdebugmask=0x1613 kernel
+    # param (which includes the 0x1000 MPO disable bit).
+    KWIN_DRM_NO_OVERLAY = "1";
+  };
 
   networking = {
     enableIPv6 = false;

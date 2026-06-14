@@ -43,6 +43,7 @@ let
 
   # --- Shared Tool Definitions ---
   baseTools = with pkgs; [
+    codex
     fish
   ];
   pythonTools = with pkgs; [
@@ -129,4 +130,3 @@ in
     ];
   };
 }
-

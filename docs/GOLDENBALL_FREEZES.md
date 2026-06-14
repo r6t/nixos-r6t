@@ -62,17 +62,19 @@ kwin_wayland: Pageflip timed out! This is a bug in the amdgpu kernel driver
 
 All in `hosts/goldenball/configuration.nix` kernel params:
 
-| Param                   | Value          | Purpose                                                                                                          |
-| ----------------------- | -------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `amdgpu.dcdebugmask`    | `0x612`        | Disables DC_DISABLE_STUTTER(0x002) + DC_DISABLE_PSR(0x010) + DC_DISABLE_PSR_SU(0x200) + DC_DISABLE_REPLAY(0x400) |
-| `amdgpu.sg_display`     | `0`            | Disables scatter-gather display (DMA-fence flip timeouts on unified memory)                                      |
-| `amdgpu.gpu_recovery`   | `1`            | Soft-resets display engine on timeout instead of hard-locking                                                    |
-| `amdgpu.ppfeaturemask`  | `0xfff73fff`   | Disables GFXOFF, STUTTER_MODE, OVERDRIVE                                                                         |
-| `amdgpu.freesync_video` | `1`            | Required for VRR to function at all on eDP connectors                                                            |
-| `amdgpu.abmlevel`       | `0`            | Disables adaptive backlight management                                                                           |
-| `amdgpu.cwsr_enable`    | `0` (modprobe) | Disables Compute Wavefront Save-Restore; prevents GPU hangs from register sync issues on gfx1151                 |
+| Param                   | Value          | Purpose                                                                                          |
+| ----------------------- | -------------- | ------------------------------------------------------------------------------------------------ |
+| `amdgpu.dcdebugmask`    | `0x1613`       | Also disables pipe split and MPO, in addition to stutter, PSR, PSR-SU, and replay                |
+| `amdgpu.sg_display`     | `0`            | Disables scatter-gather display (DMA-fence flip timeouts on unified memory)                      |
+| `amdgpu.gpu_recovery`   | `1`            | Soft-resets display engine on timeout instead of hard-locking                                    |
+| `amdgpu.ppfeaturemask`  | `0xfff73fff`   | Disables GFXOFF, STUTTER_MODE, OVERDRIVE                                                         |
+| `amdgpu.freesync_video` | `0`            | Hard-disables VRR capability in the kernel                                                       |
+| `amdgpu.aspm`           | `0`            | Disables GPU PCIe ASPM only; does not affect the USB4 PCIe tree                                  |
+| `amdgpu.abmlevel`       | `0`            | Disables adaptive backlight management                                                           |
+| `amdgpu.cwsr_enable`    | `0` (modprobe) | Disables Compute Wavefront Save-Restore; prevents GPU hangs from register sync issues on gfx1151 |
 
 KWin: `VrrPolicy=0` (Never — VRR fully disabled, changed Jun 4 2026 after VrrPolicy=1 still triggered).
+KWin overlays: disabled with `KWIN_DRM_NO_OVERLAY=1`.
 
 **These reduce frequency but do not eliminate the bug.**
 
@@ -96,9 +98,12 @@ kernel: xhci_hcd 0000:52:00.0: HC died; cleaning up
 kernel: ixgbe 0000:44:00.1: Adapter removed
 ```
 
-**What it is:** The USB4 PCIe bridge at `0000:00:01.1` (1022:150a, "Strix Halo PCIe USB4 Bridge") drops its link. Everything downstream dies: the dock's xhci USB controller, the ixgbe NIC. The display engine then loses its DPIA-routed display path, and a flip_done timeout follows ~30–60 min later.
+**What it is:** One of the USB4 PCIe bridges at `0000:00:01.1` or `0000:00:01.2` (1022:150a, "Strix Halo PCIe USB4 Bridge") drops its link. Everything downstream dies: the dock's xhci USB controller, the ixgbe NIC. The display engine then loses its DPIA-routed display path, and a flip_done timeout follows.
 
-**Observed:** Jun 2 2026 at 21:11 after 3+ day uptime. No prior sleep events that day. Spontaneous link drop.
+**Observed:**
+
+- Jun 2 2026 at 21:11 after 3+ day uptime. No prior sleep events that day. Flip timeout followed about 58 min later.
+- Jun 13 2026 at 16:15 on `00:01.2`, 22 min after attaching the dock. The root link, retimers, Titan Ridge xHCI, and ixgbe NICs disappeared; the tree re-enumerated 22 sec later. KWin page-flip timeouts began 90 sec after recovery and the eDP CRTC-0 `flip_done` timeout followed at 16:17:25. There was no system suspend. Re-enumeration logged `ASPM: current common clock configuration is inconsistent`.
 
 ### Mitigations in place
 
@@ -117,7 +122,7 @@ Udev rules in `hosts/goldenball/configuration.nix` + `modules/nixos/usb4-sfp/def
 ### Next steps if TB cascade recurs
 
 1. Check `journalctl -b -1 -k | grep "Jun.*21:1"` for what preceded the link drop
-2. Consider adding `pcie_aspm=off` kernel param (aggressive but eliminates all ASPM as a cause)
+2. Test `pcie_aspm=off` kernel param (added to config Jun 13; aggressive, but eliminates PCIe ASPM as a cause)
 3. Consider whether `SuspendState=s2idle` (current) is stable with TB4 dock; may need to disconnect dock before sleep
 
 ---
@@ -218,6 +223,8 @@ No evidence of hardware defect in any collected logs (no MCE, no hardware ECC er
 | Jun 2 21:11  | USB4 cascade: PCIe link down, xhci died, ixgbe removed                                  |
 | Jun 2 22:09  | flip_done timeout → hard freeze → reboot                                                |
 | Jun 4 18:44  | Boot; flip_done at 18:46:24 (~100s after KWin, idle desktop). VrrPolicy changed 1→0     |
+| Jun 9 18:45  | Boot; flip_done at 19:17:32. Occurred with VrrPolicy=0, no dock connected.              |
+| Jun 13 16:15 | USB4 `00:01.2` link dropped and recovered; eDP flip timeout followed at 16:17:25.       |
 
 ---
 
