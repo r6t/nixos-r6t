@@ -29,8 +29,9 @@
 ─ hosts/ # System/host definitions
 ─ hosts/{host}/incus-instances/ # Incus profile YAMLs and cloud-init seed files per host
 ─ modules/ # NixOS and home-manager modules, used by hosts and containers
-─ docs/ # Detailed guides for LLMs and humans (loaded via opencode.json)
-─ opencode.json # Project-level opencode config. Must live at repo root for opencode's auto-discovery to find it (walks up from CWD to git root); cannot be moved into docs/ or .config/. Currently a thin file: `$schema` + `instructions` array pointing at docs/\*.md so every opencode session in this repo pre-loads those guides as context.
+─ .agents/skills/ # Task-specific workflows shared by Codex and OpenCode
+─ docs/ # Detailed reference guides for LLMs and humans, loaded on demand by skills
+─ opencode.json # Project-level opencode config. Must live at repo root for opencode's auto-discovery to find it (walks up from CWD to git root); cannot be moved into docs/ or .config/.
 
 ## Code style
 
@@ -50,6 +51,14 @@ curl -s -H "Authorization: Bearer $(cat /run/secrets/HA_MCP_TOKEN)" https://home
   | python3 -c "import json,sys; [print(s['entity_id'], s['state']) for s in json.load(sys.stdin) if s['entity_id'].startswith('light.')]"
 ```
 
-## Incus containers
+## Task-specific guidance
 
-When working on incus container tasks (creating, modifying, or debugging LXC containers), read @docs/INCUS.md first. It documents the full pipeline from NixOS container definition through build, deployment, networking, and runtime configuration.
+Use the matching skill under `.agents/skills/` before working in these areas:
+
+- Incus containers and LXC images: `incus`
+- Neovim and nixvim: `nixvim`
+- llama.cpp, model serving, and local LLM tuning: `llm-hosting`
+- Shared colors and application theming: `theming`
+- Host freezes and hardware-specific troubleshooting: `host-troubleshooting`
+
+Load detailed files only when relevant to the task. Do not preemptively read every file in `docs/`.

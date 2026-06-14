@@ -105,6 +105,7 @@
       atuin.enable = true;
       bitwarden.enable = true;
       browsers.enable = true;
+      codex-config.enable = true;
       darktable.enable = true;
       drawio.enable = true;
       fish.enable = true;
