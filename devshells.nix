@@ -136,8 +136,10 @@ let
       awscli2
       aws-cdk-cli
       cfn-nag
-      nodejs_20
+      nodejs_24
+      python3
       ssm-session-manager-plugin
+      uv
     ]);
     packages = [ ];
   };
@@ -150,6 +152,11 @@ let
       else ""
     }
     ${baseShellHook "aws"}
+    # Python CDK: aws-cdk-lib/constructs/cdk-nag aren't in nixpkgs (weekly releases),
+    # so they live in a project-local uv venv. Pin uv to this shell's Nix Python
+    # instead of letting it download its own interpreter.
+    export UV_PYTHON_PREFERENCE="only-system"
+    export UV_PYTHON="${pkgs.python3}/bin/python3"
   '';
 
 in
