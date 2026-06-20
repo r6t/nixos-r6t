@@ -519,6 +519,10 @@ in
     mullvad.enable = false;
     networkmanager.enable = true;
     nix.enable = true;
+    nfs.mounts.photos = {
+      mountPoint = "/mnt/thunderbay/8TB-C/Pictures";
+      device = "crown:/";
+    };
     nixos-r6t-baseline.enable = true;
     npm.enable = true;
     printing.enable = true;

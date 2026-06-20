@@ -185,6 +185,10 @@
     mullvad.enable = true;
     networkmanager.enable = true;
     nix.enable = true;
+    nfs.mounts.photos = {
+      mountPoint = "/mnt/thunderbay/8TB-C/Pictures";
+      device = "crown:/";
+    };
     npm.enable = true;
     printing.enable = true;
     pinchflat.enable = true;

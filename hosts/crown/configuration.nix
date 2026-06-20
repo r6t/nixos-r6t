@@ -226,6 +226,18 @@ in
       thunderbayD = { device = "/dev/disk/by-uuid/5b66a482-036d-4a76-8cec-6ad15fe2360c"; keyFile = "/root/5b66a482.key"; mountPoint = "/mnt/thunderbay/8TB-D"; };
     };
 
+    nfs.exports.photos = {
+      path = "/mnt/thunderbay/8TB-C/Pictures";
+      fsid = 0;
+      mountPointGuard = "/mnt/thunderbay/8TB-C";
+      after = [
+        "mnt-thunderbay-8TB\\x2dC.mount"
+      ];
+      requires = [
+        "mnt-thunderbay-8TB\\x2dC.mount"
+      ];
+    };
+
     nix.enable = true;
     nvidia-cuda = {
       enable = true;
