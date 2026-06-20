@@ -5,6 +5,55 @@ let
   # ROCmFP4 quant support for gfx1151 (Strix Halo). Built per-system from
   # pkgs/rocmfp4-llama/package.nix and exposed at outputs.packages.
   rocmfp4Package = outputs.packages.${pkgs.stdenv.hostPlatform.system}.rocmfp4-llama;
+  selectedPackage =
+    if cfg.rocmfp4 then rocmfp4Package
+    else if cfg.rocm then pkgs.llama-cpp-rocm
+    else if cfg.vulkan then pkgs.llama-cpp-vulkan
+    else pkgs.llama-cpp;
+  serverFlags = [
+    "--host"
+    cfg.host
+    "--port"
+    (toString cfg.port)
+    # GPU offload: push all transformer layers to VRAM.
+    "-ngl"
+    "99"
+    # Flash attention: confirmed real gains on RDNA 4 (GFX1201 / KHR_coopmat):
+    # +4-11% prefill throughput, +4% generation throughput vs no-FA.
+    # Configurable because Blackwell GSP firmware can crash under FA load.
+    "--flash-attn"
+    cfg.flashAttn
+    # KV cache quantization: symmetric type required for fused flash attention
+    # kernel. q8_0 halves VRAM vs f16 with near-zero quality loss.
+    "--cache-type-k"
+    cfg.kvCacheQuant
+    "--cache-type-v"
+    cfg.kvCacheQuant
+    # Context window — override via contextSize option.
+    "-c"
+    (toString cfg.contextSize)
+    # Physical micro-batch: larger values give faster prefill on long prompts.
+    # Logical batch size (-b) is left at the server default (2048).
+    "-ub"
+    (toString cfg.ubatchSize)
+    # High process priority — GPU is dedicated to LLM inference.
+    "--prio"
+    "2"
+    # Disk-backed prompt cache size in MiB. See `cacheRamMiB` option doc
+    # for the model-architecture-specific guidance. tl;dr: 0 for hybrid
+    # models (Qwen3.6 etc.), 8192 (default) for standard transformers.
+    "--cache-ram"
+    (toString cfg.cacheRamMiB)
+    # Single parallel slot — all VRAM to one session.
+    "-np"
+    "1"
+  ]
+  ++ cfg.extraFlags
+  ++ lib.optionals (cfg.modelFile != null) [ "--model" cfg.modelFile ]
+  ++ lib.optionals (cfg.modelsDir != null) [ "--models-dir" cfg.modelsDir ]
+  ++ lib.optionals (cfg.hfRepo != null) [ "--hf-repo" cfg.hfRepo ]
+  ++ lib.optionals (cfg.hfFile != null) [ "--hf-file" cfg.hfFile ]
+  ++ lib.optionals (cfg.alias != null) [ "--alias" cfg.alias ];
 in
 {
 
@@ -304,58 +353,15 @@ in
 
     services.llama-cpp = {
       enable = true;
-      inherit (cfg) host port modelsPreset;
+      settings = {
+        inherit (cfg) host port;
+      };
 
       # GPU backend selection. The default nixpkgs llama-cpp is CPU-only.
       #   - llama-cpp-rocm:   libggml-hip.so for RDNA/CDNA via ROCm/HIP.
       #   - llama-cpp-vulkan: libggml-vulkan.so for any Vulkan-capable GPU.
       #   - rocmfp4Package:   custom fork with ROCmFP4 quants + dual HIP/Vulkan.
-      package =
-        if cfg.rocmfp4 then rocmfp4Package
-        else if cfg.rocm then pkgs.llama-cpp-rocm
-        else if cfg.vulkan then pkgs.llama-cpp-vulkan
-        else pkgs.llama-cpp;
-
-      extraFlags = [
-        # GPU offload: push all transformer layers to VRAM.
-        "-ngl"
-        "99"
-        # Flash attention: confirmed real gains on RDNA 4 (GFX1201 / KHR_coopmat):
-        # +4-11% prefill throughput, +4% generation throughput vs no-FA.
-        # Configurable because Blackwell GSP firmware can crash under FA load.
-        "--flash-attn"
-        cfg.flashAttn
-        # KV cache quantization: symmetric type required for fused flash attention
-        # kernel. q8_0 halves VRAM vs f16 with near-zero quality loss.
-        "--cache-type-k"
-        cfg.kvCacheQuant
-        "--cache-type-v"
-        cfg.kvCacheQuant
-        # Context window — override via contextSize option.
-        "-c"
-        (toString cfg.contextSize)
-        # Physical micro-batch: larger values give faster prefill on long prompts.
-        # Logical batch size (-b) is left at the server default (2048).
-        "-ub"
-        (toString cfg.ubatchSize)
-        # High process priority — GPU is dedicated to LLM inference.
-        "--prio"
-        "2"
-        # Disk-backed prompt cache size in MiB. See `cacheRamMiB` option doc
-        # for the model-architecture-specific guidance. tl;dr: 0 for hybrid
-        # models (Qwen3.6 etc.), 8192 (default) for standard transformers.
-        "--cache-ram"
-        (toString cfg.cacheRamMiB)
-        # Single parallel slot — all VRAM to one session.
-        "-np"
-        "1"
-      ]
-      ++ cfg.extraFlags
-      ++ lib.optionals (cfg.modelFile != null) [ "--model" cfg.modelFile ]
-      ++ lib.optionals (cfg.modelsDir != null) [ "--models-dir" cfg.modelsDir ]
-      ++ lib.optionals (cfg.hfRepo != null) [ "--hf-repo" cfg.hfRepo ]
-      ++ lib.optionals (cfg.hfFile != null) [ "--hf-file" cfg.hfFile ]
-      ++ lib.optionals (cfg.alias != null) [ "--alias" cfg.alias ];
+      package = selectedPackage;
       openFirewall = true;
     };
 
@@ -366,66 +372,73 @@ in
     # blocks /dev/dri access without these relaxations, and PrivateUsers=true
     # breaks render/video group propagation. Apply the same overrides for all
     # GPU backends including the rocmfp4 fork (which is HIP-based + Vulkan).
-    systemd.services.llama-cpp = lib.mkIf (cfg.rocm || cfg.cuda || cfg.vulkan || cfg.rocmfp4) {
-      # network.target is not sufficient for internet connectivity — the upstream
-      # unit only sets After=network.target. HuggingFace auto-download fails at
-      # boot unless we wait for an actual routable connection.
-      after = [ "network-online.target" ];
-      wants = [ "network-online.target" ];
-      serviceConfig = {
-        MemoryDenyWriteExecute = lib.mkForce false;
-        PrivateUsers = lib.mkForce false;
-        # GPU compute requires access to /dev/kfd (ROCm) or /dev/nvidia* (CUDA) and
-        # /dev/dri/renderD* (all backends, including Vulkan). The DynamicUser sandbox
-        # needs these group memberships.
-        SupplementaryGroups = [ "render" "video" ];
-      };
+    systemd.services.llama-cpp = lib.mkMerge [
+      {
+        serviceConfig.ExecStart = lib.mkForce (toString (
+          [ (lib.getExe' selectedPackage "llama-server") ] ++ serverFlags
+        ));
+      }
+      (lib.mkIf (cfg.rocm || cfg.cuda || cfg.vulkan || cfg.rocmfp4) {
+        # network.target is not sufficient for internet connectivity — the upstream
+        # unit only sets After=network.target. HuggingFace auto-download fails at
+        # boot unless we wait for an actual routable connection.
+        after = [ "network-online.target" ];
+        wants = [ "network-online.target" ];
+        serviceConfig = {
+          MemoryDenyWriteExecute = lib.mkForce false;
+          PrivateUsers = lib.mkForce false;
+          # GPU compute requires access to /dev/kfd (ROCm) or /dev/nvidia* (CUDA) and
+          # /dev/dri/renderD* (all backends, including Vulkan). The DynamicUser sandbox
+          # needs these group memberships.
+          SupplementaryGroups = [ "render" "video" ];
+        };
 
-      environment = lib.mkMerge [
-        # Vulkan path env (also applied for rocmfp4 because the dual-backend
-        # binary embeds the Vulkan code path and benefits from the Mesa cache
-        # even when the runtime backend is ROCm0).
-        (lib.optionalAttrs (cfg.vulkan || cfg.rocmfp4) {
-          # Persist the Mesa pipeline (SPIR-V → ISA) shader cache across service
-          # restarts. Without this, the first prompt after a fresh service start
-          # spends ~20s recompiling shaders for every unique compute shape —
-          # measured cold pp ≈ 1 tok/s vs warm ≈ 145 tok/s on Qwen3.6-27B Q6_K.
-          # systemd's CacheDirectory provides /var/cache/llama-cpp (resolves to
-          # /var/cache/private/llama-cpp under DynamicUser=true); the incus
-          # profile bind-mounts that to host-side storage so the cache survives
-          # container relaunches as well as service restarts.
-          MESA_SHADER_CACHE_DIR = "/var/cache/llama-cpp/mesa-shaders";
-          # Prevent RADV from spilling GPU buffer allocations into GTT under
-          # perceived memory pressure. On discrete RDNA 4 (R9700) this produces
-          # a measured 4.5× decode speedup by avoiding PCIe round-trips.
-          # On Strix Halo unified memory (goldenball) VRAM and GTT share the
-          # same physical LPDDR5X, so there is no PCIe penalty — but the flag
-          # still affects how RADV manages memory pressure during heavy MTP
-          # inference bursts. Removing it coincided with increased display
-          # engine flip_done timeouts after inference; restored as a mitigation.
-          RADV_PERFTEST = "nogttspill";
-        })
-        (lib.optionalAttrs (cfg.rocm && cfg.rocmVisibleDevices != null) {
-          # Restrict ROCm to a specific GPU by index. Use when multiple AMD GPUs
-          # are present and inference must land on a particular one (e.g. an iGPU
-          # + discrete GPU laptop).
-          ROCR_VISIBLE_DEVICES = cfg.rocmVisibleDevices;
-        })
-        # ROCmFP4 fork-specific env vars (per upstream STRIX-HALO-QUICKSTART.md).
-        (lib.optionalAttrs cfg.rocmfp4 {
-          # Force gfx11.5.1 ISA selection on Strix Halo. The chip reports as
-          # gfx1151 but ROCm 7.x device libraries are keyed on gfx11.5.1; this
-          # override is required for the HIP runtime to pick the correct
-          # bitcode at JIT time. Removing it crashes with "no HIP GPUs are
-          # available" or generates wrong-arch kernels.
-          HSA_OVERRIDE_GFX_VERSION = "11.5.1";
-          # Allow HIP allocations to span unified-memory pages (Strix Halo
-          # CPU+GPU share LPDDR5X). Without this, HIP rejects allocations
-          # larger than the GTT carve-out.
-          GGML_HIP_ENABLE_UNIFIED_MEMORY = "1";
-        })
-      ];
-    };
+        environment = lib.mkMerge [
+          # Vulkan path env (also applied for rocmfp4 because the dual-backend
+          # binary embeds the Vulkan code path and benefits from the Mesa cache
+          # even when the runtime backend is ROCm0).
+          (lib.optionalAttrs (cfg.vulkan || cfg.rocmfp4) {
+            # Persist the Mesa pipeline (SPIR-V → ISA) shader cache across service
+            # restarts. Without this, the first prompt after a fresh service start
+            # spends ~20s recompiling shaders for every unique compute shape —
+            # measured cold pp ≈ 1 tok/s vs warm ≈ 145 tok/s on Qwen3.6-27B Q6_K.
+            # systemd's CacheDirectory provides /var/cache/llama-cpp (resolves to
+            # /var/cache/private/llama-cpp under DynamicUser=true); the incus
+            # profile bind-mounts that to host-side storage so the cache survives
+            # container relaunches as well as service restarts.
+            MESA_SHADER_CACHE_DIR = "/var/cache/llama-cpp/mesa-shaders";
+            # Prevent RADV from spilling GPU buffer allocations into GTT under
+            # perceived memory pressure. On discrete RDNA 4 (R9700) this produces
+            # a measured 4.5× decode speedup by avoiding PCIe round-trips.
+            # On Strix Halo unified memory (goldenball) VRAM and GTT share the
+            # same physical LPDDR5X, so there is no PCIe penalty — but the flag
+            # still affects how RADV manages memory pressure during heavy MTP
+            # inference bursts. Removing it coincided with increased display
+            # engine flip_done timeouts after inference; restored as a mitigation.
+            RADV_PERFTEST = "nogttspill";
+          })
+          (lib.optionalAttrs (cfg.rocm && cfg.rocmVisibleDevices != null) {
+            # Restrict ROCm to a specific GPU by index. Use when multiple AMD GPUs
+            # are present and inference must land on a particular one (e.g. an iGPU
+            # + discrete GPU laptop).
+            ROCR_VISIBLE_DEVICES = cfg.rocmVisibleDevices;
+          })
+          # ROCmFP4 fork-specific env vars (per upstream STRIX-HALO-QUICKSTART.md).
+          (lib.optionalAttrs cfg.rocmfp4 {
+            # Force gfx11.5.1 ISA selection on Strix Halo. The chip reports as
+            # gfx1151 but ROCm 7.x device libraries are keyed on gfx11.5.1; this
+            # override is required for the HIP runtime to pick the correct
+            # bitcode at JIT time. Removing it crashes with "no HIP GPUs are
+            # available" or generates wrong-arch kernels.
+            HSA_OVERRIDE_GFX_VERSION = "11.5.1";
+            # Allow HIP allocations to span unified-memory pages (Strix Halo
+            # CPU+GPU share LPDDR5X). Without this, HIP rejects allocations
+            # larger than the GTT carve-out.
+            GGML_HIP_ENABLE_UNIFIED_MEMORY = "1";
+          })
+        ];
+      })
+    ];
 
     # Allow members of the wheel group to start/stop llama-cpp without a
     # password prompt. Used by the llama-cpp-toggle script below.
