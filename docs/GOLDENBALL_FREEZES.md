@@ -55,6 +55,7 @@ kwin_wayland: Pageflip timed out! This is a bug in the amdgpu kernel driver
 | `VrrPolicy=2` (Always) in KWin — compositor issues adaptive-sync flips on desktop                         | Flips started within 90s of login with Steam open, before any game launched |
 | Heavy Vulkan compute (MTP inference) followed by idle — display engine transitions out of peak-load state | Freeze consistently ~2 min after llama-cpp finishes generating              |
 | USB4/TB4 dock connected + PCIe link instability → DPIA path disruption → flip timeout ~1h later           | Jun 2 2026: xhci died at 21:11, flip_done at 22:09                          |
+| USB4/TB4 dock hotplug without a PCIe link failure                                                         | Jun 15 2026: eDP froze 22s after display HPD, while external DP-4 survived  |
 | `VrrPolicy=1` (Automatic) does NOT fully prevent it                                                       | Still occurred with Automatic mode + external display connected             |
 | Idle Plasma desktop startup (~100s after KWin start, no GPU load)                                         | Jun 4 2026: flip_done at 18:46:24, boot at 18:44:14, no llama-cpp/USB4/dock |
 
@@ -77,6 +78,25 @@ KWin: `VrrPolicy=0` (Never — VRR fully disabled, changed Jun 4 2026 after VrrP
 KWin overlays: disabled with `KWIN_DRM_NO_OVERLAY=1`.
 
 **These reduce frequency but do not eliminate the bug.**
+
+### Jun 15 2026: dock hotplug directly triggered an eDP-only stall
+
+At 12:35:17 the Plugable USB4-HUB3A began a normal enumeration. DP hotplug reached
+amdgpu at 12:35:19, KWin page-flip timeouts began at 12:35:41, and CRTC-0 logged
+`flip_done timed out` at 12:35:50. The internal eDP-1 image hard-locked, but the
+external DP-4 display, browser video, terminal, and rest of the host continued
+working.
+
+Unlike the Jun 2 and Jun 13 incidents, there was no `Link Down`, `HC died`,
+device removal, AER error, ENOMEM, or framebuffer pin failure. The dock's PCIe
+tree remained present. The `62:00.0` and `62:04.0` unused Goshen Ridge bridge
+ports logged `Unable to change power state from D3cold to D0`, but both remained
+runtime-suspended and had `d3cold_allowed=0`; there is no evidence those warnings
+represent a root USB4 link collapse. All configured amdgpu mitigations and
+`pcie_aspm=off` were active.
+
+This establishes clean dock/display hotplug itself as a trigger for the primary
+DCN 3.5.1 eDP bug, independent of the secondary USB4 PCIe cascade.
 
 ### Next steps if freezes continue
 
@@ -213,18 +233,19 @@ No evidence of hardware defect in any collected logs (no MCE, no hardware ECC er
 
 ## Boot history reference (May–Jun 2026)
 
-| Date         | Notable events                                                                          |
-| ------------ | --------------------------------------------------------------------------------------- |
-| May 23       | Multiple boots on kernel 6.17.8, NixOS 25.05 — zero flip timeouts                       |
-| May 24       | Rebuilt to NixOS 26.05 (kernel 7.0.8) + added amdgpu params + VRR — flip timeouts begin |
-| May 29–30    | Multiple flip_done freezes; mitigations added (dcdebugmask 0x612, cwsr=0, VrrPolicy=1)  |
-| May 30 19:13 | 3-day boot begins; 35B MTP model loaded; ENOMEM errors appear                           |
-| May 31 10:35 | Plugable dock hotplugged; framebuffer pin failures                                      |
-| Jun 2 21:11  | USB4 cascade: PCIe link down, xhci died, ixgbe removed                                  |
-| Jun 2 22:09  | flip_done timeout → hard freeze → reboot                                                |
-| Jun 4 18:44  | Boot; flip_done at 18:46:24 (~100s after KWin, idle desktop). VrrPolicy changed 1→0     |
-| Jun 9 18:45  | Boot; flip_done at 19:17:32. Occurred with VrrPolicy=0, no dock connected.              |
-| Jun 13 16:15 | USB4 `00:01.2` link dropped and recovered; eDP flip timeout followed at 16:17:25.       |
+| Date         | Notable events                                                                           |
+| ------------ | ---------------------------------------------------------------------------------------- |
+| May 23       | Multiple boots on kernel 6.17.8, NixOS 25.05 — zero flip timeouts                        |
+| May 24       | Rebuilt to NixOS 26.05 (kernel 7.0.8) + added amdgpu params + VRR — flip timeouts begin  |
+| May 29–30    | Multiple flip_done freezes; mitigations added (dcdebugmask 0x612, cwsr=0, VrrPolicy=1)   |
+| May 30 19:13 | 3-day boot begins; 35B MTP model loaded; ENOMEM errors appear                            |
+| May 31 10:35 | Plugable dock hotplugged; framebuffer pin failures                                       |
+| Jun 2 21:11  | USB4 cascade: PCIe link down, xhci died, ixgbe removed                                   |
+| Jun 2 22:09  | flip_done timeout → hard freeze → reboot                                                 |
+| Jun 4 18:44  | Boot; flip_done at 18:46:24 (~100s after KWin, idle desktop). VrrPolicy changed 1→0      |
+| Jun 9 18:45  | Boot; flip_done at 19:17:32. Occurred with VrrPolicy=0, no dock connected.               |
+| Jun 13 16:15 | USB4 `00:01.2` link dropped and recovered; eDP flip timeout followed at 16:17:25.        |
+| Jun 15 12:35 | Dock hotplug completed without link loss; eDP flip timeout followed 31 sec after attach. |
 
 ---
 
