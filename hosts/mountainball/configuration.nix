@@ -11,6 +11,7 @@
   ];
 
   boot = {
+    loader.systemd-boot.configurationLimit = 3;
     resumeDevice = "/dev/mapper/luks-swap";
     kernelParams = [
       "resume=UUID=dea57a9c-895b-407d-b45f-f4cea665864f"

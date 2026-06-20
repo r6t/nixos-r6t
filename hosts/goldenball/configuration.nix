@@ -64,6 +64,7 @@ in
   ];
 
   boot = {
+    loader.systemd-boot.configurationLimit = 3;
     kernelPackages = lib.mkDefault pkgs.linuxPackages_latest;
 
     initrd.luks.devices."luks-4c181c40-b517-4477-b5b2-ddb63e56e552".device = "/dev/disk/by-uuid/4c181c40-b517-4477-b5b2-ddb63e56e552";

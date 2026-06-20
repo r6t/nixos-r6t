@@ -15,7 +15,6 @@
     home-manager.users.${userConfig.username} = {
       home.packages = with pkgs; [
         brave
-        librewolf
         ungoogled-chromium
       ];
       programs.firefox = {
@@ -237,4 +236,3 @@
     };
   };
 }
-
