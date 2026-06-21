@@ -35,7 +35,6 @@
   config = lib.mkIf config.mine.tailscale.enable {
     services.tailscale = {
       enable = true;
-      inherit (config.mine.tailscale) authKeyFile;
       extraUpFlags = lib.unique (
         config.mine.tailscale.extraUpFlags
         ++ [ "--accept-dns=${if config.mine.tailscale.acceptDns then "true" else "false"}" ]

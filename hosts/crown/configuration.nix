@@ -39,6 +39,13 @@ in
       # Enable forwarding for containers
       "net.ipv4.ip_forward" = 1;
       "net.ipv6.conf.all.forwarding" = 1;
+
+      # These are host-level kernel limits used by LXCs. Keep them high enough
+      # for Tailscale/WireGuard exit-node throughput and larger conntrack tables.
+      "net.core.rmem_max" = 134217728;
+      "net.core.wmem_max" = 134217728;
+      "net.netfilter.nf_conntrack_max" = 2097152;
+      "net.netfilter.nf_conntrack_buckets" = 524288;
     };
     kernelModules = [ "kvm-amd" "kvm" ];
     kernelParams = [

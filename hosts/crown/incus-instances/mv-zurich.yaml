@@ -28,11 +28,13 @@ devices:
     type: disk
   wireguard-conf:
     path: /etc/wireguard/wg0.conf
+    readonly: "true"
     shift: "true"
     source: /mnt/crownstore/Sync/app-config/wireguard/ch-zrh.conf
     type: disk
   tailscale-auth:
     path: /etc/tailscale/auth-key
+    readonly: "true"
     shift: "true"
     source: /mnt/crownstore/Sync/app-config/tailscale/exit-node-auth-key
     type: disk

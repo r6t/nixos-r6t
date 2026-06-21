@@ -46,16 +46,7 @@ in
         };
         nameservers = [ "127.0.0.1" ];
 
-        interfaces.eth0 = {
-          useDHCP = false;
-          ipv4.routes = [
-            {
-              address = "192.168.6.0";
-              prefixLength = 24;
-              via = "192.168.6.1";
-            }
-          ];
-        };
+        interfaces.eth0.useDHCP = false;
 
         wg-quick.interfaces.wg0 = {
           configFile = cfg.wgConfigFile;
@@ -68,13 +59,17 @@ in
           enable = true;
           checkReversePath = "loose";
           allowPing = true;
-          # Kill-switch: block forwarded traffic if wg0 is down
+          # Default-deny forwarding keeps this acting only as an explicit
+          # LAN/tailnet -> Mullvad router, with a kill-switch if wg0 is down.
           extraCommands = ''
-            iptables -D FORWARD -o eth0 ! -d 192.168.6.0/24 -j DROP 2>/dev/null || true
-            iptables -I FORWARD -o eth0 ! -d 192.168.6.0/24 -j DROP
+            iptables -D FORWARD -o eth0 ! -d 192.168.6.0/24 -m comment --comment exit-node-killswitch -j DROP 2>/dev/null || true
+            iptables -D FORWARD -m comment --comment exit-node-default-deny -j DROP 2>/dev/null || true
+            iptables -I FORWARD -o eth0 ! -d 192.168.6.0/24 -m comment --comment exit-node-killswitch -j DROP
+            iptables -A FORWARD -m comment --comment exit-node-default-deny -j DROP
           '';
           extraStopCommands = ''
-            iptables -D FORWARD -o eth0 ! -d 192.168.6.0/24 -j DROP 2>/dev/null || true
+            iptables -D FORWARD -o eth0 ! -d 192.168.6.0/24 -m comment --comment exit-node-killswitch -j DROP 2>/dev/null || true
+            iptables -D FORWARD -m comment --comment exit-node-default-deny -j DROP 2>/dev/null || true
           '';
         };
 
@@ -93,7 +88,6 @@ in
         ephemeral = true;
         extraUpFlags = [
           "--advertise-exit-node"
-          "--accept-routes"
         ];
       };
 
@@ -101,27 +95,33 @@ in
         useRoutingFeatures = lib.mkForce "server";
       };
 
-      networking = {
-        # Static routes to keep tailnet traffic on tailscale interface
-        interfaces.tailscale0 = {
-          ipv4.routes = [
-            {
-              address = "100.64.0.0";
-              prefixLength = 10;
-            }
-          ];
-          ipv6.routes = [
-            {
-              address = "fd7a:115c:a1e0::";
-              prefixLength = 48;
-            }
-          ];
-        };
-
-        nat.internalInterfaces = [ "tailscale0" ];
-      };
+      networking.nat.internalInterfaces = [ "tailscale0" ];
 
       systemd.services = {
+        tailscale-tailnet-routes = {
+          description = "Keep tailnet routes on tailscale0";
+          after = [ "tailscaled.service" ];
+          wants = [ "tailscaled.service" ];
+          wantedBy = [ "multi-user.target" ];
+          path = [ pkgs.iproute2 pkgs.coreutils ];
+          script = ''
+            for _ in $(seq 1 30); do
+              if ip link show tailscale0 >/dev/null 2>&1; then
+                ip route replace 100.64.0.0/10 dev tailscale0
+                ip -6 route replace fd7a:115c:a1e0::/48 dev tailscale0
+                exit 0
+              fi
+              sleep 1
+            done
+
+            echo "tailscale0 not present; skipping tailnet route pinning"
+          '';
+          serviceConfig = {
+            Type = "oneshot";
+            RemainAfterExit = true;
+          };
+        };
+
         # GRO forwarding for exit node
         # https://tailscale.com/kb/1320/performance-best-practices#ethtool-configuration
         tailscale-network-optimizations = {
