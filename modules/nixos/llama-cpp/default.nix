@@ -1,6 +1,7 @@
 { lib, config, pkgs, outputs, ... }:
 let
   cfg = config.mine.llama-cpp;
+  llamaCfg = config.services.llama-cpp;
   # Custom flake-output package: charlie12345/rocmfp4-llama fork compiled with
   # ROCmFP4 quant support for gfx1151 (Strix Halo). Built per-system from
   # pkgs/rocmfp4-llama/package.nix and exposed at outputs.packages.
@@ -10,50 +11,6 @@ let
     else if cfg.rocm then pkgs.llama-cpp-rocm
     else if cfg.vulkan then pkgs.llama-cpp-vulkan
     else pkgs.llama-cpp;
-  serverFlags = [
-    "--host"
-    cfg.host
-    "--port"
-    (toString cfg.port)
-    # GPU offload: push all transformer layers to VRAM.
-    "-ngl"
-    "99"
-    # Flash attention: confirmed real gains on RDNA 4 (GFX1201 / KHR_coopmat):
-    # +4-11% prefill throughput, +4% generation throughput vs no-FA.
-    # Configurable because Blackwell GSP firmware can crash under FA load.
-    "--flash-attn"
-    cfg.flashAttn
-    # KV cache quantization: symmetric type required for fused flash attention
-    # kernel. q8_0 halves VRAM vs f16 with near-zero quality loss.
-    "--cache-type-k"
-    cfg.kvCacheQuant
-    "--cache-type-v"
-    cfg.kvCacheQuant
-    # Context window — override via contextSize option.
-    "-c"
-    (toString cfg.contextSize)
-    # Physical micro-batch: larger values give faster prefill on long prompts.
-    # Logical batch size (-b) is left at the server default (2048).
-    "-ub"
-    (toString cfg.ubatchSize)
-    # High process priority — GPU is dedicated to LLM inference.
-    "--prio"
-    "2"
-    # Disk-backed prompt cache size in MiB. See `cacheRamMiB` option doc
-    # for the model-architecture-specific guidance. tl;dr: 0 for hybrid
-    # models (Qwen3.6 etc.), 8192 (default) for standard transformers.
-    "--cache-ram"
-    (toString cfg.cacheRamMiB)
-    # Single parallel slot — all VRAM to one session.
-    "-np"
-    "1"
-  ]
-  ++ cfg.extraFlags
-  ++ lib.optionals (cfg.modelFile != null) [ "--model" cfg.modelFile ]
-  ++ lib.optionals (cfg.modelsDir != null) [ "--models-dir" cfg.modelsDir ]
-  ++ lib.optionals (cfg.hfRepo != null) [ "--hf-repo" cfg.hfRepo ]
-  ++ lib.optionals (cfg.hfFile != null) [ "--hf-file" cfg.hfFile ]
-  ++ lib.optionals (cfg.alias != null) [ "--alias" cfg.alias ];
 in
 {
 
@@ -349,19 +306,56 @@ in
           be enabled at a time.
         '';
       }
+      {
+        assertion = cfg.modelsPreset == null;
+        message = ''
+          mine.llama-cpp.modelsPreset is no longer supported by upstream
+          services.llama-cpp. Use mine.llama-cpp.modelFile or HuggingFace
+          auto-download options instead.
+        '';
+      }
     ];
 
     services.llama-cpp = {
       enable = true;
-      settings = {
-        inherit (cfg) host port;
-      };
 
       # GPU backend selection. The default nixpkgs llama-cpp is CPU-only.
       #   - llama-cpp-rocm:   libggml-hip.so for RDNA/CDNA via ROCm/HIP.
       #   - llama-cpp-vulkan: libggml-vulkan.so for any Vulkan-capable GPU.
       #   - rocmfp4Package:   custom fork with ROCmFP4 quants + dual HIP/Vulkan.
       package = selectedPackage;
+
+      settings = {
+        inherit (cfg) host port;
+        # GPU offload: push all transformer layers to VRAM.
+        n-gpu-layers = 99;
+        # Flash attention: confirmed real gains on RDNA 4 (GFX1201 / KHR_coopmat):
+        # +4-11% prefill throughput, +4% generation throughput vs no-FA.
+        # Configurable because Blackwell GSP firmware can crash under FA load.
+        flash-attn = cfg.flashAttn;
+        # KV cache quantization: symmetric type required for fused flash attention
+        # kernel. q8_0 halves VRAM vs f16 with near-zero quality loss.
+        cache-type-k = cfg.kvCacheQuant;
+        cache-type-v = cfg.kvCacheQuant;
+        # Context window — override via contextSize option.
+        ctx-size = cfg.contextSize;
+        # Physical micro-batch: larger values give faster prefill on long prompts.
+        # Logical batch size (-b) is left at the server default (2048).
+        ubatch-size = cfg.ubatchSize;
+        # High process priority — GPU is dedicated to LLM inference.
+        prio = 2;
+        # Disk-backed prompt cache size in MiB. See `cacheRamMiB` option doc
+        # for the model-architecture-specific guidance. tl;dr: 0 for hybrid
+        # models (Qwen3.6 etc.), 8192 (default) for standard transformers.
+        cache-ram = cfg.cacheRamMiB;
+        # Single parallel slot — all VRAM to one session.
+        parallel = 1;
+      }
+      // lib.optionalAttrs (cfg.modelFile != null) { model = cfg.modelFile; }
+      // lib.optionalAttrs (cfg.modelsDir != null) { models-dir = cfg.modelsDir; }
+      // lib.optionalAttrs (cfg.hfRepo != null) { hf-repo = cfg.hfRepo; }
+      // lib.optionalAttrs (cfg.hfFile != null) { hf-file = cfg.hfFile; }
+      // lib.optionalAttrs (cfg.alias != null) { inherit (cfg) alias; };
       openFirewall = true;
     };
 
@@ -374,9 +368,21 @@ in
     # GPU backends including the rocmfp4 fork (which is HIP-based + Vulkan).
     systemd.services.llama-cpp = lib.mkMerge [
       {
-        serviceConfig.ExecStart = lib.mkForce (toString (
-          [ (lib.getExe' selectedPackage "llama-server") ] ++ serverFlags
-        ));
+        # Upstream removed services.llama-cpp.extraFlags in favor of settings,
+        # but llama-server still has flags that do not round-trip through
+        # lib.cli.toCommandLine, notably rocmfp4's single-dash "-dev".
+        serviceConfig.ExecStart = lib.mkForce (toString [
+          (lib.getExe' llamaCfg.package "llama-server")
+          (lib.cli.toCommandLine
+            (optionName: {
+              option = if builtins.stringLength optionName > 1 then "--${optionName}" else "-${optionName}";
+              sep = " ";
+              explicitBool = false;
+              formatArg = lib.generators.mkValueStringDefault { };
+            })
+            llamaCfg.settings)
+          cfg.extraFlags
+        ]);
       }
       (lib.mkIf (cfg.rocm || cfg.cuda || cfg.vulkan || cfg.rocmfp4) {
         # network.target is not sufficient for internet connectivity — the upstream
