@@ -23,8 +23,24 @@
   };
   nix.settings.use-cgroups = true;
   time.timeZone = "America/Los_Angeles";
-  services.journald.extraConfig = "SystemMaxUse=500M";
   system.stateVersion = "23.11";
+
+  services = {
+    journald.extraConfig = "SystemMaxUse=500M";
+    alloy.extraFlags = lib.mkForce [
+      "--server.http.listen-addr=192.168.6.1:12346"
+      "--disable-reporting"
+    ];
+    prometheus.exporters.node.listenAddress = "192.168.6.1";
+  };
+
+  virtualisation.incus.preseed = {
+    config = {
+      "core.https_address" = "192.168.6.1:8443";
+      "core.metrics_address" = "192.168.6.1:9101";
+      "core.metrics_authentication" = "false";
+    };
+  };
 
   systemd = {
     tmpfiles.rules = [ ];
@@ -121,8 +137,11 @@
 
       # Allow LAN to access the router host on specific ports
       nftablesAllowFromLan = {
-        extraTcpPorts = [ 5201 8443 9000 9101 ]; # iperf3, incus, node-exporter, incus-metrics
+        extraTcpPorts = [ 5201 8443 ]; # iperf3, incus API/UI
         extraUdpPorts = [ 514 5201 ]; # syslog, iperf3
+        sourceTcpPorts = [
+          { source = "192.168.6.3"; ports = [ 9000 9101 12346 ]; } # spire monitoring
+        ];
       };
     };
 

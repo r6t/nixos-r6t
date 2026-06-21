@@ -117,6 +117,28 @@ in
         example = [ 5201 ];
         description = "Extra UDP ports to allow from LAN only (NOT exposed to WAN)";
       };
+
+      sourceTcpPorts = lib.mkOption {
+        type = lib.types.listOf (lib.types.submodule {
+          options = {
+            source = lib.mkOption {
+              type = lib.types.str;
+              example = "192.168.6.3";
+              description = "Literal LAN source IP or CIDR to allow. Do not use DNS names here.";
+            };
+            ports = lib.mkOption {
+              type = lib.types.listOf lib.types.int;
+              example = [ 9000 12346 ];
+              description = "TCP ports to allow from this LAN source.";
+            };
+          };
+        });
+        default = [ ];
+        example = [
+          { source = "192.168.6.3"; ports = [ 9000 9101 12346 ]; }
+        ];
+        description = "Source-restricted TCP ports to allow from LAN only.";
+      };
     };
 
     mssClamping = lib.mkOption {
@@ -216,6 +238,11 @@ in
       wanWatchdogScript = pkgs.writeShellScriptBin "wan-watchdog" ''
         exec ${pkgs.fish}/bin/fish ${./wan-watchdog.fish} ${cfg.wanInterface} ${toString cfg.wanWatchdog.failuresBeforeRestart} ${lib.concatStringsSep " " cfg.wanWatchdog.targets}
       '';
+
+      nftPortSet = ports:
+        if builtins.length ports == 1
+        then toString (builtins.head ports)
+        else "{ ${lib.concatStringsSep ", " (map toString ports)} }";
     in
     {
       # Ensure iproute2 with CAKE support is available
@@ -286,6 +313,12 @@ in
               '')
               cfg.nftablesAllowFromLan.extraUdpPorts;
 
+            sourceTcpRules = lib.concatMapStringsSep "\n"
+              (rule: ''
+                iifname "${cfg.lanInterface}" ip saddr ${rule.source} tcp dport ${nftPortSet rule.ports} accept
+              '')
+              cfg.nftablesAllowFromLan.sourceTcpPorts;
+
             mssClampingRule = lib.optionalString cfg.mssClamping ''
               chain forward_mss {
                 type filter hook forward priority 0; policy accept;
@@ -342,6 +375,7 @@ in
                   # Extra ports from LAN only
                   ${extraTcpRules}
                   ${extraUdpRules}
+                  ${sourceTcpRules}
                 }
                 chain output {
                   type filter hook output priority 0; policy accept;
