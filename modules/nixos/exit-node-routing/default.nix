@@ -63,12 +63,21 @@ in
           # LAN/tailnet -> Mullvad router, with a kill-switch if wg0 is down.
           extraCommands = ''
             iptables -D FORWARD -o eth0 ! -d 192.168.6.0/24 -m comment --comment exit-node-killswitch -j DROP 2>/dev/null || true
+            iptables -D FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -m comment --comment exit-node-established -j ACCEPT 2>/dev/null || true
+            iptables -D FORWARD -i eth0 -s 192.168.6.0/24 -o wg0 -m comment --comment exit-node-lan-to-mullvad -j ACCEPT 2>/dev/null || true
+            iptables -D FORWARD -i tailscale0 -o wg0 -m comment --comment exit-node-tailnet-to-mullvad -j ACCEPT 2>/dev/null || true
             iptables -D FORWARD -m comment --comment exit-node-default-deny -j DROP 2>/dev/null || true
             iptables -I FORWARD -o eth0 ! -d 192.168.6.0/24 -m comment --comment exit-node-killswitch -j DROP
+            iptables -A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -m comment --comment exit-node-established -j ACCEPT
+            iptables -A FORWARD -i eth0 -s 192.168.6.0/24 -o wg0 -m comment --comment exit-node-lan-to-mullvad -j ACCEPT
+            iptables -A FORWARD -i tailscale0 -o wg0 -m comment --comment exit-node-tailnet-to-mullvad -j ACCEPT
             iptables -A FORWARD -m comment --comment exit-node-default-deny -j DROP
           '';
           extraStopCommands = ''
             iptables -D FORWARD -o eth0 ! -d 192.168.6.0/24 -m comment --comment exit-node-killswitch -j DROP 2>/dev/null || true
+            iptables -D FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -m comment --comment exit-node-established -j ACCEPT 2>/dev/null || true
+            iptables -D FORWARD -i eth0 -s 192.168.6.0/24 -o wg0 -m comment --comment exit-node-lan-to-mullvad -j ACCEPT 2>/dev/null || true
+            iptables -D FORWARD -i tailscale0 -o wg0 -m comment --comment exit-node-tailnet-to-mullvad -j ACCEPT 2>/dev/null || true
             iptables -D FORWARD -m comment --comment exit-node-default-deny -j DROP 2>/dev/null || true
           '';
         };
