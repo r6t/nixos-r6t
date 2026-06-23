@@ -45,11 +45,23 @@
     #     pinned via existing rules in goldenball/configuration.nix.
     #
     # 1022:150a must also be pinned to prevent the root from suspending.
+    # IOMMU-protected Thunderbolt devices can be safely authorized by udev before
+    # boltd starts; this avoids ixgbe probing the tunneled X520 while the chain is
+    # still in a half-authorized D3cold state during boot.
     services.udev.extraRules = ''
+      # Authorize IOMMU-protected Thunderbolt chains early. Kernel docs recommend
+      # this exact policy for domains with iommu_dma_protection=1.
+      ACTION=="add", SUBSYSTEM=="thunderbolt", ATTRS{iommu_dma_protection}=="1", ATTR{authorized}=="0", ATTR{authorized}="1"
+
       # AMD Strix Halo PCIe USB4 Bridge — root of the Thunderbolt tree.
       # Must not runtime-suspend or all downstream TB devices disconnect.
       ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x1022", ATTR{device}=="0x150a", ATTR{power/control}="on"
       ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x1022", ATTR{device}=="0x150a", ATTR{d3cold_allowed}="0"
+
+      # Intel X520/82599 SFP+ functions in the TB enclosure. If these enter
+      # D3cold before ixgbe binds, probe fails with "device inaccessible".
+      ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x8086", ATTR{device}=="0x10fb", ATTR{power/control}="on"
+      ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x8086", ATTR{device}=="0x10fb", ATTR{d3cold_allowed}="0"
 
       # Trigger ethtool settings when the renamed interface appears.
       # "move" is the udev action fired when udevd renames the interface.

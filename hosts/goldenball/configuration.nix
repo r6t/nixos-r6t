@@ -136,6 +136,12 @@ in
       # mitigation instead of leaving global ASPM disabled.
       "pcie_aspm=off"
 
+      # Disable PCIe port runtime power management. Unlike pcie_aspm=off (link
+      # L-state policy), this prevents hotplug/root ports from runtime-suspending
+      # tunneled USB4 PCIe devices into D3cold. Needed after ixgbe probed the
+      # USB4 X520 before boltd authorization completed and failed D3cold->D0.
+      "pcie_port_pm=off"
+
       # IOMMU passthrough: zero-cost translation for GPU compute while keeping
       # IOMMU active for USB4 PCIe tunneling and device isolation.
       "iommu=pt"
