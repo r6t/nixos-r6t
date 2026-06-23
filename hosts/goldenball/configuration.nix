@@ -142,6 +142,17 @@ in
       # USB4 X520 before boltd authorization completed and failed D3cold->D0.
       "pcie_port_pm=off"
 
+      # Force native PCIe hotplug services and allow bridge resource reallocation
+      # for USB4/TB PCIe tunnels. Without these, hotplugged TB devices authorize
+      # but the downstream PCIe tree may never materialize on Strix Halo.
+      "pcie_ports=native"
+      "pci=realloc"
+
+      # Disable USB4/Thunderbolt CLx lane low-power states. The kernel enables
+      # CL0s/CL1/CL2 after router enumeration; on this Strix Halo + TB chain,
+      # authorized devices can still fail to establish a downstream PCIe tree.
+      "thunderbolt.clx=0"
+
       # IOMMU passthrough: zero-cost translation for GPU compute while keeping
       # IOMMU active for USB4 PCIe tunneling and device isolation.
       "iommu=pt"
