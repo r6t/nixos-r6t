@@ -4,13 +4,10 @@
       lib.mkEnableOption "USB4 SFP+ 10G ixgbe adapter support";
   };
   config = lib.mkIf config.mine.usb4-sfp.enable {
-    boot = {
-      kernelModules = [ "ixgbe" ];
-      extraModprobeConfig = ''
-        # allow_unsupported_sfp: required for many SFP+ modules not on Intel's allowlist
-        options ixgbe allow_unsupported_sfp=1
-      '';
-    };
+    boot.extraModprobeConfig = ''
+      # allow_unsupported_sfp: required for many SFP+ modules not on Intel's allowlist
+      options ixgbe allow_unsupported_sfp=1
+    '';
 
     # Rename ixgbe ports by PCI function suffix via ID_PATH glob.
     # The full BDF (e.g. pci-0000:44:00.0) shifts across Thunderbolt reconnects,
@@ -45,28 +42,36 @@
     #     pinned via existing rules in goldenball/configuration.nix.
     #
     # 1022:150a must also be pinned to prevent the root from suspending.
-    # IOMMU-protected Thunderbolt devices can be safely authorized by udev before
-    # boltd starts; this avoids ixgbe probing the tunneled X520 while the chain is
-    # still in a half-authorized D3cold state during boot.
-    services.udev.extraRules = ''
-      # Authorize IOMMU-protected Thunderbolt chains early. Kernel docs recommend
-      # this exact policy for domains with iommu_dma_protection=1.
-      ACTION=="add", SUBSYSTEM=="thunderbolt", ATTRS{iommu_dma_protection}=="1", ATTR{authorized}=="0", ATTR{authorized}="1"
+    # These PCI rules must run before systemd's 80-drivers.rules on every add
+    # event, including boot coldplug and docking hotplug. Otherwise udev's kmod
+    # builtin can autoload ixgbe while the tunneled X520 is still in D3cold.
+    # Thunderbolt authorization stays with boltd; pre-authorizing the TB chain
+    # via udev can leave hotplugged docks authorized without a PCIe tunnel.
+    services.udev = {
+      packages = [
+        (pkgs.writeTextFile {
+          name = "79-usb4-sfp-pm-rules";
+          destination = "/etc/udev/rules.d/79-usb4-sfp-pm.rules";
+          text = ''
+            # AMD Strix Halo PCIe USB4 Bridge - root of the Thunderbolt tree.
+            # Must not runtime-suspend or all downstream TB devices disconnect.
+            ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x1022", ATTR{device}=="0x150a", ATTR{power/control}="on"
+            ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x1022", ATTR{device}=="0x150a", ATTR{d3cold_allowed}="0"
 
-      # AMD Strix Halo PCIe USB4 Bridge — root of the Thunderbolt tree.
-      # Must not runtime-suspend or all downstream TB devices disconnect.
-      ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x1022", ATTR{device}=="0x150a", ATTR{power/control}="on"
-      ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x1022", ATTR{device}=="0x150a", ATTR{d3cold_allowed}="0"
+            # Intel X520/82599 SFP+ functions in the TB enclosure. If these enter
+            # D3cold before ixgbe binds, probe fails with "device inaccessible".
+            ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x8086", ATTR{device}=="0x10fb", ATTR{power/control}="on"
+            ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x8086", ATTR{device}=="0x10fb", ATTR{d3cold_allowed}="0"
+          '';
+        })
+      ];
 
-      # Intel X520/82599 SFP+ functions in the TB enclosure. If these enter
-      # D3cold before ixgbe binds, probe fails with "device inaccessible".
-      ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x8086", ATTR{device}=="0x10fb", ATTR{power/control}="on"
-      ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x8086", ATTR{device}=="0x10fb", ATTR{d3cold_allowed}="0"
-
-      # Trigger ethtool settings when the renamed interface appears.
-      # "move" is the udev action fired when udevd renames the interface.
-      ACTION=="add|move", SUBSYSTEM=="net", KERNEL=="ixgbe0", RUN+="${pkgs.systemd}/bin/systemctl restart ixgbe-force-settings.service"
-    '';
+      extraRules = ''
+        # Trigger ethtool settings when the renamed interface appears.
+        # "move" is the udev action fired when udevd renames the interface.
+        ACTION=="add|move", SUBSYSTEM=="net", KERNEL=="ixgbe0", RUN+="${pkgs.systemd}/bin/systemctl restart ixgbe-force-settings.service"
+      '';
+    };
 
     # Apply ethtool settings after the interface comes up.
     # Disabling offloads and flow control reduces the intermittent freeze seen
