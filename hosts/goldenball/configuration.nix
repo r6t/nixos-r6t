@@ -61,6 +61,28 @@ in
          ID_INPUT_TOUCHPAD_INTEGRATION=internal
       '';
     })
+    (pkgs.writeTextFile {
+      name = "79-goldenball-usb4-pm-rules";
+      destination = "/etc/udev/rules.d/79-goldenball-usb4-pm.rules";
+      text = ''
+        # Strix Halo PCIe USB4 bridge roots. Must not runtime-suspend or all
+        # downstream Thunderbolt/USB4 PCIe devices can disconnect.
+        ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x1022", ATTR{device}=="0x150a", ATTR{power/control}="on"
+        ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x1022", ATTR{device}=="0x150a", ATTR{d3cold_allowed}="0"
+
+        # Strix Halo USB4 host routers expose DPIA adapters used by the docked
+        # display path. Keep them awake to avoid USB4/display cascade failures.
+        ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x1022", ATTR{device}=="0x158d", ATTR{power/control}="on"
+        ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x1022", ATTR{device}=="0x158d", ATTR{d3cold_allowed}="0"
+        ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x1022", ATTR{device}=="0x158e", ATTR{power/control}="on"
+        ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x1022", ATTR{device}=="0x158e", ATTR{d3cold_allowed}="0"
+
+        # Intel PCIe switches inside the dock/enclosure must not enter D3cold;
+        # hotplugged downstream devices have failed to wake behind them.
+        ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x8086", ATTR{device}=="0x0b26", ATTR{d3cold_allowed}="0"
+        ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x8086", ATTR{device}=="0x15ef", ATTR{d3cold_allowed}="0"
+      '';
+    })
   ];
 
   boot = {
@@ -220,11 +242,6 @@ in
     services.llama-cpp.wantedBy = lib.mkForce [ ];
   };
 
-  # USB4/Thunderbolt display stability: Strix Halo USB4 host routers
-  # (1022:158d, 1022:158e) use DPIA adapters that crash ~10 min after boot
-  # if the router enters runtime suspend. Intel PCIe switches inside the hub
-  # (8086:0b26, 8086:15ef) must not enter D3cold (hotplugged, fail to wake).
-  #
   # GZ302EA dock: ignore phantom REL Mouse subdevice from hid_asus. The dock
   # exposes both a Mouse and a Touchpad; the Mouse bypasses libinput DWT
   # suppression. Ignoring it is safe — ABS_MT Touchpad handles all cursor
@@ -236,13 +253,6 @@ in
   # interface. See device map comment at top of file.
   services = {
     udev.extraRules = ''
-      ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x1022", ATTR{device}=="0x158d", ATTR{power/control}="on"
-      ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x1022", ATTR{device}=="0x158d", ATTR{d3cold_allowed}="0"
-      ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x1022", ATTR{device}=="0x158e", ATTR{power/control}="on"
-      ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x1022", ATTR{device}=="0x158e", ATTR{d3cold_allowed}="0"
-      ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x8086", ATTR{device}=="0x0b26", ATTR{d3cold_allowed}="0"
-      ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x8086", ATTR{device}=="0x15ef", ATTR{d3cold_allowed}="0"
-
       SUBSYSTEM=="input", ATTRS{idVendor}=="0b05", ATTRS{idProduct}=="1a30", ENV{ID_INPUT_MOUSE}=="1", ENV{ID_INPUT_TOUCHPAD}!="1", ENV{LIBINPUT_IGNORE_DEVICE}="1"
 
       ACTION=="add", SUBSYSTEM=="hid", KERNELS=="0003:0B05:1A30.0004", DRIVER=="hid_asus", \

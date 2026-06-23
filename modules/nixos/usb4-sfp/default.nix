@@ -30,21 +30,11 @@
       };
     };
 
-    # Thunderbolt link stability for USB4-tunneled ixgbe NIC.
-    #
-    # Without these rules the Thunderbolt chain drops every ~60s:
-    #   AMD 1022:150a PCIe USB4 Bridge (00:01.1, 00:01.2) — root of the TB tree,
-    #     power/control=auto d3cold_allowed=1 by default. When it suspends it
-    #     kills all downstream devices including the NIC.
-    #   Intel 8086:0b26 Goshen Ridge bridges — already pinned via existing rules
-    #     in goldenball/configuration.nix.
-    #   Intel 8086:15ef JHL7440 bridges (inside the DM7801BJ enclosure) — already
-    #     pinned via existing rules in goldenball/configuration.nix.
-    #
-    # 1022:150a must also be pinned to prevent the root from suspending.
-    # These PCI rules must run before systemd's 80-drivers.rules on every add
-    # event, including boot coldplug and docking hotplug. Otherwise udev's kmod
-    # builtin can autoload ixgbe while the tunneled X520 is still in D3cold.
+    # Adapter-local PM guard for USB4-tunneled ixgbe NICs. The X520 functions
+    # must not enter D3cold before ixgbe binds, or probe can fail with
+    # "device inaccessible". Keep this before systemd's 80-drivers.rules so it
+    # runs before udev's kmod builtin autoloads ixgbe on coldplug or hotplug.
+    # Host/router/dock-specific Thunderbolt bridge PM belongs in host configs.
     # Thunderbolt authorization stays with boltd; pre-authorizing the TB chain
     # via udev can leave hotplugged docks authorized without a PCIe tunnel.
     services.udev = {
@@ -53,11 +43,6 @@
           name = "79-usb4-sfp-pm-rules";
           destination = "/etc/udev/rules.d/79-usb4-sfp-pm.rules";
           text = ''
-            # AMD Strix Halo PCIe USB4 Bridge - root of the Thunderbolt tree.
-            # Must not runtime-suspend or all downstream TB devices disconnect.
-            ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x1022", ATTR{device}=="0x150a", ATTR{power/control}="on"
-            ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x1022", ATTR{device}=="0x150a", ATTR{d3cold_allowed}="0"
-
             # Intel X520/82599 SFP+ functions in the TB enclosure. If these enter
             # D3cold before ixgbe binds, probe fails with "device inaccessible".
             ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x8086", ATTR{device}=="0x10fb", ATTR{power/control}="on"

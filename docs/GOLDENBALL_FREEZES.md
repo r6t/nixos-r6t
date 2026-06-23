@@ -127,7 +127,8 @@ kernel: ixgbe 0000:44:00.1: Adapter removed
 
 ### Mitigations in place
 
-Udev rules in `hosts/goldenball/configuration.nix` + `modules/nixos/usb4-sfp/default.nix`:
+Udev rules in `hosts/goldenball/configuration.nix` plus X520 function rules in
+`modules/nixos/usb4-sfp/default.nix`:
 
 ```
 1022:150a  power/control=on, d3cold_allowed=0   (USB4 PCIe bridge root)
@@ -137,7 +138,18 @@ Udev rules in `hosts/goldenball/configuration.nix` + `modules/nixos/usb4-sfp/def
 8086:15ef  d3cold_allowed=0                     (Intel PCIe switch in dock)
 ```
 
-**The `d3cold_allowed=0` on 158d/158e was added Jun 2026** (previously only `power/control=on` was set for those two). The 150a was correctly pinned earlier by usb4-sfp module.
+**The `d3cold_allowed=0` on 158d/158e was added Jun 2026** (previously only `power/control=on` was set for those two). The 150a pin is goldenball-specific and lives in an ordered host udev rule; the X520/82599 function pins live in the shared `usb4-sfp` module.
+
+Kernel params in `hosts/goldenball/configuration.nix` for the same USB4/TB PCIe tunnel:
+
+```
+pcie_port_pm=off
+pcie_ports=native
+pci=realloc
+thunderbolt.clx=0
+```
+
+`thunderbolt.clx=0` fixed the Jun 2026 hotplug failure where `boltctl` showed the dock/enclosure authorized but `lspci` never showed the downstream PCIe tree or ixgbe NIC.
 
 ### Next steps if TB cascade recurs
 
