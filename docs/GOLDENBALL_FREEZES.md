@@ -42,22 +42,23 @@ kernel: amdgpu 0000:c4:00.0: [drm] *ERROR* [CRTC:416:crtc-0] flip_done timed out
 kwin_wayland: Pageflip timed out! This is a bug in the amdgpu kernel driver
 ```
 
-**What it is:** The DCN 3.5.1 display engine (eDP-1 internal panel, CRTC-0) stalls waiting for a page-flip acknowledgement from the GPU hardware. Once triggered it fires every second indefinitely. With `gpu_recovery=1` the system sometimes self-recovers; without recovery it hard-freezes requiring power cycle.
+**What it is:** The DCN 3.5.1 display engine stalls waiting for a page-flip acknowledgement from the GPU hardware. Most observed incidents hit eDP-1 (internal panel, CRTC-0), but Jun 23 2026 confirmed the same class can also hit external DP-4 (CRTC-1). Once triggered it fires every second indefinitely. With `gpu_recovery=1` the system sometimes self-recovers; without recovery it hard-freezes requiring power cycle.
 
-**Always affects eDP-1 (internal panel) only.** External display on DP-4 (via Plugable TB4 dock) continues working during the freeze.
+**Originally eDP-1-only in collected logs, but no longer exclusively so.** External display on DP-4 (via Plugable TB4 dock) previously continued working during eDP-1 freezes; Jun 23 showed DP-4 itself can stall as `CRTC:428:crtc-1`.
 
 **This is a known upstream kernel bug with no fix as of kernel 7.0/7.1-rc5 (May 2026).** The DCN 3.5.x code has not been touched upstream since June 2024. Not a hardware defect.
 
 ### Confirmed triggers
 
-| Trigger                                                                                                   | Evidence                                                                    |
-| --------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| `VrrPolicy=2` (Always) in KWin — compositor issues adaptive-sync flips on desktop                         | Flips started within 90s of login with Steam open, before any game launched |
-| Heavy Vulkan compute (MTP inference) followed by idle — display engine transitions out of peak-load state | Freeze consistently ~2 min after llama-cpp finishes generating              |
-| USB4/TB4 dock connected + PCIe link instability → DPIA path disruption → flip timeout ~1h later           | Jun 2 2026: xhci died at 21:11, flip_done at 22:09                          |
-| USB4/TB4 dock hotplug without a PCIe link failure                                                         | Jun 15 2026: eDP froze 22s after display HPD, while external DP-4 survived  |
-| `VrrPolicy=1` (Automatic) does NOT fully prevent it                                                       | Still occurred with Automatic mode + external display connected             |
-| Idle Plasma desktop startup (~100s after KWin start, no GPU load)                                         | Jun 4 2026: flip_done at 18:46:24, boot at 18:44:14, no llama-cpp/USB4/dock |
+| Trigger                                                                                                   | Evidence                                                                               |
+| --------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `VrrPolicy=2` (Always) in KWin — compositor issues adaptive-sync flips on desktop                         | Flips started within 90s of login with Steam open, before any game launched            |
+| Heavy Vulkan compute (MTP inference) followed by idle — display engine transitions out of peak-load state | Freeze consistently ~2 min after llama-cpp finishes generating                         |
+| USB4/TB4 dock connected + PCIe link instability → DPIA path disruption → flip timeout ~1h later           | Jun 2 2026: xhci died at 21:11, flip_done at 22:09                                     |
+| USB4/TB4 dock hotplug without a PCIe link failure                                                         | Jun 15 2026: eDP froze 22s after display HPD, while external DP-4 survived             |
+| USB4/TB4 dock boot-time cascade + external 4K240 DP-4                                                     | Jun 23 2026: xhci died at 17:58:51, DP-4 HPD at 17:58:59, crtc-1 flip_done at 18:17:28 |
+| `VrrPolicy=1` (Automatic) does NOT fully prevent it                                                       | Still occurred with Automatic mode + external display connected                        |
+| Idle Plasma desktop startup (~100s after KWin start, no GPU load)                                         | Jun 4 2026: flip_done at 18:46:24, boot at 18:44:14, no llama-cpp/USB4/dock            |
 
 ### Mitigations in place (as of Jun 2026)
 
@@ -97,6 +98,31 @@ represent a root USB4 link collapse. All configured amdgpu mitigations and
 
 This establishes clean dock/display hotplug itself as a trigger for the primary
 DCN 3.5.1 eDP bug, independent of the secondary USB4 PCIe cascade.
+
+### Jun 23 2026: external DP-4 / CRTC-1 stalled
+
+At boot, the Plugable USB4 chain had a full PCIe/USB4 cascade: `00:01.1` link
+down, retimers disconnected, `xhci_hcd 0000:52:00.0` logged `HC died`, then the
+dock re-enumerated. DP hotplug reached amdgpu at 17:58:59 (`DMUB HPD IRQ
+callback: link_index=5`). About 18.5 minutes later, KWin began logging
+`Pageflip timed out!`, and the kernel logged:
+
+```
+amdgpu 0000:c4:00.0: [drm] *ERROR* [CRTC:428:crtc-1] flip_done timed out
+```
+
+This time the visible hard-frozen output was the external DP-4 display, not the
+internal eDP panel. `kscreen-doctor -o` still reported DP-4 connected/enabled at
+3840x2160@240 with VRR disabled, and `/sys/class/drm/card1-DP-4/status` remained
+`connected`, so this was a display pipeline stall rather than unplug detection.
+There was no fresh USB4 link-down event immediately before the 18:17 timeout;
+the only nearby userspace event was a PowerDevil backlight helper around
+18:16:51-18:17:02. No ENOMEM / framebuffer pin failure was observed in the
+collected log slice.
+
+This disproves the earlier eDP-only assumption. Hypothesis: the boot-time USB4
+cascade left the DP tunnel/display engine in a fragile state, and the external
+4K240 DP-4 scanout later hit the same DCN 3.5.1 page-flip failure path.
 
 ### Next steps if freezes continue
 
@@ -258,6 +284,7 @@ No evidence of hardware defect in any collected logs (no MCE, no hardware ECC er
 | Jun 9 18:45  | Boot; flip_done at 19:17:32. Occurred with VrrPolicy=0, no dock connected.               |
 | Jun 13 16:15 | USB4 `00:01.2` link dropped and recovered; eDP flip timeout followed at 16:17:25.        |
 | Jun 15 12:35 | Dock hotplug completed without link loss; eDP flip timeout followed 31 sec after attach. |
+| Jun 23 18:17 | External DP-4 hard-froze; `CRTC:428:crtc-1` flip_done after boot-time USB4 cascade.      |
 
 ---
 

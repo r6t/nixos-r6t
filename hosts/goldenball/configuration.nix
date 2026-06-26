@@ -561,7 +561,10 @@ in
     sound.enable = true;
     ssh.enable = true;
     sshfs.enable = true;
-    steam.enable = true;
+    steam = {
+      enable = true;
+      goldenballGameLauncher.enable = true;
+    };
     syncthing.enable = true;
     tailscale.enable = true;
     usb4-sfp.enable = true;
