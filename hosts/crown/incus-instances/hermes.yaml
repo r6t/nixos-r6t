@@ -24,6 +24,8 @@ devices:
     listen: tcp:0.0.0.0:9119
     type: proxy
   hermes-data:
+    # Hermes uses a static hermes user, not DynamicUser/StateDirectory, so mount
+    # directly to /var/lib/hermes instead of /var/lib/private/hermes.
     path: /var/lib/hermes
     shift: "true"
     source: /mnt/crownstore/app-storage/hermes
