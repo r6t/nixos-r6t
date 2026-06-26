@@ -20,6 +20,11 @@
     "photos.r6t.io" = { upstream = "http://localhost:2283"; compress = false; };
   };
 
+  hermes = {
+    "api.hermes.r6t.io" = { upstream = "http://localhost:8642"; compress = false; };
+    "hermes.r6t.io" = { upstream = "http://localhost:9119"; };
+  };
+
   jellyfin = {
     "jellyfin.r6t.io" = { upstream = "http://localhost:8096"; };
   };

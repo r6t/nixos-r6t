@@ -169,6 +169,7 @@ let
   nixvimConfig = {
     programs.nixvim = {
       version.enableNixpkgsReleaseCheck = false;
+      nixpkgs.source = pkgs.path;
       defaultEditor = true;
       enable = true;
       extraPlugins = with pkgs.vimPlugins; [

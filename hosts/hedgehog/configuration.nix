@@ -3,6 +3,8 @@
   imports = [
     inputs.home-manager.nixosModules.home-manager
     inputs.sops-nix.nixosModules.sops
+    inputs.nix-flatpak.nixosModules.nix-flatpak
+    inputs.comfyui-nix.nixosModules.default
     ./hardware-configuration.nix
     ../../modules/default.nix
   ];
@@ -34,8 +36,6 @@
 
   services.xserver = {
     enable = true;
-    displayManager.defaultSession = "none";
-    desktopManager.enable = false;
     videoDrivers = [ "nvidia" ];
   };
 
@@ -109,12 +109,13 @@
     tailscale.enable = true;
     user.enable = true;
 
-    # ComfyUI image generation — CUDA, accessible on tailnet
-    comfyui = {
-      enable = true;
-      port = 8188;
-      listenAddress = "0.0.0.0";
-      autoStart = true;
-    };
+  };
+
+  # ComfyUI image generation — CUDA, accessible on tailnet.
+  services.comfyui = {
+    enable = true;
+    gpuSupport = "cuda";
+    port = 8188;
+    listenAddress = "0.0.0.0";
   };
 }

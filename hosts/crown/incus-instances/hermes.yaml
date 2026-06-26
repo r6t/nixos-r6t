@@ -1,0 +1,52 @@
+config:
+  security.nesting: "true"
+  user.user-data: |
+    #cloud-config
+    datasource_list: [NoCloud, None]
+description: hermes
+devices:
+  eth0:
+    name: eth0
+    nictype: bridged
+    parent: br1
+    type: nic
+  git:
+    path: /mnt/git
+    shift: "true"
+    source: /home/r6t/git
+    type: disk
+  hermes-api-port:
+    connect: tcp:127.0.0.1:8642
+    listen: tcp:0.0.0.0:8642
+    type: proxy
+  hermes-dashboard-port:
+    connect: tcp:127.0.0.1:9119
+    listen: tcp:0.0.0.0:9119
+    type: proxy
+  hermes-data:
+    path: /var/lib/hermes
+    shift: "true"
+    source: /mnt/crownstore/app-storage/hermes
+    type: disk
+  hermes-env:
+    path: /var/lib/hermes/hermes.env
+    readonly: "true"
+    source: /mnt/crownstore/Sync/app-config/hermes/hermes.env
+    type: disk
+  root:
+    path: /
+    pool: default
+    type: disk
+  seed-meta-data:
+    path: /var/lib/cloud/seed/nocloud/meta-data
+    source: /home/r6t/git/nixos-r6t/hosts/crown/incus-instances/seed/hermes.meta-data
+    type: disk
+  seed-network-config:
+    path: /var/lib/cloud/seed/nocloud/network-config
+    source: /home/r6t/git/nixos-r6t/hosts/crown/incus-instances/seed/hermes.network-config
+    type: disk
+  seed-user-data:
+    path: /var/lib/cloud/seed/nocloud/user-data
+    source: /home/r6t/git/nixos-r6t/hosts/crown/incus-instances/seed/hermes.user-data
+    type: disk
+name: hermes
