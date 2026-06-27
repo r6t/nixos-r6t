@@ -24,16 +24,11 @@ devices:
     listen: tcp:0.0.0.0:9119
     type: proxy
   hermes-data:
-    # Hermes uses a static hermes user, not DynamicUser/StateDirectory, so mount
-    # directly to /var/lib/hermes instead of /var/lib/private/hermes.
+    # Docker maps this into the Hermes container as /opt/data. Keep .env,
+    # config.yaml, sessions, skills, memories, and logs here.
     path: /var/lib/hermes
     shift: "true"
     source: /mnt/crownstore/app-storage/hermes
-    type: disk
-  hermes-env:
-    path: /var/lib/hermes/hermes.env
-    readonly: "true"
-    source: /mnt/crownstore/Sync/app-config/hermes/hermes.env
     type: disk
   root:
     path: /

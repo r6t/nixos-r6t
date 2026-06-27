@@ -1,17 +1,6 @@
-{ inputs, lib, pkgs, ... }:
+{ pkgs, ... }:
 
 let
-  system = pkgs.stdenv.hostPlatform.system;
-  hermesPackage = inputs.hermes-agent.packages.${system}.default;
-
-  hermesTools = with pkgs; [
-    gh
-    jq
-    nodejs_22
-    signal-cli
-    uv
-  ];
-
   signalCliDaemon = pkgs.writeShellScript "signal-cli-hermes-daemon" ''
     set -eu
 
@@ -29,95 +18,76 @@ let
 in
 {
   imports = [
-    inputs.hermes-agent.nixosModules.default
     ./lib/base.nix
     ./lib/mullvad-dns.nix
+    ../modules/nixos/docker/default.nix
   ];
 
   networking = {
     hostName = "hermes";
-    firewall.allowedTCPPorts = [ 8642 9119 ];
+    firewall = {
+      allowedTCPPorts = [ 8642 9119 ];
+      extraCommands = ''
+        iptables -I INPUT 1 -i br-+ -p udp --dport 53 -j ACCEPT
+        iptables -I INPUT 1 -i br-+ -p tcp --dport 53 -j ACCEPT
+      '';
+    };
   };
 
-  environment.systemPackages = hermesTools;
+  mine.docker.enable = true;
 
-  services.hermes-agent = {
-    enable = true;
-    package = hermesPackage;
-    stateDir = "/var/lib/hermes";
-    workingDirectory = "/var/lib/hermes/workspace";
-    environmentFiles = [ "/var/lib/hermes/hermes.env" ];
-    environment = {
-      API_SERVER_ENABLED = "true";
-      API_SERVER_HOST = "0.0.0.0";
-      API_SERVER_PORT = "8642";
-      HERMES_DASHBOARD_PUBLIC_URL = "https://hermes.r6t.io";
-      SIGNAL_HTTP_URL = "http://127.0.0.1:8080";
-    };
-    addToSystemPackages = true;
-    extraPackages = hermesTools;
-    settings = {
-      model.default = "anthropic/claude-sonnet-4";
-      terminal = {
-        backend = "local";
-        timeout = 180;
-        home_mode = "auto";
+  # Docker bridge networks and some containerized services expect this.
+  boot.kernel.sysctl."vm.overcommit_memory" = "1";
+
+  users.groups.hermes.gid = 10000;
+  users.users.hermes = {
+    isSystemUser = true;
+    group = "hermes";
+    uid = 10000;
+    home = "/var/lib/hermes";
+  };
+
+  environment.systemPackages = with pkgs; [
+    jq
+    signal-cli
+  ];
+
+  virtualisation.oci-containers = {
+    backend = "docker";
+    containers.hermes = {
+      image = "nousresearch/hermes-agent:latest";
+      pull = "always";
+      cmd = [ "gateway" "run" ];
+      volumes = [
+        "/var/lib/hermes:/opt/data"
+        "/mnt/git:/mnt/git"
+      ];
+      environment = {
+        HERMES_UID = "10000";
+        HERMES_GID = "10000";
+        HERMES_DASHBOARD = "1";
+        HERMES_DASHBOARD_PUBLIC_URL = "https://hermes.r6t.io";
+        API_SERVER_ENABLED = "true";
+        API_SERVER_HOST = "0.0.0.0";
+        API_SERVER_PORT = "8642";
+        SIGNAL_HTTP_URL = "http://127.0.0.1:8080";
       };
-      agent.max_turns = 60;
-      memory = {
-        memory_enabled = true;
-        user_profile_enabled = true;
-      };
-      tool_loop_guardrails = {
-        warnings_enabled = true;
-        hard_stop_enabled = true;
-      };
-      platform_toolsets.signal = [ "hermes-signal" ];
-      platforms.signal.enabled = true;
+      networks = [ "host" ];
+      extraOptions = [ "--shm-size=1g" ];
     };
   };
 
   systemd.tmpfiles.rules = [
     "d /mnt 0755 root root -"
+    "d /mnt/git 0755 root root -"
+    "d /var/lib/hermes 0750 hermes hermes -"
     "d /var/lib/hermes/signal-cli 0700 hermes hermes -"
   ];
 
   systemd.services = {
-    hermes-agent = {
+    docker-hermes = {
       wants = [ "signal-cli.service" ];
       after = [ "signal-cli.service" ];
-      serviceConfig.EnvironmentFile = "-/var/lib/hermes/hermes.env";
-      serviceConfig.ReadWritePaths = lib.mkAfter [ "/mnt/git" ];
-    };
-
-    hermes-dashboard = {
-      description = "Hermes Agent Dashboard";
-      wantedBy = [ "multi-user.target" ];
-      after = [ "network-online.target" "hermes-agent.service" ];
-      wants = [ "network-online.target" ];
-
-      environment = {
-        HOME = "/var/lib/hermes";
-        HERMES_HOME = "/var/lib/hermes/.hermes";
-        HERMES_MANAGED = "true";
-        MESSAGING_CWD = "/var/lib/hermes/workspace";
-      };
-
-      path = [ hermesPackage ] ++ hermesTools;
-
-      serviceConfig = {
-        User = "hermes";
-        Group = "hermes";
-        WorkingDirectory = "/var/lib/hermes/workspace";
-        EnvironmentFile = [
-          "/var/lib/hermes/.hermes/.env"
-          "-/var/lib/hermes/hermes.env"
-        ];
-        ExecStart = "${hermesPackage}/bin/hermes dashboard --host 0.0.0.0 --port 9119 --no-open";
-        Restart = "always";
-        RestartSec = 5;
-        UMask = "0007";
-      };
     };
 
     signal-cli = {
@@ -132,10 +102,7 @@ in
         User = "hermes";
         Group = "hermes";
         WorkingDirectory = "/var/lib/hermes";
-        EnvironmentFile = [
-          "-/var/lib/hermes/.hermes/.env"
-          "-/var/lib/hermes/hermes.env"
-        ];
+        EnvironmentFile = [ "-/var/lib/hermes/.env" ];
         ExecStart = signalCliDaemon;
         Restart = "always";
         RestartSec = 10;

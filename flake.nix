@@ -10,10 +10,6 @@
       url = "github:nix-community/home-manager/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    hermes-agent = {
-      url = "github:NousResearch/hermes-agent";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     hardware = {
       url = "github:nixos/nixos-hardware";
       inputs.nixpkgs.follows = "nixpkgs";
