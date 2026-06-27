@@ -314,6 +314,21 @@ in
           auto-download options instead.
         '';
       }
+      {
+        assertion = cfg.kvCacheQuant == "f16" || cfg.flashAttn != "off";
+        message = ''
+          mine.llama-cpp: quantized KV cache requires flash attention in current
+          llama.cpp because this module sets both --cache-type-k and
+          --cache-type-v. Use kvCacheQuant = "f16" when flashAttn = "off".
+        '';
+      }
+      {
+        assertion = !cfg.cuda || (config.nixpkgs.config.cudaSupport or false);
+        message = ''
+          mine.llama-cpp.cuda = true requires nixpkgs.config.cudaSupport = true
+          so pkgs.llama-cpp is built with the CUDA backend.
+        '';
+      }
     ];
 
     services.llama-cpp = {
@@ -368,6 +383,11 @@ in
     # GPU backends including the rocmfp4 fork (which is HIP-based + Vulkan).
     systemd.services.llama-cpp = lib.mkMerge [
       {
+        unitConfig = {
+          # GPU init failures should not create an endless coredump/probe loop.
+          StartLimitBurst = 3;
+          StartLimitIntervalSec = "30min";
+        };
         # Upstream removed services.llama-cpp.extraFlags in favor of settings,
         # but llama-server still has flags that do not round-trip through
         # lib.cli.toCommandLine, notably rocmfp4's single-dash "-dev".

@@ -8,7 +8,11 @@
     ./lib/mullvad-dns.nix
   ];
 
-  nixpkgs.config.allowUnfree = true;
+  nixpkgs.config = {
+    allowUnfree = true;
+    cudaSupport = true;
+    nvidia.acceptLicense = true;
+  };
 
   hardware.graphics.enable = true;
 
@@ -43,17 +47,15 @@
       hfRepo = "unsloth/Qwen3-14B-GGUF";
       hfFile = "Qwen3-14B-Q4_K_M.gguf";
 
-      contextSize = 65536; # 64K. 14B @ Q4_K_M uses ~9 GB, leaving ~7 GB headroom.
-      kvCacheQuant = "q4_0"; # Halves KV cache VRAM vs f16.
+      contextSize = 32768; # 32K with f16 KV keeps the 16 GB card below the hard VRAM cap.
+      kvCacheQuant = "f16"; # Current llama.cpp requires flash-attn for quantized V cache.
       flashAttn = "off"; # Blackwell sm_120 has multiple FA-related bugs:
       # - #23717: q8_0/q8_0 + FA gibberish on RTX 5060 Ti
       # - #23693: q4_0 KV + FA garbled output regression vs b9174
       # - #23210: CUDA crash on Qwen3.6-27B + FA + MTP at long ctx
-      # All filed against this exact GPU. Disabling FA uses stable vanilla
-      # CUDA kernels which support quantized KV without these regressions.
-      ubatchSize = 2048; # CUDA Blackwell tuning. Module default 1024 is for AMD
-      # RDNA 3.5 APU (Strix Halo); the option doc already notes
-      # 2048 is reasonable for discrete NVIDIA.
+      # All filed against this exact GPU. Disabling FA uses the stable vanilla
+      # CUDA path; keep KV f16 while FA is disabled.
+      ubatchSize = 1024; # Conservative while validating RTX 5060 Ti over Thunderbolt.
       cacheRamMiB = 8192; # Standard transformer supports --cache-reuse.
       # Disk-backed prompt cache gives warm-prefill speedup across turns.
 
