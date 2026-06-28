@@ -32,7 +32,12 @@
     llama-cpp = {
       after = [ "llama-cpp-cuda-driver-libs.service" ];
       wants = [ "llama-cpp-cuda-driver-libs.service" ];
-      environment.LD_LIBRARY_PATH = "/usr/lib64";
+      environment = {
+        LD_LIBRARY_PATH = "/usr/lib64";
+        # CUDA graphs crashed the 595.84 GSP driver on RTX 5060 Ti during
+        # llama.cpp validation; keep Blackwell on the non-graphs CUDA path.
+        GGML_CUDA_ENABLE_GRAPHS = "0";
+      };
     };
 
     llama-cpp-cuda-driver-libs = {
@@ -87,7 +92,7 @@
       hfRepo = "unsloth/Qwen3-14B-GGUF";
       hfFile = "Qwen3-14B-Q4_K_M.gguf";
 
-      contextSize = 32768; # 32K with f16 KV keeps the 16 GB card below the hard VRAM cap.
+      contextSize = 16384; # 32K + full GPU offload OOMs on this llama.cpp/CUDA build.
       kvCacheQuant = "f16"; # Current llama.cpp requires flash-attn for quantized V cache.
       flashAttn = "off"; # Blackwell sm_120 has multiple FA-related bugs:
       # - #23717: q8_0/q8_0 + FA gibberish on RTX 5060 Ti
@@ -95,7 +100,7 @@
       # - #23210: CUDA crash on Qwen3.6-27B + FA + MTP at long ctx
       # All filed against this exact GPU. Disabling FA uses the stable vanilla
       # CUDA path; keep KV f16 while FA is disabled.
-      ubatchSize = 1024; # Conservative while validating RTX 5060 Ti over Thunderbolt.
+      ubatchSize = 256; # Keep CUDA compute buffers inside the 16 GB hard VRAM cap.
       cacheRamMiB = 8192; # Standard transformer supports --cache-reuse.
       # Disk-backed prompt cache gives warm-prefill speedup across turns.
 
