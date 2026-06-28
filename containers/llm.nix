@@ -123,6 +123,8 @@
       # Disk-backed prompt cache gives warm-prefill speedup across turns.
 
       extraFlags = [
+        "--device"
+        "CUDA0"
         "--jinja"
         "--no-mmproj"
         # Thinking mode off by default. Enable per-conversation via Open WebUI
