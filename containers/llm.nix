@@ -126,6 +126,8 @@
         "--device"
         "CUDA0"
         "--jinja"
+        "--reasoning"
+        "off"
         "--no-mmproj"
         # Thinking mode off by default. Enable per-conversation via Open WebUI
         # Workspace preset with chat_template_kwargs={"enable_thinking": true}.
