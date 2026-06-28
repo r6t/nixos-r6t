@@ -8,6 +8,7 @@ let
   rocmfp4Package = outputs.packages.${pkgs.stdenv.hostPlatform.system}.rocmfp4-llama;
   selectedPackage =
     if cfg.rocmfp4 then rocmfp4Package
+    else if cfg.cuda then pkgs.llama-cpp-cuda
     else if cfg.rocm then pkgs.llama-cpp-rocm
     else if cfg.vulkan then pkgs.llama-cpp-vulkan
     else pkgs.llama-cpp;
@@ -201,11 +202,11 @@ in
       type = lib.types.bool;
       default = false;
       description = ''
-        Enable CUDA GPU acceleration. Does not change the package — CUDA support
-        is compiled in when nixpkgs.config.cudaSupport = true (set automatically
-        by mine.nvidia-cuda). This flag exists to opt-in to the service hardening
-        overrides required for CUDA: disabling MemoryDenyWriteExecute (CUDA PTX
-        JIT requires W+X pages) and granting render/video group access.
+        Enable CUDA GPU acceleration using pkgs.llama-cpp-cuda. This is the
+        NVIDIA path used by crown's llm container. The flag also opts in to the
+        service hardening overrides required for CUDA: disabling
+        MemoryDenyWriteExecute (CUDA PTX JIT requires W+X pages) and granting
+        render/video group access.
       '';
     };
 
@@ -335,6 +336,7 @@ in
       enable = true;
 
       # GPU backend selection. The default nixpkgs llama-cpp is CPU-only.
+      #   - llama-cpp-cuda:   libggml-cuda.so for NVIDIA GPUs.
       #   - llama-cpp-rocm:   libggml-hip.so for RDNA/CDNA via ROCm/HIP.
       #   - llama-cpp-vulkan: libggml-vulkan.so for any Vulkan-capable GPU.
       #   - rocmfp4Package:   custom fork with ROCmFP4 quants + dual HIP/Vulkan.
