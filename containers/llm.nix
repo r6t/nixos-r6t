@@ -109,7 +109,7 @@
       hfFile = "Qwen3-14B-Q4_K_M.gguf";
 
       gpuLayers = "all"; # Require full model offload to the RTX 5060 Ti.
-      contextSize = 8192; # Leave hard VRAM headroom on the 16 GB card.
+      contextSize = 32768; # Native Qwen3-14B context; fits with conservative CUDA batch sizes.
       kvCacheQuant = "f16"; # Current llama.cpp requires flash-attn for quantized V cache.
       flashAttn = "off"; # Blackwell sm_120 has multiple FA-related bugs:
       # - #23717: q8_0/q8_0 + FA gibberish on RTX 5060 Ti
