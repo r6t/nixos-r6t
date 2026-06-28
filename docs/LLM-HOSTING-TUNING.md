@@ -337,10 +337,16 @@ overflow to system memory. Models that exceed 16 GB will OOM.
 
 Measured/validated operating point on crown:
 
-| Model     | Quant  | Context | KV  | Prompt cache | Notes                                      |
-| --------- | ------ | ------- | --- | ------------ | ------------------------------------------ |
-| Qwen3-14B | Q4_K_M | 16K     | f16 | off          | Safe target after 32K CUDA driver failure  |
-| Qwen3-14B | Q4_K_M | 32K     | f16 | on           | Starts, but long prompt reuse crashed CUDA |
+| Model     | Quant  | Context | KV  | Prompt cache | Notes                                       |
+| --------- | ------ | ------- | --- | ------------ | ------------------------------------------- |
+| Qwen3-14B | Q4_K_M | 16K     | f16 | off          | Current candidate after CUDA driver failure |
+| Qwen3-14B | Q4_K_M | 32K     | f16 | on           | Starts, but long prompt reuse crashed CUDA  |
+
+Follow-up testing showed prompt cache was not the root cause: with 16K and
+`--cache-ram 0`, a larger prefill still crashed in
+`ggml_cuda_mul_mat_q`/`mmq.cu` and the host driver lost the GPU. Do not force
+MMQ on crown; leave llama.cpp to choose its CUDA matmul path and keep prefill
+batching conservative.
 
 Old planning presets:
 

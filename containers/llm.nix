@@ -39,9 +39,6 @@
         # CUDA graphs crashed the 595.84 GSP driver on RTX 5060 Ti during
         # llama.cpp validation; keep Blackwell on the non-graphs CUDA path.
         GGML_CUDA_DISABLE_GRAPHS = "1";
-        # Prefer lower-VRAM custom quantized matmul kernels over cuBLAS. This is
-        # slower for prefill on some GPUs but leaves more headroom on 16 GB.
-        GGML_CUDA_FORCE_MMQ = "1";
         CUDA_MODULE_LOADING = "LAZY";
       };
       serviceConfig.ExecStartPre = [
@@ -119,7 +116,7 @@
       # - #23210: CUDA crash on Qwen3.6-27B + FA + MTP at long ctx
       # All filed against this exact GPU. Disabling FA uses the stable vanilla
       # CUDA path; keep KV f16 while FA is disabled.
-      batchSize = 512; # Reduce CUDA compute-buffer pressure during prompt prefill.
+      batchSize = 256; # Reduce CUDA compute-buffer pressure during prompt prefill.
       ubatchSize = 128; # Keep CUDA launch/memory pressure low on 595.84 + Blackwell.
       cacheRamMiB = 0; # Avoid long-context prompt-cache reuse on unstable Blackwell CUDA path.
 
