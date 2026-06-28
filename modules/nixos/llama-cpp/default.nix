@@ -120,6 +120,15 @@ in
       '';
     };
 
+    gpuLayers = lib.mkOption {
+      type = lib.types.oneOf [ lib.types.int lib.types.str ];
+      default = 99;
+      description = ''
+        Max transformer layers to store in VRAM, passed as --n-gpu-layers.
+        Use "auto" to let llama.cpp fit GPU offload to available device memory.
+      '';
+    };
+
     kvCacheQuant = lib.mkOption {
       type = lib.types.enum [ "f16" "q8_0" "q4_0" ];
       default = "q8_0";
@@ -345,7 +354,7 @@ in
       settings = {
         inherit (cfg) host port;
         # GPU offload: push all transformer layers to VRAM.
-        n-gpu-layers = 99;
+        n-gpu-layers = cfg.gpuLayers;
         # Flash attention: confirmed real gains on RDNA 4 (GFX1201 / KHR_coopmat):
         # +4-11% prefill throughput, +4% generation throughput vs no-FA.
         # Configurable because Blackwell GSP firmware can crash under FA load.

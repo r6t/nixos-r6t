@@ -92,6 +92,7 @@
       hfRepo = "unsloth/Qwen3-14B-GGUF";
       hfFile = "Qwen3-14B-Q4_K_M.gguf";
 
+      gpuLayers = "auto"; # Let llama.cpp fit offload instead of hard-OOMing the driver.
       contextSize = 16384; # 32K + full GPU offload OOMs on this llama.cpp/CUDA build.
       kvCacheQuant = "f16"; # Current llama.cpp requires flash-attn for quantized V cache.
       flashAttn = "off"; # Blackwell sm_120 has multiple FA-related bugs:
