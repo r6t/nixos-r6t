@@ -1,4 +1,4 @@
-{ ... }:
+{ config, pkgs, ... }:
 
 {
   imports = [
@@ -15,6 +15,8 @@
   };
 
   hardware.graphics.enable = true;
+
+  environment.systemPackages = [ config.services.llama-cpp.package ];
 
   networking.hostName = "llm";
 
@@ -36,8 +38,22 @@
         LD_LIBRARY_PATH = "/usr/lib64";
         # CUDA graphs crashed the 595.84 GSP driver on RTX 5060 Ti during
         # llama.cpp validation; keep Blackwell on the non-graphs CUDA path.
-        GGML_CUDA_ENABLE_GRAPHS = "0";
+        GGML_CUDA_DISABLE_GRAPHS = "1";
+        # Prefer lower-VRAM custom quantized matmul kernels over cuBLAS. This is
+        # slower for prefill on some GPUs but leaves more headroom on 16 GB.
+        GGML_CUDA_FORCE_MMQ = "1";
+        CUDA_MODULE_LOADING = "LAZY";
       };
+      serviceConfig.ExecStartPre = [
+        "+${pkgs.writeShellScript "llama-cpp-cuda-preflight" ''
+          set -eu
+          export LD_LIBRARY_PATH=/usr/lib64
+
+          devices="$(${config.services.llama-cpp.package}/bin/llama-bench --list-devices 2>&1)"
+          printf '%s\n' "$devices"
+          printf '%s\n' "$devices" | grep -q 'CUDA0:'
+        ''}"
+      ];
     };
 
     llama-cpp-cuda-driver-libs = {
@@ -81,8 +97,8 @@
 
       # Qwen3 14B @ Q4_K_M: 9 GB model, standard transformer architecture.
       # Standard transformer → KV cache reuse between turns works, giving fast
-      # multi-turn chat. 9 GB model on 16 GB GPU leaves ~7 GB headroom for
-      # context, enabling 64K context comfortably.
+      # multi-turn chat. This container is dedicated to crown's RTX 5060 Ti and
+      # must fail closed rather than falling back to CPU inference.
       #
       # Switching models is a Nix rebuild away: change hfRepo/hfFile/contextSize
       # below, then `nrs` on crown to rebuild the container and relaunch it.
@@ -92,8 +108,8 @@
       hfRepo = "unsloth/Qwen3-14B-GGUF";
       hfFile = "Qwen3-14B-Q4_K_M.gguf";
 
-      gpuLayers = "auto"; # Let llama.cpp fit offload instead of hard-OOMing the driver.
-      contextSize = 16384; # 32K + full GPU offload OOMs on this llama.cpp/CUDA build.
+      gpuLayers = "all"; # Require full model offload to the RTX 5060 Ti.
+      contextSize = 8192; # Leave hard VRAM headroom on the 16 GB card.
       kvCacheQuant = "f16"; # Current llama.cpp requires flash-attn for quantized V cache.
       flashAttn = "off"; # Blackwell sm_120 has multiple FA-related bugs:
       # - #23717: q8_0/q8_0 + FA gibberish on RTX 5060 Ti
@@ -101,7 +117,8 @@
       # - #23210: CUDA crash on Qwen3.6-27B + FA + MTP at long ctx
       # All filed against this exact GPU. Disabling FA uses the stable vanilla
       # CUDA path; keep KV f16 while FA is disabled.
-      ubatchSize = 256; # Keep CUDA compute buffers inside the 16 GB hard VRAM cap.
+      batchSize = 512; # Reduce CUDA compute-buffer pressure during prompt prefill.
+      ubatchSize = 128; # Keep CUDA launch/memory pressure low on 595.84 + Blackwell.
       cacheRamMiB = 8192; # Standard transformer supports --cache-reuse.
       # Disk-backed prompt cache gives warm-prefill speedup across turns.
 

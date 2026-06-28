@@ -154,6 +154,15 @@ in
       '';
     };
 
+    batchSize = lib.mkOption {
+      type = lib.types.int;
+      default = 2048;
+      description = ''
+        Logical maximum batch size (-b) used during prompt processing. Lower
+        this on memory-constrained GPUs to reduce CUDA compute buffer pressure.
+      '';
+    };
+
     cacheRamMiB = lib.mkOption {
       type = lib.types.int;
       default = 8192;
@@ -365,8 +374,9 @@ in
         cache-type-v = cfg.kvCacheQuant;
         # Context window — override via contextSize option.
         ctx-size = cfg.contextSize;
-        # Physical micro-batch: larger values give faster prefill on long prompts.
-        # Logical batch size (-b) is left at the server default (2048).
+        # Prompt-processing batch sizes. Larger values improve prefill throughput
+        # but increase CUDA compute-buffer pressure.
+        batch-size = cfg.batchSize;
         ubatch-size = cfg.ubatchSize;
         # High process priority — GPU is dedicated to LLM inference.
         prio = 2;
