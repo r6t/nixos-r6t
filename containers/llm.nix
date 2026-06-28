@@ -26,6 +26,46 @@
     "d /var/cache/private/llama-cpp 0700 root root -"
   ];
 
+  # Crown's Incus NVIDIA runtime mounts versioned driver libraries into
+  # /usr/lib64. llama.cpp's CUDA backend dlopens the libcuda.so.1 SONAME.
+  systemd.services = {
+    llama-cpp = {
+      after = [ "llama-cpp-cuda-driver-libs.service" ];
+      wants = [ "llama-cpp-cuda-driver-libs.service" ];
+      environment.LD_LIBRARY_PATH = "/usr/lib64";
+    };
+
+    llama-cpp-cuda-driver-libs = {
+      description = "Create NVIDIA driver library SONAME symlinks for llama.cpp CUDA";
+      before = [ "llama-cpp.service" ];
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+      };
+      script = ''
+        set -eu
+
+        link_latest() {
+          soname="$1"
+          latest=""
+
+          for candidate in /usr/lib64/"$soname".*; do
+            if [ -e "$candidate" ] && [ "$candidate" != "/usr/lib64/$soname.1" ]; then
+              latest="$candidate"
+            fi
+          done
+
+          if [ -n "$latest" ]; then
+            ln -sfn "$(basename "$latest")" "/usr/lib64/$soname.1"
+          fi
+        }
+
+        link_latest libcuda.so
+        link_latest libnvidia-ml.so
+      '';
+    };
+  };
+
   mine = {
     llama-cpp = {
       enable = true;
