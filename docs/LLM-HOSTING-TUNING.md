@@ -70,9 +70,9 @@ with massive unified memory.
 | PCIe                    | Gen 5 x16                        |
 | CUDA compute capability | 12.0 (sm_120)                    |
 
-The RTX 5060 Ti is installed on crown but **no model serving has been set up
-yet**. Planning notes below are based on published specs and community data
-for similar cards — no measured benchmarks exist for this specific setup.
+The RTX 5060 Ti is installed on crown and serves the `llm` LXC through
+llama.cpp CUDA. Keep this container GPU-only: if CUDA is unavailable, the
+service should fail closed rather than falling back to CPU inference.
 
 ---
 
@@ -108,11 +108,14 @@ stack is years ahead of open alternatives on NVIDIA hardware:
 When setting up crown's llm container, use `llama-cpp-cuda` (or vLLM with
 CUDA) rather than trying Vulkan/ROCm.
 
-Required for CUDA path:
+Required for CUDA path in the crown LXC:
 
-- `hardware.nvidia.open = true` in the container or host
-- `CUDA_VISIBLE_DEVICES` or incus GPU passthrough exposes `cuda0`
-- Container needs CUDA runtime libraries (bundled with `llama-cpp-cuda`)
+- Incus GPU passthrough exposes `CUDA0`
+- CUDA-enabled `pkgs.llama-cpp.override { cudaSupport = true; }`
+- Incus mounts versioned NVIDIA driver libraries into `/usr/lib64`; the
+  container creates `libcuda.so.1` and `libnvidia-ml.so.1` SONAME symlinks
+- `llama-cpp.service` runs with `LD_LIBRARY_PATH=/usr/lib64`
+- `ExecStartPre` must verify `llama-bench --list-devices` reports `CUDA0:`
 
 ---
 
@@ -332,7 +335,14 @@ weights + KV_cache + compute_graph ≤ ~15.5 GB
 This is a **hard cap** — unlike goldenball's 128 GB unified RAM, you cannot
 overflow to system memory. Models that exceed 16 GB will OOM.
 
-Planned presets (not yet deployed — no model setup on crown yet):
+Measured/validated operating point on crown:
+
+| Model     | Quant  | Context | KV  | Prompt cache | Notes                                      |
+| --------- | ------ | ------- | --- | ------------ | ------------------------------------------ |
+| Qwen3-14B | Q4_K_M | 16K     | f16 | off          | Safe target after 32K CUDA driver failure  |
+| Qwen3-14B | Q4_K_M | 32K     | f16 | on           | Starts, but long prompt reuse crashed CUDA |
+
+Old planning presets:
 
 | Preset              | Architecture   | Active params | Quant / Size   | VRAM fit                                 | When to use                             |
 | ------------------- | -------------- | ------------- | -------------- | ---------------------------------------- | --------------------------------------- | ------------------------ |
@@ -350,13 +360,13 @@ Planned presets (not yet deployed — no model setup on crown yet):
 
 The 16 GB limit is tight for 30B-class models. Realistic options:
 
-| Model         | Quant  | Weights | Headroom for KV @ 32K                        | Notes                             |
-| ------------- | ------ | ------- | -------------------------------------------- | --------------------------------- |
-| Qwen3-8B      | Q4_K_M | ~5.5 GB | ~10 GB (4x larger KV than crown's 35B setup) | Comfortable, fast                 |
-| Qwen3-14B     | Q4_K_M | ~9 GB   | ~6.5 GB                                      | Fits, decent quality              |
-| Qwen3-32B     | Q4_K_M | ~19 GB  | **NO** — won't fit                           | Need Q4_K_S or accept ~3K context |
-| Qwen3-30B-A3B | Q4_K_S | ~14 GB  | ~2 GB                                        | Tight but possible                |
-| Llama-3.1-8B  | Q4_K_M | ~5.2 GB | ~10 GB                                       | Standard transformer, fast        |
+| Model         | Quant  | Weights | Headroom for KV @ 32K                        | Notes                                          |
+| ------------- | ------ | ------- | -------------------------------------------- | ---------------------------------------------- |
+| Qwen3-8B      | Q4_K_M | ~5.5 GB | ~10 GB (4x larger KV than crown's 35B setup) | Comfortable, fast                              |
+| Qwen3-14B     | Q4_K_M | ~9 GB   | ~6.5 GB                                      | Fits, decent quality; use 16K on crown for now |
+| Qwen3-32B     | Q4_K_M | ~19 GB  | **NO** — won't fit                           | Need Q4_K_S or accept ~3K context              |
+| Qwen3-30B-A3B | Q4_K_S | ~14 GB  | ~2 GB                                        | Tight but possible                             |
+| Llama-3.1-8B  | Q4_K_M | ~5.2 GB | ~10 GB                                       | Standard transformer, fast                     |
 
 **Key difference from crown's R9700:** The 16 GB on the 5060 Ti is a hard
 limit (dedicated VRAM), not shared with CPU like goldenball's unified memory.

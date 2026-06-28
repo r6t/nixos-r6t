@@ -109,7 +109,9 @@
       hfFile = "Qwen3-14B-Q4_K_M.gguf";
 
       gpuLayers = "all"; # Require full model offload to the RTX 5060 Ti.
-      contextSize = 32768; # Native Qwen3-14B context; fits with conservative CUDA batch sizes.
+      # 32K starts and short requests work, but long prompt reuse reproduced a
+      # CUDA launch failure on 595.84 that made the host GPU disappear.
+      contextSize = 16384;
       kvCacheQuant = "f16"; # Current llama.cpp requires flash-attn for quantized V cache.
       flashAttn = "off"; # Blackwell sm_120 has multiple FA-related bugs:
       # - #23717: q8_0/q8_0 + FA gibberish on RTX 5060 Ti
@@ -119,8 +121,7 @@
       # CUDA path; keep KV f16 while FA is disabled.
       batchSize = 512; # Reduce CUDA compute-buffer pressure during prompt prefill.
       ubatchSize = 128; # Keep CUDA launch/memory pressure low on 595.84 + Blackwell.
-      cacheRamMiB = 8192; # Standard transformer supports --cache-reuse.
-      # Disk-backed prompt cache gives warm-prefill speedup across turns.
+      cacheRamMiB = 0; # Avoid long-context prompt-cache reuse on unstable Blackwell CUDA path.
 
       extraFlags = [
         "--device"
