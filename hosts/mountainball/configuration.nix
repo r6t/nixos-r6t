@@ -126,28 +126,22 @@
         # It is only active when opencode is run from ~/git/appdaemons, via the
         # project-level opencode.json in that repo (not managed by this flake).
 
-        # opencode -> remote llama-server on crown via caddy + Route53.
-        # Crown's container runs Qwen3-14B-Q6_K with `--reasoning off` as the
-        # global default (fast chat). The `thinking` variant
-        # below re-enables thinking on a per-request basis through the chat
-        # template kwarg — opencode merges variant attrs into the request body,
-        # llama-server reads chat_template_kwargs from the body and applies
-        # them to the jinja template.
+        # opencode -> remote TensorRT-LLM on crown via caddy + Route53.
+        # Crown's TensorRT server defaults Qwen3 thinking off for direct
+        # responses. The `thinking` variant opts in per request through
+        # chat_template_kwargs.
         opencode-llamacpp = {
           enable = true;
           baseURL = "https://llm.r6t.io/v1";
           models = {
-            # Model id MUST match the alias llama-server reports at /v1/models.
-            # Currently that's the full HF repo string. Verify with:
+            # Model id MUST match the alias TensorRT-LLM reports at /v1/models.
+            # Verify with:
             #   curl -s https://llm.r6t.io/v1/models | jq '.data[].id'
-            "unsloth/Qwen3-14B-GGUF" = {
-              name = "Qwen3 14B (crown)";
-              context = 65536;
-              output = 32768;
+            "nvidia/Qwen3-8B-FP8" = {
+              name = "Qwen3 8B FP8 (crown TensorRT)";
+              context = 8192;
+              output = 1024;
               variants = {
-                # default variant gets no extras — server's --reasoning off
-                # applies, fast direct responses.
-                # `thinking` flips Qwen3.6 reasoning on for this request only.
                 # Cycle variants in opencode with the variant_cycle keybind.
                 thinking.chat_template_kwargs = { enable_thinking = true; };
               };

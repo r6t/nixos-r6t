@@ -42,15 +42,15 @@ pipeline (build → quantize → deploy).
 
 Two distinct systems serve LLM inference, with very different capabilities:
 
-|                  | Crown                                 | Goldenball                                                                                |
-| ---------------- | ------------------------------------- | ----------------------------------------------------------------------------------------- |
-| GPU              | NVIDIA GeForce RTX 5060 Ti 16 GB      | AMD Radeon 8060S (iGPU, gfx1151)                                                          |
-| Architecture     | Blackwell (sm_120)                    | RDNA 3.5                                                                                  |
-| GPU memory       | 16 GB GDDR7                           | ~104 GB visible unified (128 GB system RAM, shared with CPU)                              |
-| Memory bandwidth | ~288 GB/s                             | ~256 GB/s (LPDDR5X, 1000 MHz)                                                             |
-| PCIe             | PCIe 5.0 x16                          | PCIe 4.0 x16 (APU internal)                                                               |
-| Primary backend  | CUDA                                  | ROCmFP4 fork (HIP via custom build) with Vulkan fallback                                  |
-| Status           | GPU installed, **no model setup yet** | **Live**: Qwen3.6-35B-A3B-MTP ROCmFP4 STRIX_LEAN, ~50-71 tok/s decode (measured Jun 2026) |
+|                  | Crown                             | Goldenball                                                                                |
+| ---------------- | --------------------------------- | ----------------------------------------------------------------------------------------- |
+| GPU              | NVIDIA GeForce RTX 5060 Ti 16 GB  | AMD Radeon 8060S (iGPU, gfx1151)                                                          |
+| Architecture     | Blackwell (sm_120)                | RDNA 3.5                                                                                  |
+| GPU memory       | 16 GB GDDR7                       | ~104 GB visible unified (128 GB system RAM, shared with CPU)                              |
+| Memory bandwidth | ~288 GB/s                         | ~256 GB/s (LPDDR5X, 1000 MHz)                                                             |
+| PCIe             | PCIe 5.0 x16                      | PCIe 4.0 x16 (APU internal)                                                               |
+| Primary backend  | TensorRT-LLM via CUDA             | ROCmFP4 fork (HIP via custom build) with Vulkan fallback                                  |
+| Status           | **Live**: nvidia/Qwen3-8B-FP8, 8K | **Live**: Qwen3.6-35B-A3B-MTP ROCmFP4 STRIX_LEAN, ~50-71 tok/s decode (measured Jun 2026) |
 
 The RTX 5060 Ti is a consumer Blackwell card (Ada Lovelace successor). The
 Strix Halo APU is an AMD desktop-class APU with ~25 TOPS NPU and an 8-CU
@@ -358,11 +358,11 @@ prefill range. Do not force MMQ on crown; keep context and prefill batching
 conservative, and disable CUDA fusion until the NVIDIA/llama.cpp Blackwell path
 is stable.
 
-Current TensorRT-LLM candidate on crown:
+Current TensorRT-LLM deployment on crown:
 
-| Backend      | Model               | Quant | Context | Notes                                       |
-| ------------ | ------------------- | ----- | ------- | ------------------------------------------- |
-| TensorRT-LLM | nvidia/Qwen3-8B-FP8 | FP8   | 8K      | Primary safe candidate, needs reboot retest |
+| Backend      | Model               | Quant | Context | Notes                                      |
+| ------------ | ------------------- | ----- | ------- | ------------------------------------------ |
+| TensorRT-LLM | nvidia/Qwen3-8B-FP8 | FP8   | 8K      | Live, OpenAI-compatible endpoint on `8080` |
 
 The TensorRT-LLM container uses NVIDIA's pinned NGC release image and serves
 OpenAI-compatible API traffic on port 8080 for Open WebUI. This avoids the
@@ -371,8 +371,15 @@ current insecure `pkgs.vllm` package. Crown has only 16 GB VRAM.
 KV cache creation on the RTX 5060 Ti and destabilized CUDA.
 `nvidia/Qwen3-14B-NVFP4` fit far enough to run TensorRT warmup, but failed in
 the NVFP4/CUTLASS path (`Failed to initialize cutlass FP4 gemm`, TMA descriptor 719) and again wedged the driver. Avoid FP4/NVFP4 on this card/driver/image for
-now. The active TensorRT candidate is a smaller FP8 Qwen3 checkpoint at 8K
-context with conservative KV and batching limits.
+now. The active TensorRT deployment is a smaller FP8 Qwen3 checkpoint at 8K
+context with conservative KV and batching limits. On Jun 29, 2026, it loaded
+successfully on driver 595.84 using the `nvcr.io/nvidia/tensorrt-llm/release:1.3.0rc19`
+image. Startup used about 12.3 GiB VRAM steady-state with about 3.5 GiB free,
+the `/v1/models` endpoint reported `nvidia/Qwen3-8B-FP8`, and a tiny
+OpenAI-compatible chat completion succeeded without wedging the GPU. Qwen3's
+upstream chat template emits `<think>` content by default, so crown serves a
+custom Qwen3 template that defaults `enable_thinking` to false while preserving
+per-request `chat_template_kwargs.enable_thinking = true` opt-in.
 
 Old planning presets:
 
@@ -1058,13 +1065,15 @@ custom_params, web search setup, etc.). Key points for the LLM hosting side:
 ## opencode integration
 
 See `modules/home/nixvim/default.nix` for the `opencode-llamacpp` home-manager
-module. Currently enabled on mountainball, points at `https://llm.r6t.io/v1`.
+module. Currently enabled on mountainball, points at `https://llm.r6t.io/v1`,
+and registers `nvidia/Qwen3-8B-FP8` with an 8K context / 1K output limit.
 
 The integration registers the active model as a provider in
 `~/.config/opencode/opencode.json`. Per-model `variants` let you toggle
-thinking on/off without changing the active model on the server side
-(thinking is per-request via `chat_template_kwargs`, same mechanism as the
-Open WebUI workspace preset).
+thinking on/off without changing the active model on the server side. Crown's
+TensorRT server defaults Qwen3 thinking off for direct coding responses;
+OpenCode's `thinking` variant sends `chat_template_kwargs.enable_thinking = true`
+when you want explicit reasoning mode.
 
 Reality check: no open-weights model under 100B parameters breaks 50% on
 Aider polyglot. The 60-70% range is 600B+ models (DeepSeek V3.2, Kimi K2).

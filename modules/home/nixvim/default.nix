@@ -7,7 +7,7 @@ let
   llamaCfg = cfg.opencode-llamacpp;
 
   # Build the opencode.json provider config when enabled.
-  # Crown's llama-server exposes a fully OpenAI-compatible /v1 endpoint.
+  # The local/remote LLM endpoint exposes a fully OpenAI-compatible /v1 API.
   opencodeLocalConfig = lib.mkIf llamaCfg.enable {
     ".config/opencode/opencode.json" = {
       text = builtins.toJSON (
@@ -31,7 +31,7 @@ let
           provider = {
             llamacpp = {
               npm = "@ai-sdk/openai-compatible";
-              name = "llama.cpp (local)";
+              name = "OpenAI-compatible local LLM";
               options = {
                 inherit (llamaCfg) baseURL;
               };
