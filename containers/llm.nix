@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ lib, pkgs, ... }:
 
 {
   imports = [
@@ -50,15 +50,18 @@
     docker-trtllm = {
       after = [ "network-online.target" "trtllm-cuda-driver-libs.service" ];
       wants = [ "network-online.target" "trtllm-cuda-driver-libs.service" ];
-      serviceConfig.ExecStartPre = [
-        "+${pkgs.writeShellScript "trtllm-cuda-preflight" ''
-          set -eu
+      serviceConfig = {
+        Restart = lib.mkForce "no";
+        ExecStartPre = [
+          "+${pkgs.writeShellScript "trtllm-cuda-preflight" ''
+            set -eu
 
-          test -e /dev/nvidia0
-          test -e /dev/nvidiactl
-          test -e /usr/lib64/libcuda.so.1
-        ''}"
-      ];
+            test -e /dev/nvidia0
+            test -e /dev/nvidiactl
+            test -e /usr/lib64/libcuda.so.1
+          ''}"
+        ];
+      };
     };
 
     trtllm-cuda-driver-libs = {
@@ -100,9 +103,9 @@
       cmd = [
         "trtllm-serve"
         "serve"
-        "nvidia/Qwen3-14B-NVFP4"
+        "nvidia/Qwen3-8B-FP8"
         "--served_model_name"
-        "nvidia/Qwen3-14B-NVFP4"
+        "nvidia/Qwen3-8B-FP8"
         "--host"
         "0.0.0.0"
         "--port"

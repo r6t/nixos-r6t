@@ -360,18 +360,19 @@ is stable.
 
 Current TensorRT-LLM candidate on crown:
 
-| Backend      | Model                  | Quant | Context | Notes                                  |
-| ------------ | ---------------------- | ----- | ------- | -------------------------------------- |
-| TensorRT-LLM | nvidia/Qwen3-14B-NVFP4 | NVFP4 | 8K      | Primary candidate, needs reboot retest |
+| Backend      | Model               | Quant | Context | Notes                                       |
+| ------------ | ------------------- | ----- | ------- | ------------------------------------------- |
+| TensorRT-LLM | nvidia/Qwen3-8B-FP8 | FP8   | 8K      | Primary safe candidate, needs reboot retest |
 
 The TensorRT-LLM container uses NVIDIA's pinned NGC release image and serves
 OpenAI-compatible API traffic on port 8080 for Open WebUI. This avoids the
 current insecure `pkgs.vllm` package. Crown has only 16 GB VRAM.
 `Qwen/Qwen3.6-35B-A3B-FP8` downloaded and reached model load, but OOMed before
-KV cache creation on the RTX 5060 Ti and destabilized CUDA. Use a standard
-Qwen3 14B-class model for the always-on service. NVIDIA's ModelOpt NVFP4
-checkpoint is the TensorRT/Blackwell-oriented candidate; start at 8K context
-with conservative KV and batching limits, then tune upward after it is stable.
+KV cache creation on the RTX 5060 Ti and destabilized CUDA.
+`nvidia/Qwen3-14B-NVFP4` fit far enough to run TensorRT warmup, but failed in
+the NVFP4/CUTLASS path (`Failed to initialize cutlass FP4 gemm`, TMA descriptor 719) and again wedged the driver. Avoid FP4/NVFP4 on this card/driver/image for
+now. The active TensorRT candidate is a smaller FP8 Qwen3 checkpoint at 8K
+context with conservative KV and batching limits.
 
 Old planning presets:
 
