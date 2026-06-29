@@ -25,17 +25,14 @@
   networking.hostName = "llm";
 
   environment.etc."trtllm/config.yml".text = ''
-    max_batch_size: 8
-    max_num_tokens: 4096
+    max_batch_size: 1
+    max_num_tokens: 1024
     kv_cache_config:
-      free_gpu_memory_fraction: 0.75
+      free_gpu_memory_fraction: 0.4
     cuda_graph_config:
-      enable_padding: true
+      enable_padding: false
       batch_sizes:
       - 1
-      - 2
-      - 4
-      - 8
   '';
 
   systemd.tmpfiles.rules = [
@@ -103,15 +100,15 @@
       cmd = [
         "trtllm-serve"
         "serve"
-        "Qwen/Qwen3.6-30B-A3B"
+        "nvidia/Qwen3-14B-NVFP4"
         "--served_model_name"
-        "Qwen/Qwen3.6-30B-A3B"
+        "nvidia/Qwen3-14B-NVFP4"
         "--host"
         "0.0.0.0"
         "--port"
         "8080"
         "--max_seq_len"
-        "32768"
+        "8192"
         "--config"
         "/etc/trtllm/config.yml"
       ];
@@ -126,7 +123,8 @@
       ];
       networks = [ "host" ];
       extraOptions = [
-        "--gpus=all"
+        # Explicit NVIDIA CDI avoids Docker probing unavailable AMD CDI specs.
+        "--device=nvidia.com/gpu=all"
         "--ipc=host"
         "--shm-size=1g"
         "--ulimit=memlock=-1"

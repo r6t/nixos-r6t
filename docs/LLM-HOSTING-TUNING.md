@@ -118,7 +118,9 @@ Required for CUDA path in the crown LXC:
 - NVIDIA TensorRT-LLM release image from NGC for the primary service
 - Incus mounts versioned NVIDIA driver libraries into `/usr/lib64`; the
   container creates `libcuda.so.1` and `libnvidia-ml.so.1` SONAME symlinks
-- `docker-trtllm.service` starts `trtllm-serve` with `--gpus=all`
+- `docker-trtllm.service` starts `trtllm-serve` with explicit NVIDIA CDI
+  (`--device=nvidia.com/gpu=all`); generic `--gpus=all` tried to resolve a
+  missing AMD CDI spec inside the LXC before reaching NVIDIA
 - `ExecStartPre` must verify `/dev/nvidia0`, `/dev/nvidiactl`, and
   `/usr/lib64/libcuda.so.1` exist before Docker starts the model server
 
@@ -358,15 +360,18 @@ is stable.
 
 Current TensorRT-LLM candidate on crown:
 
-| Backend      | Model                | Quant          | Context | Notes                                  |
-| ------------ | -------------------- | -------------- | ------- | -------------------------------------- |
-| TensorRT-LLM | Qwen/Qwen3.6-30B-A3B | Runtime-chosen | 32K     | Primary candidate, may need downsizing |
+| Backend      | Model                  | Quant | Context | Notes                                  |
+| ------------ | ---------------------- | ----- | ------- | -------------------------------------- |
+| TensorRT-LLM | nvidia/Qwen3-14B-NVFP4 | NVFP4 | 8K      | Primary candidate, needs reboot retest |
 
 The TensorRT-LLM container uses NVIDIA's pinned NGC release image and serves
 OpenAI-compatible API traffic on port 8080 for Open WebUI. This avoids the
-current insecure `pkgs.vllm` package. Qwen3.6 stays the target family, but crown
-has only 16 GB VRAM; if the 30B A3B checkpoint does not fit at useful context,
-drop to a smaller Qwen3.6 footprint before changing model families.
+current insecure `pkgs.vllm` package. Crown has only 16 GB VRAM.
+`Qwen/Qwen3.6-35B-A3B-FP8` downloaded and reached model load, but OOMed before
+KV cache creation on the RTX 5060 Ti and destabilized CUDA. Use a standard
+Qwen3 14B-class model for the always-on service. NVIDIA's ModelOpt NVFP4
+checkpoint is the TensorRT/Blackwell-oriented candidate; start at 8K context
+with conservative KV and batching limits, then tune upward after it is stable.
 
 Old planning presets:
 
@@ -405,7 +410,7 @@ than AMD Vulkan.
 Since crown's GPU is CUDA, the setup path differs from goldenball:
 
 1. **Use TensorRT-LLM + CUDA** for the always-on OpenAI-compatible service
-2. **Stay in the Qwen3.6 family** but reduce footprint if 30B A3B does not fit
+2. **Use 14B-class Qwen3 first**; only revisit larger MoE/coder models after the TensorRT path is stable
 3. **Use TabbyAPI/Exllama only as a clean fallback** if TensorRT-LLM is too rough
 4. **Keep llama.cpp CUDA as a fallback only** after the repeated long-prefill crashes
 5. **Don't try ROCm/Vulkan** — CUDA is orders of magnitude better on NVIDIA
