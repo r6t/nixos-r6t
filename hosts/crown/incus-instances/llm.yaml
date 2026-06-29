@@ -19,17 +19,17 @@ devices:
     vendorid: "10de"
     productid: "2d04"
     type: gpu
-  llama-cpp-cache:
-    path: /var/cache/private/llama-cpp
+  trtllm-cache:
+    path: /var/cache/trtllm
     shift: "true"
     source: /mnt/crownstore/app-storage/llama-cpp-cache
     type: disk
-  llama-cpp-data:
-    path: /var/lib/private/llama-cpp
+  trtllm-data:
+    path: /var/lib/trtllm
     shift: "true"
     source: /mnt/crownstore/app-storage/llama-cpp
     type: disk
-  llama-server-port:
+  trtllm-port:
     connect: tcp:127.0.0.1:8080
     listen: tcp:0.0.0.0:8088
     type: proxy

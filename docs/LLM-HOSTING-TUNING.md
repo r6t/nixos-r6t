@@ -70,9 +70,10 @@ with massive unified memory.
 | PCIe                    | Gen 5 x16                        |
 | CUDA compute capability | 12.0 (sm_120)                    |
 
-The RTX 5060 Ti is installed on crown and serves the `llm` LXC through
-llama.cpp CUDA. Keep this container GPU-only: if CUDA is unavailable, the
-service should fail closed rather than falling back to CPU inference.
+The RTX 5060 Ti is installed on crown and serves the `llm` LXC through a
+CUDA-native OpenAI-compatible backend. Keep this container GPU-only: if CUDA is
+unavailable, the service should fail closed rather than falling back to CPU
+inference.
 
 ---
 
@@ -99,23 +100,27 @@ On crown's RTX 5060 Ti, **CUDA is the clear choice** — NVIDIA's proprietary
 stack is years ahead of open alternatives on NVIDIA hardware:
 
 - **Best performance** — CUDA kernels are highly optimized for NVIDIA GPUs
-- **vLLM support** — production-grade continuous batching, PagedAttention
+- **TensorRT-LLM support** — NVIDIA's fastest path for Blackwell serving
 - **Triton / FlashAttention** — cutting-edge kernels (FA3, etc.)
 - **Tensor Cores** — dedicated FP4/FP8/INT8 compute (Blackwell has fourth-gen)
-- **Ecosystem** — PyTorch, vLLM, llama.cpp CUDA, MLX, ROCmFP4-equivalents all
+- **Ecosystem** — PyTorch, TensorRT-LLM, vLLM, llama.cpp CUDA, and MLX all
   support CUDA first
 
-When setting up crown's llm container, use `llama-cpp-cuda` (or vLLM with
-CUDA) rather than trying Vulkan/ROCm.
+When setting up crown's llm container, use TensorRT-LLM or another CUDA-native
+backend rather than trying Vulkan/ROCm. llama.cpp CUDA is retained for reference,
+but it is no longer the preferred crown backend after repeated long-prefill
+driver failures on RTX 5060 Ti.
 
 Required for CUDA path in the crown LXC:
 
 - Incus GPU passthrough exposes `CUDA0`
-- CUDA-enabled `pkgs.llama-cpp.override { cudaSupport = true; }`
+- Docker inside the LXC with `hardware.nvidia-container-toolkit.enable = true`
+- NVIDIA TensorRT-LLM release image from NGC for the primary service
 - Incus mounts versioned NVIDIA driver libraries into `/usr/lib64`; the
   container creates `libcuda.so.1` and `libnvidia-ml.so.1` SONAME symlinks
-- `llama-cpp.service` runs with `LD_LIBRARY_PATH=/usr/lib64`
-- `ExecStartPre` must verify `llama-bench --list-devices` reports `CUDA0:`
+- `docker-trtllm.service` starts `trtllm-serve` with `--gpus=all`
+- `ExecStartPre` must verify `/dev/nvidia0`, `/dev/nvidiactl`, and
+  `/usr/lib64/libcuda.so.1` exist before Docker starts the model server
 
 ---
 
@@ -335,18 +340,33 @@ weights + KV_cache + compute_graph ≤ ~15.5 GB
 This is a **hard cap** — unlike goldenball's 128 GB unified RAM, you cannot
 overflow to system memory. Models that exceed 16 GB will OOM.
 
-Measured/validated operating point on crown:
+Measured/validated llama.cpp operating points on crown:
 
-| Model     | Quant  | Context | KV  | Prompt cache | Notes                                       |
-| --------- | ------ | ------- | --- | ------------ | ------------------------------------------- |
-| Qwen3-14B | Q4_K_M | 16K     | f16 | off          | Current candidate after CUDA driver failure |
-| Qwen3-14B | Q4_K_M | 32K     | f16 | on           | Starts, but long prompt reuse crashed CUDA  |
+| Model     | Quant  | Context | KV  | Prompt cache | Notes                                      |
+| --------- | ------ | ------- | --- | ------------ | ------------------------------------------ |
+| Qwen3-14B | Q4_K_M | 4K      | f16 | off          | Current conservative candidate             |
+| Qwen3-14B | Q4_K_M | 16K     | f16 | off          | Starts, but long prefill crashed CUDA      |
+| Qwen3-14B | Q4_K_M | 32K     | f16 | on           | Starts, but long prompt reuse crashed CUDA |
 
 Follow-up testing showed prompt cache was not the root cause: with 16K and
 `--cache-ram 0`, a larger prefill still crashed in
-`ggml_cuda_mul_mat_q`/`mmq.cu` and the host driver lost the GPU. Do not force
-MMQ on crown; leave llama.cpp to choose its CUDA matmul path and keep prefill
-batching conservative.
+`ggml_cuda_mul_mat_q`/`mmq.cu` and the host driver lost the GPU. Removing forced
+MMQ moved the failure to the generic CUDA matmul path, still around the 7K-token
+prefill range. Do not force MMQ on crown; keep context and prefill batching
+conservative, and disable CUDA fusion until the NVIDIA/llama.cpp Blackwell path
+is stable.
+
+Current TensorRT-LLM candidate on crown:
+
+| Backend      | Model                | Quant          | Context | Notes                                  |
+| ------------ | -------------------- | -------------- | ------- | -------------------------------------- |
+| TensorRT-LLM | Qwen/Qwen3.6-30B-A3B | Runtime-chosen | 32K     | Primary candidate, may need downsizing |
+
+The TensorRT-LLM container uses NVIDIA's pinned NGC release image and serves
+OpenAI-compatible API traffic on port 8080 for Open WebUI. This avoids the
+current insecure `pkgs.vllm` package. Qwen3.6 stays the target family, but crown
+has only 16 GB VRAM; if the 30B A3B checkpoint does not fit at useful context,
+drop to a smaller Qwen3.6 footprint before changing model families.
 
 Old planning presets:
 
@@ -364,15 +384,16 @@ Old planning presets:
 
 **Practical models for 16 GB VRAM:**
 
-The 16 GB limit is tight for 30B-class models. Realistic options:
+The 16 GB limit is tight for 30B-class models. Realistic llama.cpp/GGUF-era
+planning options:
 
-| Model         | Quant  | Weights | Headroom for KV @ 32K                        | Notes                                          |
-| ------------- | ------ | ------- | -------------------------------------------- | ---------------------------------------------- |
-| Qwen3-8B      | Q4_K_M | ~5.5 GB | ~10 GB (4x larger KV than crown's 35B setup) | Comfortable, fast                              |
-| Qwen3-14B     | Q4_K_M | ~9 GB   | ~6.5 GB                                      | Fits, decent quality; use 16K on crown for now |
-| Qwen3-32B     | Q4_K_M | ~19 GB  | **NO** — won't fit                           | Need Q4_K_S or accept ~3K context              |
-| Qwen3-30B-A3B | Q4_K_S | ~14 GB  | ~2 GB                                        | Tight but possible                             |
-| Llama-3.1-8B  | Q4_K_M | ~5.2 GB | ~10 GB                                       | Standard transformer, fast                     |
+| Model         | Quant  | Weights | Headroom for KV @ 32K                        | Notes                                                 |
+| ------------- | ------ | ------- | -------------------------------------------- | ----------------------------------------------------- |
+| Qwen3-8B      | Q4_K_M | ~5.5 GB | ~10 GB (4x larger KV than crown's 35B setup) | Comfortable, fast                                     |
+| Qwen3-14B     | Q4_K_M | ~9 GB   | ~6.5 GB                                      | Fits VRAM, but llama.cpp CUDA crashed on long prefill |
+| Qwen3-32B     | Q4_K_M | ~19 GB  | **NO** — won't fit                           | Need Q4_K_S or accept ~3K context                     |
+| Qwen3-30B-A3B | Q4_K_S | ~14 GB  | ~2 GB                                        | Tight but possible                                    |
+| Llama-3.1-8B  | Q4_K_M | ~5.2 GB | ~10 GB                                       | Standard transformer, fast                            |
 
 **Key difference from crown's R9700:** The 16 GB on the 5060 Ti is a hard
 limit (dedicated VRAM), not shared with CPU like goldenball's unified memory.
@@ -383,9 +404,11 @@ than AMD Vulkan.
 
 Since crown's GPU is CUDA, the setup path differs from goldenball:
 
-1. **Start with vLLM + CUDA** for best throughput on medium models (8B-32B)
-2. **llama.cpp CUDA** for models where vLLM doesn't help (hybrid attention, MTP)
-3. **Don't try ROCm/Vulkan** — CUDA is orders of magnitude better on NVIDIA
+1. **Use TensorRT-LLM + CUDA** for the always-on OpenAI-compatible service
+2. **Stay in the Qwen3.6 family** but reduce footprint if 30B A3B does not fit
+3. **Use TabbyAPI/Exllama only as a clean fallback** if TensorRT-LLM is too rough
+4. **Keep llama.cpp CUDA as a fallback only** after the repeated long-prefill crashes
+5. **Don't try ROCm/Vulkan** — CUDA is orders of magnitude better on NVIDIA
 
 ---
 

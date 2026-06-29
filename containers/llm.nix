@@ -1,8 +1,8 @@
-{ config, pkgs, ... }:
+{ pkgs, ... }:
 
 {
   imports = [
-    ../modules/nixos/llama-cpp/default.nix
+    ../modules/nixos/docker/default.nix
     ../modules/nixos/open-webui/default.nix
     ./lib/base.nix
     ./lib/mullvad-dns.nix
@@ -15,47 +15,58 @@
   };
 
   hardware.graphics.enable = true;
+  hardware.nvidia-container-toolkit = {
+    enable = true;
+    suppressNvidiaDriverAssertion = true;
+  };
 
-  environment.systemPackages = [ config.services.llama-cpp.package ];
+  mine.docker.enable = true;
 
   networking.hostName = "llm";
+
+  environment.etc."trtllm/config.yml".text = ''
+    max_batch_size: 8
+    max_num_tokens: 4096
+    kv_cache_config:
+      free_gpu_memory_fraction: 0.75
+    cuda_graph_config:
+      enable_padding: true
+      batch_sizes:
+      - 1
+      - 2
+      - 4
+      - 8
+  '';
 
   systemd.tmpfiles.rules = [
     "d /var/lib/private 0700 root root -"
     "d /var/lib/private/open-webui 0700 root root -"
-    "d /var/lib/private/llama-cpp 0700 root root -"
+    "d /var/lib/trtllm 0755 root root -"
     "d /var/cache/private 0700 root root -"
-    "d /var/cache/private/llama-cpp 0700 root root -"
+    "d /var/cache/trtllm 0755 root root -"
+    "d /var/cache/trtllm/huggingface 0755 root root -"
   ];
 
   # Crown's Incus NVIDIA runtime mounts versioned driver libraries into
-  # /usr/lib64. llama.cpp's CUDA backend dlopens the libcuda.so.1 SONAME.
+  # /usr/lib64. Docker's NVIDIA runtime and TensorRT-LLM dlopen SONAMEs.
   systemd.services = {
-    llama-cpp = {
-      after = [ "llama-cpp-cuda-driver-libs.service" ];
-      wants = [ "llama-cpp-cuda-driver-libs.service" ];
-      environment = {
-        LD_LIBRARY_PATH = "/usr/lib64";
-        # CUDA graphs crashed the 595.84 GSP driver on RTX 5060 Ti during
-        # llama.cpp validation; keep Blackwell on the non-graphs CUDA path.
-        GGML_CUDA_DISABLE_GRAPHS = "1";
-        CUDA_MODULE_LOADING = "LAZY";
-      };
+    docker-trtllm = {
+      after = [ "network-online.target" "trtllm-cuda-driver-libs.service" ];
+      wants = [ "network-online.target" "trtllm-cuda-driver-libs.service" ];
       serviceConfig.ExecStartPre = [
-        "+${pkgs.writeShellScript "llama-cpp-cuda-preflight" ''
+        "+${pkgs.writeShellScript "trtllm-cuda-preflight" ''
           set -eu
-          export LD_LIBRARY_PATH=/usr/lib64
 
-          devices="$(${config.services.llama-cpp.package}/bin/llama-bench --list-devices 2>&1)"
-          printf '%s\n' "$devices"
-          printf '%s\n' "$devices" | grep -q 'CUDA0:'
+          test -e /dev/nvidia0
+          test -e /dev/nvidiactl
+          test -e /usr/lib64/libcuda.so.1
         ''}"
       ];
     };
 
-    llama-cpp-cuda-driver-libs = {
-      description = "Create NVIDIA driver library SONAME symlinks for llama.cpp CUDA";
-      before = [ "llama-cpp.service" ];
+    trtllm-cuda-driver-libs = {
+      description = "Create NVIDIA driver library SONAME symlinks for TensorRT-LLM CUDA";
+      before = [ "docker-trtllm.service" ];
       serviceConfig = {
         Type = "oneshot";
         RemainAfterExit = true;
@@ -84,53 +95,47 @@
     };
   };
 
-  mine = {
-    llama-cpp = {
-      enable = true;
-      cuda = true;
-      host = "0.0.0.0";
-      port = 8080;
-      modelsDir = "/var/lib/llama-cpp/models";
-
-      # Qwen3 14B @ Q4_K_M: 9 GB model, standard transformer architecture.
-      # Standard transformer → KV cache reuse between turns works, giving fast
-      # multi-turn chat. This container is dedicated to crown's RTX 5060 Ti and
-      # must fail closed rather than falling back to CPU inference.
-      #
-      # Switching models is a Nix rebuild away: change hfRepo/hfFile/contextSize
-      # below, then `nrs` on crown to rebuild the container and relaunch it.
-      #
-      # Quality: ~71.5% MMLU Pro, 14B class. Not the top tier but solid.
-      # For coding work, goldenball handles the heavy models (ROCmFP4 35B-MTP).
-      hfRepo = "unsloth/Qwen3-14B-GGUF";
-      hfFile = "Qwen3-14B-Q4_K_M.gguf";
-
-      gpuLayers = "all"; # Require full model offload to the RTX 5060 Ti.
-      # 32K starts and short requests work, but long prompt reuse reproduced a
-      # CUDA launch failure on 595.84 that made the host GPU disappear.
-      contextSize = 16384;
-      kvCacheQuant = "f16"; # Current llama.cpp requires flash-attn for quantized V cache.
-      flashAttn = "off"; # Blackwell sm_120 has multiple FA-related bugs:
-      # - #23717: q8_0/q8_0 + FA gibberish on RTX 5060 Ti
-      # - #23693: q4_0 KV + FA garbled output regression vs b9174
-      # - #23210: CUDA crash on Qwen3.6-27B + FA + MTP at long ctx
-      # All filed against this exact GPU. Disabling FA uses the stable vanilla
-      # CUDA path; keep KV f16 while FA is disabled.
-      batchSize = 256; # Reduce CUDA compute-buffer pressure during prompt prefill.
-      ubatchSize = 128; # Keep CUDA launch/memory pressure low on 595.84 + Blackwell.
-      cacheRamMiB = 0; # Avoid long-context prompt-cache reuse on unstable Blackwell CUDA path.
-
-      extraFlags = [
-        "--device"
-        "CUDA0"
-        "--jinja"
-        "--reasoning"
-        "off"
-        "--no-mmproj"
-        # Thinking mode off by default. Enable per-conversation via Open WebUI
-        # Workspace preset with chat_template_kwargs={"enable_thinking": true}.
+  virtualisation.oci-containers = {
+    backend = "docker";
+    containers.trtllm = {
+      image = "nvcr.io/nvidia/tensorrt-llm/release:1.3.0rc19";
+      pull = "always";
+      cmd = [
+        "trtllm-serve"
+        "serve"
+        "Qwen/Qwen3.6-30B-A3B"
+        "--served_model_name"
+        "Qwen/Qwen3.6-30B-A3B"
+        "--host"
+        "0.0.0.0"
+        "--port"
+        "8080"
+        "--max_seq_len"
+        "32768"
+        "--config"
+        "/etc/trtllm/config.yml"
+      ];
+      environment = {
+        CUDA_MODULE_LOADING = "LAZY";
+        HF_HOME = "/root/.cache/huggingface";
+      };
+      volumes = [
+        "/etc/trtllm/config.yml:/etc/trtllm/config.yml:ro"
+        "/var/cache/trtllm/huggingface:/root/.cache/huggingface"
+        "/var/lib/trtllm:/workspace/trtllm"
+      ];
+      networks = [ "host" ];
+      extraOptions = [
+        "--gpus=all"
+        "--ipc=host"
+        "--shm-size=1g"
+        "--ulimit=memlock=-1"
+        "--ulimit=stack=67108864"
       ];
     };
+  };
+
+  mine = {
     open-webui = {
       enable = true;
       host = "0.0.0.0";
