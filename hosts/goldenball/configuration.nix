@@ -581,7 +581,7 @@ in
   home-manager.users.${userConfig.username} = {
     programs.plasma = {
       configFile = {
-        # KWin compositor: target the panel's native 180 Hz and enable VRR.
+        # KWin compositor: target the panel's native 180 Hz and keep VRR disabled.
         # MaxFPS / RefreshRate ensure KWin's render loop aims for the correct ceiling;
         # without these the compositor may auto-detect a lower rate after SDDM's
         # first-boot atomic commit failure.
@@ -595,8 +595,8 @@ in
         # llama-cpp). This is the strongest remaining software mitigation.
         # Trade: loses adaptive sync in games (Rocket League etc. will run at fixed
         # 180 Hz). Set back to 1 if an upstream kernel fix lands for DCN 3.5.1.
-        # Requires amdgpu.freesync_video=1 (set in kernelParams above) to expose
-        # VRR capability to userspace — kept enabled so we can re-enable VRR later.
+        # Re-enabling VRR later also requires changing amdgpu.freesync_video back
+        # to 1 so the driver exposes VRR capability to userspace.
         "kwinrc"."Output eDP-1"."VrrPolicy" = 0;
 
         # plasma-manager's typed touchpad option doesn't expose KDE's

@@ -46,19 +46,20 @@ kwin_wayland: Pageflip timed out! This is a bug in the amdgpu kernel driver
 
 **Originally eDP-1-only in collected logs, but no longer exclusively so.** External display on DP-4 (via Plugable TB4 dock) previously continued working during eDP-1 freezes; Jun 23 showed DP-4 itself can stall as `CRTC:428:crtc-1`.
 
-**This is a known upstream kernel bug with no fix as of kernel 7.0/7.1-rc5 (May 2026).** The DCN 3.5.x code has not been touched upstream since June 2024. Not a hardware defect.
+**This is a known upstream kernel bug with no fix as of kernel 7.1.0 (Jun 28 2026).** The DCN 3.5.x code has not been touched upstream since June 2024. Not a hardware defect.
 
 ### Confirmed triggers
 
-| Trigger                                                                                                   | Evidence                                                                               |
-| --------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| `VrrPolicy=2` (Always) in KWin — compositor issues adaptive-sync flips on desktop                         | Flips started within 90s of login with Steam open, before any game launched            |
-| Heavy Vulkan compute (MTP inference) followed by idle — display engine transitions out of peak-load state | Freeze consistently ~2 min after llama-cpp finishes generating                         |
-| USB4/TB4 dock connected + PCIe link instability → DPIA path disruption → flip timeout ~1h later           | Jun 2 2026: xhci died at 21:11, flip_done at 22:09                                     |
-| USB4/TB4 dock hotplug without a PCIe link failure                                                         | Jun 15 2026: eDP froze 22s after display HPD, while external DP-4 survived             |
-| USB4/TB4 dock boot-time cascade + external 4K240 DP-4                                                     | Jun 23 2026: xhci died at 17:58:51, DP-4 HPD at 17:58:59, crtc-1 flip_done at 18:17:28 |
-| `VrrPolicy=1` (Automatic) does NOT fully prevent it                                                       | Still occurred with Automatic mode + external display connected                        |
-| Idle Plasma desktop startup (~100s after KWin start, no GPU load)                                         | Jun 4 2026: flip_done at 18:46:24, boot at 18:44:14, no llama-cpp/USB4/dock            |
+| Trigger                                                                                                   | Evidence                                                                                                                                                |
+| --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `VrrPolicy=2` (Always) in KWin — compositor issues adaptive-sync flips on desktop                         | Flips started within 90s of login with Steam open, before any game launched                                                                             |
+| Heavy Vulkan compute (MTP inference) followed by idle — display engine transitions out of peak-load state | Freeze consistently ~2 min after llama-cpp finishes generating                                                                                          |
+| USB4/TB4 dock connected + PCIe link instability → DPIA path disruption → flip timeout ~1h later           | Jun 2 2026: xhci died at 21:11, flip_done at 22:09                                                                                                      |
+| USB4/TB4 dock hotplug without a PCIe link failure                                                         | Jun 15 2026: eDP froze 22s after display HPD, while external DP-4 survived                                                                              |
+| USB4/TB4 dock boot-time cascade + external 4K240 DP-4                                                     | Jun 23 2026: xhci died at 17:58:51, DP-4 HPD at 17:58:59, crtc-1 flip_done at 18:17:28                                                                  |
+| Rocket League under gamescope on external 4K240 after USB4 boot cascade                                   | Jun 28 2026: xhci died/re-enumerated at boot, Rocket League exited at 14:44:01, KWin page-flip timeouts began at 14:44:06, crtc-0 flip_done at 14:44:14 |
+| `VrrPolicy=1` (Automatic) does NOT fully prevent it                                                       | Still occurred with Automatic mode + external display connected                                                                                         |
+| Idle Plasma desktop startup (~100s after KWin start, no GPU load)                                         | Jun 4 2026: flip_done at 18:46:24, boot at 18:44:14, no llama-cpp/USB4/dock                                                                             |
 
 ### Mitigations in place (as of Jun 2026)
 
@@ -124,11 +125,58 @@ This disproves the earlier eDP-only assumption. Hypothesis: the boot-time USB4
 cascade left the DP tunnel/display engine in a fragile state, and the external
 4K240 DP-4 scanout later hit the same DCN 3.5.1 page-flip failure path.
 
+### Jun 28 2026: Rocket League / gamescope after USB4 boot cascade
+
+At boot, all configured mitigations were active on kernel 7.1.0:
+`amdgpu.dcdebugmask=0x1613`, `amdgpu.sg_display=0`, `amdgpu.gpu_recovery=1`,
+`amdgpu.ppfeaturemask=0xfff73fff`, `amdgpu.freesync_video=0`,
+`amdgpu.aspm=0`, `pcie_aspm=off`, `pcie_port_pm=off`, `pcie_ports=native`,
+`pci=realloc`, and `thunderbolt.clx=0`.
+
+The Plugable USB4 chain had another boot-time cascade: `00:01.2` linked down at
+14:14:57, both retimers disconnected, the DM7801 device disconnected, and
+`xhci_hcd 0000:b2:00.0` logged `Controller not ready at resume -19` plus
+`HC died; cleaning up`. The dock re-enumerated at 14:15:05 and amdgpu logged a
+DP hotplug callback (`DMUB HPD IRQ callback: link_index=8`).
+
+Rocket League launched through gamescope 3.16.24 at 14:18:31 using RADV
+`AMD Radeon 8060S Graphics (RADV STRIX_HALO)`. Gamescope switched the Wayland
+backend to 240 Hz at 14:18:39. User-visible sequence: Rocket League began
+stuttering on the external display, then the internal display froze, then the
+external display froze too.
+
+At 14:44:00-14:44:01, `gamescopereaper` aborted in `gamemode_request_end` /
+D-Bus cleanup, gamescope logged `Primary child shut down`, and Steam stopped
+game 252950. Five seconds later KWin began logging `Pageflip timed out! This is
+a bug in the amdgpu kernel driver`. The kernel then logged:
+
+```
+14:44:14 amdgpu 0000:c4:00.0: [drm] *ERROR* [CRTC:424:crtc-0] flip_done timed out
+14:44:18 amdgpu 0000:c4:00.0: [drm] *ERROR* [CRTC:424:crtc-0] hw_done or flip_done timed out
+14:44:39 amdgpu 0000:c4:00.0: [drm] *ERROR* [CRTC:424:crtc-0] commit wait timed out
+14:44:49 amdgpu 0000:c4:00.0: [drm] *ERROR* [PLANE:421:plane-7] commit wait timed out
+14:44:50 amdgpu 0000:c4:00.0: [drm] vblank wait timed out on crtc 0
+```
+
+No `amdgpu_vm_validate`, framebuffer pin failure, ENOMEM, GPU reset, RAS/MCE,
+or thermal fault was observed in the prior boot. There were frequent Steam
+`CHTTPClientThre` split-lock bus-lock traps in the minute before the crash;
+these may explain user-visible stutter but are not sufficient to explain the
+amdgpu CRTC/vblank stall.
+
+Interpretation: this is the primary DCN 3.5.1 display pipeline bug again, not a
+new hardware failure. The boot-time USB4 cascade is a plausible precondition as
+in the Jun 23 DP-4 incident, but this time the fatal kernel timeout landed on
+`crtc-0` while Rocket League/gamescope was active on the external 4K240 output.
+The gamescope/GameMode coredumps are recorded as nearby userspace events, not
+as the proven root cause of the display-engine stall.
+
 ### Next steps if freezes continue
 
 1. ~~Try `VrrPolicy=0` (Never)~~ **Done Jun 4 2026** — VRR fully disabled; loses adaptive sync in games
 2. Check if any upstream kernel patch for DCN 3.5.1 flip_done has landed (search `drm/amd` commits)
 3. File upstream at https://gitlab.freedesktop.org/drm/amd/-/issues with `sudo dmesg` output
+4. Test whether Rocket League still freezes when the external output is capped below 240 Hz or launched without gamescope after a boot-time USB4 cascade
 
 ---
 
@@ -176,6 +224,54 @@ thunderbolt.clx=0
 ```
 
 `thunderbolt.clx=0` fixed the Jun 2026 hotplug failure where `boltctl` showed the dock/enclosure authorized but `lspci` never showed the downstream PCIe tree or ixgbe NIC.
+
+### Related: external display missing when dock is attached at boot
+
+**Symptom:** With the Plugable dock connected at boot, the external display is
+absent at SDDM/Plasma. Other dock devices can work. Unplugging/replugging the
+dock later causes the external display to appear.
+
+**Current signature:** the USB4/TB chain enumerates, but the DisplayPort tunnel
+fails before userspace sees the external output:
+
+```
+thunderbolt 0000:c6:00.6: 0:6 <-> 2:13 (DP): not active, tearing down
+thunderbolt 0000:c6:00.6: 0: failed to allocate DP resource for port 7
+sddm-greeter-qt6: Adding view for "eDP-1" ...
+```
+
+After replug, the chain drops/re-enumerates and amdgpu receives hotplug:
+
+```
+thunderbolt 1-0:2.1: retimer disconnected
+pcieport 0000:00:01.2: pciehp: Slot(0-1): Link Down
+xhci_hcd 0000:b2:00.0: HC died; cleaning up
+amdgpu 0000:c4:00.0: [drm] DMUB HPD IRQ callback: link_index=8
+```
+
+Observed on multiple kernel 7.1 boots with different NixOS system generations
+(Jun 23 and Jun 28). `kscreen-doctor -o` after replug reports the display as
+`DP-7` connected/enabled at 3840x2160@240.
+
+**Interpretation:** this is a USB4 DisplayPort tunnel/resource allocation race,
+not a generic dock failure. It explains why USB/PCIe devices on the dock can be
+usable while the external display is missing. The boot-time DP tunnel failure is
+also a plausible precondition for later `flip_done` stalls, because the display
+pipeline starts from a fragile re-enumerated state.
+
+**Next config tests, one at a time:**
+
+1. ~~If no Thunderbolt dock device is needed before root unlock/login, remove
+   `thunderbolt` from `boot.initrd.availableKernelModules` for goldenball so the
+   dock is not enumerated in stage 1.~~ **Failed Jun 28 2026** — caused loss of
+   keyboard input at the LUKS prompt even with the native keyboard. Do not retry
+   without a separate initrd input fix.
+2. If delaying Thunderbolt is not acceptable, test early amdgpu KMS instead by
+   adding `amdgpu` to `boot.initrd.kernelModules`, so the display engine is up
+   before the Thunderbolt DP tunnel is created.
+3. If neither helps, test a deliberate post-boot Thunderbolt reauthorization or
+   controller power-cycle service, but only with user approval because it will
+   briefly disconnect every device on the dock.
 
 ### Next steps if TB cascade recurs
 
@@ -271,32 +367,35 @@ No evidence of hardware defect in any collected logs (no MCE, no hardware ECC er
 
 ## Boot history reference (May–Jun 2026)
 
-| Date         | Notable events                                                                           |
-| ------------ | ---------------------------------------------------------------------------------------- |
-| May 23       | Multiple boots on kernel 6.17.8, NixOS 25.05 — zero flip timeouts                        |
-| May 24       | Rebuilt to NixOS 26.05 (kernel 7.0.8) + added amdgpu params + VRR — flip timeouts begin  |
-| May 29–30    | Multiple flip_done freezes; mitigations added (dcdebugmask 0x612, cwsr=0, VrrPolicy=1)   |
-| May 30 19:13 | 3-day boot begins; 35B MTP model loaded; ENOMEM errors appear                            |
-| May 31 10:35 | Plugable dock hotplugged; framebuffer pin failures                                       |
-| Jun 2 21:11  | USB4 cascade: PCIe link down, xhci died, ixgbe removed                                   |
-| Jun 2 22:09  | flip_done timeout → hard freeze → reboot                                                 |
-| Jun 4 18:44  | Boot; flip_done at 18:46:24 (~100s after KWin, idle desktop). VrrPolicy changed 1→0      |
-| Jun 9 18:45  | Boot; flip_done at 19:17:32. Occurred with VrrPolicy=0, no dock connected.               |
-| Jun 13 16:15 | USB4 `00:01.2` link dropped and recovered; eDP flip timeout followed at 16:17:25.        |
-| Jun 15 12:35 | Dock hotplug completed without link loss; eDP flip timeout followed 31 sec after attach. |
-| Jun 23 18:17 | External DP-4 hard-froze; `CRTC:428:crtc-1` flip_done after boot-time USB4 cascade.      |
+| Date         | Notable events                                                                                                                                |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| May 23       | Multiple boots on kernel 6.17.8, NixOS 25.05 — zero flip timeouts                                                                             |
+| May 24       | Rebuilt to NixOS 26.05 (kernel 7.0.8) + added amdgpu params + VRR — flip timeouts begin                                                       |
+| May 29–30    | Multiple flip_done freezes; mitigations added (dcdebugmask 0x612, cwsr=0, VrrPolicy=1)                                                        |
+| May 30 19:13 | 3-day boot begins; 35B MTP model loaded; ENOMEM errors appear                                                                                 |
+| May 31 10:35 | Plugable dock hotplugged; framebuffer pin failures                                                                                            |
+| Jun 2 21:11  | USB4 cascade: PCIe link down, xhci died, ixgbe removed                                                                                        |
+| Jun 2 22:09  | flip_done timeout → hard freeze → reboot                                                                                                      |
+| Jun 4 18:44  | Boot; flip_done at 18:46:24 (~100s after KWin, idle desktop). VrrPolicy changed 1→0                                                           |
+| Jun 9 18:45  | Boot; flip_done at 19:17:32. Occurred with VrrPolicy=0, no dock connected.                                                                    |
+| Jun 13 16:15 | USB4 `00:01.2` link dropped and recovered; eDP flip timeout followed at 16:17:25.                                                             |
+| Jun 15 12:35 | Dock hotplug completed without link loss; eDP flip timeout followed 31 sec after attach.                                                      |
+| Jun 23 18:17 | External DP-4 hard-froze; `CRTC:428:crtc-1` flip_done after boot-time USB4 cascade.                                                           |
+| Jun 28 14:44 | Rocket League/gamescope on external 4K240; `CRTC:424:crtc-0` flip_done after USB4 boot cascade.                                               |
+| Jun 28 boot  | External display absent at boot; DP tunnel logged `not active` / `failed to allocate DP resource for port 7`; replug produced HPD and `DP-7`. |
 
 ---
 
 ## Files to check when troubleshooting
 
-| File                                       | What's there                                                                      |
-| ------------------------------------------ | --------------------------------------------------------------------------------- |
-| `hosts/goldenball/configuration.nix`       | All kernel params, udev rules, VrrPolicy, auraConfigs, hid_asus udev rebind       |
-| `hosts/goldenball/llm-config.nix`          | LLM model presets, active model selection                                         |
-| `modules/nixos/llama-cpp/default.nix`      | llama-server service, `RADV_PERFTEST`, `MESA_SHADER_CACHE_DIR`                    |
-| `modules/nixos/usb4-sfp/default.nix`       | USB4/TB4 PCIe power pinning for ixgbe NIC                                         |
-| `modules/nixos/networkmanager/default.nix` | WiFi MAC policy                                                                   |
-| `modules/nixos/asusctl/default.nix`        | Aura LED option passthrough                                                       |
-| `docs/LLM-HOSTING-TUNING.md`               | LLM tuning reference (written for crown/R9700 but applies with noted differences) |
-| `docs/INCUS.md`                            | Container architecture (not directly relevant to freezes)                         |
+| File                                          | What's there                                                                      |
+| --------------------------------------------- | --------------------------------------------------------------------------------- |
+| `hosts/goldenball/configuration.nix`          | All kernel params, udev rules, VrrPolicy, auraConfigs, hid_asus udev rebind       |
+| `hosts/goldenball/hardware-configuration.nix` | Generated initrd module list; currently includes `thunderbolt`                    |
+| `hosts/goldenball/llm-config.nix`             | LLM model presets, active model selection                                         |
+| `modules/nixos/llama-cpp/default.nix`         | llama-server service, `RADV_PERFTEST`, `MESA_SHADER_CACHE_DIR`                    |
+| `modules/nixos/usb4-sfp/default.nix`          | USB4/TB4 PCIe power pinning for ixgbe NIC                                         |
+| `modules/nixos/networkmanager/default.nix`    | WiFi MAC policy                                                                   |
+| `modules/nixos/asusctl/default.nix`           | Aura LED option passthrough                                                       |
+| `docs/LLM-HOSTING-TUNING.md`                  | LLM tuning reference (written for crown/R9700 but applies with noted differences) |
+| `docs/INCUS.md`                               | Container architecture (not directly relevant to freezes)                         |
