@@ -37,6 +37,38 @@ Downstream standalone Home Manager users currently provide:
 - `userConfig.homeDirectory`
 - `isNixOS = false`
 
+This is the stable compatibility API for downstream flakes. Internal module
+paths may change, but these exported names should continue to work. Downstream
+flakes should import only the modules they intend to configure, then enable them
+through the existing `mine.home.*` options.
+
+Example standalone Home Manager usage:
+
+```nix
+{
+  extraSpecialArgs = {
+    userConfig = {
+      username = "example";
+      homeDirectory = "/home/example";
+    };
+    isNixOS = false;
+  };
+
+  modules = [
+    nixos-r6t.homeManagerModules.fish
+    nixos-r6t.homeManagerModules.git
+    ({ ... }: {
+      mine.home.fish.enable = true;
+      mine.home.git.enable = true;
+    })
+  ];
+}
+```
+
+There is intentionally no bundled `homeManagerModules.default` export yet. The
+current downstream contract is explicit per-module imports; broader aggregate
+exports can be added later as an additive compatibility layer.
+
 ### Linux Packages
 
 The package contract is currently Linux-only under `packages.x86_64-linux`.
