@@ -51,10 +51,12 @@
   outputs = inputs@{ flake-parts, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } {
       imports = [
+        flake-parts.flakeModules.modules
         ./flake/devshells.nix
         ./flake/hosts.nix
         ./flake/packages.nix
         ./flake/checks.nix
+        ./flake/modules.nix
         ./flake/nixos-modules.nix
         ./flake/home-manager-modules.nix
       ];

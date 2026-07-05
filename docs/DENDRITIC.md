@@ -85,6 +85,29 @@ These are exported for downstream NixOS flakes:
 by this repo's host configurations. It exposes the `mine.*` option surface but
 does not enable features by itself.
 
+### Dendritic Module Registry
+
+These `modules` outputs are the branch's first dendritic registry layer. They
+store lower-level modules by class while compatibility exports continue to serve
+existing consumers:
+
+- `modules.homeManager.alacritty`
+- `modules.homeManager.atuin`
+- `modules.homeManager.fish`
+- `modules.homeManager.git`
+- `modules.homeManager.nixvim`
+- `modules.homeManager.zellij`
+- `modules.nixos.default`
+
+Compatibility exports should alias through this registry rather than importing
+implementation files directly:
+
+- `homeManagerModules.*` aliases `modules.homeManager.*`
+- `nixosModules.default` aliases `modules.nixos.default`
+
+This registry is intentionally small. Add new entries only when they are meant
+to become reusable module API, not just because a file exists in `modules/`.
+
 ### Linux Packages
 
 The package contract is currently Linux-only under `packages.x86_64-linux`.
@@ -164,6 +187,9 @@ These commands evaluate output names without building or activating anything:
 
 ```fish
 nix eval --json .#nixosConfigurations --apply builtins.attrNames
+nix eval --json .#modules --apply builtins.attrNames
+nix eval --json .#modules.homeManager --apply builtins.attrNames
+nix eval --json .#modules.nixos --apply builtins.attrNames
 nix eval --json .#nixosModules --apply builtins.attrNames
 nix eval --json .#homeManagerModules --apply builtins.attrNames
 nix eval --json .#packages.x86_64-linux --apply builtins.attrNames

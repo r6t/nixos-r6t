@@ -1,5 +1,7 @@
+{ config, ... }:
+
 {
   flake.nixosModules = {
-    default = import ../modules/default.nix;
+    default = config.flake.modules.nixos.default;
   };
 }
