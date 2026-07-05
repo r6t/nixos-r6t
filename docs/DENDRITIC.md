@@ -24,6 +24,7 @@ These host outputs are the operational entry points for system rebuilds:
 
 These are exported for downstream flakes, including `~/git/nix-work-r6t`:
 
+- `homeManagerModules.default`
 - `homeManagerModules.alacritty`
 - `homeManagerModules.atuin`
 - `homeManagerModules.fish`
@@ -41,6 +42,15 @@ This is the stable compatibility API for downstream flakes. Internal module
 paths may change, but these exported names should continue to work. Downstream
 flakes should import only the modules they intend to configure, then enable them
 through the existing `mine.home.*` options.
+
+`homeManagerModules.default` is an additive aggregate of the portable modules
+listed above. It also imports the upstream `nixvim.homeModules.nixvim`
+dependency needed by `homeManagerModules.nixvim`, but does not enable any
+features. Prefer explicit per-module imports for narrow downstream flakes; use
+`default` when importing the full portable option surface is more convenient.
+
+Downstreams that import `homeManagerModules.nixvim` directly should also import
+their own `nixvim.homeModules.nixvim`, as `~/git/nix-work-r6t` does today.
 
 Example standalone Home Manager usage:
 
@@ -65,9 +75,15 @@ Example standalone Home Manager usage:
 }
 ```
 
-There is intentionally no bundled `homeManagerModules.default` export yet. The
-current downstream contract is explicit per-module imports; broader aggregate
-exports can be added later as an additive compatibility layer.
+### NixOS Modules
+
+These are exported for downstream NixOS flakes:
+
+- `nixosModules.default`
+
+`nixosModules.default` points at `modules/default.nix`, the same module imported
+by this repo's host configurations. It exposes the `mine.*` option surface but
+does not enable features by itself.
 
 ### Linux Packages
 
@@ -148,6 +164,7 @@ These commands evaluate output names without building or activating anything:
 
 ```fish
 nix eval --json .#nixosConfigurations --apply builtins.attrNames
+nix eval --json .#nixosModules --apply builtins.attrNames
 nix eval --json .#homeManagerModules --apply builtins.attrNames
 nix eval --json .#packages.x86_64-linux --apply builtins.attrNames
 nix eval --json .#checks.x86_64-linux --apply builtins.attrNames

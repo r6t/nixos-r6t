@@ -55,6 +55,7 @@
         ./flake/hosts.nix
         ./flake/packages.nix
         ./flake/checks.nix
+        ./flake/nixos-modules.nix
         ./flake/home-manager-modules.nix
       ];
 
