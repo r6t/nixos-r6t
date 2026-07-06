@@ -85,6 +85,21 @@ These are exported for downstream NixOS flakes:
 by this repo's host configurations. It exposes the `mine.*` option surface but
 does not enable features by itself.
 
+### NixOS Host Factory
+
+These helper exports build NixOS systems without changing the operational
+`nixosConfigurations.<host>` rebuild entry points:
+
+- `lib.mkNixosHost`
+- `lib.mkRegisteredNixosHost`
+
+`lib.mkNixosHost { modules = [ ... ]; }` is the generic factory. It uses the
+same default `specialArgs` as this repository's host configurations unless a
+caller passes explicit `specialArgs`.
+
+`lib.mkRegisteredNixosHost "mountainball"` is the repo-local convenience wrapper
+used by `nixosConfigurations.*`. It consumes `modules.nixos.<host>` entries.
+
 ### Dendritic Module Registry
 
 These `modules` outputs are the branch's first dendritic registry layer. They
@@ -197,6 +212,7 @@ These commands evaluate output names without building or activating anything:
 
 ```fish
 nix eval --json .#nixosConfigurations --apply builtins.attrNames
+nix eval --json .#lib --apply builtins.attrNames
 nix eval --json .#modules --apply builtins.attrNames
 nix eval --json .#modules.homeManager --apply builtins.attrNames
 nix eval --json .#modules.nixos --apply builtins.attrNames

@@ -53,6 +53,7 @@
       imports = [
         flake-parts.flakeModules.modules
         ./flake/devshells.nix
+        ./flake/lib.nix
         ./flake/hosts.nix
         ./flake/packages.nix
         ./flake/checks.nix

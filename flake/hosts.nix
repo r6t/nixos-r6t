@@ -1,15 +1,7 @@
-{ config, inputs, self, ... }:
+{ config, ... }:
 
 let
-  inherit (import ./common.nix) userConfig;
-  inherit (self) outputs;
-
-  specialArgs = { inherit userConfig inputs outputs; isNixOS = true; };
-
-  mkNixosHost = name: inputs.nixpkgs.lib.nixosSystem {
-    inherit specialArgs;
-    modules = [ config.flake.modules.nixos.${name} ];
-  };
+  mkNixosHost = config.flake.lib.mkRegisteredNixosHost;
 in
 {
   flake.nixosConfigurations = {
