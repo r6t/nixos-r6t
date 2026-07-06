@@ -13,5 +13,7 @@
     ../modules/home/git/flake-module.nix
     ../modules/home/nixvim/flake-module.nix
     ../modules/home/zellij/flake-module.nix
+    ../modules/profiles/r6t-base/flake-module.nix
+    ../modules/profiles/r6t-home-shell/flake-module.nix
   ];
 }

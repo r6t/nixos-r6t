@@ -5,6 +5,8 @@ let
 in
 {
 
+  # Legacy compatibility module for hosts not migrated to modules.nixos.r6t-base
+  # yet. New profile-based hosts should import r6t-base instead.
   options = {
     mine.nixos-r6t-baseline.enable =
       lib.mkEnableOption "enable NixOS baseline system configuration";

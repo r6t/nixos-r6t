@@ -1,3 +1,5 @@
+{ inputs, ... }:
+
 let
   allowUnfreeWithTemporaryElectronInsecure = {
     nixpkgs.config = {
@@ -10,6 +12,8 @@ in
 {
   flake.modules.nixos.mountainball = {
     imports = [
+      inputs.self.modules.nixos.r6t-base
+      inputs.self.modules.nixos.r6t-home-shell
       ./configuration.nix
       allowUnfreeWithTemporaryElectronInsecure
     ];

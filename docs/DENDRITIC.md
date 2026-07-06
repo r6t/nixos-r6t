@@ -118,6 +118,8 @@ existing consumers:
 - `modules.nixos.goldenball`
 - `modules.nixos.hedgehog`
 - `modules.nixos.mountainball`
+- `modules.nixos.r6t-base`
+- `modules.nixos.r6t-home-shell`
 - `modules.nixos.saguaro`
 
 Compatibility exports should alias through this registry rather than importing
@@ -142,6 +144,35 @@ Portable Home Manager aspect registrations are colocated with their feature
 directories. Each `modules/home/<name>/flake-module.nix` defines the matching
 `modules.homeManager.<name>` registry entry, while the actual Home Manager
 module remains `modules/home/<name>/default.nix`.
+
+Profile aspects live under `modules/profiles/<name>/flake-module.nix`. These
+are NixOS-class aspects that compose existing lower-level modules with
+`lib.mkDefault` activation values. They provide host-file reduction without yet
+rewriting every leaf module away from `mine.*.enable` gates.
+
+Initial profile aspects:
+
+- `modules.nixos.r6t-base` enables conservative fleet defaults: bootloader,
+  fwupd, fzf, iperf, localization, nix, ssh, tailscale, user, common system
+  packages, system fish shell support, and fail2ban SSH hardening.
+- `modules.nixos.r6t-home-shell` enables the shell-oriented Home Manager stack:
+  home-manager core, atuin, fish, git, nixvim, ssh, and zellij. This is the
+  preferred name instead of `r6t-home-cli` because the profile describes an
+  interactive shell environment rather than a generic CLI role.
+
+`modules.nixos.r6t-base` owns behavior that used to live in the catch-all
+`modules/nixos/nixos-r6t-baseline/default.nix` module. The split files are kept
+inside the profile directory:
+
+- `modules/profiles/r6t-base/ssh-hardening.nix`
+- `modules/profiles/r6t-base/system-packages.nix`
+- `modules/profiles/r6t-base/system-shell.nix`
+
+`mine.nixos-r6t-baseline.enable` is legacy compatibility for hosts that have not
+been migrated to profile imports yet. Do not add new behavior there.
+
+Planned profile aspect names include `kde-workstation`, `server-base`,
+`incus-host`, and `router`.
 
 `flake/modules.nix` remains as the manual import list for these feature-owned
 flake-parts modules. It should not own registry values directly unless there is
