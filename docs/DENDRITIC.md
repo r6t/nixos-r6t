@@ -130,6 +130,23 @@ implementation files directly:
 `modules.nixos.<host>`. Those host modules currently wrap the existing files in
 `hosts/<host>/configuration.nix`; the host file contents have not been moved.
 
+Host aspect registrations are colocated with their host directories. Each
+`hosts/<host>/flake-module.nix` defines the matching `modules.nixos.<host>`
+registry entry and imports `hosts/<host>/configuration.nix`.
+
+The base NixOS module registry entry is colocated with the module tree:
+`modules/flake-module.nix` defines `modules.nixos.default` as
+`modules/default.nix`.
+
+Portable Home Manager aspect registrations are colocated with their feature
+directories. Each `modules/home/<name>/flake-module.nix` defines the matching
+`modules.homeManager.<name>` registry entry, while the actual Home Manager
+module remains `modules/home/<name>/default.nix`.
+
+`flake/modules.nix` remains as the manual import list for these feature-owned
+flake-parts modules. It should not own registry values directly unless there is
+no better feature directory for the value yet.
+
 This registry is intentionally small. Add new entries only when they are meant
 to become reusable module API, not just because a file exists in `modules/`.
 
