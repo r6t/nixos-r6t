@@ -97,13 +97,23 @@ existing consumers:
 - `modules.homeManager.git`
 - `modules.homeManager.nixvim`
 - `modules.homeManager.zellij`
+- `modules.nixos.barrel`
+- `modules.nixos.crown`
 - `modules.nixos.default`
+- `modules.nixos.goldenball`
+- `modules.nixos.hedgehog`
+- `modules.nixos.mountainball`
+- `modules.nixos.saguaro`
 
 Compatibility exports should alias through this registry rather than importing
 implementation files directly:
 
 - `homeManagerModules.*` aliases `modules.homeManager.*`
 - `nixosModules.default` aliases `modules.nixos.default`
+
+`nixosConfigurations.*` also consumes the host-specific registry entries under
+`modules.nixos.<host>`. Those host modules currently wrap the existing files in
+`hosts/<host>/configuration.nix`; the host file contents have not been moved.
 
 This registry is intentionally small. Add new entries only when they are meant
 to become reusable module API, not just because a file exists in `modules/`.

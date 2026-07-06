@@ -1,4 +1,4 @@
-{ inputs, self, ... }:
+{ config, inputs, self, ... }:
 
 let
   inherit (import ./common.nix) userConfig;
@@ -6,69 +6,28 @@ let
 
   specialArgs = { inherit userConfig inputs outputs; isNixOS = true; };
 
-  allowUnfreeWithTemporaryElectronInsecure = {
-    nixpkgs.config = {
-      allowUnfree = true;
-      # temporary allow recent EOL
-      permittedInsecurePackages = [ "electron-36.9.5" "electron-39.8.10" ];
-    };
+  mkNixosHost = name: inputs.nixpkgs.lib.nixosSystem {
+    inherit specialArgs;
+    modules = [ config.flake.modules.nixos.${name} ];
   };
 in
 {
   flake.nixosConfigurations = {
     # cold storage
-    barrel = inputs.nixpkgs.lib.nixosSystem {
-      inherit specialArgs;
-      modules = [
-        ../hosts/barrel/configuration.nix
-      ];
-    };
+    barrel = mkNixosHost "barrel";
 
     # primary server
-    crown = inputs.nixpkgs.lib.nixosSystem {
-      inherit specialArgs;
-      modules = [
-        ../hosts/crown/configuration.nix
-      ];
-    };
+    crown = mkNixosHost "crown";
 
-    mountainball = inputs.nixpkgs.lib.nixosSystem {
-      inherit specialArgs;
-      modules = [
-        ../hosts/mountainball/configuration.nix
-        allowUnfreeWithTemporaryElectronInsecure
-      ];
-    };
+    mountainball = mkNixosHost "mountainball";
 
     # laptop — ASUS ROG Z13 GZ302 Strix Halo
-    goldenball = inputs.nixpkgs.lib.nixosSystem {
-      inherit specialArgs;
-      modules = [
-        ../hosts/goldenball/configuration.nix
-        allowUnfreeWithTemporaryElectronInsecure
-      ];
-    };
+    goldenball = mkNixosHost "goldenball";
 
     # living room HTPC — gamescope session + image generation
-    hedgehog = inputs.nixpkgs.lib.nixosSystem {
-      inherit specialArgs;
-      modules = [
-        ../hosts/hedgehog/configuration.nix
-        {
-          nixpkgs.config = {
-            allowUnfree = true;
-            cudaSupport = true;
-          };
-        }
-      ];
-    };
+    hedgehog = mkNixosHost "hedgehog";
 
     # router + appliances
-    saguaro = inputs.nixpkgs.lib.nixosSystem {
-      inherit specialArgs;
-      modules = [
-        ../hosts/saguaro/configuration.nix
-      ];
-    };
+    saguaro = mkNixosHost "saguaro";
   };
 }
