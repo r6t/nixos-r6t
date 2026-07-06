@@ -154,6 +154,14 @@ to become reusable module API, not just because a file exists in `modules/`.
 
 The package contract is currently Linux-only under `packages.x86_64-linux`.
 
+Package output registration is now colocated with package owners:
+
+- `containers/flake-module/default.nix` discovers direct `containers/*.nix`
+  image definitions and defines the container image and metadata package outputs.
+- `pkgs/rocmfp4-llama/flake-module.nix` defines
+  `packages.x86_64-linux.rocmfp4-llama`.
+- `flake/packages.nix` is the import list for package-output feature modules.
+
 Custom package outputs:
 
 - `packages.x86_64-linux.rocmfp4-llama`
@@ -221,7 +229,7 @@ The dendritic migration should not initially redesign runtime profiles:
 - Do not rename or remove the baseline outputs above without a documented transition.
 - Keep downstream compatibility through `homeManagerModules.*` even if dendritic `flake.modules.*` exports are added.
 - Keep Incus image attr names stable even if image generation moves out of `flake.nix`.
-- Treat `containers/` and `pkgs/` as lower-level implementation directories unless explicitly migrated later.
+- Keep Incus runtime profiles out of package-output migration; they remain host-specific operational state.
 
 ## No-Build Validation Commands
 
