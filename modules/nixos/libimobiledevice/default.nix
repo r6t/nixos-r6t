@@ -5,13 +5,5 @@
       lib.mkEnableOption "enable libimobiledevice iOS tools";
   };
 
-  config = lib.mkIf config.mine.libimobiledevice.enable {
-    environment.systemPackages = with pkgs; [
-      libimobiledevice
-      ifuse
-      usbmuxd
-    ];
-    services.usbmuxd.enable = true;
-    users.users.${userConfig.username}.extraGroups = [ "usbmux" ];
-  };
+  config = lib.mkIf config.mine.libimobiledevice.enable (import ./config.nix { inherit pkgs userConfig; });
 }

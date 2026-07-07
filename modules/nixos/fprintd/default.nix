@@ -5,7 +5,5 @@
       lib.mkEnableOption "enable fprintd";
   };
 
-  config = lib.mkIf config.mine.fprintd.enable {
-    services.fprintd.enable = true;
-  };
+  config = lib.mkIf config.mine.fprintd.enable (import ./config.nix);
 }

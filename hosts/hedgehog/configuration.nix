@@ -23,21 +23,16 @@
     hostName = "hedgehog";
     firewall = {
       enable = true;
-      allowedTCPPorts = [ 22 ];
     };
   };
 
   system.stateVersion = "25.05";
-  time.timeZone = "America/Los_Angeles";
 
   # ---------------------------------------------------------------------------
   # Virtual display — Xvfb for Steam streaming (no physical monitor)
   # ---------------------------------------------------------------------------
 
-  services.xserver = {
-    enable = true;
-    videoDrivers = [ "nvidia" ];
-  };
+  services.xserver.enable = true;
 
   # Xvfb virtual framebuffer for headless Steam streaming.
   # Steam Remote Play needs an X11 display surface to capture.
@@ -69,45 +64,16 @@
   mine = {
     bluetooth.enable = false;
     direnv.enable = true;
-    fwupd.enable = true;
-    fzf.enable = true;
-    iperf.enable = true;
-    localization.enable = true;
-    networkmanager.enable = true;
-    nix.enable = true;
-    nixos-r6t-baseline.enable = true;
     rdfind.enable = false;
-
-    # RTX 4070 Ti — open NVIDIA kernel module (CUDA/NVENC identical between open/proprietary)
-    nvidia-cuda = {
-      enable = true;
-      open = true;
-      package = "latest";
-      containerToolkit = false;
-      installCudaToolkit = true;
-    };
 
     # CLI home modules — headless server accessed via SSH
     home = {
-      atuin.enable = true;
-      fish.enable = true;
-      git.enable = true;
       git.signingPubKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINFSoABOk+KRUGtbxpS5PjcIHy4cYh7GOWxC7rNzv3Ua r6t@mountainball";
-      home-manager.enable = true;
       nixvim = {
-        enable = true;
         enableSopsSecrets = false;
         enableHaMcp = false;
       };
-      ssh.enable = true;
-      zellij.enable = true;
     };
-
-    sound.enable = true;
-    ssh.enable = true;
-    steam.enable = true;
-    tailscale.enable = true;
-    user.enable = true;
 
   };
 

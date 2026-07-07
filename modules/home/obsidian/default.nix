@@ -6,7 +6,6 @@
   };
 
   # nixpkgs.config.allowUnfree is set at the host level in flake.nix
-  config = lib.mkIf config.mine.home.obsidian.enable {
-    home-manager.users.${userConfig.username}.home.packages = with pkgs; [ obsidian ];
-  };
+  config = lib.mkIf config.mine.home.obsidian.enable
+    (import ./config.nix { inherit pkgs userConfig; });
 }

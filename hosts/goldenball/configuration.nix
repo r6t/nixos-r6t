@@ -86,7 +86,6 @@ in
   ];
 
   boot = {
-    loader.systemd-boot.configurationLimit = 3;
     kernelPackages = lib.mkDefault pkgs.linuxPackages_latest;
 
     initrd.luks.devices."luks-4c181c40-b517-4477-b5b2-ddb63e56e552".device = "/dev/disk/by-uuid/4c181c40-b517-4477-b5b2-ddb63e56e552";
@@ -269,8 +268,6 @@ in
       };
     };
 
-    fprintd.enable = false;
-
     # Strix Halo only supports S0 (s2idle) and S4 (hibernate) — no S3 deep sleep.
     # s2idle is unreliable on battery. On AC: stay in s2idle so the machine
     # remains reachable. On battery: lid close triggers suspend only, no hibernate.
@@ -300,45 +297,20 @@ in
     firewall = {
       enable = true;
       checkReversePath = false;
-      allowedTCPPorts = [ 22 8384 8443 22000 ];
+      allowedTCPPorts = [ 8384 8443 22000 ];
     };
   };
 
   system.stateVersion = "25.05";
-  time.timeZone = "America/Los_Angeles";
 
   # ---------------------------------------------------------------------------
   # Modules
   # ---------------------------------------------------------------------------
 
   mine = {
-    flatpak = {
-      base.enable = true;
-      anki.enable = true;
-      calibre.enable = true;
-      element.enable = true;
-      inkscape.enable = true;
-      libreoffice.enable = true;
-      picard.enable = true;
-      proton-mail.enable = true;
-      remmina.enable = true;
-      zoom.enable = true;
-    };
-
     home = {
-      alacritty.enable = true;
-      atuin.enable = true;
-      bitwarden.enable = true;
-      browsers.enable = true;
-      darktable.enable = true;
-      drawio.enable = true;
-      fish.enable = true;
-      fontconfig.enable = true;
-      git.enable = true;
-      home-manager.enable = true;
       hyprland.enable = false;
       kde-apps = {
-        enable = true;
         tablet = true;
         # 2560x1600 panel — 1.5x is the right Xwayland HiDPI scale (module default is 2 for 4K).
         xwaylandScale = 1.5;
@@ -347,9 +319,7 @@ in
         llamaCppLauncher = true;
       };
       mako.enable = false;
-      mpv.enable = true;
       nixvim = {
-        enable = true;
         enableSopsSecrets = true;
         enableHaMcp = true;
         # opencode points at the local llama-server on goldenball.
@@ -380,14 +350,8 @@ in
         };
       };
       obs-studio.enable = false;
-      obsidian.enable = true;
       orca-slicer.enable = false;
-      signal-desktop.enable = true;
-      ssh.enable = true;
-      teams-for-linux.enable = true;
       virt-viewer.enable = false;
-      webcord.enable = true;
-      zellij.enable = true;
     };
 
     alloy.enable = false;
@@ -493,19 +457,9 @@ in
         '';
       };
     };
-    bluetooth.enable = true;
-    bolt.enable = true;
-    bootloader.enable = true;
-    czkawka.enable = true;
-    direnv.enable = true;
     ddc-i2c.enable = false;
     docker.enable = false;
-    fonts.enable = true;
-    fwupd.enable = true;
-    fzf.enable = true;
     hypr.enable = false;
-    iperf.enable = true;
-    kde.enable = true;
     kde.tablet = true;
 
     # Local llama-server — Vulkan backend for Radeon 8060S (gfx1151).
@@ -543,34 +497,13 @@ in
       extraFlags = localLlm.activeModel.extraFlags;
     };
 
-    localization.enable = true;
     mullvad.enable = false;
-    networkmanager.enable = true;
-    nix.enable = true;
-    nfs.mounts.photos = {
-      mountPoint = "/mnt/thunderbay/8TB-C/Pictures";
-      device = "crown:/";
-    };
-    nixos-r6t-baseline.enable = true;
-    npm.enable = true;
-    printing.enable = true;
     pinchflat.enable = false;
     prometheus-node-exporter.enable = false;
     rdfind.enable = false;
-    sops.enable = true;
-    sound.enable = true;
-    ssh.enable = true;
-    sshfs.enable = true;
     steam = {
-      enable = true;
       goldenballGameLauncher.enable = true;
     };
-    syncthing.enable = true;
-    tailscale.enable = true;
-    usb4-sfp.enable = true;
-    user.enable = true;
-    v4l-utils.enable = true;
-    zola.enable = true;
   };
 
   # ---------------------------------------------------------------------------

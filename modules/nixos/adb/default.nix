@@ -5,7 +5,5 @@
       lib.mkEnableOption "enable adb";
   };
 
-  config = lib.mkIf config.mine.adb.enable {
-    programs.adb.enable = true;
-  };
+  config = lib.mkIf config.mine.adb.enable (import ./config.nix);
 }

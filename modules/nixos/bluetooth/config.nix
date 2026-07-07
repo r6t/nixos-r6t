@@ -1,0 +1,18 @@
+{
+  # blueman disabled as long as hyprland isn't in use
+  services.blueman.enable = false;
+  hardware.bluetooth = {
+    enable = true;
+    powerOnBoot = true;
+    settings = {
+      General = {
+        # adding the 3 below trying to get bluetooth to start enabled
+        Enable = "Source,Sink,Media,Socket";
+        FastConnectable = "true";
+        MultiProfile = "multiple";
+        # Experimental settings allow the os to read bluetooth device battery level
+        Experimental = true;
+      };
+    };
+  };
+}

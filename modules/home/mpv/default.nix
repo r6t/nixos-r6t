@@ -1,4 +1,4 @@
 import ../../lib/mkHomePackageModule.nix {
   name = "mpv";
-  packages = p: [ p.mpv-unwrapped ];
+  configModule = import ./config.nix;
 }

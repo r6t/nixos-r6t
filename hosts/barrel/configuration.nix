@@ -1,4 +1,4 @@
-{ inputs, lib, ... }:
+{ inputs, ... }:
 
 {
   imports = [
@@ -9,10 +9,6 @@
     ../../modules/default.nix
   ];
 
-  boot = {
-    supportedFilesystems = [ "zfs" ];
-  };
-
   fileSystems."/mnt/zfskey" = {
     device = "/dev/disk/by-uuid/213b225c-366b-4577-a56f-366fe577d482";
     fsType = "ext4";
@@ -22,13 +18,8 @@
   networking = {
     hostId = "eb5912c9";
     enableIPv6 = false;
-    useNetworkd = true;
     hostName = "barrel";
-    nameservers = [ "192.168.6.1" ];
-    defaultGateway = {
-      address = "192.168.6.1";
-      interface = "eno2";
-    };
+    defaultGateway.interface = "eno2";
 
     interfaces = {
       # Lower port unused
@@ -46,8 +37,6 @@
     firewall = {
       enable = true;
       checkReversePath = false;
-      allowedTCPPorts = [ 22 ];
-      trustedInterfaces = [ "tailscale0" ];
     };
     # firewall = {
     #   enable = false; # Disabled - using nftables instead
@@ -98,58 +87,16 @@
     #   '';
     # };
   };
-  nix.settings.use-cgroups = true;
-
-  time.timeZone = "America/Los_Angeles";
-
-  services = {
-    journald.extraConfig = "SystemMaxUse=500M";
-    resolved = {
-      enable = true;
-      settings.Resolve.Domains = [ "~." ];
-    };
-  };
 
   system.stateVersion = "23.11";
 
-  systemd = {
-    tmpfiles.rules = [
-      "d /mnt/barrel-pool 0755 r6t users -"
-      "d /mnt/zfskey 0755 root root -"
-    ];
-    services = {
-      # System configuration
-      systemd-networkd-wait-online.enable = lib.mkForce false;
-      nix-daemon.serviceConfig = {
-        # throttle nix builds to 50% of 16 cores
-        CPUQuota = "800%";
-      };
-    };
-  };
+  systemd.tmpfiles.rules = [
+    "d /mnt/barrel-pool 0755 r6t users -"
+    "d /mnt/zfskey 0755 root root -"
+  ];
 
   # modules/
   mine = {
-    home = {
-      atuin.enable = true;
-      fish.enable = true;
-      git.enable = true;
-      home-manager.enable = true;
-      nixvim.enable = true;
-      ssh.enable = true;
-    };
-
-    bootloader.enable = true;
-    nixos-r6t-baseline.enable = true;
-    fwupd.enable = true;
-    iperf.enable = true;
-    fzf.enable = true;
-    localization.enable = true;
-    nix.enable = true;
-    sops.enable = true;
-    ssh.enable = true;
-    tailscale.enable = true;
-    user.enable = true;
-
     zfs-pool = {
       barrel-pool = {
         poolName = "barrel-pool";

@@ -21,12 +21,9 @@
       192.168.6.10 loki.r6t.io
     '';
   };
-  nix.settings.use-cgroups = true;
-  time.timeZone = "America/Los_Angeles";
   system.stateVersion = "23.11";
 
   services = {
-    journald.extraConfig = "SystemMaxUse=500M";
     alloy.extraFlags = lib.mkForce [
       "--server.http.listen-addr=192.168.6.1:12346"
       "--disable-reporting"
@@ -50,13 +47,6 @@
         after = [ "mnt-kingston240.mount" ];
         requires = [ "mnt-kingston240.mount" ];
       };
-
-      # System configuration
-      systemd-networkd-wait-online.enable = lib.mkForce false;
-      nix-daemon.serviceConfig = {
-        CPUQuota = "800%";
-      };
-
       # Watchdog: restart haos VM if its USB NIC (enp0s13f0u3c2) disappears.
       # The Zigbee stick and HA NIC are now on separate USB root hubs, so this should
       # rarely trigger — it is a last-resort backstop for any future USB disruption.
@@ -97,25 +87,7 @@
 
   # modules/
   mine = {
-    home = {
-      atuin.enable = true;
-      fish.enable = true;
-      git.enable = true;
-      home-manager.enable = true;
-      nixvim.enable = true;
-      ssh.enable = true;
-    };
-
-    alloy = {
-      enable = true;
-      lokiUrl = "https://loki.r6t.io/loki/api/v1/push";
-      syslogListen = true;
-    };
     home-router = {
-      enable = true;
-      cake.enable = true;
-      healthCheck.enable = true;
-      wanWatchdog.enable = true;
       lanAddress = "192.168.6.1/24";
       lanInterface = "enp100s0";
       wanInterface = "enp101s0";
@@ -145,32 +117,15 @@
       };
     };
 
-    bolt.enable = true;
-    bootloader.enable = true;
-    nixos-r6t-baseline.enable = true;
-    fwupd.enable = true;
-    iperf.enable = true;
-    fzf.enable = true;
-    incus = {
-      enable = true;
-      profileDir = "/home/r6t/git/nixos-r6t/hosts/saguaro/incus-instances";
-    };
-    localization.enable = true;
     mountLuksStore.kingston240 = {
       device = "/dev/disk/by-uuid/d7c2abad-2a6d-47ef-8310-dd57fb1156b9";
       keyFile = "/root/kingston240key";
       mountPoint = "/mnt/kingston240";
     };
-    nix.enable = true;
 
     sops = {
-      enable = true;
       defaultSopsFile = "/mnt/kingston240/sops-ryan/secrets.yaml";
       ageKeyFile = "/mnt/kingston240/age/keys.txt";
     };
-
-    prometheus-node-exporter.enable = true;
-    ssh.enable = true;
-    user.enable = true;
   };
 }

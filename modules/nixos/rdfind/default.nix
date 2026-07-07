@@ -5,7 +5,5 @@
       lib.mkEnableOption "enable rdfind";
   };
 
-  config = lib.mkIf config.mine.rdfind.enable {
-    environment.systemPackages = with pkgs; [ rdfind ];
-  };
+  config = lib.mkIf config.mine.rdfind.enable (import ./config.nix { inherit pkgs; });
 }

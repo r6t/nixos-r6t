@@ -17,13 +17,5 @@
     };
   };
 
-  config = lib.mkIf config.mine.sops.enable {
-    environment.systemPackages = with pkgs; [ age sops ];
-    sops = {
-      inherit (config.mine.sops) defaultSopsFile;
-      defaultSopsFormat = "yaml";
-      age.keyFile = config.mine.sops.ageKeyFile;
-      validateSopsFiles = false;
-    };
-  };
+  config = lib.mkIf config.mine.sops.enable (import ./config.nix { inherit config pkgs; });
 }

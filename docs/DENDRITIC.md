@@ -113,14 +113,38 @@ existing consumers:
 - `modules.homeManager.nixvim`
 - `modules.homeManager.zellij`
 - `modules.nixos.barrel`
+- `modules.nixos.booted-host`
+- `modules.nixos.cgrouped-nix-builds`
 - `modules.nixos.crown`
 - `modules.nixos.default`
+- `modules.nixos.gaming-host`
 - `modules.nixos.goldenball`
 - `modules.nixos.hedgehog`
+- `modules.nixos.incus-host`
+- `modules.nixos.infra-host`
+- `modules.nixos.infra-networkd-journal`
+- `modules.nixos.kde-workstation`
+- `modules.nixos.laptop-workstation`
+- `modules.nixos.monitoring-agent`
 - `modules.nixos.mountainball`
+- `modules.nixos.nfs-photos-client`
+- `modules.nixos.nfs-pictures-export`
+- `modules.nixos.nix-build-throttle`
+- `modules.nixos.nvidia-container-host`
+- `modules.nixos.nvidia-cuda-workload`
+- `modules.nixos.office-desk`
 - `modules.nixos.r6t-base`
+- `modules.nixos.r6t-home-core`
 - `modules.nixos.r6t-home-shell`
+- `modules.nixos.r6t-system-core`
+- `modules.nixos.router`
 - `modules.nixos.saguaro`
+- `modules.nixos.sops-host`
+- `modules.nixos.static-lan-host`
+- `modules.nixos.sync-host`
+- `modules.nixos.tailnet-host`
+- `modules.nixos.thunderbolt-host`
+- `modules.nixos.zfs-host`
 
 Compatibility exports should alias through this registry rather than importing
 implementation files directly:
@@ -140,6 +164,11 @@ The base NixOS module registry entry is colocated with the module tree:
 `modules/flake-module.nix` defines `modules.nixos.default` as
 `modules/default.nix`.
 
+`modules/default.nix` is the compatibility aggregate for the legacy `mine.*`
+option surface. It intentionally lists each `flatpak`, `home`, and `nixos` leaf
+module explicitly instead of auto-discovering directories, so new leaf modules
+must be registered deliberately.
+
 Portable Home Manager aspect registrations are colocated with their feature
 directories. Each `modules/home/<name>/flake-module.nix` defines the matching
 `modules.homeManager.<name>` registry entry, while the actual Home Manager
@@ -150,15 +179,64 @@ are NixOS-class aspects that compose existing lower-level modules with
 `lib.mkDefault` activation values. They provide host-file reduction without yet
 rewriting every leaf module away from `mine.*.enable` gates.
 
-Initial profile aspects:
+Current profile aspects:
 
-- `modules.nixos.r6t-base` enables conservative fleet defaults: bootloader,
-  fwupd, fzf, iperf, localization, nix, ssh, tailscale, user, common system
-  packages, system fish shell support, and fail2ban SSH hardening.
-- `modules.nixos.r6t-home-shell` enables the shell-oriented Home Manager stack:
-  home-manager core, atuin, fish, git, nixvim, ssh, and zellij. This is the
-  preferred name instead of `r6t-home-cli` because the profile describes an
+- `modules.nixos.booted-host` enables the standard bootloader module for hosts
+  that boot from this flake.
+- `modules.nixos.cgrouped-nix-builds` enables Nix build cgroup accounting for
+  hosts where this was already configured directly.
+- `modules.nixos.gaming-host` enables shared gaming/runtime defaults: unfree
+  packages, NetworkManager, sound, and Steam.
+- `modules.nixos.incus-host` enables Incus, defaulting `mine.incus.profileDir`
+  to `hosts/<hostname>/incus-instances`, and enables nftables for Incus hosts.
+- `modules.nixos.infra-host` composes `cgrouped-nix-builds`,
+  `infra-networkd-journal`, and `nix-build-throttle` for headless infra hosts.
+- `modules.nixos.infra-networkd-journal` caps journald size and disables
+  `systemd-networkd-wait-online` for networkd-managed infra hosts.
+- `modules.nixos.kde-workstation` enables the common KDE workstation desktop
+  stack: KDE, NetworkManager, Flatpak desktop apps, shared desktop Home Manager
+  apps, fonts, sound, printing, supporting tools, and the nixpkgs allowUnfree /
+  temporary Electron exceptions needed by those apps.
+- `modules.nixos.laptop-workstation` enables laptop defaults shared by
+  `mountainball` and `goldenball`: a short systemd-boot generation limit and
+  disabled fingerprint service.
+- `modules.nixos.monitoring-agent` enables Alloy and Prometheus node exporter.
+- `modules.nixos.nfs-photos-client` mounts crown's curated photo export on
+  workstation clients.
+- `modules.nixos.nfs-pictures-export` defines crown's curated Pictures NFS
+  export and its storage mount ordering.
+- `modules.nixos.nix-build-throttle` caps `nix-daemon` CPU to `800%` on hosts
+  where long builds should not consume the whole machine.
+- `modules.nixos.nvidia-container-host` enables NVIDIA/CUDA host support for
+  container GPU passthrough without installing the full CUDA toolkit.
+- `modules.nixos.nvidia-cuda-workload` enables NVIDIA/CUDA host support for a
+  local CUDA workload machine with the CUDA toolkit installed.
+- `modules.nixos.office-desk` enables USB4 SFP+ dock support for systems that use
+  the physical office desk Thunderbolt dock. This currently applies to
+  `mountainball` and `goldenball` only, and imports `thunderbolt-host`.
+- `modules.nixos.r6t-base` composes `booted-host`, `r6t-system-core`, and
+  `tailnet-host` for normal flake-managed hosts.
+- `modules.nixos.r6t-home-core` enables the shared portable Home Manager core:
+  home-manager, atuin, fish, git, nixvim, and ssh.
+- `modules.nixos.r6t-home-shell` extends `r6t-home-core` with zellij. This is
+  the preferred name instead of `r6t-home-cli` because the profile describes an
   interactive shell environment rather than a generic CLI role.
+- `modules.nixos.r6t-system-core` enables conservative fleet defaults: fwupd,
+  fzf, iperf, localization, nix, ssh, user, common system packages, system fish
+  shell support, fail2ban SSH hardening, and the shared time zone.
+- `modules.nixos.router` enables the Home Router module and router-specific
+  Alloy syslog ingestion defaults while leaving interface names and reservations
+  host-local.
+- `modules.nixos.sops-host` enables the SOPS module while leaving host-specific
+  secret files and age key paths host-local.
+- `modules.nixos.static-lan-host` enables networkd, LAN DNS, the default LAN
+  gateway address, and resolved settings for static LAN servers.
+- `modules.nixos.sync-host` enables SSHFS and Syncthing for hosts that already
+  share the sync stack.
+- `modules.nixos.tailnet-host` enables Tailscale.
+- `modules.nixos.thunderbolt-host` enables Bolt for Thunderbolt/USB4-capable
+  hosts.
+- `modules.nixos.zfs-host` enables ZFS filesystem support.
 
 `modules.nixos.r6t-base` owns behavior that used to live in the catch-all
 `modules/nixos/nixos-r6t-baseline/default.nix` module. The split files are kept
@@ -168,18 +246,59 @@ inside the profile directory:
 - `modules/profiles/r6t-base/system-packages.nix`
 - `modules/profiles/r6t-base/system-shell.nix`
 
-`mine.nixos-r6t-baseline.enable` is legacy compatibility for hosts that have not
-been migrated to profile imports yet. Do not add new behavior there.
+`mine.nixos-r6t-baseline.enable` is legacy compatibility only. Hosts should use
+`r6t-system-core` or `r6t-base` instead. Do not add new behavior there.
 
-Planned profile aspect names include `kde-workstation`, `server-base`,
-`incus-host`, and `router`.
+Direct-import migration is underway for profile-owned leaves. Migrated leaves
+expose a direct `config.nix` implementation imported by profiles, while their
+`default.nix` files keep old `mine.*.enable` wrappers for compatibility
+consumers. This is the preferred migration pattern for removing enable hooks
+without breaking old imports. Current direct-import leaves include bootloader,
+Nix, SSH, user, fwupd, fzf, iperf, localization, NetworkManager, sound,
+Bluetooth, czkawka, direnv, fonts, npm, printing, v4l-utils, zola, Bolt,
+Prometheus node exporter, SSHFS, Syncthing, and USB4 SFP support.
 
-`flake/modules.nix` remains as the manual import list for these feature-owned
-flake-parts modules. It should not own registry values directly unless there is
-no better feature directory for the value yet.
+### Leaf Migration Guardrails
 
-This registry is intentionally small. Add new entries only when they are meant
-to become reusable module API, not just because a file exists in `modules/`.
+Treat `config.nix` splits as implementation movement, not as new public API.
+
+- Only split a leaf when direct import of its ungated behavior is equivalent to
+  enabling the existing `mine.<leaf>.enable` option.
+- Keep `modules/nixos/<leaf>/default.nix` in `modules/default.nix` while the
+  legacy `mine.*` option surface exists. The wrapper owns option declarations
+  and should continue to gate `import ./config.nix` with `lib.mkIf`.
+- Put only active feature configuration in `config.nix`. Do not declare
+  `mine.*` options, inspect `mine.<leaf>.enable`, or add a second enable gate
+  there; profiles import `config.nix` because they want the feature enabled.
+- Preserve non-enable compatibility options on the wrapper and pass only the
+  existing implementation inputs (`config`, `inputs`, `lib`, `pkgs`, and so on)
+  through to `config.nix` as needed.
+- Profiles should direct-import `../../nixos/<leaf>/config.nix` for migrated
+  leaves, or compose another profile via `inputs.self.modules.nixos.<profile>`.
+  Do not import a leaf `default.nix` from a profile just to toggle an enable
+  option.
+- Do not add one `modules.nixos.<leaf>` registry entry per migrated leaf unless
+  that leaf is intentionally becoming reusable module API. Prefer merging
+  non-distinct lower-level modules under profile names.
+- Keep host-specific facts host-local: hardware imports, interface names,
+  addresses, mounts, secrets, and one-off service data should not become
+  profiles without at least two consumers or a documented replacement-host
+  story.
+- Update the current direct-import leaf list above and run no-build eval checks
+  before considering a pass complete.
+
+No planned profile name should be added until it has a clear reusable role or a
+clear future replacement-host story.
+
+`flake/modules.nix` remains as the deliberate registration list for these
+feature-owned flake-parts modules. It groups host, portable Home Manager, and
+profile aspect names, then maps those names to colocated `flake-module.nix`
+files. It should not own registry values directly unless there is no better
+feature directory for the value yet.
+
+This registry is intentionally deliberate. Add new entries only when they are
+meant to become reusable module API, not just because a file exists in
+`modules/`.
 
 ### Linux Packages
 
@@ -276,6 +395,15 @@ nix eval --json .#nixosModules --apply builtins.attrNames
 nix eval --json .#homeManagerModules --apply builtins.attrNames
 nix eval --json .#packages.x86_64-linux --apply builtins.attrNames
 nix eval --json .#checks.x86_64-linux --apply builtins.attrNames
+```
+
+After a leaf-migration pass, also force every registered NixOS host to evaluate
+its system toplevel derivation path without building it:
+
+```fish
+for host in barrel crown goldenball hedgehog mountainball saguaro
+    nix eval --raw ".#nixosConfigurations.$host.config.system.build.toplevel.drvPath"
+end
 ```
 
 Humans can also check container discovery without building:

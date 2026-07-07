@@ -5,7 +5,5 @@
       lib.mkEnableOption "enable apache";
   };
 
-  config = lib.mkIf config.mine.apache.enable {
-    environment.systemPackages = with pkgs; [ apacheHttpd ];
-  };
+  config = lib.mkIf config.mine.apache.enable (import ./config.nix { inherit pkgs; });
 }

@@ -5,9 +5,6 @@
       lib.mkEnableOption "enable fontconfig in home-manager";
   };
 
-  config = lib.mkIf config.mine.home.fontconfig.enable {
-    home-manager.users.${userConfig.username}.fonts = {
-      fontconfig.enable = true;
-    };
-  };
+  config = lib.mkIf config.mine.home.fontconfig.enable
+    (import ./config.nix { inherit userConfig; });
 }

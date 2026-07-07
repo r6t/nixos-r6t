@@ -5,10 +5,5 @@
       lib.mkEnableOption "enable tpm utilities";
   };
 
-  config = lib.mkIf config.mine.tpm.enable {
-    environment.systemPackages = with pkgs; [
-      clevis
-      tpm2-tools
-    ];
-  };
+  config = lib.mkIf config.mine.tpm.enable (import ./config.nix { inherit pkgs; });
 }
