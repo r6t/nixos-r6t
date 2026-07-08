@@ -8,6 +8,15 @@
     inputs.nix-flatpak.nixosModules.nix-flatpak
     ./hardware-configuration.nix
     ../../modules/default.nix
+    ../../modules/home/makemkv/config.nix
+    ../../modules/home/obs-studio/config.nix
+    ../../modules/home/orca-slicer/config.nix
+    ../../modules/home/virt-viewer/config.nix
+    ../../modules/nixos/ddc-i2c/config.nix
+    ../../modules/nixos/docker/config.nix
+    ../../modules/nixos/mullvad/config.nix
+    ../../modules/nixos/pinchflat/config.nix
+    ../../modules/nixos/rdfind/config.nix
   ];
 
   boot = {
@@ -84,7 +93,6 @@
       git.signingPubKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINFSoABOk+KRUGtbxpS5PjcIHy4cYh7GOWxC7rNzv3Ua r6t@mountainball";
       hyprland.enable = false;
       gnome-apps.enable = false;
-      makemkv.enable = true;
       mako.enable = false;
       nixvim = {
         enableSopsSecrets = true;
@@ -115,17 +123,9 @@
           };
         };
       };
-      obs-studio.enable = true;
-      orca-slicer.enable = true;
-      virt-viewer.enable = true;
     };
 
-    ddc-i2c.enable = true;
-    docker.enable = true;
     hypr.enable = false;
     gnome.enable = false;
-    mullvad.enable = true;
-    pinchflat.enable = true;
-    rdfind.enable = true;
   };
 }

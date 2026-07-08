@@ -7,6 +7,7 @@
     inputs.comfyui-nix.nixosModules.default
     ./hardware-configuration.nix
     ../../modules/default.nix
+    ../../modules/nixos/direnv/config.nix
   ];
 
   # ---------------------------------------------------------------------------
@@ -63,7 +64,6 @@
 
   mine = {
     bluetooth.enable = false;
-    direnv.enable = true;
     rdfind.enable = false;
 
     # CLI home modules — headless server accessed via SSH

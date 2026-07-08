@@ -1,5 +1,7 @@
 {
-  flake.modules.nixos.tailnet-host = { lib, ... }: {
-    mine.tailscale.enable = lib.mkDefault true;
+  flake.modules.nixos.tailnet-host = { ... }: {
+    imports = [
+      ../../nixos/tailscale/config.nix
+    ];
   };
 }

@@ -234,7 +234,9 @@ Current profile aspects:
   gateway address, and resolved settings for static LAN servers.
 - `modules.nixos.sync-host` enables SSHFS and Syncthing for hosts that already
   share the sync stack.
-- `modules.nixos.tailnet-host` enables Tailscale.
+- `modules.nixos.tailnet-host` enables Tailscale for normal hosts. Container
+  image modules still use the legacy `mine.tailscale.enable` flag because their
+  DNS override behavior depends on that option value.
 - `modules.nixos.thunderbolt-host` enables Bolt for Thunderbolt/USB4-capable
   hosts.
 - `modules.nixos.zfs-host` enables ZFS filesystem support.
@@ -250,15 +252,17 @@ inside the profile directory:
 `mine.nixos-r6t-baseline.enable` is legacy compatibility only. Hosts should use
 `r6t-system-core` or `r6t-base` instead. Do not add new behavior there.
 
-Direct-import migration is underway for profile-owned leaves. Migrated leaves
-expose a direct `config.nix` implementation imported by profiles, while their
-`default.nix` files keep old `mine.*.enable` wrappers for compatibility
-consumers. This is the preferred migration pattern for removing enable hooks
-without breaking old imports. Current direct-import leaves include bootloader,
+Direct-import migration is underway for profile- and host-owned leaves. Migrated
+leaves expose a direct `config.nix` implementation imported by profiles or host
+configs, while their `default.nix` files keep old `mine.*.enable` wrappers for
+compatibility consumers. This is the preferred migration pattern for removing
+enable hooks without breaking old imports. Current direct-import leaves include bootloader,
 Nix, SSH, user, fwupd, fzf, iperf, localization, NetworkManager, sound,
 Bluetooth, czkawka, direnv, fonts, npm, printing, v4l-utils, zola, Bolt,
 Prometheus node exporter, SSHFS, Syncthing, USB4 SFP support, desktop Flatpak
-apps, browsers, darktable, KDE apps, the KDE desktop, and Steam.
+apps, browsers, darktable, KDE apps, the KDE desktop, Steam, Tailscale host
+configuration, MakeMKV, Docker, Incus log collection, ddc-i2c, Mullvad,
+Pinchflat, rdfind, OBS Studio, Orca Slicer, and virt-viewer.
 
 ### Leaf Migration Guardrails
 
@@ -279,6 +283,8 @@ Treat `config.nix` splits as implementation movement, not as new public API.
   leaves, or compose another profile via `inputs.self.modules.nixos.<profile>`.
   Do not import a leaf `default.nix` from a profile just to toggle an enable
   option.
+- Host configs may direct-import migrated leaf `config.nix` files for
+  host-specific features that are not reusable profile behavior.
 - Do not add one `modules.nixos.<leaf>` registry entry per migrated leaf unless
   that leaf is intentionally becoming reusable module API. Prefer merging
   non-distinct lower-level modules under profile names.

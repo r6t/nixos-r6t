@@ -32,6 +32,8 @@ in
     inputs.nix-flatpak.nixosModules.nix-flatpak
     ./hardware-configuration.nix
     ../../modules/default.nix
+    ../../modules/nixos/incus-log-collector/config.nix
+    ../../modules/nixos/rdfind/config.nix
   ];
 
 
@@ -171,8 +173,6 @@ in
     home = {
       git.signingPubKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEpfN0UYA2Bbn+F9IMMVrtIAI2M0vTTLMHWz4qQ8L5P0 r6t@nixos";
     };
-
-    incus-log-collector.enable = true;
     caddy = {
       enable = true;
       environmentFile = "/mnt/crownstore/Sync/app-config/caddy/crown.caddy.env";
@@ -191,7 +191,6 @@ in
     };
 
     nvidia-cuda.allowExternalGpu = true; # Connected via Thunderbolt eGPU
-    rdfind.enable = true;
     wg-metrics = {
       enable = true;
       instanceMapFile = "/home/r6t/git/nixos-r6t/hosts/crown/incus-instances/instance_map.json";
