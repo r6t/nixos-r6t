@@ -236,6 +236,35 @@ in
       "d /var/lib/llama-cpp-models 0755 r6t users -"
     ];
 
+    # ASUS Battery Care: keep the almost-always-plugged tablet at 80% max
+    # charge. asusctl persists the limit in asusd's config; the sysfs write is
+    # a direct kernel fallback for the current boot.
+    services.goldenball-battery-charge-limit = {
+      description = "Limit ASUS battery charge to 80%";
+      wantedBy = [ "multi-user.target" ];
+      wants = [ "asusd.service" ];
+      after = [ "asusd.service" ];
+      serviceConfig.Type = "oneshot";
+      script = ''
+        if ! ${pkgs.asusctl}/bin/asusctl battery limit 80; then
+          printf 'asusctl battery limit failed; falling back to sysfs\n' >&2
+        fi
+
+        found=0
+        for threshold in /sys/class/power_supply/BAT*/charge_control_end_threshold; do
+          if [ -w "$threshold" ]; then
+            printf '80\n' > "$threshold"
+            found=1
+          fi
+        done
+
+        if [ "$found" -eq 0 ]; then
+          printf 'No writable charge_control_end_threshold found under /sys/class/power_supply/BAT*\n' >&2
+          exit 1
+        fi
+      '';
+    };
+
     # services.llama-cpp from nixpkgs always installs with WantedBy=multi-user.target.
     # Override to prevent auto-start at boot — use `systemctl start llama-cpp` or the
     # KDE app menu / panel launcher instead.
