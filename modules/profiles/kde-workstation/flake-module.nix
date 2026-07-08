@@ -1,10 +1,23 @@
 {
-  flake.modules.nixos.kde-workstation = { lib, ... }: {
+  flake.modules.nixos.kde-workstation = { ... }: {
     imports = [
+      ../../flatpak/anki/config.nix
+      ../../flatpak/base/config.nix
+      ../../flatpak/calibre/config.nix
+      ../../flatpak/element/config.nix
+      ../../flatpak/inkscape/config.nix
+      ../../flatpak/libreoffice/config.nix
+      ../../flatpak/picard/config.nix
+      ../../flatpak/proton-mail/config.nix
+      ../../flatpak/remmina/config.nix
+      ../../flatpak/zoom/config.nix
       ../../home/alacritty/config.nix
       ../../home/bitwarden/config.nix
+      ../../home/browsers/config.nix
+      ../../home/darktable/config.nix
       ../../home/drawio/config.nix
       ../../home/fontconfig/config.nix
+      ../../home/kde-apps/config.nix
       ../../home/mpv/config.nix
       ../../home/obsidian/config.nix
       ../../home/signal-desktop/config.nix
@@ -14,6 +27,7 @@
       ../../nixos/czkawka/config.nix
       ../../nixos/direnv/config.nix
       ../../nixos/fonts/config.nix
+      ../../nixos/kde/config.nix
       ../../nixos/networkmanager/config.nix
       ../../nixos/npm/config.nix
       ../../nixos/printing/config.nix
@@ -26,29 +40,6 @@
       allowUnfree = true;
       # Temporary allow recent EOL Electron packages used by desktop apps.
       permittedInsecurePackages = [ "electron-36.9.5" "electron-39.8.10" ];
-    };
-
-    mine = {
-      flatpak = {
-        base.enable = lib.mkDefault true;
-        anki.enable = lib.mkDefault true;
-        calibre.enable = lib.mkDefault true;
-        element.enable = lib.mkDefault true;
-        inkscape.enable = lib.mkDefault true;
-        libreoffice.enable = lib.mkDefault true;
-        picard.enable = lib.mkDefault true;
-        proton-mail.enable = lib.mkDefault true;
-        remmina.enable = lib.mkDefault true;
-        zoom.enable = lib.mkDefault true;
-      };
-
-      home = {
-        browsers.enable = lib.mkDefault true;
-        darktable.enable = lib.mkDefault true;
-        kde-apps.enable = lib.mkDefault true;
-      };
-
-      kde.enable = lib.mkDefault true;
     };
   };
 }

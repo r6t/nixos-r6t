@@ -175,9 +175,10 @@ directories. Each `modules/home/<name>/flake-module.nix` defines the matching
 module remains `modules/home/<name>/default.nix`.
 
 Profile aspects live under `modules/profiles/<name>/flake-module.nix`. These
-are NixOS-class aspects that compose existing lower-level modules with
-`lib.mkDefault` activation values. They provide host-file reduction without yet
-rewriting every leaf module away from `mine.*.enable` gates.
+are NixOS-class aspects that compose existing lower-level modules with direct
+leaf imports and, where a leaf has not yet migrated, `lib.mkDefault` activation
+values. They provide host-file reduction without yet rewriting every leaf module
+away from `mine.*.enable` gates.
 
 Current profile aspects:
 
@@ -256,7 +257,8 @@ consumers. This is the preferred migration pattern for removing enable hooks
 without breaking old imports. Current direct-import leaves include bootloader,
 Nix, SSH, user, fwupd, fzf, iperf, localization, NetworkManager, sound,
 Bluetooth, czkawka, direnv, fonts, npm, printing, v4l-utils, zola, Bolt,
-Prometheus node exporter, SSHFS, Syncthing, and USB4 SFP support.
+Prometheus node exporter, SSHFS, Syncthing, USB4 SFP support, desktop Flatpak
+apps, browsers, darktable, KDE apps, the KDE desktop, and Steam.
 
 ### Leaf Migration Guardrails
 

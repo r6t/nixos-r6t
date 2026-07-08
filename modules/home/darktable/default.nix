@@ -1,50 +1,10 @@
 { lib, config, pkgs, userConfig, ... }:
 
-let
-  cfg = config.mine.home.darktable;
-in
 {
-  options.mine.home.darktable = {
-    enable = lib.mkEnableOption "darktable";
-  };
+  options.mine.home.darktable.enable = lib.mkEnableOption "darktable";
 
-  # Deployment pattern:
-  # - mountainball imports camera-card files into ~/Pictures/... for now.
-  # - Syncthing duplicates ~/Pictures to crown's backing storage.
-  # - crown exports that storage over NFS at /mnt/thunderbay/8TB-C/Pictures.
-  # - mountainball and goldenball both use that identical NFS path in darktable.
-  # - darktable databases stay local per host; shared edit state is via sidecar XMP files.
-  # version controlling darktable config prevents automatic changes with app updates
-  # stopped using versioned app config Oct 2025
-
-  config = lib.mkMerge [
-    (lib.mkIf cfg.enable {
-      home-manager.users.${userConfig.username} = {
-        home.packages = with pkgs; [
-          darktable
-          # sqlite3 for darktable maintenance scripts
-          sqlite-interactive
-        ];
-      };
-    })
-
-    (lib.mkIf (cfg.enable && config.networking.hostName == "mountainball") {
-      hardware.graphics = {
-        enable = true;
-        extraPackages = with pkgs; [
-          mesa.opencl # RusticL OpenCL for AMD
-        ];
-      };
-
-      environment.variables = {
-        RUSTICL_ENABLE = "radeonsi";
-      };
-
-      home-manager.users.${userConfig.username} = {
-        home.packages = with pkgs; [
-          clinfo
-        ];
-      };
-    })
-  ];
+  config = lib.mkIf config.mine.home.darktable.enable
+    (import ./config.nix {
+      inherit lib config pkgs userConfig;
+    }).config;
 }
