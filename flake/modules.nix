@@ -3,7 +3,6 @@ let
     "barrel"
     "crown"
     "goldenball"
-    "hedgehog"
     "mountainball"
     "saguaro"
   ];

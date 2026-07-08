@@ -89,11 +89,7 @@
   # modules
   mine = {
     home = {
-      freecad.enable = false; # 20260118 builds failing on pagmo
       git.signingPubKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINFSoABOk+KRUGtbxpS5PjcIHy4cYh7GOWxC7rNzv3Ua r6t@mountainball";
-      hyprland.enable = false;
-      gnome-apps.enable = false;
-      mako.enable = false;
       nixvim = {
         enableSopsSecrets = true;
         # HA MCP is intentionally NOT enabled globally here.
@@ -124,8 +120,5 @@
         };
       };
     };
-
-    hypr.enable = false;
-    gnome.enable = false;
   };
 }

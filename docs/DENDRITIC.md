@@ -16,7 +16,6 @@ These host outputs are the operational entry points for system rebuilds:
 - `nixosConfigurations.barrel`
 - `nixosConfigurations.crown`
 - `nixosConfigurations.goldenball`
-- `nixosConfigurations.hedgehog`
 - `nixosConfigurations.mountainball`
 - `nixosConfigurations.saguaro`
 
@@ -119,7 +118,6 @@ existing consumers:
 - `modules.nixos.default`
 - `modules.nixos.gaming-host`
 - `modules.nixos.goldenball`
-- `modules.nixos.hedgehog`
 - `modules.nixos.incus-host`
 - `modules.nixos.infra-host`
 - `modules.nixos.infra-networkd-journal`
@@ -285,6 +283,13 @@ Treat `config.nix` splits as implementation movement, not as new public API.
   option.
 - Host configs may direct-import migrated leaf `config.nix` files for
   host-specific features that are not reusable profile behavior.
+- Once a feature is direct-imported by a profile or host, `mine.<leaf>.enable =
+false` no longer disables it. Remove stale false-hook tombstones rather than
+  keeping misleading preferences. Keep explicit `enable = false` only when it is
+  a real downstream service/module setting with behavior.
+- Delete empty no-op compatibility modules instead of preserving inert option
+  surface. Legacy wrappers are kept only when they still enable real behavior or
+  preserve a compatibility contract.
 - Do not add one `modules.nixos.<leaf>` registry entry per migrated leaf unless
   that leaf is intentionally becoming reusable module API. Prefer merging
   non-distinct lower-level modules under profile names.
@@ -409,7 +414,7 @@ After a leaf-migration pass, also force every registered NixOS host to evaluate
 its system toplevel derivation path without building it:
 
 ```fish
-for host in barrel crown goldenball hedgehog mountainball saguaro
+for host in barrel crown goldenball mountainball saguaro
     nix eval --raw ".#nixosConfigurations.$host.config.system.build.toplevel.drvPath"
 end
 ```

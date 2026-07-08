@@ -309,7 +309,6 @@ in
 
   mine = {
     home = {
-      hyprland.enable = false;
       kde-apps = {
         tablet = true;
         # 2560x1600 panel — 1.5x is the right Xwayland HiDPI scale (module default is 2 for 4K).
@@ -318,7 +317,6 @@ in
         # Requires mine.llama-cpp.enable (which provides the script + polkit rule).
         llamaCppLauncher = true;
       };
-      mako.enable = false;
       nixvim = {
         enableSopsSecrets = true;
         enableHaMcp = true;
@@ -349,12 +347,8 @@ in
           };
         };
       };
-      obs-studio.enable = false;
-      orca-slicer.enable = false;
-      virt-viewer.enable = false;
     };
 
-    alloy.enable = false;
     asusctl = {
       enable = true;
       # GZ302EA has two aura USB devices:
@@ -457,9 +451,6 @@ in
         '';
       };
     };
-    ddc-i2c.enable = false;
-    docker.enable = false;
-    hypr.enable = false;
     kde.tablet = true;
 
     # Local llama-server — Vulkan backend for Radeon 8060S (gfx1151).
@@ -497,10 +488,6 @@ in
       extraFlags = localLlm.activeModel.extraFlags;
     };
 
-    mullvad.enable = false;
-    pinchflat.enable = false;
-    prometheus-node-exporter.enable = false;
-    rdfind.enable = false;
     steam = {
       goldenballGameLauncher.enable = true;
     };

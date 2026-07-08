@@ -16,9 +16,6 @@ in
     # laptop — ASUS ROG Z13 GZ302 Strix Halo
     goldenball = mkNixosHost "goldenball";
 
-    # living room HTPC — gamescope session + image generation
-    hedgehog = mkNixosHost "hedgehog";
-
     # router + appliances
     saguaro = mkNixosHost "saguaro";
   };

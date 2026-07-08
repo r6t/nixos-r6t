@@ -59,7 +59,6 @@ let
     "bluetooth"
     "bolt"
     "bootloader"
-    "bridge"
     "caddy"
     "czkawka"
     "ddc-i2c"
