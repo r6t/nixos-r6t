@@ -392,7 +392,8 @@ in
       // lib.optionalAttrs (cfg.hfRepo != null) { hf-repo = cfg.hfRepo; }
       // lib.optionalAttrs (cfg.hfFile != null) { hf-file = cfg.hfFile; }
       // lib.optionalAttrs (cfg.alias != null) { inherit (cfg) alias; };
-      openFirewall = true;
+      # Keep the host firewall closed. Tailscale access is allowed via tailscale0.
+      openFirewall = false;
     };
 
     # GPU-specific service hardening overrides.

@@ -28,7 +28,7 @@
       eno2 = {
         useDHCP = false;
         ipv4.addresses = [{
-          address = "192.168.6.3";
+          address = "192.168.6.4";
           prefixLength = 24;
         }];
       };
