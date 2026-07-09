@@ -30,7 +30,6 @@ let
     "nfs-pictures-export"
     "nix-build-throttle"
     "nvidia-container-host"
-    "nvidia-cuda-workload"
     "office-desk"
     "r6t-base"
     "r6t-home-core"

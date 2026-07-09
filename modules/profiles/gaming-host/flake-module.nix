@@ -3,6 +3,7 @@
     imports = [
       ../../nixos/networkmanager/config.nix
       ../../nixos/sound/config.nix
+      ../../nixos/steam/options.nix
       ../../nixos/steam/config.nix
     ];
 

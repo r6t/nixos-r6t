@@ -22,7 +22,7 @@ solid for older or less demanding titles but is not a discrete-GPU replacement.
 
 ## Steam and gaming stack
 
-Enabled in the base config via `mine.steam.enable = true`:
+Enabled by the shared `modules.nixos.gaming-host` profile:
 
 - `programs.steam` — sandboxed via bubblewrap, home bound to `~/steam-sandbox`
 - `mangohud` — GPU/CPU/frame overlay (injected into the Steam FHS)

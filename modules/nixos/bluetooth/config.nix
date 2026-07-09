@@ -1,5 +1,5 @@
 {
-  # blueman disabled as long as hyprland isn't in use
+  # KDE handles Bluetooth UI; keep blueman disabled to avoid duplicate applets.
   services.blueman.enable = false;
   hardware.bluetooth = {
     enable = true;

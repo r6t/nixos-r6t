@@ -105,6 +105,12 @@ These `modules` outputs are the branch's first dendritic registry layer. They
 store lower-level modules by class while compatibility exports continue to serve
 existing consumers:
 
+The stable external API remains `nixosConfigurations.*`, `homeManagerModules.*`,
+`nixosModules.default`, `packages.*`, and `checks.*`. Treat most
+`modules.nixos.<profile>` and `modules.nixos.<host>` entries as repo-internal
+composition points unless this document explicitly promotes one to downstream
+API.
+
 - `modules.homeManager.alacritty`
 - `modules.homeManager.atuin`
 - `modules.homeManager.fish`
@@ -129,7 +135,6 @@ existing consumers:
 - `modules.nixos.nfs-pictures-export`
 - `modules.nixos.nix-build-throttle`
 - `modules.nixos.nvidia-container-host`
-- `modules.nixos.nvidia-cuda-workload`
 - `modules.nixos.office-desk`
 - `modules.nixos.r6t-base`
 - `modules.nixos.r6t-home-core`
@@ -166,6 +171,12 @@ The base NixOS module registry entry is colocated with the module tree:
 option surface. It intentionally lists each `flatpak`, `home`, and `nixos` leaf
 module explicitly instead of auto-discovering directories, so new leaf modules
 must be registered deliberately.
+
+During migration, do not add new `mine.*.enable` activation hooks. Direct
+imports and profiles should activate behavior. Keep existing `mine.*` options
+only for compatibility consumers or for real knobs that still need a custom
+namespace; design a replacement namespace deliberately if the old name becomes
+misleading.
 
 Portable Home Manager aspect registrations are colocated with their feature
 directories. Each `modules/home/<name>/flake-module.nix` defines the matching
@@ -208,8 +219,6 @@ Current profile aspects:
   where long builds should not consume the whole machine.
 - `modules.nixos.nvidia-container-host` enables NVIDIA/CUDA host support for
   container GPU passthrough without installing the full CUDA toolkit.
-- `modules.nixos.nvidia-cuda-workload` enables NVIDIA/CUDA host support for a
-  local CUDA workload machine with the CUDA toolkit installed.
 - `modules.nixos.office-desk` enables USB4 SFP+ dock support for systems that use
   the physical office desk Thunderbolt dock. This currently applies to
   `mountainball` and `goldenball` only, and imports `thunderbolt-host`.
@@ -253,8 +262,10 @@ inside the profile directory:
 Direct-import migration is underway for profile- and host-owned leaves. Migrated
 leaves expose a direct `config.nix` implementation imported by profiles or host
 configs, while their `default.nix` files keep old `mine.*.enable` wrappers for
-compatibility consumers. This is the preferred migration pattern for removing
-enable hooks without breaking old imports. Current direct-import leaves include bootloader,
+compatibility consumers. Leaves with custom non-enable options may split those
+declarations into `options.nix`, imported by both the wrapper and direct
+profiles. This is the preferred migration pattern for removing enable hooks
+without breaking old imports. Current direct-import leaves include bootloader,
 Nix, SSH, user, fwupd, fzf, iperf, localization, NetworkManager, sound,
 Bluetooth, czkawka, direnv, fonts, npm, printing, v4l-utils, zola, Bolt,
 Prometheus node exporter, SSHFS, Syncthing, USB4 SFP support, desktop Flatpak
@@ -269,18 +280,21 @@ Treat `config.nix` splits as implementation movement, not as new public API.
 - Only split a leaf when direct import of its ungated behavior is equivalent to
   enabling the existing `mine.<leaf>.enable` option.
 - Keep `modules/nixos/<leaf>/default.nix` in `modules/default.nix` while the
-  legacy `mine.*` option surface exists. The wrapper owns option declarations
+  legacy `mine.*` option surface exists. The wrapper owns the legacy enable gate
   and should continue to gate `import ./config.nix` with `lib.mkIf`.
+- If `config.nix` still reads custom `mine.*` knobs, move those option
+  declarations to `options.nix` and import it from both the wrapper and any
+  direct-importing profile or host module.
 - Put only active feature configuration in `config.nix`. Do not declare
   `mine.*` options, inspect `mine.<leaf>.enable`, or add a second enable gate
   there; profiles import `config.nix` because they want the feature enabled.
-- Preserve non-enable compatibility options on the wrapper and pass only the
-  existing implementation inputs (`config`, `inputs`, `lib`, `pkgs`, and so on)
-  through to `config.nix` as needed.
-- Profiles should direct-import `../../nixos/<leaf>/config.nix` for migrated
-  leaves, or compose another profile via `inputs.self.modules.nixos.<profile>`.
-  Do not import a leaf `default.nix` from a profile just to toggle an enable
-  option.
+- Preserve non-enable compatibility options in `options.nix` or the wrapper, and
+  pass only the existing implementation inputs (`config`, `inputs`, `lib`,
+  `pkgs`, and so on) through to `config.nix` as needed.
+- Profiles should direct-import `../../nixos/<leaf>/options.nix` if needed and
+  `../../nixos/<leaf>/config.nix` for migrated leaves, or compose another
+  profile via `inputs.self.modules.nixos.<profile>`. Do not import a leaf
+  `default.nix` from a profile just to toggle an enable option.
 - Host configs may direct-import migrated leaf `config.nix` files for
   host-specific features that are not reusable profile behavior.
 - Once a feature is direct-imported by a profile or host, `mine.<leaf>.enable =
@@ -312,6 +326,20 @@ feature directory for the value yet.
 This registry is intentionally deliberate. Add new entries only when they are
 meant to become reusable module API, not just because a file exists in
 `modules/`.
+
+### Deferred Areas
+
+Hold these areas for focused follow-up passes rather than mixing them into small
+leaf migrations:
+
+- Router modules, especially `modules/nixos/home-router/default.nix` and
+  `modules.nixos.router`, because they encode live network behavior.
+- Nixvim and `homeManagerModules.nixvim`, because downstream standalone Home
+  Manager compatibility and upstream nixvim imports need a dedicated pass.
+- SOPS, because `mine.sops.enable` currently models secret availability for
+  other modules and needs a smarter replacement than a mechanical direct import.
+- Incus/LXC image and runtime modules, because container build attrs, profile
+  paths, and runtime mapping files are operational contracts.
 
 ### Linux Packages
 
