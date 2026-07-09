@@ -17,6 +17,7 @@
       ../../home/darktable/config.nix
       ../../home/drawio/config.nix
       ../../home/fontconfig/config.nix
+      ../../home/kde-apps/options.nix
       ../../home/kde-apps/config.nix
       ../../home/mpv/config.nix
       ../../home/obsidian/config.nix

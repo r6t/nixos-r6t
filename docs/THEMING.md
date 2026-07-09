@@ -59,7 +59,7 @@ The opencode agent color cycle is `[secondary, accent, success, warning, primary
 | build | `secondary` | `#42be65` green |
 | plan  | `accent`    | `#08bdba` teal  |
 
-### KDE Plasma — `modules/home/kde-apps/default.nix`
+### KDE Plasma — `modules/home/kde-apps/config.nix`
 
 Uses a custom `Oxocarbon.colors` KDE color scheme deployed to
 `~/.local/share/color-schemes/Oxocarbon.colors` via `home.file`. plasma-manager references it as
@@ -112,5 +112,5 @@ Until then, when updating the palette, change colors in this order:
 2. Update `oxocarbonTheme` KDL in `modules/home/zellij/default.nix` (RGB triplets)
 3. Update `opencodeThemeConfig` in `modules/home/nixvim/default.nix` (opencode JSON hex strings)
 4. Update `modules/home/kde-apps/Oxocarbon.colors` (RGB triplets)
-5. Update `AccentColor` in `modules/home/kde-apps/default.nix` if the accent slot changes
+5. Update `AccentColor` in `modules/home/kde-apps/config.nix` if the accent slot changes
 6. Neovim updates itself via the plugin
