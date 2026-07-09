@@ -1,10 +1,7 @@
 { inputs, lib, config, pkgs, ... }:
 
 {
-  options = {
-    mine.user.enable =
-      lib.mkEnableOption "enable my user account";
-  };
+  imports = [ ./options.nix ];
 
   config = lib.mkIf config.mine.user.enable (import ./config.nix { inherit inputs lib pkgs; });
 }

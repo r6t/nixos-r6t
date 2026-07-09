@@ -1,11 +1,7 @@
 { lib, config, ... }:
 
 {
-
-  options = {
-    mine.prometheus-node-exporter.enable =
-      lib.mkEnableOption "enable prometheus-node-exporter";
-  };
+  imports = [ ./options.nix ];
 
   config = lib.mkIf config.mine.prometheus-node-exporter.enable (import ./config.nix);
 }

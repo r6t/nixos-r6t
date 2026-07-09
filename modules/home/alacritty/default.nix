@@ -1,11 +1,7 @@
 { lib, config, pkgs, userConfig, isNixOS ? true, ... }:
 
-let
-  cfg = config.mine.home.alacritty;
-in
 {
-  options.mine.home.alacritty.enable =
-    lib.mkEnableOption "enable alacritty in home-manager";
+  imports = [ ./options.nix ];
 
-  config = lib.mkIf cfg.enable (import ./config.nix { inherit pkgs userConfig isNixOS; });
+  config = lib.mkIf config.mine.home.alacritty.enable (import ./config.nix { inherit pkgs userConfig isNixOS; });
 }

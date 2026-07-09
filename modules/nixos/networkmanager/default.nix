@@ -1,11 +1,7 @@
 { lib, config, ... }:
 
 {
-
-  options = {
-    mine.networkmanager.enable =
-      lib.mkEnableOption "enable networkmanager";
-  };
+  imports = [ ./options.nix ];
 
   config = lib.mkIf config.mine.networkmanager.enable (import ./config.nix);
 }

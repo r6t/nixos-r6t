@@ -1,11 +1,7 @@
 { lib, config, pkgs, ... }:
 
 {
-
-  options = {
-    mine.fzf.enable =
-      lib.mkEnableOption "enable fzf";
-  };
+  imports = [ ./options.nix ];
 
   config = lib.mkIf config.mine.fzf.enable (import ./config.nix { inherit pkgs; });
 }

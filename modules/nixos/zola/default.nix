@@ -1,11 +1,7 @@
 { lib, config, pkgs, ... }:
 
 {
-
-  options = {
-    mine.zola.enable =
-      lib.mkEnableOption "enable zola static site generator";
-  };
+  imports = [ ./options.nix ];
 
   config = lib.mkIf config.mine.zola.enable (import ./config.nix { inherit pkgs; });
 }

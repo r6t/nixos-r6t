@@ -1,9 +1,7 @@
 { lib, config, ... }:
 
 {
-  options = {
-    mine.pinchflat.enable = lib.mkEnableOption "enable pinchflat";
-  };
+  imports = [ ./options.nix ];
 
   config = lib.mkIf config.mine.pinchflat.enable (import ./config.nix { inherit lib; });
 }

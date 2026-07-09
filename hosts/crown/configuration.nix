@@ -33,6 +33,7 @@ in
     ./hardware-configuration.nix
     ../../modules/default.nix
     ../../modules/nixos/incus-log-collector/config.nix
+    ../../modules/nixos/rdfind/options.nix
     ../../modules/nixos/rdfind/config.nix
   ];
 

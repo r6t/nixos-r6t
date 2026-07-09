@@ -7,6 +7,7 @@
 { name
 , appId ? null
 , configModule ? null
+, optionsModule ? null
 , description ? "enable ${name} via flatpak"
 }:
 
@@ -23,9 +24,11 @@ let
       };
 in
 {
+  imports = lib.optionals (optionsModule != null) [ optionsModule ];
 
-  options.mine.flatpak.${name}.enable =
-    lib.mkEnableOption description;
+  options = lib.optionalAttrs (optionsModule == null) {
+    mine.flatpak.${name}.enable = lib.mkEnableOption description;
+  };
 
   config = lib.mkIf config.mine.flatpak.${name}.enable moduleConfig;
 }

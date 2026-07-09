@@ -1,9 +1,6 @@
 { lib, config, pkgs, ... }: {
 
-  options = {
-    mine.rdfind.enable =
-      lib.mkEnableOption "enable rdfind";
-  };
+  imports = [ ./options.nix ];
 
   config = lib.mkIf config.mine.rdfind.enable (import ./config.nix { inherit pkgs; });
 }

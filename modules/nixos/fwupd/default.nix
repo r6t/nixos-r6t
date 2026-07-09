@@ -1,11 +1,7 @@
 { lib, config, ... }:
 
 {
-
-  options = {
-    mine.fwupd.enable =
-      lib.mkEnableOption "enable fwupd";
-  };
+  imports = [ ./options.nix ];
 
   config = lib.mkIf config.mine.fwupd.enable (import ./config.nix);
 }

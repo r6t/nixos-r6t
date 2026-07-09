@@ -8,14 +8,23 @@
     inputs.nix-flatpak.nixosModules.nix-flatpak
     ./hardware-configuration.nix
     ../../modules/default.nix
+    ../../modules/home/makemkv/options.nix
     ../../modules/home/makemkv/config.nix
+    ../../modules/home/obs-studio/options.nix
     ../../modules/home/obs-studio/config.nix
+    ../../modules/home/orca-slicer/options.nix
     ../../modules/home/orca-slicer/config.nix
+    ../../modules/home/virt-viewer/options.nix
     ../../modules/home/virt-viewer/config.nix
+    ../../modules/nixos/ddc-i2c/options.nix
     ../../modules/nixos/ddc-i2c/config.nix
+    ../../modules/nixos/docker/options.nix
     ../../modules/nixos/docker/config.nix
+    ../../modules/nixos/mullvad/options.nix
     ../../modules/nixos/mullvad/config.nix
+    ../../modules/nixos/pinchflat/options.nix
     ../../modules/nixos/pinchflat/config.nix
+    ../../modules/nixos/rdfind/options.nix
     ../../modules/nixos/rdfind/config.nix
   ];
 

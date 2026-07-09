@@ -285,6 +285,9 @@ Treat `config.nix` splits as implementation movement, not as new public API.
 - If `config.nix` still reads custom `mine.*` knobs, move those option
   declarations to `options.nix` and import it from both the wrapper and any
   direct-importing profile or host module.
+- Helper-generated wrappers such as `mkHomePackageModule` and `mkFlatpakModule`
+  should receive `optionsModule = ./options.nix`, not `import ./options.nix`, so
+  profile path imports and wrapper imports de-duplicate as the same module.
 - Put only active feature configuration in `config.nix`. Do not declare
   `mine.*` options, inspect `mine.<leaf>.enable`, or add a second enable gate
   there; profiles import `config.nix` because they want the feature enabled.

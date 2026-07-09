@@ -1,11 +1,7 @@
 { lib, config, userConfig, isNixOS ? true, ... }:
 
-let
-  cfg = config.mine.home.atuin;
-in
 {
-  options.mine.home.atuin.enable =
-    lib.mkEnableOption "enable atuin in home-manager";
+  imports = [ ./options.nix ];
 
-  config = lib.mkIf cfg.enable (import ./config.nix { inherit userConfig isNixOS; });
+  config = lib.mkIf config.mine.home.atuin.enable (import ./config.nix { inherit userConfig isNixOS; });
 }

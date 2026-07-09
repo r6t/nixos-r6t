@@ -1,8 +1,7 @@
 { lib, config, pkgs, userConfig, ... }:
 
 {
-  options.mine.home.browsers.enable =
-    lib.mkEnableOption "enable desktop web browsers in home-manager";
+  imports = [ ./options.nix ];
 
   config = lib.mkIf config.mine.home.browsers.enable
     (import ./config.nix {

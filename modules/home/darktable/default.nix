@@ -1,7 +1,7 @@
 { lib, config, pkgs, userConfig, ... }:
 
 {
-  options.mine.home.darktable.enable = lib.mkEnableOption "darktable";
+  imports = [ ./options.nix ];
 
   config = lib.mkIf config.mine.home.darktable.enable
     (import ./config.nix {

@@ -1,5 +1,8 @@
 {
   flake.modules.nixos.thunderbolt-host = {
-    imports = [ ../../nixos/bolt/config.nix ];
+    imports = [
+      ../../nixos/bolt/options.nix
+      ../../nixos/bolt/config.nix
+    ];
   };
 }
