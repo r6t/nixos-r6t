@@ -27,6 +27,7 @@
       ../../nixos/czkawka/config.nix
       ../../nixos/direnv/config.nix
       ../../nixos/fonts/config.nix
+      ../../nixos/kde/options.nix
       ../../nixos/kde/config.nix
       ../../nixos/networkmanager/config.nix
       ../../nixos/npm/config.nix

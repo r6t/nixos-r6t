@@ -98,5 +98,6 @@ vulkaninfo --summary | head -20
 # expected: AMD Radeon 780M Graphics (RADV PHOENIX)
 ```
 
-If missing, check that `mesa` is in the system closure (it is, via `mine.kde`)
-and that the `amdgpu` kernel module is loaded (`lsmod | grep amdgpu`).
+If missing, check that `mesa` is in the system closure (it is, via
+`modules.nixos.kde-workstation`) and that the `amdgpu` kernel module is loaded
+(`lsmod | grep amdgpu`).
