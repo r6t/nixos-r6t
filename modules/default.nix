@@ -86,7 +86,6 @@ let
     "nixos-r6t-baseline"
     "npm"
     "nvidia-cuda"
-    "ollama"
     "open-webui"
     "pinchflat"
     "printing"

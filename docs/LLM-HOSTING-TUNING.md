@@ -265,7 +265,7 @@ When you reply to a model's message in a chat, ~95% of the prompt is the
 existing conversation history you've already sent before. A working KV cache
 lets the engine **skip re-processing tokens it has already prefilled** — only
 the new tokens (your latest user turn + a bit of template glue) need fresh
-prefill. That's how Ollama on a small Llama variant feels instant on turn N:
+prefill. That's how a cached standard-transformer chat feels instant on turn N:
 ~10 new tokens to prefill, then immediately generate.
 
 **Hybrid attention models break this** because their recurrent layers carry
@@ -289,7 +289,7 @@ When you reply to a model's message in a chat, ~95% of the prompt is the
 existing conversation history you've already sent before. A working KV cache
 lets the engine **skip re-processing tokens it has already prefilled** — only
 the new tokens (your latest user turn + a bit of template glue) need fresh
-prefill. That's how Ollama on a small Llama variant feels instant on turn N:
+prefill. That's how a cached standard-transformer chat feels instant on turn N:
 ~10 new tokens to prefill, then immediately generate.
 
 **Hybrid attention models break this** because their recurrent layers carry

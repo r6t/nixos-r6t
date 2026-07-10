@@ -1,0 +1,71 @@
+{ lib, ... }:
+
+{
+  options.mine.nvidia-cuda = {
+    enable = lib.mkEnableOption "configure nvidia gpu for cuda";
+
+    open = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = ''
+        Use the open-source NVIDIA kernel module ( Nouveau fork in kernel).
+        Set to false for the proprietary driver. The open and proprietary
+        kernel modules share identical user-space binaries for CUDA, NVENC,
+        and Vulkan — the only difference is the kernel module itself.
+        The open module is preferred for headless/server setups.
+      '';
+    };
+
+    package = lib.mkOption {
+      type = lib.types.enum [ "production" "stable" "latest" ];
+      default = "production";
+      description = ''
+        NVIDIA driver package to use.
+        - production
+        - stable
+        - latest
+      '';
+    };
+
+    containerToolkit = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = ''
+        Enable nvidia-container-toolkit for GPU passthrough to containers.
+        Required for Docker/Incus containers that need GPU access.
+      '';
+    };
+
+    installCudaToolkit = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = ''
+        Install CUDA toolkit (nvcc, headers, etc.) on the system.
+        Set to true for physical hosts that compile CUDA code or run local GPU workloads.
+        Set to false for containers that use nvidia-container-toolkit (runtime libraries mounted from host).
+      '';
+    };
+
+    gspFirmware = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = ''
+        Enable GSP (GPU System Processor) firmware.
+        Required for RTX 50 series, recommended for RTX 40 series.
+        Disable (set false) if the GPU fails to initialize over Thunderbolt on AMD USB4
+        hosts where the PCIe link briefly drops during enumeration.
+      '';
+    };
+
+    allowExternalGpu = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = ''
+        Enable support for Thunderbolt/USB4 eGPUs.
+        Sets hardware.nvidia.prime.allowExternalGpu = true, which instructs the NVIDIA
+        driver to accept externally-attached GPUs. Required for eGPU use; without it
+        the driver may refuse to initialize the GPU on some configurations.
+      '';
+    };
+  };
+}

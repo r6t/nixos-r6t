@@ -1,9 +1,11 @@
 {
   flake.modules.nixos.nvidia-container-host = { lib, ... }: {
-    imports = [ ../../nixos/nvidia-cuda/default.nix ];
+    imports = [
+      ../../nixos/nvidia-cuda/options.nix
+      ../../nixos/nvidia-cuda/config.nix
+    ];
 
     mine.nvidia-cuda = {
-      enable = lib.mkDefault true;
       open = lib.mkDefault true;
       containerToolkit = lib.mkDefault true;
       installCudaToolkit = lib.mkDefault false;

@@ -13,7 +13,7 @@
       Run a StatusNotifierItem (SNI) tray daemon for the llama-cpp systemd service.
       Appears in the KDE system tray alongside wifi/bluetooth/volume. Left-click
       toggles the service; icon and tooltip reflect live service state.
-      Requires mine.llama-cpp.enable on the host (polkit rule for wheel group).
+      Requires the llama-cpp host config (polkit rule for wheel group).
     '';
   };
 }

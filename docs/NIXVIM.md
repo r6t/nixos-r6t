@@ -20,8 +20,8 @@ and settings are declared as Nix attrs, no `init.lua` to edit.
   `opencode-llamacpp` only on mountainball) live in the host's configuration,
   not this module.
 - **opencode integration**: provider config and per-model variants are built
-  in this same file — search for `opencode-llamacpp` / `opencode-ollama`.
-  Enabled per host via `mine.home.nixvim.opencode-llamacpp` (see
+  in this same file — search for `opencode-llamacpp`. Enabled per host via
+  `mine.home.nixvim.opencode-llamacpp` (see
   `docs/LLM-HOSTING-TUNING.md` for the surrounding context).
 
 ## Licensing pitfalls

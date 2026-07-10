@@ -276,7 +276,8 @@ Bluetooth, czkawka, direnv, fonts, npm, printing, v4l-utils, zola, Bolt,
 Prometheus node exporter, SSHFS, Syncthing, USB4 SFP support, desktop Flatpak
 apps, browsers, darktable, KDE apps, the KDE desktop, Steam, Tailscale host
 configuration, Home Router, SOPS host configuration, NFS, ZFS pool management,
-LUKS store mounts, MakeMKV, Docker, Incus log collection, ddc-i2c, Mullvad,
+LUKS store mounts, NVIDIA/CUDA support, llama.cpp, Open WebUI,
+stable-diffusion.cpp, MakeMKV, Docker, Incus log collection, ddc-i2c, Mullvad,
 Pinchflat, rdfind, OBS Studio, Orca Slicer, and virt-viewer.
 
 SOPS is the semantic exception to simple `enable` migration. `mine.sops.enable`
@@ -293,6 +294,14 @@ import split `options.nix` and `config.nix` files for compatibility, while
 profiles and hosts direct-import those split files. They still activate from the
 presence of declared `mine.nfs`, `mine.zfs-pool`, or `mine.mountLuksStore`
 entries.
+
+GPU/LLM leaves follow the standard direct-import pattern. `nvidia-cuda`,
+`llama-cpp`, `open-webui`, and `stable-diffusion-cpp` keep legacy `default.nix`
+enable wrappers, while direct users import `options.nix` plus `config.nix`. This
+split is structural: goldenball keeps its measured ROCmFP4 llama.cpp model
+values host-local, and crown's `llm` container keeps its TensorRT-LLM/Open WebUI
+behavior container-local. The standalone Ollama module was retired as unused;
+Open WebUI still keeps its generic optional Ollama backend URL knob.
 
 ### Leaf Migration Guardrails
 

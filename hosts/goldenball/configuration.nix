@@ -6,7 +6,8 @@ in
   imports = [
     ./hardware-configuration.nix
     ../../modules/nixos/asusctl/default.nix
-    ../../modules/nixos/llama-cpp/default.nix
+    ../../modules/nixos/llama-cpp/options.nix
+    ../../modules/nixos/llama-cpp/config.nix
   ];
 
   # ---------------------------------------------------------------------------
@@ -310,7 +311,7 @@ in
         # 2560x1600 panel — 1.5x is the right Xwayland HiDPI scale (module default is 2 for 4K).
         xwaylandScale = 1.5;
         # Pin the llama-cpp start/stop toggle to the panel task manager.
-        # Requires mine.llama-cpp.enable (which provides the script + polkit rule).
+        # Requires the llama-cpp host config (which provides the script + polkit rule).
         llamaCppLauncher = true;
       };
       nixvim = {
@@ -470,7 +471,6 @@ in
     # The SNI tray daemon (mine.home.kde-apps.llamaCppLauncher = true) registers
     # a system-tray icon alongside wifi/bluetooth/volume for one-click toggle.
     llama-cpp = {
-      enable = true;
       rocmfp4 = true;
       host = "0.0.0.0";
       port = 8080;

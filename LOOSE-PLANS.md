@@ -46,12 +46,13 @@
 - [x] `zfs-pool`.
 - [x] `mountLuksStore`.
 - [x] Storage/network validation passed.
-- [ ] GPU/LLM pass.
-- [ ] `nvidia-cuda`.
-- [ ] `llama-cpp`.
-- [ ] `open-webui`.
-- [ ] `ollama`.
-- [ ] `stable-diffusion-cpp`.
+- [x] GPU/LLM pass.
+- [x] `nvidia-cuda`.
+- [x] `llama-cpp`.
+- [x] `open-webui`.
+- [x] `ollama` retired as unused.
+- [x] `stable-diffusion-cpp`.
+- [x] GPU/LLM validation passed.
 - [ ] Server pass.
 - [ ] `caddy`.
 - [ ] `headscale`.
@@ -118,4 +119,4 @@
 
 ## Decision
 
-Phase 1 is complete. Phase 2 storage/network pass is complete. The next recommended step is the Phase 2 Incus pass.
+Phase 1 is complete. Phase 2 storage/network and GPU/LLM passes are complete. The next recommended step is the Phase 2 Incus pass.

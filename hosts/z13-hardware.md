@@ -194,7 +194,7 @@ should stay in the user's host config, not the upstream module:
 - `mine.*` module enables (asusctl, bluetooth, kde, llama-cpp, etc.)
 - KWin / plasma-manager configuration (refresh rate, VRR policy, touchpad
   per-device tweaks like `tapToClick=false`, scale factor)
-- Personal tooling (llama-cpp / ollama / Steam / etc.)
+- Personal tooling (llama-cpp / Steam / etc.)
 - `services.libinput.touchpad.{naturalScrolling,tapping,disableWhileTyping}` —
   user preference, not hardware quirk
 - TTM page limit / GTT sizing — workload-specific (this user runs LLMs)

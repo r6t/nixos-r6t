@@ -3,7 +3,8 @@
 {
   imports = [
     ../modules/nixos/docker/default.nix
-    ../modules/nixos/open-webui/default.nix
+    ../modules/nixos/open-webui/options.nix
+    ../modules/nixos/open-webui/config.nix
     ./lib/base.nix
     ./lib/mullvad-dns.nix
   ];
@@ -234,7 +235,6 @@
 
   mine = {
     open-webui = {
-      enable = true;
       host = "0.0.0.0";
       openaiApiUrls = [
         "http://localhost:8080/v1"
