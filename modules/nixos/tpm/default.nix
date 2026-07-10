@@ -1,9 +1,6 @@
 { lib, config, pkgs, ... }: {
 
-  options = {
-    mine.tpm.enable =
-      lib.mkEnableOption "enable tpm utilities";
-  };
+  imports = [ ./options.nix ];
 
   config = lib.mkIf config.mine.tpm.enable (import ./config.nix { inherit pkgs; });
 }

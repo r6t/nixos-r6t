@@ -1,6 +1,7 @@
 # Neovim (nixvim)
 
-Source of truth: `modules/home/nixvim/default.nix`. Uses
+Source of truth for behavior: `modules/home/nixvim/default.nix`. Option
+declarations live in `modules/home/nixvim/options.nix`. Uses
 [nixvim](https://github.com/nix-community/nixvim) as the framework — plugins
 and settings are declared as Nix attrs, no `init.lua` to edit.
 
