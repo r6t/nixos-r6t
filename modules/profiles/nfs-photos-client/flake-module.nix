@@ -1,6 +1,9 @@
 {
   flake.modules.nixos.nfs-photos-client = { lib, ... }: {
-    imports = [ ../../nixos/nfs/default.nix ];
+    imports = [
+      ../../nixos/nfs/options.nix
+      ../../nixos/nfs/config.nix
+    ];
 
     mine.nfs.mounts.photos = {
       device = lib.mkDefault "crown:/";

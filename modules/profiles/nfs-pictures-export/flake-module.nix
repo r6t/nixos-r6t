@@ -1,6 +1,9 @@
 {
   flake.modules.nixos.nfs-pictures-export = { lib, ... }: {
-    imports = [ ../../nixos/nfs/default.nix ];
+    imports = [
+      ../../nixos/nfs/options.nix
+      ../../nixos/nfs/config.nix
+    ];
 
     mine.nfs.exports.Pictures = {
       sourcePath = lib.mkDefault "/mnt/thunderbay/8TB-C/Pictures";

@@ -8,7 +8,8 @@ in
 {
   imports = [
     ./hardware-configuration.nix
-    ../../modules/nixos/mountLuksStore/default.nix
+    ../../modules/nixos/mountLuksStore/options.nix
+    ../../modules/nixos/mountLuksStore/config.nix
   ];
 
   boot = {

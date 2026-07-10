@@ -275,9 +275,9 @@ Nix, SSH, user, fwupd, fzf, iperf, localization, NetworkManager, sound,
 Bluetooth, czkawka, direnv, fonts, npm, printing, v4l-utils, zola, Bolt,
 Prometheus node exporter, SSHFS, Syncthing, USB4 SFP support, desktop Flatpak
 apps, browsers, darktable, KDE apps, the KDE desktop, Steam, Tailscale host
-configuration, Home Router, SOPS host configuration, MakeMKV, Docker, Incus log
-collection, ddc-i2c, Mullvad, Pinchflat, rdfind, OBS Studio, Orca Slicer, and
-virt-viewer.
+configuration, Home Router, SOPS host configuration, NFS, ZFS pool management,
+LUKS store mounts, MakeMKV, Docker, Incus log collection, ddc-i2c, Mullvad,
+Pinchflat, rdfind, OBS Studio, Orca Slicer, and virt-viewer.
 
 SOPS is the semantic exception to simple `enable` migration. `mine.sops.enable`
 is now legacy wrapper activation only. Modules that conditionally add optional
@@ -286,6 +286,13 @@ active SOPS configuration and therefore models whether this host has `sops-nix`
 configured. Profiles should import `modules.nixos.sops-host`; hosts should keep
 only path-like SOPS facts such as `mine.sops.defaultSopsFile` and
 `mine.sops.ageKeyFile` host-local.
+
+NFS, ZFS pool management, and LUKS store mounts are option-driven storage/network
+modules rather than simple `enable` modules. Their legacy `default.nix` wrappers
+import split `options.nix` and `config.nix` files for compatibility, while
+profiles and hosts direct-import those split files. They still activate from the
+presence of declared `mine.nfs`, `mine.zfs-pool`, or `mine.mountLuksStore`
+entries.
 
 ### Leaf Migration Guardrails
 

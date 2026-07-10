@@ -31,7 +31,8 @@ in
     ../../modules/nixos/caddy/default.nix
     ../../modules/nixos/incus-log-collector/config.nix
     ../../modules/nixos/incus-nightly-rebuild/default.nix
-    ../../modules/nixos/mountLuksStore/default.nix
+    ../../modules/nixos/mountLuksStore/options.nix
+    ../../modules/nixos/mountLuksStore/config.nix
     ../../modules/nixos/rdfind/options.nix
     ../../modules/nixos/rdfind/config.nix
     ../../modules/nixos/wg-metrics/default.nix
