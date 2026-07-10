@@ -1,4 +1,4 @@
-{ inputs, lib, pkgs, ... }:
+{ lib, pkgs, ... }:
 
 let
   allCaddyRoutes = import ../../containers/lib/caddy-routes.nix;
@@ -27,13 +27,14 @@ let
 in
 {
   imports = [
-    inputs.home-manager.nixosModules.home-manager
-    inputs.nix-flatpak.nixosModules.nix-flatpak
     ./hardware-configuration.nix
-    ../../modules/default.nix
+    ../../modules/nixos/caddy/default.nix
     ../../modules/nixos/incus-log-collector/config.nix
+    ../../modules/nixos/incus-nightly-rebuild/default.nix
+    ../../modules/nixos/mountLuksStore/default.nix
     ../../modules/nixos/rdfind/options.nix
     ../../modules/nixos/rdfind/config.nix
+    ../../modules/nixos/wg-metrics/default.nix
   ];
 
 

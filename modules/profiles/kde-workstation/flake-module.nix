@@ -1,6 +1,9 @@
+{ inputs, ... }:
+
 {
   flake.modules.nixos.kde-workstation = { ... }: {
     imports = [
+      inputs.nix-flatpak.nixosModules.nix-flatpak
       ../../flatpak/anki/options.nix
       ../../flatpak/anki/config.nix
       ../../flatpak/base/options.nix

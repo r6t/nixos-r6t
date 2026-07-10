@@ -1,13 +1,12 @@
-{ inputs, pkgs, lib, userConfig, ... }:
+{ pkgs, lib, userConfig, ... }:
 let
   localLlm = import ./llm-config.nix;
 in
 {
   imports = [
-    inputs.home-manager.nixosModules.home-manager
-    inputs.nix-flatpak.nixosModules.nix-flatpak
     ./hardware-configuration.nix
-    ../../modules/default.nix
+    ../../modules/nixos/asusctl/default.nix
+    ../../modules/nixos/llama-cpp/default.nix
   ];
 
   # ---------------------------------------------------------------------------

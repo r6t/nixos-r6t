@@ -80,9 +80,10 @@ These are exported for downstream NixOS flakes:
 
 - `nixosModules.default`
 
-`nixosModules.default` points at `modules/default.nix`, the same module imported
-by this repo's host configurations. It exposes the `mine.*` option surface but
-does not enable features by itself.
+`nixosModules.default` points at `modules/default.nix`, the compatibility
+aggregate for downstream NixOS users. It exposes the `mine.*` option surface but
+does not enable features by itself. Repo-owned hosts do not import this
+aggregate; they compose profile and host modules through `modules.nixos.<host>`.
 
 ### NixOS Host Factory
 
@@ -158,6 +159,8 @@ implementation files directly:
 `nixosConfigurations.*` also consumes the host-specific registry entries under
 `modules.nixos.<host>`. Those host modules currently wrap the existing files in
 `hosts/<host>/configuration.nix`; the host file contents have not been moved.
+Host files may directly import host-local implementation modules during the
+migration, but they should not import the global compatibility aggregate.
 
 Host aspect registrations are colocated with their host directories. Each
 `hosts/<host>/flake-module.nix` defines the matching `modules.nixos.<host>`
@@ -168,9 +171,10 @@ The base NixOS module registry entry is colocated with the module tree:
 `modules/default.nix`.
 
 `modules/default.nix` is the compatibility aggregate for the legacy `mine.*`
-option surface. It intentionally lists each `flatpak`, `home`, and `nixos` leaf
-module explicitly instead of auto-discovering directories, so new leaf modules
-must be registered deliberately.
+option surface and backs `nixosModules.default`. It intentionally lists each
+`flatpak`, `home`, and `nixos` leaf module explicitly instead of auto-discovering
+directories, so new leaf modules must be registered deliberately. It is not part
+of repo-owned host composition.
 
 During migration, do not add new `mine.*.enable` activation hooks. Direct
 imports and profiles should activate behavior. Keep existing `mine.*` options

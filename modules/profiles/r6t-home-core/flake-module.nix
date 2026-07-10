@@ -1,6 +1,9 @@
+{ inputs, ... }:
+
 {
   flake.modules.nixos.r6t-home-core = { lib, ... }: {
     imports = [
+      inputs.home-manager.nixosModules.home-manager
       ../../home/atuin/options.nix
       ../../home/atuin/config.nix
       ../../home/fish/options.nix
@@ -9,6 +12,7 @@
       ../../home/git/config.nix
       ../../home/home-manager/options.nix
       ../../home/home-manager/config.nix
+      ../../home/nixvim/default.nix
       ../../home/ssh/options.nix
       ../../home/ssh/config.nix
     ];

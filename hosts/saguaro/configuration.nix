@@ -1,4 +1,4 @@
-{ inputs, lib, ... }:
+{ lib, ... }:
 
 let
   lanInterface = "enp100s0";
@@ -7,10 +7,8 @@ in
 
 {
   imports = [
-    inputs.home-manager.nixosModules.home-manager
-    inputs.nix-flatpak.nixosModules.nix-flatpak
     ./hardware-configuration.nix
-    ../../modules/default.nix
+    ../../modules/nixos/mountLuksStore/default.nix
   ];
 
   boot = {

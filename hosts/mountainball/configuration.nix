@@ -2,11 +2,8 @@
 
 {
   imports = [
-    inputs.home-manager.nixosModules.home-manager
     inputs.hardware.nixosModules.framework-13-7040-amd
-    inputs.nix-flatpak.nixosModules.nix-flatpak
     ./hardware-configuration.nix
-    ../../modules/default.nix
     ../../modules/home/makemkv/options.nix
     ../../modules/home/makemkv/config.nix
     ../../modules/home/obs-studio/options.nix
