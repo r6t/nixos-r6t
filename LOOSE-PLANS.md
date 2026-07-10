@@ -64,6 +64,15 @@
 - [x] `uptime-kuma` retired as unused.
 - [x] Server validation passed.
 
+## Warning Cleanup Before Incus Pass
+
+- [x] Grafana Loki datasource header value moved out of `secureJsonData`.
+- [x] Container packages use native `system.build.images.lxc` and `lxc-metadata`.
+- [x] nixvim treesitter grammars follow the configured treesitter package.
+- [x] Local host and representative container evals are warning-free.
+- [ ] Downstream override eval still emits Nix's expected lock-file override warning.
+- [ ] Downstream `nvim-treesitter-legacy` warning remains in the downstream nixpkgs pin's plugin conflict check, not in this repo's runtime plugin closure.
+
 ## Phase 3: Slim Host Files
 
 - Move reusable policy into profiles only when it has a real role.
@@ -120,4 +129,4 @@
 
 ## Decision
 
-Phase 1 is complete. Phase 2 storage/network, GPU/LLM, and server passes are complete. The next recommended step is the Phase 2 Incus pass.
+Phase 1 is complete. Phase 2 storage/network, GPU/LLM, and server passes are complete. Warning cleanup is complete locally; downstream warning cleanup needs a downstream nixpkgs refresh or local downstream policy decision. The next recommended repo step is the Phase 2 Incus pass.

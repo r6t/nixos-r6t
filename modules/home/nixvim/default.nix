@@ -165,6 +165,12 @@ let
     tree-sitter
   ];
 
+  treesitterPackage =
+    if isNixOS then
+      config.home-manager.users.${userConfig.username}.programs.nixvim.plugins.treesitter.package
+    else
+      config.programs.nixvim.plugins.treesitter.package;
+
   # Shared nixvim configuration
   nixvimConfig = {
     programs.nixvim = {
@@ -817,7 +823,7 @@ let
           enable = true;
           highlight.enable = true;
           indent.enable = true;
-          grammarPackages = with pkgs.vimPlugins.nvim-treesitter.builtGrammars; [
+          grammarPackages = with treesitterPackage.builtGrammars; [
             bash
             css
             dockerfile

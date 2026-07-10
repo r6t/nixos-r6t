@@ -3,35 +3,33 @@
 let
   inherit (import ../../flake/common.nix) linuxSystem userConfig;
   inherit (self) outputs;
+  inherit (inputs.nixpkgs) lib;
 
   containerDir = ./..;
   containerFiles = builtins.filter
-    (file: inputs.nixpkgs.lib.hasSuffix ".nix" file)
+    (file: lib.hasSuffix ".nix" file)
     (builtins.attrNames (builtins.readDir containerDir));
+
+  mkContainerSystem = module: lib.nixosSystem {
+    system = linuxSystem;
+    modules = [ module ];
+    specialArgs = { inherit outputs userConfig inputs; };
+  };
 
   mkImage = file:
     let
       name = builtins.replaceStrings [ ".nix" ] [ "" ] file;
       module = containerDir + "/${file}";
+      images = (mkContainerSystem module).config.system.build.images;
     in
     [
       {
         inherit name;
-        value = inputs.nixos-generators.nixosGenerate {
-          system = linuxSystem;
-          format = "lxc";
-          modules = [ module ];
-          specialArgs = { inherit outputs userConfig inputs; };
-        };
+        value = images.lxc;
       }
       {
         name = "${name}-metadata";
-        value = inputs.nixos-generators.nixosGenerate {
-          system = linuxSystem;
-          format = "lxc-metadata";
-          modules = [ module ];
-          specialArgs = { inherit outputs userConfig inputs; };
-        };
+        value = images.lxc-metadata;
       }
     ];
 

@@ -70,7 +70,7 @@ in
             type = "loki";
             url = "http://localhost:${toString cfg.loki.httpListenPort}";
             jsonData.httpHeaderName1 = "X-Scope-OrgID";
-            secureJsonData.httpHeaderValue1 = "fake";
+            jsonData.httpHeaderValue1 = "fake";
           }
         ];
 
