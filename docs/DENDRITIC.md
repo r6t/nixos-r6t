@@ -232,9 +232,9 @@ Current profile aspects:
 - `modules.nixos.r6t-system-core` enables conservative fleet defaults: fwupd,
   fzf, iperf, localization, nix, ssh, user, common system packages, system fish
   shell support, fail2ban SSH hardening, and the shared time zone.
-- `modules.nixos.router` enables the Home Router module and router-specific
-  Alloy syslog ingestion defaults while leaving interface names and reservations
-  host-local.
+- `modules.nixos.router` composes `monitoring-agent`, direct-imports the Home
+  Router implementation, and enables router-specific Alloy syslog ingestion
+  defaults while leaving interface names and reservations host-local.
 - `modules.nixos.sops-host` enables the SOPS module while leaving host-specific
   secret files and age key paths host-local.
 - `modules.nixos.static-lan-host` enables networkd, LAN DNS, the default LAN
@@ -270,8 +270,8 @@ Nix, SSH, user, fwupd, fzf, iperf, localization, NetworkManager, sound,
 Bluetooth, czkawka, direnv, fonts, npm, printing, v4l-utils, zola, Bolt,
 Prometheus node exporter, SSHFS, Syncthing, USB4 SFP support, desktop Flatpak
 apps, browsers, darktable, KDE apps, the KDE desktop, Steam, Tailscale host
-configuration, MakeMKV, Docker, Incus log collection, ddc-i2c, Mullvad,
-Pinchflat, rdfind, OBS Studio, Orca Slicer, and virt-viewer.
+configuration, Home Router, MakeMKV, Docker, Incus log collection, ddc-i2c,
+Mullvad, Pinchflat, rdfind, OBS Studio, Orca Slicer, and virt-viewer.
 
 ### Leaf Migration Guardrails
 
@@ -335,8 +335,6 @@ meant to become reusable module API, not just because a file exists in
 Hold these areas for focused follow-up passes rather than mixing them into small
 leaf migrations:
 
-- Router modules, especially `modules/nixos/home-router/default.nix` and
-  `modules.nixos.router`, because they encode live network behavior.
 - Nixvim and `homeManagerModules.nixvim`, because downstream standalone Home
   Manager compatibility and upstream nixvim imports need a dedicated pass.
 - SOPS, because `mine.sops.enable` currently models secret availability for
