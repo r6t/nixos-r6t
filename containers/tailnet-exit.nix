@@ -6,7 +6,6 @@
   ];
 
   mine.exit-node-routing = {
-    enable = true;
     enableTailscale = true;
   };
 

@@ -31,12 +31,14 @@ in
     ../../modules/nixos/caddy/options.nix
     ../../modules/nixos/caddy/config.nix
     ../../modules/nixos/incus-log-collector/config.nix
-    ../../modules/nixos/incus-nightly-rebuild/default.nix
+    ../../modules/nixos/incus-nightly-rebuild/options.nix
+    ../../modules/nixos/incus-nightly-rebuild/config.nix
     ../../modules/nixos/mountLuksStore/options.nix
     ../../modules/nixos/mountLuksStore/config.nix
     ../../modules/nixos/rdfind/options.nix
     ../../modules/nixos/rdfind/config.nix
-    ../../modules/nixos/wg-metrics/default.nix
+    ../../modules/nixos/wg-metrics/options.nix
+    ../../modules/nixos/wg-metrics/config.nix
   ];
 
 
@@ -181,7 +183,6 @@ in
       routes = crownCaddyRoutes;
     };
     incus-nightly-rebuild = {
-      enable = true;
       flakePath = "/home/r6t/git/nixos-r6t";
     };
 
@@ -194,7 +195,6 @@ in
 
     nvidia-cuda.allowExternalGpu = true; # Connected via Thunderbolt eGPU
     wg-metrics = {
-      enable = true;
       instanceMapFile = "/home/r6t/git/nixos-r6t/hosts/crown/incus-instances/instance_map.json";
     };
 

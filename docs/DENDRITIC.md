@@ -253,6 +253,11 @@ Current profile aspects:
   hosts.
 - `modules.nixos.zfs-host` enables ZFS filesystem support.
 
+The Phase 2 direct-import pass is complete for storage/network, GPU/LLM, active
+server modules, and Incus-owned host/container modules. Remaining `default.nix`
+imports in containers are intentionally deferred lower-level container base
+modules or one-off host modules, not profile-owned legacy enables.
+
 `modules.nixos.r6t-base` owns behavior that used to live in the catch-all
 `modules/nixos/nixos-r6t-baseline/default.nix` module. The split files are kept
 inside the profile directory:
@@ -277,9 +282,10 @@ Prometheus node exporter, SSHFS, Syncthing, USB4 SFP support, desktop Flatpak
 apps, browsers, darktable, KDE apps, the KDE desktop, Steam, Tailscale host
 configuration, Home Router, SOPS host configuration, NFS, ZFS pool management,
 LUKS store mounts, NVIDIA/CUDA support, llama.cpp, Open WebUI,
-stable-diffusion.cpp, MakeMKV, Docker, Incus log collection, ddc-i2c, Mullvad,
-Pinchflat, rdfind, Caddy, monitoring services, Immich, Jellyfin, OBS Studio,
-Orca Slicer, and virt-viewer.
+stable-diffusion.cpp, MakeMKV, Docker, Incus host support, Incus log
+collection, Incus nightly rebuilds, WireGuard exit-node metrics, exit-node
+routing, ddc-i2c, Mullvad, Pinchflat, rdfind, Caddy, monitoring services,
+Immich, Jellyfin, OBS Studio, Orca Slicer, and virt-viewer.
 
 SOPS is the semantic exception to simple `enable` migration. `mine.sops.enable`
 is now legacy wrapper activation only. Modules that conditionally add optional
@@ -309,6 +315,12 @@ Server leaves follow the same pattern for active services. `caddy`,
 while crown and the active containers direct-import their `config.nix` files.
 Unused server modules `headscale`, `karakeep`, `n8n`, and `uptime-kuma` were
 retired instead of preserving no-op option surface.
+
+Incus leaves follow the same pattern for active host/container behavior. `incus`,
+`incus-nightly-rebuild`, `wg-metrics`, and `exit-node-routing` keep compatibility
+wrappers, while `incus-host`, crown, and the exit-node container base
+direct-import their split implementation files. `incus-log-collector` was already
+split; crown imports its active config directly.
 
 ### Leaf Migration Guardrails
 
@@ -374,8 +386,10 @@ leaf migrations:
 
 - Nixvim and `homeManagerModules.nixvim`, because downstream standalone Home
   Manager compatibility and upstream nixvim imports need a dedicated pass.
-- Incus/LXC image and runtime modules, because container build attrs, profile
-  paths, and runtime mapping files are operational contracts.
+- Incus runtime profile design, because profile paths, seed files, and runtime
+  mapping files are operational contracts. Image package generation and Incus
+  host/container modules have already been migrated; avoid redesigning runtime
+  YAML/profile management without a focused operational reason.
 
 ### Linux Packages
 

@@ -35,12 +35,12 @@
 
 ## Phase 2: Convert Remaining Profile-Owned Legacy Enables
 
-- [ ] Incus pass.
-- [ ] `incus`.
-- [ ] `incus-log-collector`.
-- [ ] `incus-nightly-rebuild`.
-- [ ] `wg-metrics`.
-- [ ] `exit-node-routing`.
+- [x] Incus pass.
+- [x] `incus`.
+- [x] `incus-log-collector`.
+- [x] `incus-nightly-rebuild`.
+- [x] `wg-metrics`.
+- [x] `exit-node-routing`.
 - [x] Storage/network pass.
 - [x] `nfs`.
 - [x] `zfs-pool`.
@@ -63,6 +63,7 @@
 - [x] `n8n` retired as unused.
 - [x] `uptime-kuma` retired as unused.
 - [x] Server validation passed.
+- [x] Incus validation passed.
 
 ## Warning Cleanup Before Incus Pass
 
@@ -73,14 +74,13 @@
 - [ ] Downstream override eval still emits Nix's expected lock-file override warning.
 - [ ] Downstream `nvim-treesitter-legacy` warning remains in the downstream nixpkgs pin's plugin conflict check, not in this repo's runtime plugin closure.
 
-## Phase 3: Slim Host Files
+## Phase 3: Targeted Host File Cleanup
 
-- Move reusable policy into profiles only when it has a real role.
-- Shared firewall defaults.
-- Sync-host ports.
-- Incus-host ports/sysctls if truly common.
-- `nix-daemon` memory limits into `nix-build-throttle`.
-- Router LAN monitoring binds into `router` if safely derivable from router options.
+- Audit host files for repeated active behavior before moving anything.
+- Move reusable policy into profiles only when it has a real role or a replacement-host story.
+- Keep firewall ports, Incus sysctls, NIC pins, storage ordering, and router monitoring binds host-local unless at least two hosts share the exact policy.
+- Move `nix-daemon` memory limits into `nix-build-throttle` only if another host needs the same policy.
+- Remove stale commented-out blocks and obsolete tombstones when encountered.
 - Keep host-local facts.
 - Hardware imports.
 - `system.stateVersion`.
@@ -95,15 +95,17 @@
 
 ## Phase 4: Incus/Container Cleanup
 
+- Native LXC package generation via `system.build.images.lxc` / `lxc-metadata` is complete; do not reintroduce `nixos-generators`.
 - Do not move or rename direct `containers/*.nix`; those are public build attrs.
 - Do not add helper `.nix` files directly under `containers/`.
 - Keep runtime profiles under `hosts/<host>/incus-instances/`.
 - Keep `instance_map.json` stable.
 - Preserve Tailscale/DNS semantics; `mine.tailscale.enable` still has real meaning in containers because DNS override behavior depends on it.
-- Split module internals first; avoid redesigning YAML/profile generation.
+- Avoid redesigning YAML/profile generation unless there is a focused operational reason.
 
 ## Phase 5: LLM/GPU Cleanup
 
+- Mostly satisfied by the Phase 2 GPU/LLM pass; revisit only for a concrete hardware or serving change.
 - Preserve measured tuning exactly.
 - Keep `crown` TensorRT-LLM separate from `goldenball` llama.cpp/ROCmFP4.
 - Do not genericize GPU passthrough.
@@ -129,4 +131,4 @@
 
 ## Decision
 
-Phase 1 is complete. Phase 2 storage/network, GPU/LLM, and server passes are complete. Warning cleanup is complete locally; downstream warning cleanup needs a downstream nixpkgs refresh or local downstream policy decision. The next recommended repo step is the Phase 2 Incus pass.
+Phase 1 and Phase 2 are complete. Warning cleanup is complete locally; downstream warning cleanup needs a downstream nixpkgs refresh or local downstream policy decision. The next useful repo work is targeted host-file cleanup only where repeated behavior is proven, not broad abstraction.
