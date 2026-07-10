@@ -2,7 +2,7 @@
   config = {
 
     # set secrets
-    sops.secrets."firefox_sync" = lib.mkIf config.mine.sops.enable {
+    sops.secrets."firefox_sync" = lib.mkIf config.mine.sops.available {
       owner = config.users.users.${userConfig.username}.name;
     };
 

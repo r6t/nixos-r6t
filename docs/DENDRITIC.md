@@ -235,8 +235,9 @@ Current profile aspects:
 - `modules.nixos.router` composes `monitoring-agent`, direct-imports the Home
   Router implementation, and enables router-specific Alloy syslog ingestion
   defaults while leaving interface names and reservations host-local.
-- `modules.nixos.sops-host` enables the SOPS module while leaving host-specific
-  secret files and age key paths host-local.
+- `modules.nixos.sops-host` imports upstream `sops-nix`, direct-imports the
+  local SOPS configuration, and leaves host-specific secret files and age key
+  paths host-local.
 - `modules.nixos.static-lan-host` enables networkd, LAN DNS, the default LAN
   gateway address, and resolved settings for static LAN servers.
 - `modules.nixos.sync-host` enables SSHFS and Syncthing for hosts that already
@@ -270,8 +271,17 @@ Nix, SSH, user, fwupd, fzf, iperf, localization, NetworkManager, sound,
 Bluetooth, czkawka, direnv, fonts, npm, printing, v4l-utils, zola, Bolt,
 Prometheus node exporter, SSHFS, Syncthing, USB4 SFP support, desktop Flatpak
 apps, browsers, darktable, KDE apps, the KDE desktop, Steam, Tailscale host
-configuration, Home Router, MakeMKV, Docker, Incus log collection, ddc-i2c,
-Mullvad, Pinchflat, rdfind, OBS Studio, Orca Slicer, and virt-viewer.
+configuration, Home Router, SOPS host configuration, MakeMKV, Docker, Incus log
+collection, ddc-i2c, Mullvad, Pinchflat, rdfind, OBS Studio, Orca Slicer, and
+virt-viewer.
+
+SOPS is the semantic exception to simple `enable` migration. `mine.sops.enable`
+is now legacy wrapper activation only. Modules that conditionally add optional
+`sops.secrets` entries should check `mine.sops.available`, which is set by the
+active SOPS configuration and therefore models whether this host has `sops-nix`
+configured. Profiles should import `modules.nixos.sops-host`; hosts should keep
+only path-like SOPS facts such as `mine.sops.defaultSopsFile` and
+`mine.sops.ageKeyFile` host-local.
 
 ### Leaf Migration Guardrails
 
@@ -337,8 +347,6 @@ leaf migrations:
 
 - Nixvim and `homeManagerModules.nixvim`, because downstream standalone Home
   Manager compatibility and upstream nixvim imports need a dedicated pass.
-- SOPS, because `mine.sops.enable` currently models secret availability for
-  other modules and needs a smarter replacement than a mechanical direct import.
 - Incus/LXC image and runtime modules, because container build attrs, profile
   paths, and runtime mapping files are operational contracts.
 

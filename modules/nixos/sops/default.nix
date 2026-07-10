@@ -1,21 +1,7 @@
-{ pkgs, lib, config, userConfig, ... }: {
+{ pkgs, lib, config, ... }:
 
-  options = {
-    mine.sops = {
-      enable =
-        lib.mkEnableOption "gotta have my sops";
-      defaultSopsFile = lib.mkOption {
-        type = lib.types.str;
-        default = "/home/${userConfig.username}/git/sops-ryan/secrets.yaml";
-        description = "Path to the default SOPS file";
-      };
-      ageKeyFile = lib.mkOption {
-        type = lib.types.str;
-        default = "/home/${userConfig.username}/.config/sops/age/keys.txt";
-        description = "Path to the age key file";
-      };
-    };
-  };
+{
+  imports = [ ./options.nix ];
 
-  config = lib.mkIf config.mine.sops.enable (import ./config.nix { inherit config pkgs; });
+  config = lib.mkIf config.mine.sops.enable (import ./config.nix { inherit lib config pkgs; });
 }

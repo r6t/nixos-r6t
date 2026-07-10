@@ -18,13 +18,13 @@
 
   # set secrets
   sops.secrets = {
-    "syncthing/password" = lib.mkIf config.mine.sops.enable {
+    "syncthing/password" = lib.mkIf config.mine.sops.available {
       owner = config.users.users.${userConfig.username}.name;
     };
-    "syncthing/machine_id/crown" = lib.mkIf config.mine.sops.enable {
+    "syncthing/machine_id/crown" = lib.mkIf config.mine.sops.available {
       owner = config.users.users.${userConfig.username}.name;
     };
-    "syncthing/machine_id/mountainball" = lib.mkIf config.mine.sops.enable {
+    "syncthing/machine_id/mountainball" = lib.mkIf config.mine.sops.available {
       owner = config.users.users.${userConfig.username}.name;
     };
   };

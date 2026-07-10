@@ -4,7 +4,6 @@
   imports = [
     inputs.home-manager.nixosModules.home-manager
     inputs.hardware.nixosModules.framework-13-7040-amd
-    inputs.sops-nix.nixosModules.sops
     inputs.nix-flatpak.nixosModules.nix-flatpak
     ./hardware-configuration.nix
     ../../modules/default.nix
