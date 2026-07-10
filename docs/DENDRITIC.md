@@ -278,7 +278,8 @@ apps, browsers, darktable, KDE apps, the KDE desktop, Steam, Tailscale host
 configuration, Home Router, SOPS host configuration, NFS, ZFS pool management,
 LUKS store mounts, NVIDIA/CUDA support, llama.cpp, Open WebUI,
 stable-diffusion.cpp, MakeMKV, Docker, Incus log collection, ddc-i2c, Mullvad,
-Pinchflat, rdfind, OBS Studio, Orca Slicer, and virt-viewer.
+Pinchflat, rdfind, Caddy, monitoring services, Immich, Jellyfin, OBS Studio,
+Orca Slicer, and virt-viewer.
 
 SOPS is the semantic exception to simple `enable` migration. `mine.sops.enable`
 is now legacy wrapper activation only. Modules that conditionally add optional
@@ -302,6 +303,12 @@ split is structural: goldenball keeps its measured ROCmFP4 llama.cpp model
 values host-local, and crown's `llm` container keeps its TensorRT-LLM/Open WebUI
 behavior container-local. The standalone Ollama module was retired as unused;
 Open WebUI still keeps its generic optional Ollama backend URL knob.
+
+Server leaves follow the same pattern for active services. `caddy`,
+`monitoring-services`, `immich`, and `jellyfin` keep compatibility wrappers,
+while crown and the active containers direct-import their `config.nix` files.
+Unused server modules `headscale`, `karakeep`, `n8n`, and `uptime-kuma` were
+retired instead of preserving no-op option surface.
 
 ### Leaf Migration Guardrails
 

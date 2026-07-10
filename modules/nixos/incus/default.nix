@@ -109,9 +109,6 @@ in
     # set secrets
     sops.secrets = lib.mkIf config.mine.sops.available (
       lib.genAttrs [
-        "caddy/headscale/aws_access_key_id"
-        "caddy/headscale/aws_region"
-        "caddy/headscale/aws_secret_access_key"
         "caddy/lab/aws_access_key_id"
         "caddy/lab/aws_region"
         "caddy/lab/aws_secret_access_key"

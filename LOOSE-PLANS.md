@@ -53,15 +53,16 @@
 - [x] `ollama` retired as unused.
 - [x] `stable-diffusion-cpp`.
 - [x] GPU/LLM validation passed.
-- [ ] Server pass.
-- [ ] `caddy`.
-- [ ] `headscale`.
-- [ ] `monitoring-services`.
-- [ ] `immich`.
-- [ ] `jellyfin`.
-- [ ] `karakeep`.
-- [ ] `n8n`.
-- [ ] `uptime-kuma`.
+- [x] Server pass.
+- [x] `caddy`.
+- [x] `headscale` retired as unused.
+- [x] `monitoring-services`.
+- [x] `immich`.
+- [x] `jellyfin`.
+- [x] `karakeep` retired as unused.
+- [x] `n8n` retired as unused.
+- [x] `uptime-kuma` retired as unused.
+- [x] Server validation passed.
 
 ## Phase 3: Slim Host Files
 
@@ -119,4 +120,4 @@
 
 ## Decision
 
-Phase 1 is complete. Phase 2 storage/network and GPU/LLM passes are complete. The next recommended step is the Phase 2 Incus pass.
+Phase 1 is complete. Phase 2 storage/network, GPU/LLM, and server passes are complete. The next recommended step is the Phase 2 Incus pass.

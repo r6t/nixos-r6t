@@ -3,7 +3,8 @@
 {
   imports = [
     ./lib/base.nix
-    ../modules/nixos/monitoring-services/default.nix
+    ../modules/nixos/monitoring-services/options.nix
+    ../modules/nixos/monitoring-services/config.nix
     ../modules/nixos/prometheus-node-exporter/default.nix
     ../modules/nixos/tailscale/default.nix
   ];
@@ -44,7 +45,6 @@
       authKeyFile = "/etc/tailscale/auth-key";
     };
     monitoring-services = {
-      enable = true;
       grafana.domain = "grafana.r6t.io";
       grafana.oidc = {
         signoutRedirectUrl = "https://pid.r6t.io/";

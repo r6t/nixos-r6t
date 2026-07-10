@@ -28,7 +28,8 @@ in
 {
   imports = [
     ./hardware-configuration.nix
-    ../../modules/nixos/caddy/default.nix
+    ../../modules/nixos/caddy/options.nix
+    ../../modules/nixos/caddy/config.nix
     ../../modules/nixos/incus-log-collector/config.nix
     ../../modules/nixos/incus-nightly-rebuild/default.nix
     ../../modules/nixos/mountLuksStore/options.nix
@@ -176,7 +177,6 @@ in
       git.signingPubKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEpfN0UYA2Bbn+F9IMMVrtIAI2M0vTTLMHWz4qQ8L5P0 r6t@nixos";
     };
     caddy = {
-      enable = true;
       environmentFile = "/mnt/crownstore/Sync/app-config/caddy/crown.caddy.env";
       routes = crownCaddyRoutes;
     };
