@@ -55,7 +55,6 @@ in
       };
     };
 
-    tmpfiles.rules = [ ];
     services = {
       # Storage-dependent services - wait for LUKS mount
       incus = {

@@ -256,7 +256,7 @@ Current profile aspects:
 The Phase 2 direct-import pass is complete for storage/network, GPU/LLM, active
 server modules, and Incus-owned host/container modules. Remaining `default.nix`
 imports in containers are intentionally deferred lower-level container base
-modules or one-off host modules, not profile-owned legacy enables.
+modules, not profile-owned legacy enables.
 
 `modules.nixos.r6t-base` owns behavior that used to live in the catch-all
 `modules/nixos/nixos-r6t-baseline/default.nix` module. The split files are kept
@@ -276,7 +276,7 @@ compatibility consumers. Leaves with custom non-enable options may split those
 declarations into `options.nix`, imported by both the wrapper and direct
 profiles. This is the preferred migration pattern for removing enable hooks
 without breaking old imports. Current direct-import leaves include bootloader,
-Nix, SSH, user, fwupd, fzf, iperf, localization, NetworkManager, sound,
+Nix, SSH, user, asusctl, fwupd, fzf, iperf, localization, NetworkManager, sound,
 Bluetooth, czkawka, direnv, fonts, npm, printing, v4l-utils, zola, Bolt,
 Prometheus node exporter, SSHFS, Syncthing, USB4 SFP support, desktop Flatpak
 apps, browsers, darktable, KDE apps, the KDE desktop, Steam, Tailscale host

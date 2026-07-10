@@ -41,7 +41,6 @@ in
     ../../modules/nixos/wg-metrics/config.nix
   ];
 
-
   boot = {
     kernel.sysctl = {
       # Enable forwarding for containers
@@ -62,8 +61,6 @@ in
       "reboot=efi"
     ];
   };
-
-
 
   fileSystems."/mnt/thunderkey" = {
     device = "/dev/disk/by-label/thunderkey";
@@ -110,7 +107,6 @@ in
   system.stateVersion = "23.11";
 
   systemd.services = {
-
     tailscale-udp-gro = {
       description = "Enable UDP GRO forwarding for Tailscale on Mellanox interfaces";
       after = [ "network.target" ];

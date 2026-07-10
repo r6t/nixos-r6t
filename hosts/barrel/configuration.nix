@@ -34,54 +34,6 @@
       enable = true;
       checkReversePath = false;
     };
-    # firewall = {
-    #   enable = false; # Disabled - using nftables instead
-    #   checkReversePath = false;
-    # };
-    # nftables = {
-    #   enable = true;
-    #   ruleset = ''
-    #     table inet filter {
-    #       chain input {
-    #         type filter hook input priority 0; policy drop;
-    #         # Loopback always allowed
-    #         iifname "lo" accept
-    #         # DHCP from LAN (before conntrack)
-    #         iifname "enp100s0" udp dport 67 accept
-    #         # Established/related from anywhere
-    #         ct state { established, related } accept
-    #         ct state invalid drop
-    #         # ICMP for diagnostics
-    #         ip protocol icmp accept
-    #         # SSH from LAN only
-    #         iifname "enp100s0" tcp dport 22 accept
-    #         # DNS from LAN only
-    #         iifname "enp100s0" tcp dport 53 accept
-    #         iifname "enp100s0" udp dport 53 accept
-    #         # Incus from LAN
-    #         iifname "enp100s0" tcp dport 8443 accept
-    #       }
-    #       chain output {
-    #         type filter hook output priority 0; policy accept;
-    #         # Allow all output from router (DHCP responses, DNS responses, updates, etc.)
-    #       }
-    #       chain forward {
-    #         type filter hook forward priority 0; policy drop;
-    #         ct state { established, related } accept
-    #         ct state invalid drop
-    #         # LAN -> WAN
-    #         iifname "enp100s0" oifname "enp101s0" accept
-    #       }
-    #     }
-    #     table ip nat {
-    #       chain postrouting {
-    #         type nat hook postrouting priority 100; policy accept;
-    #         # Masquerade LAN traffic going to WAN
-    #         oifname "enp101s0" masquerade
-    #       }
-    #     }
-    #   '';
-    # };
   };
 
   system.stateVersion = "23.11";

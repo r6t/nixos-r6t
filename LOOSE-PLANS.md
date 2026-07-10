@@ -76,22 +76,23 @@
 
 ## Phase 3: Targeted Host File Cleanup
 
-- Audit host files for repeated active behavior before moving anything.
-- Move reusable policy into profiles only when it has a real role or a replacement-host story.
-- Keep firewall ports, Incus sysctls, NIC pins, storage ordering, and router monitoring binds host-local unless at least two hosts share the exact policy.
-- Move `nix-daemon` memory limits into `nix-build-throttle` only if another host needs the same policy.
-- Remove stale commented-out blocks and obsolete tombstones when encountered.
-- Keep host-local facts.
-- Hardware imports.
-- `system.stateVersion`.
-- Hostnames and host IDs.
-- PCI path interface pins.
-- Static IPs/gateways/bridges.
-- UUIDs, key files, mount points.
-- SOPS paths.
-- DHCP reservations.
-- `goldenball` kernel/GPU stability tuning.
-- `crown` concrete Caddy route selection.
+- [x] Audit host files for repeated active behavior before moving anything.
+- [x] Move reusable policy into profiles only when it has a real role or a replacement-host story.
+- [x] Keep firewall ports, Incus sysctls, NIC pins, storage ordering, and router monitoring binds host-local unless at least two hosts share the exact policy.
+- [x] Keep `nix-daemon` memory limits host-local; only `mountainball` has the memory cap, while `nix-build-throttle` owns shared CPU quota.
+- [x] Remove stale commented-out blocks and obsolete tombstones when encountered.
+- [x] Split host-owned `asusctl` so `goldenball` direct-imports its config and no host imports leaf `default.nix` wrappers.
+- [x] Keep host-local facts.
+- [x] Hardware imports.
+- [x] `system.stateVersion`.
+- [x] Hostnames and host IDs.
+- [x] PCI path interface pins.
+- [x] Static IPs/gateways/bridges.
+- [x] UUIDs, key files, mount points.
+- [x] SOPS paths.
+- [x] DHCP reservations.
+- [x] `goldenball` kernel/GPU stability tuning.
+- [x] `crown` concrete Caddy route selection.
 
 ## Phase 4: Incus/Container Cleanup
 
@@ -131,4 +132,4 @@
 
 ## Decision
 
-Phase 1 and Phase 2 are complete. Warning cleanup is complete locally; downstream warning cleanup needs a downstream nixpkgs refresh or local downstream policy decision. The next useful repo work is targeted host-file cleanup only where repeated behavior is proven, not broad abstraction.
+Phase 1, Phase 2, and the targeted Phase 3 host cleanup are complete. Warning cleanup is complete locally; downstream warning cleanup needs a downstream nixpkgs refresh or local downstream policy decision. The next useful repo work is Phase 4 Incus/container cleanup only for focused operational issues, not broad redesign.

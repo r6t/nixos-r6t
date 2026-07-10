@@ -39,7 +39,6 @@
     };
   };
 
-
   systemd = {
     services = {
       nix-daemon.serviceConfig = {

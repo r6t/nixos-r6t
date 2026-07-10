@@ -5,7 +5,8 @@ in
 {
   imports = [
     ./hardware-configuration.nix
-    ../../modules/nixos/asusctl/default.nix
+    ../../modules/nixos/asusctl/options.nix
+    ../../modules/nixos/asusctl/config.nix
     ../../modules/nixos/llama-cpp/options.nix
     ../../modules/nixos/llama-cpp/config.nix
   ];
@@ -347,7 +348,6 @@ in
     };
 
     asusctl = {
-      enable = true;
       # GZ302EA has two aura USB devices:
       #   1a30 — detachable keyboard dock (drives keyboard backlight)
       #   18c6 — tablet body (drives the back-panel window light)
