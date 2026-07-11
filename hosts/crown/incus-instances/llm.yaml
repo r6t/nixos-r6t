@@ -1,5 +1,5 @@
 config:
-  limits.memory: 64GiB
+  limits.memory: 48GiB
   nvidia.driver.capabilities: all
   nvidia.runtime: "true"
   security.nesting: "true"
