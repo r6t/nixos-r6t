@@ -62,7 +62,6 @@ in
         "/var/lib/hermes:/opt/data"
         "/mnt/git:/mnt/git"
       ];
-      environmentFiles = [ "/var/lib/hermes/.env" ];
       environment = {
         HERMES_UID = "10000";
         HERMES_GID = "10000";

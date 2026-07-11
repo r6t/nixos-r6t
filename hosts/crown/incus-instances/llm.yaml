@@ -1,5 +1,5 @@
 config:
-  limits.memory: 32GiB
+  limits.memory: 64GiB
   nvidia.driver.capabilities: all
   nvidia.runtime: "true"
   security.nesting: "true"
@@ -19,17 +19,17 @@ devices:
     vendorid: "10de"
     productid: "2d04"
     type: gpu
-  trtllm-cache:
-    path: /var/cache/trtllm
+  llama-cpp-cache:
+    path: /var/cache/llama-cpp
     shift: "true"
     source: /mnt/crownstore/app-storage/llama-cpp-cache
     type: disk
-  trtllm-data:
-    path: /var/lib/trtllm
+  llama-cpp-data:
+    path: /var/lib/llama-cpp
     shift: "true"
     source: /mnt/crownstore/app-storage/llama-cpp
     type: disk
-  trtllm-port:
+  llm-api-port:
     connect: tcp:127.0.0.1:8080
     listen: tcp:0.0.0.0:8088
     type: proxy
