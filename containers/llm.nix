@@ -235,7 +235,7 @@
       ];
     };
 
-    "open-webui" = {
+    containers."open-webui" = {
       image = "ghcr.io/open-webui/open-webui:main";
       pull = "always";
       environmentFiles = [ "/etc/oi.env" ];
