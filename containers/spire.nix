@@ -1,44 +1,25 @@
-{ lib, ... }:
+{ ... }:
 
 {
   imports = [
     ./lib/base.nix
     ../modules/nixos/monitoring-services/options.nix
     ../modules/nixos/monitoring-services/config.nix
+    ../modules/nixos/pocket-id/options.nix
+    ../modules/nixos/pocket-id/config.nix
     ../modules/nixos/prometheus-node-exporter/default.nix
     ../modules/nixos/tailscale/default.nix
   ];
 
   networking.hostName = "spire";
-
-  # Match existing data ownership (r6t:users = 1000:100)
-  users.users.pocket-id = {
-    uid = lib.mkForce 1000;
-    group = "users";
-    isSystemUser = true;
-    home = "/var/lib/pocket-id";
-  };
-
-  services = {
-    pocket-id = {
-      enable = true;
-      user = "pocket-id";
-      group = "users";
-
-      # Data directory mounted by Incus from persistent storage
-      dataDir = "/var/lib/pocket-id";
-
-      # ENCRYPTION_KEY and other secrets in this file on persistent storage
-      environmentFile = "/var/lib/pocket-id/pocket-id.env";
-
-      settings = {
-        APP_URL = "https://pid.r6t.io";
-        TRUST_PROXY = true;
-      };
-    };
-  };
+  services.dnsmasq.settings.server = [ "192.168.6.1" ];
 
   mine = {
+    pocket-id = {
+      appUrl = "https://pid.r6t.io";
+      dataDir = "/var/lib/pocket-id";
+      environmentFile = "/var/lib/pocket-id/pocket-id.env";
+    };
     tailscale = {
       enable = true;
       ephemeral = true;

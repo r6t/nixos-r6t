@@ -85,6 +85,7 @@ let
     "nvidia-cuda"
     "open-webui"
     "pinchflat"
+    "pocket-id"
     "printing"
     "prometheus-node-exporter"
     "rdfind"
