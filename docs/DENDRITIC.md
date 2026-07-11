@@ -311,10 +311,10 @@ behavior container-local. The standalone Ollama module was retired as unused;
 Open WebUI still keeps its generic optional Ollama backend URL knob.
 
 Server leaves follow the same pattern for active services. `caddy`,
-`monitoring-services`, `immich`, and `jellyfin` keep compatibility wrappers,
-while crown and the active containers direct-import their `config.nix` files.
-Unused server modules `headscale`, `karakeep`, `n8n`, and `uptime-kuma` were
-retired instead of preserving no-op option surface.
+`monitoring-services`, `immich`, `jellyfin`, and `pocket-id` keep compatibility
+wrappers, while crown and the active containers direct-import their `config.nix`
+files. Unused server modules `headscale`, `karakeep`, `n8n`, and `uptime-kuma`
+were retired instead of preserving no-op option surface.
 
 Incus leaves follow the same pattern for active host/container behavior. `incus`,
 `incus-nightly-rebuild`, `wg-metrics`, and `exit-node-routing` keep compatibility

@@ -134,6 +134,10 @@
 - Keep legacy wrappers in `modules/default.nix` while they preserve downstream compatibility.
 - Remove only dead/no-op modules.
 - Internal rule: no repo host should require `modules/default.nix`.
+- [x] Confirm `modules/default.nix` has no missing or stale flatpak/home/NixOS leaf registrations.
+- [x] Confirm repo-owned hosts do not import `modules/default.nix`.
+- [x] Keep `pocket-id` as an additive compatibility wrapper in `nixosModules.default`.
+- [x] Preserve public output names for hosts, modules, packages, and checks.
 
 ## Validation After Each Phase
 
@@ -147,4 +151,4 @@
 
 ## Decision
 
-Phase 1, Phase 2, targeted Phase 3 host cleanup, focused Phase 4 Incus/container cleanup, and Phase 5 LLM/GPU cleanup are complete. Warning cleanup is complete locally; downstream warning cleanup needs a downstream nixpkgs refresh or local downstream policy decision. The next useful repo work is Phase 6 compatibility finalization.
+Phase 1, Phase 2, targeted Phase 3 host cleanup, focused Phase 4 Incus/container cleanup, Phase 5 LLM/GPU cleanup, and Phase 6 compatibility finalization are complete. Warning cleanup is complete locally; downstream warning cleanup needs a downstream nixpkgs refresh or local downstream policy decision.
