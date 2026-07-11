@@ -3,8 +3,6 @@
 {
   imports = [
     ../modules/nixos/docker/default.nix
-    ../modules/nixos/open-webui/options.nix
-    ../modules/nixos/open-webui/config.nix
     ./lib/base.nix
     ./lib/mullvad-dns.nix
   ];
@@ -158,6 +156,11 @@
       };
     };
 
+    docker-open-webui = {
+      after = [ "docker-trtllm.service" ];
+      wants = [ "docker-trtllm.service" ];
+    };
+
     trtllm-cuda-driver-libs = {
       description = "Create NVIDIA driver library SONAME symlinks for TensorRT-LLM CUDA";
       before = [ "docker-trtllm.service" ];
@@ -231,16 +234,24 @@
         "--ulimit=stack=67108864"
       ];
     };
-  };
 
-  mine = {
-    open-webui = {
-      host = "0.0.0.0";
-      openaiApiUrls = [
-        "http://localhost:8080/v1"
-        "https://openrouter.ai/api/v1"
+    "open-webui" = {
+      image = "ghcr.io/open-webui/open-webui:main";
+      pull = "always";
+      environmentFiles = [ "/etc/oi.env" ];
+      environment = {
+        ANONYMIZED_TELEMETRY = "False";
+        DO_NOT_TRACK = "True";
+        HOST = "0.0.0.0";
+        OPENAI_API_BASE_URLS = "http://localhost:8080/v1;https://openrouter.ai/api/v1";
+        PORT = "8087";
+        SCARF_NO_ANALYTICS = "True";
+        WEBUI_AUTH = "True";
+      };
+      volumes = [
+        "/var/lib/private/open-webui:/app/backend/data"
       ];
-      environmentFile = "/etc/oi.env";
+      networks = [ "host" ];
     };
   };
 }
