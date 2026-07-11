@@ -62,10 +62,13 @@ in
         "/var/lib/hermes:/opt/data"
         "/mnt/git:/mnt/git"
       ];
+      environmentFiles = [ "/var/lib/hermes/.env" ];
       environment = {
         HERMES_UID = "10000";
         HERMES_GID = "10000";
         HERMES_DASHBOARD = "1";
+        HERMES_DASHBOARD_HOST = "0.0.0.0";
+        HERMES_DASHBOARD_PORT = "9119";
         HERMES_DASHBOARD_PUBLIC_URL = "https://hermes.r6t.io";
         API_SERVER_ENABLED = "true";
         API_SERVER_HOST = "0.0.0.0";
