@@ -197,7 +197,7 @@
       description = ''
         Additional CLI flags appended to the base llama-server flags.
         The base flags (GPU offload, flash-attn, KV quant, context, priority,
-        cache-reuse, parallel slots) are always applied. Use this for
+        cache-ram, parallel slots) are always applied. Use this for
         model-specific flags like --jinja.
       '';
     };

@@ -325,10 +325,9 @@ App containers on crown expose ports to the host via incus proxy devices. Crown'
 
 ### GPU Passthrough
 
-Crown has two AMD GPUs visible to amdgpu:
-
-- **Radeon AI PRO R9700** (RDNA 4 / gfx1201, Navi 48) — PCI vendorid `1002`, productid `7551`. Used for LLM inference.
-- **Ryzen Phoenix iGPU** (HawkPoint1) — PCI vendorid `1002`, productid `1900`. Must be excluded from GPU containers.
+Crown's active `llm` container uses an NVIDIA GeForce RTX 5060 Ti for
+TensorRT-LLM serving. The Incus profile filters the physical GPU by vendor and
+product ID.
 
 #### Filter the GPU device by vendorid + productid (preferred)
 
@@ -339,13 +338,12 @@ the same as the device's own BDF — easy to misread. Product IDs are stable unt
 is physically replaced.
 
 ```yaml
-# Per-GPU DRM nodes (/dev/dri/card* + /dev/dri/renderD*) for the R9700 only.
-# Filter by AMD vendorid + Navi 48 productid — survives any PCI topology change.
+# Current crown llm profile: NVIDIA RTX 5060 Ti.
 gpu:
   gid: "303"
   gputype: physical
-  vendorid: "1002"
-  productid: "7551"
+  vendorid: "10de"
+  productid: "2d04"
   type: gpu
 ```
 
@@ -357,9 +355,17 @@ lspci -D -nn | grep -iE 'VGA|3D'
 incus info --resources | grep -A4 'GPUs:'
 ```
 
-`pci:` filtering is also valid (and necessary if you need to disambiguate two identical
-GPU models) but should be a fallback. For NVIDIA hosts use `vendorid: "10de"` + the
-appropriate device ID.
+`pci:` filtering is also valid and necessary if you need to disambiguate two
+identical GPU models, but should be a fallback. Vendor/product IDs survive PCI
+topology changes better than BDF paths.
+
+For NVIDIA LXC workloads, set Incus' NVIDIA runtime config on the profile:
+
+```yaml
+config:
+  nvidia.driver.capabilities: all
+  nvidia.runtime: "true"
+```
 
 #### ROCm-specific extras
 
@@ -387,9 +393,10 @@ ROCm packages are needed — the host only provides the kernel driver and device
 found" because the Vulkan loader has nothing to load. ROCm does not need this — it
 talks to `/dev/kfd` directly without the Mesa/Vulkan loader path.
 
-On RDNA 4 (R9700), the Vulkan backend is currently more stable and frequently faster
-than ROCm/HIP for llama.cpp inference. Crown's llm container uses Vulkan; mountainball
-uses ROCm.
+On AMD RDNA 4 systems, the Vulkan backend has historically been more stable
+than ROCm/HIP for llama.cpp inference. Crown's active LLM container is NVIDIA
+and uses TensorRT-LLM/CUDA instead; goldenball's local llama.cpp service uses
+the Strix Halo ROCmFP4 fork.
 
 #### Backend behavior
 

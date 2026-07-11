@@ -299,7 +299,7 @@ kernel: [drm:amdgpu_dm_plane_helper_prepare_fb] *ERROR* Failed to pin framebuffe
 
 ### Mitigation in place
 
-`RADV_PERFTEST=nogttspill` in `modules/nixos/llama-cpp/default.nix` environment (Vulkan path). Prevents RADV from spilling GPU buffer allocations between pools under perceived pressure. Was accidentally removed in commit `60a9423` (May 30 2026) and restored the same day.
+`RADV_PERFTEST=nogttspill` in `modules/nixos/llama-cpp/config.nix` environment (Vulkan-capable path). Prevents RADV from spilling GPU buffer allocations between pools under perceived pressure. Was accidentally removed in commit `60a9423` (May 30 2026) and restored the same day.
 
 ---
 
@@ -388,14 +388,14 @@ No evidence of hardware defect in any collected logs (no MCE, no hardware ECC er
 
 ## Files to check when troubleshooting
 
-| File                                          | What's there                                                                      |
-| --------------------------------------------- | --------------------------------------------------------------------------------- |
-| `hosts/goldenball/configuration.nix`          | All kernel params, udev rules, VrrPolicy, auraConfigs, hid_asus udev rebind       |
-| `hosts/goldenball/hardware-configuration.nix` | Generated initrd module list; currently includes `thunderbolt`                    |
-| `hosts/goldenball/llm-config.nix`             | LLM model presets, active model selection                                         |
-| `modules/nixos/llama-cpp/default.nix`         | llama-server service, `RADV_PERFTEST`, `MESA_SHADER_CACHE_DIR`                    |
-| `modules/nixos/usb4-sfp/default.nix`          | USB4/TB4 PCIe power pinning for ixgbe NIC                                         |
-| `modules/nixos/networkmanager/default.nix`    | WiFi MAC policy                                                                   |
-| `modules/nixos/asusctl/default.nix`           | Aura LED option passthrough                                                       |
-| `docs/LLM-HOSTING-TUNING.md`                  | LLM tuning reference (written for crown/R9700 but applies with noted differences) |
-| `docs/INCUS.md`                               | Container architecture (not directly relevant to freezes)                         |
+| File                                          | What's there                                                                |
+| --------------------------------------------- | --------------------------------------------------------------------------- |
+| `hosts/goldenball/configuration.nix`          | All kernel params, udev rules, VrrPolicy, auraConfigs, hid_asus udev rebind |
+| `hosts/goldenball/hardware-configuration.nix` | Generated initrd module list; currently includes `thunderbolt`              |
+| `hosts/goldenball/llm-config.nix`             | LLM model presets, active model selection                                   |
+| `modules/nixos/llama-cpp/config.nix`          | llama-server service, `RADV_PERFTEST`, `MESA_SHADER_CACHE_DIR`              |
+| `modules/nixos/usb4-sfp/default.nix`          | USB4/TB4 PCIe power pinning for ixgbe NIC                                   |
+| `modules/nixos/networkmanager/default.nix`    | WiFi MAC policy                                                             |
+| `modules/nixos/asusctl/default.nix`           | Aura LED option passthrough                                                 |
+| `docs/LLM-HOSTING-TUNING.md`                  | LLM tuning reference for goldenball and crown                               |
+| `docs/INCUS.md`                               | Container architecture (not directly relevant to freezes)                   |

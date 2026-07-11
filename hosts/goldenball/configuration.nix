@@ -14,7 +14,7 @@ in
   # ---------------------------------------------------------------------------
   # ASUS ROG Z13 AI Max 395 (GZ302) — Strix Halo
   # Hardware: AMD Ryzen AI MAX+ 395 (RDNA 3.5 / gfx1151), MediaTek MT7925 WiFi
-  # Role: workstation + local LLM (vulkan, on-demand)
+  # Role: workstation + local LLM (ROCmFP4 primary, Vulkan fallback, on-demand)
   # ---------------------------------------------------------------------------
 
   # GZ302EA detachable keyboard dock (USB, 0B05:1A30) and tablet body (0B05:18C6).
@@ -218,8 +218,9 @@ in
     ];
   };
 
-  # ROCm symlink for AI/LLM tooling (darktable / blender CL discover this path).
-  # Not used by llama-cpp here — that runs the Vulkan backend.
+  # ROCm symlink for AI/LLM tooling. llama-cpp's active ROCmFP4 fork carries its
+  # own runtime closure, but desktop tools such as darktable/blender discover
+  # ROCm/OpenCL through this conventional path.
   systemd = {
     tmpfiles.rules = [
       "L+    /opt/rocm/hip   -    -    -     -    ${pkgs.rocmPackages.clr}"
@@ -450,7 +451,7 @@ in
     };
     kde.tablet = true;
 
-    # Local llama-server — Vulkan backend for Radeon 8060S (gfx1151).
+    # Local llama-server — ROCmFP4 primary backend for Radeon 8060S (gfx1151).
     # GPU LLM inference. Two backends configured here:
     #   - rocmfp4 = true:  charlie12345/rocmfp4-llama fork — HIP+Vulkan combined
     #     binary with custom Q4_0_ROCMFP4_STRIX{,_LEAN} quants. Reports 80-104

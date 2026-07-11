@@ -124,6 +124,9 @@
 - Do not genericize GPU passthrough.
 - Avoid new profiles unless a second host actually shares behavior.
 - Keep model IDs and flags stable, especially `goldenball`'s ROCmFP4 config and `crown`'s TensorRT service.
+- [x] Audit active LLM/GPU configs without changing measured model IDs, flags, context, cache, or backend settings.
+- [x] Refresh docs/comments for current crown NVIDIA/TensorRT and goldenball ROCmFP4 roles.
+- [x] Remove stale/duplicated LLM tuning docs, including obsolete `--cache-reuse` baseline wording.
 
 ## Phase 6: Compatibility Finalization
 
@@ -144,4 +147,4 @@
 
 ## Decision
 
-Phase 1, Phase 2, and the targeted Phase 3 host cleanup are complete. Warning cleanup is complete locally; downstream warning cleanup needs a downstream nixpkgs refresh or local downstream policy decision. The next useful repo work is Phase 4 Incus/container cleanup only for focused operational issues, not broad redesign.
+Phase 1, Phase 2, targeted Phase 3 host cleanup, focused Phase 4 Incus/container cleanup, and Phase 5 LLM/GPU cleanup are complete. Warning cleanup is complete locally; downstream warning cleanup needs a downstream nixpkgs refresh or local downstream policy decision. The next useful repo work is Phase 6 compatibility finalization.

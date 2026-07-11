@@ -4,7 +4,7 @@ How local large language models are hosted across the R6T infrastructure,
 what works well, what's slow and why, and how to swap between models.
 Covers two distinct hardware platforms: crown's RTX 5060 Ti 16 GB and
 goldenball's Strix Halo APU (Ryzen AI MAX+ 395, 128 GB unified RAM).
-Updated June 2026.
+Updated July 2026.
 
 **Goldenball runs the ROCmFP4 fork as its primary backend** (compiled from
 `pkgs/rocmfp4-llama/package.nix` in this flake) for ~2× decode speedup on
@@ -132,7 +132,7 @@ Strix Halo has a fragmented but maturing ecosystem. Four main backends compete:
 
 ### 1. Vulkan (RADV / llama.cpp) — the safe default
 
-The traditional path, identical to what the R9700 used (same RDNA family):
+The traditional AMD/RADV path, similar to the older R9700 setup:
 
 **Pros:**
 
@@ -220,7 +220,7 @@ Head-to-head benchmarks on Strix Halo 395+ / 128 GB unified:
 - HuggingFace native — no GGUF conversion needed
 - Cold start in seconds (vs minutes for vLLM)
 - 83% faster than Vulkan on smaller models
-- Latest release b1037-stable (Jun 5, 2026 — today)
+- Latest release observed here: b1037-stable (Jun 5, 2026)
 - No Python runtime, no Triton JIT, no Torch dependency
 - KV cache quantization support (`--kv-bits 4/8`)
 
@@ -258,30 +258,6 @@ is about how the model's attention layers handle the KV cache.
 | **Hybrid attention**     | Qwen3.5, Qwen3.6, Qwen3-Next, RWKV, Mamba/Jamba                        | Not supported                                              | Permanently disabled                | Slow every turn              |
 | **SWA + global**         | Gemma 4 series                                                         | Supported, **only on llama.cpp ≥ b8819 with `--swa-full`** | Works on recent builds              | Snappy when configured right |
 | **Standard transformer** | Qwen3-Coder dense MoE, Mistral / Devstral, Llama, most everything else | Supported                                                  | Works                               | Snappy                       |
-
-### Why this matters
-
-When you reply to a model's message in a chat, ~95% of the prompt is the
-existing conversation history you've already sent before. A working KV cache
-lets the engine **skip re-processing tokens it has already prefilled** — only
-the new tokens (your latest user turn + a bit of template glue) need fresh
-prefill. That's how a cached standard-transformer chat feels instant on turn N:
-~10 new tokens to prefill, then immediately generate.
-
-**Hybrid attention models break this** because their recurrent layers carry
-rolled-up state across all positions in the sequence. You can't surgically
-remove the KV state for "the last 200 tokens because the user edited their
-prompt" — the rolled-up state has already mixed those tokens in. llama.cpp
-detects this and silently disables cache reuse entirely. **Every turn does a
-full re-prefill of the entire conversation.** On a 2000-token chat history at
-700 tok/s prefill that's ~3 seconds of dead time before the model starts
-generating, even though the actual model speed (21 tok/s) hasn't changed.
-
-llama.cpp [issue #22940](https://github.com/ggml-org/llama.cpp/issues/22940)
-(filed 2026-05-11) confirms this is a known limitation. A ~50-line patch
-exists but is unmerged. Reporter measured a 12-turn agent loop at 298.5s →
-121.7s with the patch (~2.4× faster). When that patch lands upstream we'll
-get the speedup for free.
 
 ### Why this matters
 
@@ -381,19 +357,19 @@ upstream chat template emits `<think>` content by default, so crown serves a
 custom Qwen3 template that defaults `enable_thinking` to false while preserving
 per-request `chat_template_kwargs.enable_thinking = true` opt-in.
 
-Old planning presets:
+Archived GGUF planning presets from the pre-TensorRT crown experiments:
 
-| Preset              | Architecture   | Active params | Quant / Size   | VRAM fit                                 | When to use                             |
-| ------------------- | -------------- | ------------- | -------------- | ---------------------------------------- | --------------------------------------- | ------------------------ |
+| Preset              | Architecture   | Active params | Quant / Size   | VRAM fit                                 | Notes                                   |
+| ------------------- | -------------- | ------------- | -------------- | ---------------------------------------- | --------------------------------------- |
 | `qwen3.6-35b-a3b`   | MoE hybrid GDN | ~3B / 35B     | Q4_K_M, ~20 GB | **NO** — too big for 16 GB               | —                                       |
 | `qwen3.5-122b-a10b` | MoE hybrid GDN | ~10B / 122B   | Q4_K_M, ~65 GB | **NO** — way too big                     | —                                       |
 | `qwen3-30b-a3b`     | MoE standard   | ~3B / 30B     | Q4_K_M, ~18 GB | **TIGHT** — barely fits at small context | Snappy multi-turn, standard transformer |
 | `qwen3.5-32b`       | dense hybrid   | 32B           | Q4_K_M, ~19 GB | **NO** — too big                         | —                                       |
 | `qwen3.6-30b-a3b`   | MoE standard   | ~3B / 30B     | Q4_K_M, ~18 GB | **TIGHT**                                | Same as 30B above                       |
-| `qwen3-30b-coder`   | MoE standard   | ~3B / 30B     | Q4_K_M         | ~18 GB                                   | **TIGHT**                               | Coding-focused variant   |
-| `qwen3-4b`          | dense          | 4B            | Q4_K_M         | ~2.7 GB                                  | Comfortable fit                         | Fast, small context work |
-| `qwen3-8b`          | dense          | 8B            | Q4_K_M         | ~5.5 GB                                  | Comfortable fit                         | Medium-quality chat      |
-| `llama3.3-70b`      | dense          | 70B           | Q4_K_M         | ~38 GB                                   | **NO** — too big                        | —                        |
+| `qwen3-30b-coder`   | MoE standard   | ~3B / 30B     | Q4_K_M         | ~18 GB                                   | Tight, coding-focused variant           |
+| `qwen3-4b`          | dense          | 4B            | Q4_K_M         | ~2.7 GB                                  | Comfortable, fast small-context work    |
+| `qwen3-8b`          | dense          | 8B            | Q4_K_M         | ~5.5 GB                                  | Comfortable medium-quality chat         |
+| `llama3.3-70b`      | dense          | 70B           | Q4_K_M         | ~38 GB                                   | **NO** — too big                        |
 
 **Practical models for 16 GB VRAM:**
 
@@ -408,8 +384,8 @@ planning options:
 | Qwen3-30B-A3B | Q4_K_S | ~14 GB  | ~2 GB                                        | Tight but possible                                    |
 | Llama-3.1-8B  | Q4_K_M | ~5.2 GB | ~10 GB                                       | Standard transformer, fast                            |
 
-**Key difference from crown's R9700:** The 16 GB on the 5060 Ti is a hard
-limit (dedicated VRAM), not shared with CPU like goldenball's unified memory.
+**Key difference from goldenball:** The 16 GB on the 5060 Ti is a hard limit
+(dedicated VRAM), not shared with CPU like goldenball's unified memory.
 You cannot run 70B-class models. But CUDA gives much higher tokens/sec per GB
 than AMD Vulkan.
 
@@ -791,30 +767,34 @@ prefill-heavy workloads compared to llama.cpp's single-request mode.
 
 ## Switching models
 
-llama-server is a **single-process, single-model** inference server. The
-model is baked into the systemd ExecStart line at container build time via
-the `--model` flag. To switch:
+Goldenball's llama-server is a **single-process, single-model** inference
+server. The active model is selected in `hosts/goldenball/llm-config.nix` and
+read by both the NixOS service and OpenCode model metadata. To switch:
 
 ```fish
-# 1. Edit containers/llm.nix, change `activeModel = models.<old>` to
-#    `activeModel = models.<new>`
-$EDITOR ~/git/nixos-r6t/containers/llm.nix
+# 1. Edit hosts/goldenball/llm-config.nix, change:
+#      activeModel = models.<new>;
+$EDITOR ~/git/nixos-r6t/hosts/goldenball/llm-config.nix
 
-# 2. Rebuild the container image (picks up the new ExecStart)
-python3 containers/build.py llm
+# 2. Rebuild/switch goldenball so llama-cpp.service gets the new ExecStart.
+sudo nixos-rebuild switch --flake .#goldenball
 
-# 3. Relaunch the container (stops old, starts new with new image)
-python3 containers/relaunch.py llm
+# 3. Restart the on-demand service if it is running.
+sudo systemctl restart llama-cpp
 
-# 4. Wait ~30s for the new model to load. Watch progress:
-incus exec llm -- journalctl -u llama-cpp --no-pager -f
+# 4. Watch progress:
+journalctl -u llama-cpp --no-pager -f
 # Look for "main: model loaded" then Ctrl+C
 ```
 
-The full round-trip is ~30-60 seconds end-to-end on a model that's already
-cached locally. If the GGUF isn't cached, llama-server auto-fetches from
-HuggingFace on first start (`--hf-repo`, `--hf-file`). 20+ GB GGUF download
-over your home connection adds ~5-15 minutes.
+The service load path is ~15 seconds for an already-local GGUF. If the GGUF
+isn't cached, llama-server auto-fetches from HuggingFace on first start
+(`--hf-repo`, `--hf-file`). 20+ GB GGUF download over your home connection adds
+~5-15 minutes.
+
+On crown, the active endpoint is TensorRT-LLM in the `llm` container, not
+llama.cpp. Switching crown's served model means editing `containers/llm.nix`,
+rebuilding the `llm` image, and relaunching the container.
 
 **On goldenball:** ROCmFP4 35B-MTP is the active model, running as a
 systemd service (`systemctl start|stop llama-cpp`). Start takes ~15s to
@@ -860,7 +840,6 @@ mode.
 -c <contextSize>              # per-model
 -ub <ubatchSize>              # default 2048, great for warm prefill
 --prio 2                      # high process priority for GPU-bound work
---cache-reuse 256             # silently no-op on hybrid, helps on others
 --cache-ram <cacheRamMiB>     # per-model (0 for hybrid, 8192 for standard)
 -np 1                         # one parallel slot (all VRAM to one session)
 ```
