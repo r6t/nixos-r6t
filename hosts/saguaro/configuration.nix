@@ -92,6 +92,8 @@ in
       };
     };
 
+    incus.profileDir = "/home/r6t/git/nixos-r6t/hosts/saguaro/incus-instances";
+
     mountLuksStore.kingston240 = {
       device = "/dev/disk/by-uuid/d7c2abad-2a6d-47ef-8310-dd57fb1156b9";
       keyFile = "/root/kingston240key";

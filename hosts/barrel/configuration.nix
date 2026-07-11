@@ -15,7 +15,11 @@
     hostId = "eb5912c9";
     enableIPv6 = false;
     hostName = "barrel";
-    defaultGateway.interface = "eno2";
+    nameservers = [ "192.168.6.1" ];
+    defaultGateway = {
+      address = "192.168.6.1";
+      interface = "eno2";
+    };
 
     interfaces = {
       # Lower port unused

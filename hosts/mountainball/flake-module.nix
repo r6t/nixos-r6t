@@ -9,7 +9,7 @@
       inputs.self.modules.nixos.kde-workstation
       inputs.self.modules.nixos.laptop-workstation
       inputs.self.modules.nixos.monitoring-agent
-      inputs.self.modules.nixos.nfs-photos-client
+      inputs.self.modules.nixos.nfs-host
       inputs.self.modules.nixos.nix-build-throttle
       inputs.self.modules.nixos.office-desk
       inputs.self.modules.nixos.sops-host

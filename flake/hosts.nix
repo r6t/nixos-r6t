@@ -1,22 +1,11 @@
 { config, ... }:
 
 let
+  discovery = import ./discovery.nix;
+  hostNames = discovery.flakeModuleDirs ../hosts;
   mkNixosHost = config.flake.lib.mkRegisteredNixosHost;
 in
 {
-  flake.nixosConfigurations = {
-    # cold storage
-    barrel = mkNixosHost "barrel";
-
-    # primary server
-    crown = mkNixosHost "crown";
-
-    mountainball = mkNixosHost "mountainball";
-
-    # laptop — ASUS ROG Z13 GZ302 Strix Halo
-    goldenball = mkNixosHost "goldenball";
-
-    # router + appliances
-    saguaro = mkNixosHost "saguaro";
-  };
+  flake.nixosConfigurations = builtins.listToAttrs
+    (map (name: { inherit name; value = mkNixosHost name; }) hostNames);
 }

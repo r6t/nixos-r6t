@@ -1,6 +1,8 @@
+let
+  discovery = import ./discovery.nix;
+in
 {
   imports = [
     ../containers/flake-module/default.nix
-    ../pkgs/rocmfp4-llama/flake-module.nix
-  ];
+  ] ++ discovery.flakeModuleImports ../pkgs;
 }

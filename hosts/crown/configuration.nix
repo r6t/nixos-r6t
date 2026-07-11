@@ -73,7 +73,11 @@ in
     enableIPv6 = true;
     hostName = "crown";
     dhcpcd.enable = false;
-    defaultGateway.interface = "enp1s0d1";
+    nameservers = [ "192.168.6.1" ];
+    defaultGateway = {
+      address = "192.168.6.1";
+      interface = "enp1s0d1";
+    };
 
     bridges = {
       br1 = { interfaces = [ "enp1s0" ]; };
@@ -181,6 +185,7 @@ in
     incus-nightly-rebuild = {
       flakePath = "/home/r6t/git/nixos-r6t";
     };
+    incus.profileDir = "/home/r6t/git/nixos-r6t/hosts/crown/incus-instances";
 
     mountLuksStore = {
       crownstore = { device = "/dev/disk/by-uuid/f6425279-658b-49bd-8c3a-1645b5936182"; keyFile = "/root/crownstore.key"; mountPoint = "/mnt/crownstore"; };
@@ -190,6 +195,21 @@ in
     };
 
     nvidia-cuda.allowExternalGpu = true; # Connected via Thunderbolt eGPU
+    nfs.exports.Pictures = {
+      sourcePath = "/mnt/thunderbay/8TB-C/Pictures";
+      includePaths = [
+        "cameras"
+        "meme"
+        "reference"
+        "Screenshots"
+        "wallpaper"
+        "wallpaper-vertical"
+      ];
+      fsid = 0;
+      mountPointGuard = "/mnt/thunderbay/8TB-C";
+      after = [ "mnt-thunderbay-8TB\\x2dC.mount" ];
+      requires = [ "mnt-thunderbay-8TB\\x2dC.mount" ];
+    };
     wg-metrics = {
       instanceMapFile = "/home/r6t/git/nixos-r6t/hosts/crown/incus-instances/instance_map.json";
     };

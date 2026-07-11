@@ -124,5 +124,9 @@
         };
       };
     };
+    nfs.mounts.photos = {
+      device = "crown:/";
+      mountPoint = "/mnt/thunderbay/8TB-C/Pictures";
+    };
   };
 }

@@ -1,9 +1,9 @@
 {
   flake.modules.nixos.r6t-system-core = { lib, ... }: {
     imports = [
-      ../r6t-base/ssh-hardening.nix
-      ../r6t-base/system-packages.nix
-      ../r6t-base/system-shell.nix
+      ./ssh-hardening.nix
+      ./system-packages.nix
+      ./system-shell.nix
       ../../nixos/fwupd/options.nix
       ../../nixos/fwupd/config.nix
       ../../nixos/fzf/options.nix
