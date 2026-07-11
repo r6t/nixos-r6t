@@ -12,15 +12,10 @@
       extraDaemonFlags = lib.optionals config.mine.tailscale.ephemeral [ "--state=mem:" ];
     };
 
-    # Automatically enable short-name resolution (ssh crown) in containers.
-
-    # We add the tailnet suffix to the search list and tell dnsmasq to
-    # route those queries specifically to Tailscale.
-    networking.search = lib.mkIf config.boot.isContainer [ "cloudforest-darter.ts.net" ];
-
-    services.dnsmasq.settings.server = [
-      "/cloudforest-darter.ts.net/100.100.100.100"
-    ];
+    # Forward MagicDNS FQDNs to Tailscale without baking a tailnet name into the flake.
+    services.dnsmasq.settings = lib.mkIf config.boot.isContainer {
+      server = [ "/ts.net/100.100.100.100" ];
+    };
 
     systemd.services = {
       # For ephemeral nodes, logout on stop to ensure immediate removal from the tailnet

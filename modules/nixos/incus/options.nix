@@ -13,5 +13,14 @@
         Profiles are enforced on every nixos-rebuild — local changes are always overwritten.
       '';
     };
+
+    pruneRetiredProfiles = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = ''
+        Delete live incus profiles that no longer have a matching YAML file in profileDir.
+        The built-in default profile is never deleted.
+      '';
+    };
   };
 }

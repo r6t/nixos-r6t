@@ -27,11 +27,16 @@ REMOTE_TARGETS: dict = {}
 def run(cmd, check=True):
     """Run a command and return (stdout, stderr)."""
     result = subprocess.run(cmd, capture_output=True, text=True, check=False)
+    stdout = result.stdout.strip()
+    stderr = result.stderr.strip()
     if check and result.returncode != 0:
         print(f"  Command failed: {' '.join(cmd)}")
-        print(f"  Error: {result.stderr.strip()}")
-        raise subprocess.CalledProcessError(result.returncode, cmd)
-    return result.stdout.strip(), result.stderr.strip()
+        if stderr:
+            print(f"  Error: {stderr}")
+        raise subprocess.CalledProcessError(
+            result.returncode, cmd, output=stdout, stderr=stderr
+        )
+    return stdout, stderr
 
 
 def get_containers():
@@ -133,6 +138,19 @@ def find_tarball(result_dir):
     return tarballs[0]
 
 
+def build_output(flake_ref, attr):
+    """Build a flake attr and return its single output path."""
+    stdout, _ = run(
+        ["nix", "build", "--no-link", "--print-out-paths", f"{flake_ref}#{attr}"]
+    )
+    outputs = [Path(line) for line in stdout.splitlines() if line.strip()]
+    if len(outputs) != 1:
+        raise FileNotFoundError(
+            f"Expected 1 output path for {attr}, found {len(outputs)}"
+        )
+    return outputs[0]
+
+
 def push_to_remotes(name, remotes, dry_run=False):
     """Push a locally imported image to remote incus servers.
 
@@ -180,8 +198,8 @@ def build_and_import(name, dry_run=False):
     print(f"{'=' * 50}")
 
     if dry_run:
-        print(f"  nix build .#{name}")
-        print(f"  nix build .#{name}-metadata")
+        print(f"  nix build --no-link --print-out-paths .#{name}")
+        print(f"  nix build --no-link --print-out-paths .#{name}-metadata")
         print(f"  incus image import ... --alias {name}")
         if name in REMOTE_TARGETS:
             push_to_remotes(name, REMOTE_TARGETS[name], dry_run=True)
@@ -190,21 +208,20 @@ def build_and_import(name, dry_run=False):
     version = next_version(name)
     tmp_dir = TMP_BASE / name / str(version)
     tmp_dir.mkdir(parents=True, exist_ok=True)
-    result_link = Path("result")
 
     flake_ref = str(FLAKE_DIR)
 
     # Build rootfs
     print(f"  Building .#{name} ...")
-    run(["nix", "build", f"{flake_ref}#{name}"])
+    root_output = build_output(flake_ref, name)
     root_target = tmp_dir / "root.tar.xz"
-    shutil.copy2(find_tarball(result_link), root_target)
+    shutil.copy2(find_tarball(root_output), root_target)
 
     # Build metadata
     print(f"  Building .#{name}-metadata ...")
-    run(["nix", "build", f"{flake_ref}#{name}-metadata"])
+    metadata_output = build_output(flake_ref, f"{name}-metadata")
     metadata_target = tmp_dir / "metadata.tar.xz"
-    shutil.copy2(find_tarball(result_link), metadata_target)
+    shutil.copy2(find_tarball(metadata_output), metadata_target)
 
     # Import to local incus
     import_cmd = [
@@ -217,9 +234,21 @@ def build_and_import(name, dry_run=False):
         name,
     ]
     print(f"  Importing as '{name}' ...")
-    stdout, stderr = run(import_cmd, check=False)
-    if "Image with same fingerprint already exists" in stderr:
-        print("  Already up to date (fingerprint unchanged)")
+    import_result = subprocess.run(
+        import_cmd, capture_output=True, text=True, check=False
+    )
+    stdout = import_result.stdout.strip()
+    stderr = import_result.stderr.strip()
+    if import_result.returncode != 0:
+        if "Image with same fingerprint already exists" in stderr:
+            print("  Already up to date (fingerprint unchanged)")
+        else:
+            print(f"  Command failed: {' '.join(import_cmd)}")
+            if stderr:
+                print(f"  Error: {stderr}")
+            raise subprocess.CalledProcessError(
+                import_result.returncode, import_cmd, output=stdout, stderr=stderr
+            )
     elif stdout:
         print(f"  {stdout}")
 

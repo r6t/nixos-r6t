@@ -23,8 +23,8 @@ The fleet follows a "local-first" resolution strategy. Every host and container 
 ### 3. Tailscale App Containers (spire)
 
 - **Imports**: `lib/base.nix`, `tailscale` module. (Does NOT import `mullvad-dns.nix`).
-- **Path**: `App` -> `dnsmasq` -> `Tailscale` (`100.100.100.100`).
-- **Benefits**: Fastest possible internal/external resolution. Short-names (`ssh crown`) work out-of-the-box via automatic `cloudforest-darter.ts.net` search domain injection.
+- **Path**: `App` -> `dnsmasq` -> LAN DNS for default queries, and Tailscale DNS (`100.100.100.100`) for `*.ts.net`.
+- **Benefits**: Infrastructure containers use normal LAN DNS while still resolving MagicDNS FQDNs without routing through Mullvad.
 
 ### 4. Tailscale Exit Nodes (mv-\*)
 
@@ -42,6 +42,6 @@ The fleet follows a "local-first" resolution strategy. Every host and container 
 
 ## Key Logic
 
-- **Search Domains**: Managed centrally in `modules/nixos/tailscale/config.nix`. Containers with Tailscale enabled automatically receive `networking.search = [ "cloudforest-darter.ts.net" ];`.
+- **MagicDNS Split-DNS**: Tailscale-enabled containers forward `*.ts.net` queries to `100.100.100.100`; the concrete tailnet domain is intentionally not stored in this flake.
 - **DNS Isolation**: Containers set `resolv.conf` to `127.0.0.1` and use `--accept-dns=false` for Tailscale to prevent upstream settings from poisoning the `dnsmasq` pattern.
 - **Ephemeral Connectivity**: Containers use `mine.tailscale.ephemeral = true`, which enables Tailscale's memory-only state mode (`--state=mem:`) via `services.tailscale.extraDaemonFlags`. This ensures immediate removal from the tailnet upon shutdown and prevents machine key persistence on disk.

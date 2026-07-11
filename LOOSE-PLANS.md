@@ -103,6 +103,18 @@
 - Keep `instance_map.json` stable.
 - Preserve Tailscale/DNS semantics; `mine.tailscale.enable` still has real meaning in containers because DNS override behavior depends on it.
 - Avoid redesigning YAML/profile generation unless there is a focused operational reason.
+- [x] Audit profiles, seed files, and script workflow for focused operational risks.
+- [x] Make `containers/build.py` avoid the shared `result` symlink and fail on real image import errors.
+- [x] Make `containers/relaunch.py` surface failed incus stop/delete/launch commands instead of treating stderr as the only failure signal.
+- [x] Make `incus-log-collector` avoid replaying historical journal entries when forwarders restart.
+- [x] Update `docs/INCUS.md` for native LXC package generation.
+- [x] Delete stale/conflicting standalone `pocket-id` profile and seed files now that PocketID runs in `spire`.
+- [x] Make `incus-profile-sync` prune retired non-default profiles when YAML files are removed.
+- [x] Give `spire` a default LAN DNS upstream while keeping Tailscale split-DNS.
+- [x] Leave `sts` host port `47813` private and out of caddy routes.
+- [x] Remove the concrete Tailscale tailnet domain from container DNS config and docs.
+- [x] Keep `containers/relaunch.py` on the stop/delete/launch cattle model; persistent state belongs on host bind mounts.
+- [x] Keep `incus-profile-sync` applying checkout-path YAML while documenting the store copy as a restart trigger only.
 
 ## Phase 5: LLM/GPU Cleanup
 

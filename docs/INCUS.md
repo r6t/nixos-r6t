@@ -8,7 +8,7 @@ This document describes how NixOS LXC container images are defined, built, deplo
 containers/*.nix          NixOS definitions (what runs inside the container)
     |
     v
-flake.nix                 Auto-generates build targets from containers/*.nix
+containers/flake-module/  Auto-generates native LXC image package targets
     |
     v
 containers/build.py       Builds images via nix, imports into incus image store
@@ -53,7 +53,7 @@ containers/
 
 ### Instance Profiles: `hosts/{host}/incus-instances/`
 
-Incus profile YAML files define the runtime environment — how the container connects to the network, what host directories are mounted in, and what ports are exposed. Profiles are **declaratively managed** — `nixos-rebuild switch` automatically syncs all YAML profiles into incus, overwriting any local changes.
+Incus profile YAML files define the runtime environment — how the container connects to the network, what host directories are mounted in, and what ports are exposed. Profiles are **declaratively managed** — `nixos-rebuild switch` automatically syncs all YAML profiles into incus, overwriting any local changes and pruning retired non-default profiles whose YAML files were removed.
 
 ```
 hosts/saguaro/incus-instances/
@@ -64,8 +64,8 @@ hosts/saguaro/incus-instances/
 
 ### Build Tooling
 
-- **`flake.nix`** — auto-generates `nix build .#<name>` and `nix build .#<name>-metadata` targets for every `containers/*.nix` file
-- **`containers/build.py`** — builds images and imports them into incus. Supports `--list`, `--dry-run`, `--nightly`, and building specific containers by name. Auto-pushes to remote hosts via `REMOTE_TARGETS` dict.
+- **`containers/flake-module/default.nix`** — auto-generates `nix build .#<name>` and `nix build .#<name>-metadata` targets for every `containers/*.nix` file from NixOS' native `config.system.build.images.lxc` and `lxc-metadata` outputs.
+- **`containers/build.py`** — builds image outputs without a shared `result` symlink and imports them into incus. Supports `--list`, `--dry-run`, `--nightly`, and building specific containers by name. Auto-pushes to remote hosts via `REMOTE_TARGETS` dict.
 - **`containers/relaunch.py`** — compares image fingerprints and relaunches containers that have newer images. Supports `--all` (force), `--dry-run`, and specific container names.
 - **`hosts/crown/incus-instances/instance_map.json`** — maps incus instance names to container build targets when they differ (e.g. `mv-seattle` -> `tailnet-exit`, `pirate-ship` -> `docker`)
 
@@ -124,7 +124,7 @@ Then add the container name to the `crownContainers` list in `hosts/crown/config
 python3 containers/build.py {name}
 ```
 
-The builder produces two tarballs (rootfs + metadata) and imports them into the local incus image store with alias `{name}`. If the container is in `REMOTE_TARGETS` (in `build.py`), the image is also pushed to remote hosts.
+The builder resolves two native NixOS LXC outputs (rootfs + metadata), copies their tarballs to `/tmp/lxc/{name}/{version}/`, and imports them into the local incus image store with alias `{name}`. If the container is in `REMOTE_TARGETS` (in `build.py`), the image is also pushed to remote hosts.
 
 ### Step 4: Create the incus profile
 
@@ -173,7 +173,9 @@ devices:
 name: { name }
 ```
 
-Profiles are auto-synced to incus on every `nixos-rebuild switch` via the `incus-profile-sync` service. No manual `incus profile create` needed.
+Profiles are auto-synced to incus on every `nixos-rebuild switch` via the `incus-profile-sync` service. No manual `incus profile create` needed. Retired profiles are pruned when their YAML file is removed; if a retired profile is still used by an instance, deletion is skipped with a warning.
+
+`incus-profile-sync` applies YAML directly from `mine.incus.profileDir`, normally the mutable checkout path under `~/git/nixos-r6t`. Nix also snapshots those YAMLs into the store only to trigger the oneshot service when profile content changes across NixOS generations. This keeps live profile content aligned with the checkout paths embedded in seed disk devices.
 
 ### Step 5: Create seed files
 
@@ -252,9 +254,9 @@ Every container runs a local dnsmasq instance on port 53 that:
 
 1. Resolves `*.r6t.io` to crown's caddy IP (`192.168.6.10`) via `containers/lib/dns-overrides.nix` (**LAN only**). Containers with Tailscale enabled bypass this to use the encrypted tailnet path.
 2. Forwards all other queries to an upstream resolver on port 5353 — either Mullvad DoT (`lib/mullvad-dns.nix`) or NextDNS (`lib/nextdns.nix`)
-3. **Split-DNS for MagicDNS**: Forwards `*.ts.net` queries directly to Tailscale's resolver at `100.100.100.100` (handled automatically by `mine.tailscale.magicDnsDomain`).
+3. **Split-DNS for MagicDNS**: Tailscale-enabled containers forward `*.ts.net` queries directly to Tailscale's resolver at `100.100.100.100`.
 
-Crown's caddy handles most `*.r6t.io` services directly (local containers via proxy devices). For services on spire (PocketID), crown's caddy proxies to spire over the tailnet using MagicDNS names (`http://spire.r6t.io:1411`).
+Crown's caddy handles `*.r6t.io` services through local incus proxy devices, including spire's monitoring and PocketID endpoints.
 
 ### Caddy Reverse Proxy
 
@@ -484,6 +486,8 @@ python3 containers/relaunch.py {name} # Relaunch picks up new profile + image
 ```
 
 If only the profile YAML changed (no `.nix` changes), `nrs` + `relaunch.py` is sufficient — no image rebuild needed.
+
+`relaunch.py` treats LXCs as cattle: it stops and deletes the old instance, then launches a fresh one from the current image alias and profile. Persistent state must live on host bind mounts declared in the Incus profile; the container rootfs is disposable.
 
 ## Quick Reference
 

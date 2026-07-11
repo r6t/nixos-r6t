@@ -29,7 +29,7 @@ let
       local name="$1"
       local logfile="$LOG_DIR/$name.json"
 
-      $INCUS exec "$name" -- journalctl --follow --output=json --no-tail 2>/dev/null \
+      $INCUS exec "$name" -- journalctl --lines=0 --follow --output=json 2>/dev/null \
         >> "$logfile" &
       PIDS["$name"]=$!
       echo "Started journal forwarder for $name (pid ''${PIDS[$name]})"

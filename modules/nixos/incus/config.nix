@@ -3,8 +3,10 @@
 let
   cfg = config.mine.incus;
 
-  # Copy profile YAMLs into the nix store so changes are tracked by systemd
-  profileStore =
+  # Store copy used only as a systemd restart trigger. The sync script
+  # intentionally reads cfg.profileDir at runtime so applied profiles match the
+  # operational checkout path also referenced by cloud-init seed disk devices.
+  profileTriggerStore =
     if cfg.profileDir != null
     then
       pkgs.runCommand "incus-profiles" { } ''
@@ -34,11 +36,15 @@ let
 
     changed=0
     created=0
+    pruned=0
+    prune_failed=0
     unchanged=0
+    declare -A desired_profiles
 
     for yaml in "''${yaml_files[@]}"; do
       name="$(basename "$yaml" .yaml)"
       desired=$(cat "$yaml")
+      desired_profiles["$name"]=1
 
       if ! $INCUS profile show "$name" &>/dev/null; then
         $INCUS profile create "$name"
@@ -59,8 +65,25 @@ let
       fi
     done
 
+    ${lib.optionalString cfg.pruneRetiredProfiles ''
+      live_profiles="$($INCUS profile list --format csv -c n)"
+      while IFS= read -r profile; do
+        [ -z "$profile" ] && continue
+        [ "$profile" = "default" ] && continue
+        if [ -z "''${desired_profiles[$profile]+x}" ]; then
+          if delete_output="$($INCUS profile delete "$profile" 2>&1)"; then
+            echo "incus-profile-sync: PRUNED retired profile '$profile'"
+            pruned=$((pruned + 1))
+          else
+            echo "incus-profile-sync: WARNING failed to prune retired profile '$profile': $delete_output"
+            prune_failed=$((prune_failed + 1))
+          fi
+        fi
+      done <<< "$live_profiles"
+    ''}
+
     total=''${#yaml_files[@]}
-    echo "incus-profile-sync: $total profiles — $created created, $changed overwritten, $unchanged unchanged"
+    echo "incus-profile-sync: $total profiles — $created created, $changed overwritten, $unchanged unchanged, $pruned pruned, $prune_failed prune failures"
   '';
 in
 {
@@ -80,8 +103,9 @@ in
     after = [ "incus.service" "incus.socket" "incus-preseed.service" ];
     wants = [ "incus.service" "incus.socket" ];
     wantedBy = [ "multi-user.target" ];
-    # Trigger restart whenever YAML content changes in the nix store copy
-    restartTriggers = [ profileStore ];
+    # Trigger rerun whenever YAML content changes in the store snapshot; the
+    # script still applies the current checkout content from cfg.profileDir.
+    restartTriggers = [ profileTriggerStore ];
     serviceConfig = {
       Type = "oneshot";
       # Wait up to 30s for incus daemon to become ready before syncing profiles
