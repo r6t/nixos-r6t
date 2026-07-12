@@ -21,6 +21,14 @@ model:
   # /codex-runtime codex_app_server
   openai_runtime: auto
 
+terminal:
+  # The Incus profile mounts crown's git checkout tree at /mnt/git, and the
+  # nested Hermes Docker container sees the same path. Point this at the
+  # Syncthing-backed repo or workspace Hermes should operate in.
+  backend: local
+  cwd: /mnt/git
+  timeout: 180
+
 dashboard:
   # Required because the container binds the dashboard on 0.0.0.0 and crown
   # exposes it through hermes.r6t.io. Generate a hash inside the Hermes Docker
@@ -71,3 +79,23 @@ auxiliary:
     provider: custom
     model: Qwen3-Coder-30B-A3B-Instruct-UD-Q4_K_XL
     base_url: http://127.0.0.1:8088/v1
+
+mcp_servers:
+  homeassistant:
+    # Same Home Assistant MCP endpoint used by OpenCode. HA_MCP_TOKEN lives in
+    # .env and is substituted by Hermes when connecting to the remote MCP server.
+    url: https://homeassistant.r6t.io/api/mcp
+    headers:
+      Authorization: Bearer ${HA_MCP_TOKEN}
+
+approvals:
+  mode: manual
+  timeout: 300
+
+memory:
+  memory_enabled: true
+  user_profile_enabled: true
+  write_approval: true
+
+skills:
+  write_approval: true

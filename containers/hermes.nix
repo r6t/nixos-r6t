@@ -36,6 +36,12 @@ in
 
   mine.docker.enable = true;
 
+  mine.tailscale = {
+    enable = true;
+    ephemeral = true;
+    authKeyFile = "/etc/tailscale/auth-key";
+  };
+
   # Docker bridge networks and some containerized services expect this.
   boot.kernel.sysctl."vm.overcommit_memory" = "1";
 
