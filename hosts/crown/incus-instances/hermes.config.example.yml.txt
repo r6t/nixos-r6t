@@ -5,12 +5,12 @@
 # flows and are not represented in this file.
 
 model:
-  # Default to crown's local GPU Qwen service so Hermes has a usable model even
+  # Default to crown's local GPU Hermes service so Hermes has a usable model even
   # before cloud provider auth is completed.
   provider: custom
-  default: Qwen3.6-35B-A3B-MTP-UD-Q4_K_XL
+  default: Hermes-4-14B-Q4_K_M
   base_url: http://127.0.0.1:8088/v1
-  context_length: 65536
+  context_length: 40960
 
   # Keep Hermes' native runtime by default. To use ChatGPT subscription auth
   # through Codex's own app-server runtime, install/login inside the nested
@@ -21,18 +21,27 @@ model:
   # /codex-runtime codex_app_server
   openai_runtime: auto
 
+dashboard:
+  # Required because the container binds the dashboard on 0.0.0.0 and crown
+  # exposes it through hermes.r6t.io. Generate a hash inside the Hermes Docker
+  # image with:
+  # python -c "from plugins.dashboard_auth.basic import hash_password; print(hash_password('your-password'))"
+  basic_auth:
+    username: r6t
+    password_hash: replace-with-generated-password-hash
+
 custom_providers:
-  - name: crown-qwen
+  - name: crown-hermes
     base_url: http://127.0.0.1:8088/v1
     api_mode: chat_completions
     models:
-      Qwen3.6-35B-A3B-MTP-UD-Q4_K_XL:
-        context_length: 65536
+      Hermes-4-14B-Q4_K_M:
+        context_length: 40960
 
 model_aliases:
-  crown-qwen:
+  crown-hermes:
     provider: custom
-    model: Qwen3.6-35B-A3B-MTP-UD-Q4_K_XL
+    model: Hermes-4-14B-Q4_K_M
     base_url: http://127.0.0.1:8088/v1
   codex:
     provider: openai-codex
@@ -42,7 +51,7 @@ model_aliases:
     model: anthropic/claude-sonnet-4
 
 fallback_providers:
-  # Primary traffic uses local Qwen above. If that fails, try Codex subscription
+  # Primary traffic uses local Hermes above. If that fails, try Codex subscription
   # auth next. OpenRouter is configured as an alias, but not automatic fallback
   # here because it is per-token billed; switch to it explicitly with:
   # /model openrouter
@@ -52,13 +61,13 @@ fallback_providers:
 auxiliary:
   title_generation:
     provider: custom
-    model: Qwen3.6-35B-A3B-MTP-UD-Q4_K_XL
+    model: Hermes-4-14B-Q4_K_M
     base_url: http://127.0.0.1:8088/v1
   compression:
     provider: custom
-    model: Qwen3.6-35B-A3B-MTP-UD-Q4_K_XL
+    model: Hermes-4-14B-Q4_K_M
     base_url: http://127.0.0.1:8088/v1
   goal_judge:
     provider: custom
-    model: Qwen3.6-35B-A3B-MTP-UD-Q4_K_XL
+    model: Hermes-4-14B-Q4_K_M
     base_url: http://127.0.0.1:8088/v1

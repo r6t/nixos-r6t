@@ -24,12 +24,12 @@
     host = "0.0.0.0";
     port = 8080;
     hfRepo = "bartowski/NousResearch_Hermes-4-14B-GGUF";
-    hfFile = "Hermes-4-14B-Q4_K_M.gguf";
+    hfFile = "NousResearch_Hermes-4-14B-Q4_K_M.gguf";
     modelsDir = "/var/lib/llama-cpp/models";
     alias = "Hermes-4-14B-Q4_K_M";
-    contextSize = 65536;
+    contextSize = 40960;
     gpuLayers = "auto";
-    kvCacheQuant = "q4_0";
+    kvCacheQuant = "q8_0";
     batchSize = 1024;
     ubatchSize = 1024;
     cacheRamMiB = 8192;

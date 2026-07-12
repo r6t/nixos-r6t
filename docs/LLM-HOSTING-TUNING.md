@@ -325,10 +325,10 @@ addressable model size.
 
 Current llama.cpp operating point on crown:
 
-| Model               | Quant      | Context | KV   | Prompt cache | Notes                                                                                                |
-| ------------------- | ---------- | ------- | ---- | ------------ | ---------------------------------------------------------------------------------------------------- |
-| Qwen3.6-35B-A3B-MTP | UD-Q4_K_XL | 64K     | q4_0 | off          | Active crown model; MoE with ~3B active params, MTP n=2, `--n-cpu-moe 24`, text-only mmproj disabled |
-| Qwen3.6-35B-A3B-MTP | UD-Q4_K_XL | 131K    | q8_0 | off          | Safe fallback placement with all MoE experts on CPU; slower but preserves the larger context window  |
+| Model        | Quant  | Context | KV   | Prompt cache | Notes                                                                        |
+| ------------ | ------ | ------- | ---- | ------------ | ---------------------------------------------------------------------------- |
+| Hermes 4 14B | Q4_K_M | 40K     | q8_0 | 8 GiB        | Active crown model; dense Qwen3-14B derivative, fully GPU-resident on 12 GB  |
+| Qwen3.6 MoE  | UD-Q4  | 64K     | q4_0 | off          | Archived quality fallback; faster than 131K all-CPU-MoE but still RAM-spills |
 
 Historical testing on the previous crown GPU showed prompt cache was not the root cause: with 16K and
 `--cache-ram 0`, a larger prefill still crashed in
@@ -405,14 +405,26 @@ Since crown's GPU is CUDA, the setup path differs from goldenball:
 1. **Use llama.cpp + CUDA** for the always-on OpenAI-compatible service
 2. **Use Hermes 4 14B Q4_K_M** as the active primary model (dense, fits entirely in VRAM — faster than MoE)
    - Qwen3.6-35B-A3B-MTP UD-Q4_K_XL remains a quality fallback when context length matters more than speed
-3. **Use `--n-cpu-moe` rather than unmanaged CUDA memory oversubscription**; measured crown default is 24 at 64K/q4 KV
-4. **Use MTP n-max=2 as the default for 12 GB Qwen3.6-35B-A3B-MTP**; forum reports on 4070 SUPER/12 GB and 5070-class 12 GB hardware show this as the safer working point
-5. **Keep 8B/14B Qwen3-class models as fast fallbacks** if CPU-MoE latency is too high
+3. **Keep Qwen3.6 MoE as an explicit fallback**, not the default, when the larger/more agentic model matters more than latency
+4. **If using Qwen3.6 MoE**, use `--n-cpu-moe` rather than unmanaged CUDA memory oversubscription; measured crown profile was 24 at 64K/q4 KV
+5. **Keep 8B Qwen/Hermes-class models as emergency fast fallbacks** if 14B latency is too high
 6. **Use TabbyAPI/Exllama only as a clean fallback** if llama.cpp CUDA is too rough
 7. **Don't try ROCm/Vulkan** — CUDA is orders of magnitude better on NVIDIA
 
-Measured Jul 2026 on crown with RTX 4070 SUPER 12 GB, llama.cpp b9842, Qwen3.6
-UD-Q4_K_XL, batch/ubatch 1024, MTP n=2, and prompt cache disabled:
+Measured Jul 2026 on crown with RTX 4070 SUPER 12 GB, llama.cpp b9842, Hermes 4
+14B Q4_K_M, batch/ubatch 1024, and full CUDA offload:
+
+| KV   | Context | VRAM used | Free VRAM | pp2048     | pp8192     | pp16384    | pp32768    | tg256       |
+| ---- | ------- | --------- | --------- | ---------- | ---------- | ---------- | ---------- | ----------- |
+| q4_0 | 40K     | 10.5 GB   | 1.3 GB    | 2629 tok/s | 2333 tok/s | 1961 tok/s | 1455 tok/s | 48.73 tok/s |
+| q8_0 | 40K     | 10.8 GB   | 1.1 GB    | 2615 tok/s | 2318 tok/s | 1947 tok/s | 1442 tok/s | 48.71 tok/s |
+
+Selected default: **q8_0 KV at 40K**. q8_0 has effectively identical throughput
+to q4_0 in the measured runs, leaves about 1 GiB VRAM free, and avoids the extra
+KV quantization loss. The model reports `n_ctx_train = 40960`; attempts to serve
+64K are capped by llama.cpp to 40K.
+
+Archived Qwen3.6 MoE measurements from the previous default:
 
 | Placement                | Context | KV   | Load result | pp2048               | tg256                |
 | ------------------------ | ------- | ---- | ----------- | -------------------- | -------------------- |
@@ -421,9 +433,8 @@ UD-Q4_K_XL, batch/ubatch 1024, MTP n=2, and prompt cache disabled:
 | `--n-cpu-moe 24`         | 64K     | q8_0 | OOM         | not benchmarked      | not benchmarked      |
 | `--n-cpu-moe 24`         | 32K     | q8_0 | OK          | 44.07 tok/s at pp512 | 41.26 tok/s at tg128 |
 
-The selected Hermes/Open WebUI default is the 64K/q4 KV profile because it keeps
-the same model quality while improving interactivity. Use all-CPU-MoE at 131K
-only when the larger context window matters more than latency.
+Use all-CPU-MoE at 131K only when the larger context window matters more than
+latency.
 
 ### July 2026: Model selection research for 12 GB VRAM
 
@@ -453,22 +464,21 @@ context and compute buffers. This means:
 - **Full GPU residency** — no system RAM spill, no PCIe round-trips
 - **Standard transformer attention** — KV cache reuse works between turns, so
   multi-turn chat feels snappy (no full re-prefill penalty like hybrid models)
-- **40-60 tok/s expected** on CUDA — significantly faster than MoE at 35B
-  with system RAM spill
+- **~49 tok/s measured** on CUDA — significantly faster than MoE at 35B with
+  system RAM spill
 - **Qwen3-14B base** — strong general tasks, coding, reasoning, function
   calling; 196k+ downloads; excellent community support
 
 #### VRAM budget for 14B Q4_K_M on 12 GB VRAM
 
-| Component           | Size              |
-| ------------------- | ----------------- |
-| Model weights       | ~9 GB             |
-| KV cache (64K q4_0) | ~2.5-3 GB         |
-| Compute/graph       | ~0.5-1 GB         |
-| **Total**           | **~11.5-12.5 GB** |
+| Component      | Size                   |
+| -------------- | ---------------------- |
+| Model weights  | ~9 GB                  |
+| KV/cache/graph | ~1.8 GB measured       |
+| **Total**      | **~10.8 GB at 40K/q8** |
 
-Fits within 12 GB VRAM. 131K context with q4_0 KV would require ~14-15 GB
-total and exceed the VRAM budget.
+Fits within 12 GB VRAM with about 1.1 GB free. The model's trained context is
+40960 tokens, so serving above 40K is capped by llama.cpp.
 
 #### Other candidates considered
 
@@ -1158,15 +1168,11 @@ custom_params, web search setup, etc.). Key points for the LLM hosting side:
 
 See `modules/home/nixvim/default.nix` for the `opencode-llamacpp` home-manager
 module. Currently enabled on mountainball, points at `https://llm.r6t.io/v1`,
-and registers `Qwen3.6-35B-A3B-MTP-UD-Q4_K_XL` with a 131K context / 4K output
-limit.
+and registers `Hermes-4-14B-Q4_K_M` with a 64K context / 4K output limit.
 
 The integration registers the active model as a provider in
 `~/.config/opencode/opencode.json`. Per-model `variants` let you toggle
-thinking on/off without changing the active model on the server side. Crown's
-llama.cpp server uses the Qwen3.6 chat template;
-OpenCode's `thinking` variant sends `chat_template_kwargs.enable_thinking = true`
-when you want explicit reasoning mode.
+thinking on/off without changing the active model on the server side.
 
 Reality check: no open-weights model under 100B parameters breaks 50% on
 Aider polyglot. The 60-70% range is 600B+ models (DeepSeek V3.2, Kimi K2).
