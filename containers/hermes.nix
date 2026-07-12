@@ -58,6 +58,7 @@ in
       image = "nousresearch/hermes-agent:latest";
       pull = "always";
       cmd = [ "gateway" "run" ];
+      environmentFiles = [ "/var/lib/hermes/.env" ];
       volumes = [
         "/var/lib/hermes:/opt/data"
         "/mnt/git:/mnt/git"
