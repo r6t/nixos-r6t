@@ -106,11 +106,14 @@ in
 
   # GPU-specific service hardening overrides.
   # CUDA (PTX JIT) and ROCm (HIP JIT) require W+X memory pages at runtime.
-  # The upstream nixpkgs unit sets MemoryDenyWriteExecute=true and PrivateUsers=true.
-  # Vulkan does not JIT in the same way, but the DynamicUser sandbox still
-  # blocks /dev/dri access without these relaxations, and PrivateUsers=true
-  # breaks render/video group propagation. Apply the same overrides for all
-  # GPU backends including the rocmfp4 fork (which is HIP-based + Vulkan).
+  # The upstream nixpkgs unit sets DynamicUser=true,
+  # MemoryDenyWriteExecute=true, and PrivateUsers=true. DynamicUser also makes
+  # systemd relocate StateDirectory/CacheDirectory below private directories,
+  # which conflicts with Incus bind mounts at /var/lib/llama-cpp and
+  # /var/cache/llama-cpp. Vulkan does not JIT in the same way as CUDA/ROCm, but
+  # the same sandbox blocks /dev/dri access and breaks render/video group
+  # propagation. Apply these overrides for all GPU backends including the
+  # rocmfp4 fork (which is HIP-based + Vulkan).
   systemd.services.llama-cpp = lib.mkMerge [
     {
       unitConfig = {
@@ -141,6 +144,7 @@ in
       after = [ "network-online.target" ];
       wants = [ "network-online.target" ];
       serviceConfig = {
+        DynamicUser = lib.mkForce false;
         MemoryDenyWriteExecute = lib.mkForce false;
         PrivateUsers = lib.mkForce false;
         # GPU compute requires access to /dev/kfd (ROCm) or /dev/nvidia* (CUDA) and
