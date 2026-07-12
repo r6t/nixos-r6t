@@ -154,6 +154,12 @@ in
       };
 
       environment = lib.mkMerge [
+        (lib.optionalAttrs cfg.cuda {
+          # Incus' NVIDIA runtime mounts host driver libraries under /usr/lib64.
+          # llama.cpp's CUDA backend dlopens libcuda.so.1 from there at runtime.
+          LD_LIBRARY_PATH = "/usr/lib64:/run/opengl-driver/lib";
+          NVIDIA_VISIBLE_DEVICES = "all";
+        })
         # Vulkan path env (also applied for rocmfp4 because the dual-backend
         # binary embeds the Vulkan code path and benefits from the Mesa cache
         # even when the runtime backend is ROCm0).
@@ -199,6 +205,36 @@ in
       ];
     })
   ];
+
+  systemd.services.llama-cpp-nvidia-runtime-libs = lib.mkIf cfg.cuda {
+    description = "Prepare NVIDIA runtime library symlinks for llama.cpp";
+    before = [ "llama-cpp.service" ];
+    requiredBy = [ "llama-cpp.service" ];
+    serviceConfig = {
+      RemainAfterExit = true;
+      Type = "oneshot";
+    };
+    script = ''
+      link_latest() {
+        dir="$1"
+        soname="$2"
+
+        if [ ! -d "$dir" ] || [ -e "$dir/$soname.1" ]; then
+          return
+        fi
+
+        target="$(${pkgs.findutils}/bin/find "$dir" -maxdepth 1 -type f -name "$soname.*" ! -name '*debug*' | ${pkgs.coreutils}/bin/sort -V | ${pkgs.coreutils}/bin/tail -n 1)"
+        if [ -n "$target" ]; then
+          ${pkgs.coreutils}/bin/ln -s "''${target##*/}" "$dir/$soname.1"
+        fi
+      }
+
+      for dir in /usr/lib64 /usr/lib; do
+        link_latest "$dir" libcuda.so
+        link_latest "$dir" libnvidia-ml.so
+      done
+    '';
+  };
 
   # Allow members of the wheel group to start/stop llama-cpp without a
   # password prompt. Used by the llama-cpp-toggle script below.
