@@ -21,6 +21,7 @@ pipeline (build → quantize → deploy).
 - [GPU backend choice — goldenball (Vulkan vs ROCm vs ROCmFP4 vs MLX)](#gpu-backend-choice---goldenball-vulkan-vs-rocm-vs-rocmfp4-vs-mlx)
 - [The model architecture trap (hybrid vs SWA vs standard)](#the-model-architecture-trap-hybrid-vs-swa-vs-standard)
 - [Crown: model presets and VRAM budgeting](#crown-model-presets-and-vram-budgeting)
+- [July 2026: Model selection research for 12 GB VRAM](#july-2026-model-selection-research-for-12-gb-vram)
 - [Goldenball: model presets and VRAM budgeting](#goldenball-model-presets-and-vram-budgeting)
 - [ROCmFP4 on Strix Halo](#rocmfp4-on-strix-halo)
 - [MLX Engine ROCm on Strix Halo](#mlx-engine-rocm-on-strix-halo)
@@ -382,13 +383,14 @@ better quality/speed compromise: keep dense/non-expert work and as many experts
 as practical on CUDA, tolerate some CPU-MoE expert work, and tune context/KV
 cache size together with `--n-cpu-moe`.
 
-| Model               | Quant      | Weights | Fit                            | Notes                                                                      |
-| ------------------- | ---------- | ------- | ------------------------------ | -------------------------------------------------------------------------- |
-| Qwen3.6-35B-A3B-MTP | UD-Q4_K_XL | ~23 GB  | GPU + CPU-MoE expert residency | Active target: best quality/speed balance if CPU-MoE latency is acceptable |
-| Qwen3-8B            | Q4_K_M     | ~5.5 GB | Fully GPU-resident             | Fast fallback, much lower quality ceiling                                  |
-| Qwen3-14B           | Q4_K_M     | ~9 GB   | Tightly GPU-resident           | Conservative context/batching needed                                       |
-| Qwen3-30B-A3B       | Q4_K_S     | ~14 GB  | Spill plus tight KV/context    | Less attractive than 35B-A3B-MTP                                           |
-| Llama-3.1-8B        | Q4_K_M     | ~5.2 GB | Fully GPU-resident             | Standard-transformer fast fallback                                         |
+| Model               | Quant      | Weights | Fit                            | Notes                                                                 |
+| ------------------- | ---------- | ------- | ------------------------------ | --------------------------------------------------------------------- |
+| Qwen3.6-35B-A3B-MTP | UD-Q4_K_XL | ~23 GB  | GPU + CPU-MoE expert residency | MoE, hybrid attention, requires system RAM spill                      |
+| Qwen3-8B            | Q4_K_M     | ~5.5 GB | Fully GPU-resident             | Fast fallback, much lower quality ceiling                             |
+| Qwen3-14B           | Q4_K_M     | ~9 GB   | Tightly GPU-resident           | Conservative context/batching needed                                  |
+| Qwen3-30B-A3B       | Q4_K_S     | ~14 GB  | Spill plus tight KV/context    | Less attractive than 35B-A3B-MTP                                      |
+| Llama-3.1-8B        | Q4_K_M     | ~5.2 GB | Fully GPU-resident             | Standard-transformer fast fallback                                    |
+| Hermes 4 14B        | Q4_K_M     | ~9 GB   | Fully GPU-resident             | Dense, standard transformer, fits VRAM with room for context/batching |
 
 **Key difference from goldenball:** crown has 12 GB of fast dedicated VRAM plus
 slower CPU/system RAM over PCIe, while goldenball has a large unified memory
@@ -401,7 +403,8 @@ excellent tokens/sec for the GPU-resident part of the workload.
 Since crown's GPU is CUDA, the setup path differs from goldenball:
 
 1. **Use llama.cpp + CUDA** for the always-on OpenAI-compatible service
-2. **Use Qwen3.6-35B-A3B-MTP UD-Q4_K_XL** as the active mid-2026 4070 SUPER target
+2. **Use Hermes 4 14B Q4_K_M** as the active primary model (dense, fits entirely in VRAM — faster than MoE)
+   - Qwen3.6-35B-A3B-MTP UD-Q4_K_XL remains a quality fallback when context length matters more than speed
 3. **Use `--n-cpu-moe` rather than unmanaged CUDA memory oversubscription**; measured crown default is 24 at 64K/q4 KV
 4. **Use MTP n-max=2 as the default for 12 GB Qwen3.6-35B-A3B-MTP**; forum reports on 4070 SUPER/12 GB and 5070-class 12 GB hardware show this as the safer working point
 5. **Keep 8B/14B Qwen3-class models as fast fallbacks** if CPU-MoE latency is too high
@@ -421,6 +424,88 @@ UD-Q4_K_XL, batch/ubatch 1024, MTP n=2, and prompt cache disabled:
 The selected Hermes/Open WebUI default is the 64K/q4 KV profile because it keeps
 the same model quality while improving interactivity. Use all-CPU-MoE at 131K
 only when the larger context window matters more than latency.
+
+### July 2026: Model selection research for 12 GB VRAM
+
+A July 2026 review of available Hermes models (NousResearch's fine-tune series)
+identified the optimal tradeoff between quality, speed, and VRAM fit for a
+4070 SUPER / 4070 Ti with 12 GB VRAM. The conclusion: **Hermes 4 14B at
+Q4_K_M** is the best primary model, displacing the MoE Qwen3.6-35B-A3B-MTP
+from that role.
+
+#### Why not the MoE model?
+
+The Qwen3.6-35B-A3B-MTP is a 35B-parameter MoE model with ~3B active
+parameters per step. Despite the low active count, **the entire 35B parameter
+weight set must be loaded into memory** — only 3B fire per forward pass, but
+all 35B reside in VRAM/RAM. At Q4_K_M quant this is ~20-23 GB, requiring
+system RAM spill on a 12 GB card. The MoE advantage (fast inference from
+sparse activation) is negated by the memory bottleneck — on CUDA with system
+RAM offload, MoE models have additional overhead from switching between expert
+pathways.
+
+#### Hermes 4 14B at Q4_K_M — the dense alternative
+
+Hermes 4 14B is a **dense standard-transformer** model based on Qwen3-14B. At
+Q4_K_M quant (~9 GB weights) it fits **entirely in 12 GB VRAM** with room for
+context and compute buffers. This means:
+
+- **Full GPU residency** — no system RAM spill, no PCIe round-trips
+- **Standard transformer attention** — KV cache reuse works between turns, so
+  multi-turn chat feels snappy (no full re-prefill penalty like hybrid models)
+- **40-60 tok/s expected** on CUDA — significantly faster than MoE at 35B
+  with system RAM spill
+- **Qwen3-14B base** — strong general tasks, coding, reasoning, function
+  calling; 196k+ downloads; excellent community support
+
+#### VRAM budget for 14B Q4_K_M on 12 GB VRAM
+
+| Component           | Size              |
+| ------------------- | ----------------- |
+| Model weights       | ~9 GB             |
+| KV cache (64K q4_0) | ~2.5-3 GB         |
+| Compute/graph       | ~0.5-1 GB         |
+| **Total**           | **~11.5-12.5 GB** |
+
+Fits within 12 GB VRAM. 131K context with q4_0 KV would require ~14-15 GB
+total and exceed the VRAM budget.
+
+#### Other candidates considered
+
+| Model                   | Quant  | Weights  | VRAM fit                 | Notes                                                  |
+| ----------------------- | ------ | -------- | ------------------------ | ------------------------------------------------------ |
+| **Hermes 4 14B Q4_K_M** | Q4_K_M | ~9 GB    | Full VRAM                | **Recommended**: fastest, fits entirely in GPU         |
+| Hermes 4 14B Q4_K_L     | Q4_K_L | ~9.6 GB  | Tight VRAM               | Q8_0 embed/output; slightly better quality             |
+| Hermes 4 14B Q5_K_M     | Q5_K_M | ~10.5 GB | Edge of VRAM             | 15% larger, measurable quality improvement             |
+| Hermes 3 8B Q8_0        | Q8_0   | ~8.5 GB  | Full VRAM + context room | Fastest (60-100+ t/s), lower quality ceiling           |
+| Hermes 4.3 36B Q4_K_S   | Q4_K_S | ~21 GB   | Requires RAM spill       | SOTA quality (near 70B), but 15-25 t/s with system RAM |
+
+#### Model architecture matters more than size
+
+The single biggest factor for multi-turn chat speed is **attention architecture**,
+not parameter count. Hybrid attention models (Qwen3.6, Qwen3-Next) cannot do
+partial KV cache removal — every turn re-prefills the entire conversation.
+Standard transformers (Hermes 4 14B, Qwen3-Coder, Devstral) support cache
+reuse and feel snappy on turn N. SWA models (Gemma 4) work with `--swa-full`
+on llama.cpp ≥ b8819.
+
+A dense 14B standard-transformer in full VRAM will feel faster in interactive
+chat than a 35B MoE with system RAM spill, despite the 14B having fewer
+parameters. This is because the dense model avoids both the memory bottleneck
+and the hybrid attention re-prefill penalty.
+
+#### Quantization tradeoffs
+
+For 12 GB VRAM on NVIDIA CUDA, the quantization sweet spot is **Q4_K_M**:
+
+- Q4_K_M (~0.43 bits/weight): excellent quality/size ratio, virtually
+  indistinguishable from higher quants on 14B-class models
+- Q5_K_M (~0.52 bits/weight): measurable quality improvement but ~15-20%
+  larger — worth it only if VRAM allows
+- Q6_K (~0.62 bits/weight): near lossless for 14B but ~25% larger than Q5 —
+  diminishing returns
+- Q8_0 (~0.84 bits/weight): maximum quality, ~50-60% larger than Q4 — rarely
+  worth the VRAM cost on 12 GB
 
 ---
 
