@@ -74,7 +74,7 @@ in
       n-gpu-layers = cfg.gpuLayers;
       # Flash attention: confirmed real gains on RDNA 4 (GFX1201 / KHR_coopmat):
       # +4-11% prefill throughput, +4% generation throughput vs no-FA.
-      # Configurable because Blackwell GSP firmware can crash under FA load.
+      # Configurable because some NVIDIA driver/GSP paths can crash under FA load.
       flash-attn = cfg.flashAttn;
       # KV cache quantization: symmetric type required for fused flash attention
       # kernel. q8_0 halves VRAM vs f16 with near-zero quality loss.

@@ -176,7 +176,7 @@ mount directly to `/var/lib/<service>`.
 
 ## GPU Passthrough
 
-Crown's active `llm` container uses NVIDIA TensorRT-LLM. Prefer stable
+Crown's active `llm` container uses NVIDIA CUDA with llama.cpp. Prefer stable
 vendor/product filters over PCI BDFs unless two identical GPUs need
 disambiguation:
 
@@ -189,7 +189,7 @@ devices:
     gid: "303"
     gputype: physical
     vendorid: "10de"
-    productid: "2d04"
+    productid: "2783"
     type: gpu
 ```
 

@@ -17,7 +17,7 @@ devices:
     gid: "303"
     gputype: physical
     vendorid: "10de"
-    productid: "2d04"
+    productid: "2783"
     type: gpu
   llama-cpp-cache:
     path: /var/cache/llama-cpp

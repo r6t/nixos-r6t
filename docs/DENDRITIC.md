@@ -139,7 +139,7 @@ Custom packages use `pkgs/<name>/flake-module.nix`; currently this includes
 - Keep host-specific facts out of reusable profiles.
 - Avoid new `mine.*.enable` activation hooks for repo-owned composition.
 - Delete empty/no-op modules instead of preserving inert option surface.
-- Do not genericize measured GPU/LLM tuning; keep crown TensorRT-LLM and
+- Do not genericize measured GPU/LLM tuning; keep crown llama.cpp CUDA and
   goldenball ROCmFP4 llama.cpp values host/container-local.
 
 ## Validation

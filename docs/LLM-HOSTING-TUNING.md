@@ -2,7 +2,7 @@
 
 How local large language models are hosted across the R6T infrastructure,
 what works well, what's slow and why, and how to swap between models.
-Covers two distinct hardware platforms: crown's RTX 5060 Ti 16 GB and
+Covers two distinct hardware platforms: crown's RTX 4070 SUPER 12 GB and
 goldenball's Strix Halo APU (Ryzen AI MAX+ 395, 128 GB unified RAM).
 Updated July 2026.
 
@@ -15,7 +15,7 @@ pipeline (build → quantize → deploy).
 ## Contents
 
 - [Hardware overview](#hardware-overview)
-- [Crown: RTX 5060 Ti 16 GB](#crown-rtx-5060-ti-16-gb)
+- [Crown: RTX 4070 SUPER 12 GB](#crown-rtx-4070-super-12-gb)
 - [Goldenball: Strix Halo (Ryzen AI MAX+ 395)](#goldenball-strix-halo-ryzen-ai-max-395)
 - [GPU backend choice — crown (CUDA over Vulkan/ROCm)](#gpu-backend-choice--crown-cuda-over-vulkanrocm)
 - [GPU backend choice — goldenball (Vulkan vs ROCm vs ROCmFP4 vs MLX)](#gpu-backend-choice---goldenball-vulkan-vs-rocm-vs-rocmfp4-vs-mlx)
@@ -42,38 +42,38 @@ pipeline (build → quantize → deploy).
 
 Two distinct systems serve LLM inference, with very different capabilities:
 
-|                  | Crown                             | Goldenball                                                                                |
-| ---------------- | --------------------------------- | ----------------------------------------------------------------------------------------- |
-| GPU              | NVIDIA GeForce RTX 5060 Ti 16 GB  | AMD Radeon 8060S (iGPU, gfx1151)                                                          |
-| Architecture     | Blackwell (sm_120)                | RDNA 3.5                                                                                  |
-| GPU memory       | 16 GB GDDR7                       | ~104 GB visible unified (128 GB system RAM, shared with CPU)                              |
-| Memory bandwidth | ~288 GB/s                         | ~256 GB/s (LPDDR5X, 1000 MHz)                                                             |
-| PCIe             | PCIe 5.0 x16                      | PCIe 4.0 x16 (APU internal)                                                               |
-| Primary backend  | TensorRT-LLM via CUDA             | ROCmFP4 fork (HIP via custom build) with Vulkan fallback                                  |
-| Status           | **Live**: nvidia/Qwen3-8B-FP8, 8K | **Live**: Qwen3.6-35B-A3B-MTP ROCmFP4 STRIX_LEAN, ~50-71 tok/s decode (measured Jun 2026) |
+|                  | Crown                                          | Goldenball                                                                                |
+| ---------------- | ---------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| GPU              | NVIDIA GeForce RTX 4070 SUPER 12 GB            | AMD Radeon 8060S (iGPU, gfx1151)                                                          |
+| Architecture     | Ada Lovelace (sm_89)                           | RDNA 3.5                                                                                  |
+| GPU memory       | 12 GB GDDR6X                                   | ~104 GB visible unified (128 GB system RAM, shared with CPU)                              |
+| Memory bandwidth | ~504 GB/s                                      | ~256 GB/s (LPDDR5X, 1000 MHz)                                                             |
+| PCIe             | PCIe 4.0 x16                                   | PCIe 4.0 x16 (APU internal)                                                               |
+| Primary backend  | llama.cpp via CUDA                             | ROCmFP4 fork (HIP via custom build) with Vulkan fallback                                  |
+| Status           | **Live**: Qwen3.6-35B-A3B-MTP UD-Q4_K_XL, 131K | **Live**: Qwen3.6-35B-A3B-MTP ROCmFP4 STRIX_LEAN, ~50-71 tok/s decode (measured Jun 2026) |
 
-The RTX 5060 Ti is a consumer Blackwell card (Ada Lovelace successor). The
+The RTX 4070 SUPER is a consumer Ada Lovelace card. The
 Strix Halo APU is an AMD desktop-class APU with ~25 TOPS NPU and an 8-CU
 RDNA 3.5 iGPU, designed for thin-and-light and small-form-factor desktops
 with massive unified memory.
 
 ---
 
-## Crown: RTX 5060 Ti 16 GB
+## Crown: RTX 4070 SUPER 12 GB
 
-| Component               | Spec                             |
-| ----------------------- | -------------------------------- |
-| GPU                     | NVIDIA GeForce RTX 5060 Ti 16 GB |
-| Architecture            | Blackwell / sm_120               |
-| VRAM                    | 16 GB GDDR7                      |
-| Memory bandwidth        | ~288 GB/s (est.)                 |
-| PCIe                    | Gen 5 x16                        |
-| CUDA compute capability | 12.0 (sm_120)                    |
+| Component               | Spec                                |
+| ----------------------- | ----------------------------------- |
+| GPU                     | NVIDIA GeForce RTX 4070 SUPER 12 GB |
+| Architecture            | Ada Lovelace / sm_89                |
+| VRAM                    | 12 GB GDDR6X                        |
+| Memory bandwidth        | ~504 GB/s                           |
+| PCIe                    | Gen 4 x16                           |
+| CUDA compute capability | 8.9 (sm_89)                         |
 
-The RTX 5060 Ti is installed on crown and serves the `llm` LXC through a
-CUDA-native OpenAI-compatible backend. Keep this container GPU-only: if CUDA is
-unavailable, the service should fail closed rather than falling back to CPU
-inference.
+The RTX 4070 SUPER is installed on crown and serves the `llm` LXC through a
+CUDA-native OpenAI-compatible llama.cpp backend. Keep CUDA required: if CUDA is
+unavailable, the service should fail closed rather than silently falling back to
+CPU-only inference.
 
 ---
 
@@ -96,33 +96,29 @@ See `docs/GOLDENBALL_FREEZES.md` for Strix Halo freeze troubleshooting.
 
 ## GPU backend choice — crown (CUDA over Vulkan/ROCm)
 
-On crown's RTX 5060 Ti, **CUDA is the clear choice** — NVIDIA's proprietary
+On crown's RTX 4070 SUPER, **CUDA is the clear choice** — NVIDIA's proprietary
 stack is years ahead of open alternatives on NVIDIA hardware:
 
 - **Best performance** — CUDA kernels are highly optimized for NVIDIA GPUs
-- **TensorRT-LLM support** — NVIDIA's fastest path for Blackwell serving
+- **TensorRT-LLM support** — NVIDIA's fastest optimized serving path
 - **Triton / FlashAttention** — cutting-edge kernels (FA3, etc.)
-- **Tensor Cores** — dedicated FP4/FP8/INT8 compute (Blackwell has fourth-gen)
+- **Tensor Cores** — dedicated mixed-precision matrix acceleration
 - **Ecosystem** — PyTorch, TensorRT-LLM, vLLM, llama.cpp CUDA, and MLX all
   support CUDA first
 
-When setting up crown's llm container, use TensorRT-LLM or another CUDA-native
-backend rather than trying Vulkan/ROCm. llama.cpp CUDA is retained for reference,
-but it is no longer the preferred crown backend after repeated long-prefill
-driver failures on RTX 5060 Ti.
+When setting up crown's llm container, use a CUDA-native backend rather than
+trying Vulkan/ROCm. The active crown backend is llama.cpp CUDA because it can run
+GGUF models with CPU/system-RAM residency for weights that do not fit entirely
+in the 12 GB VRAM budget.
 
 Required for CUDA path in the crown LXC:
 
 - Incus GPU passthrough exposes `CUDA0`
-- Docker inside the LXC with `hardware.nvidia-container-toolkit.enable = true`
-- NVIDIA TensorRT-LLM release image from NGC for the primary service
+- CUDA-capable llama.cpp build for the primary service
 - Incus mounts versioned NVIDIA driver libraries into `/usr/lib64`; the
   container creates `libcuda.so.1` and `libnvidia-ml.so.1` SONAME symlinks
-- `docker-trtllm.service` starts `trtllm-serve` with explicit NVIDIA CDI
-  (`--device=nvidia.com/gpu=all`); generic `--gpus=all` tried to resolve a
-  missing AMD CDI spec inside the LXC before reaching NVIDIA
-- `ExecStartPre` must verify `/dev/nvidia0`, `/dev/nvidiactl`, and
-  `/usr/lib64/libcuda.so.1` exist before Docker starts the model server
+- `llama-cpp.service` should verify `/dev/nvidia0`, `/dev/nvidiactl`, and CUDA
+  libraries are available before serving traffic
 
 ---
 
@@ -238,10 +234,11 @@ goldenball if/when it gets packaged.
 ### Recommendation for goldenball
 
 **ROCmFP4 is deployed and active** — the primary backend for the 35B-MTP model.
-For large models (70B+), the 128 GB unified RAM enables configurations impossible
-on crown's 16 GB. For quick experiments with smaller models, MLX Engine is
-compelling. For coding-heavy workloads, consider switching to a standard
-transformer (Qwen3-Coder, Devstral) for faster multi-turn via KV cache reuse.
+For large models (70B+), the 128 GB unified RAM enables configurations that are
+not practical on crown's 12 GB fast-VRAM tier plus PCIe system-RAM spill. For
+quick experiments with smaller models, MLX Engine is compelling. For
+coding-heavy workloads, consider switching to a standard transformer
+(Qwen3-Coder, Devstral) for faster multi-turn via KV cache reuse.
 
 ---
 
@@ -307,50 +304,55 @@ only correctness-safe setting for these models today.
 
 ## Crown: model presets and VRAM budgeting
 
-### RTX 5060 Ti 16 GB — VRAM budgeting
+### RTX 4070 SUPER 12 GB — memory budgeting
 
-GPU VRAM: **16 GB**. The budget constraint is:
+Fast GPU VRAM: **12 GB**. The practical budget constraint for fully GPU-resident
+work is:
 
 ```
-weights + KV_cache + compute_graph ≤ ~15.5 GB
+weights + KV_cache + compute_graph ≤ ~11.5 GB
 ```
 
-This is a **hard cap** — unlike goldenball's 128 GB unified RAM, you cannot
-overflow to system memory. Models that exceed 16 GB will OOM.
+This is not the same kind of hard cap as TensorRT/vLLM-style fully GPU-resident
+serving. llama.cpp CUDA can keep model state in CPU/system RAM, but stock
+llama.cpp does not provide mature automatic hot-expert paging where inactive MoE
+experts sit in RAM and selected experts are transparently computed on the GPU.
+With CPU-MoE, CPU-resident expert tensors are usually read and computed through
+the CPU/RAM path; the GPU still handles GPU-resident layers, dense tensors, and
+any experts that fit in VRAM. Treat 12 GB as the fast tier, not the total
+addressable model size.
 
-Measured/validated llama.cpp operating points on crown:
+Current llama.cpp operating point on crown:
 
-| Model     | Quant  | Context | KV  | Prompt cache | Notes                                      |
-| --------- | ------ | ------- | --- | ------------ | ------------------------------------------ |
-| Qwen3-14B | Q4_K_M | 4K      | f16 | off          | Current conservative candidate             |
-| Qwen3-14B | Q4_K_M | 16K     | f16 | off          | Starts, but long prefill crashed CUDA      |
-| Qwen3-14B | Q4_K_M | 32K     | f16 | on           | Starts, but long prompt reuse crashed CUDA |
+| Model               | Quant      | Context | KV   | Prompt cache | Notes                                                                                                 |
+| ------------------- | ---------- | ------- | ---- | ------------ | ----------------------------------------------------------------------------------------------------- |
+| Qwen3.6-35B-A3B-MTP | UD-Q4_K_XL | 131K    | q8_0 | off          | Active crown model; MoE with ~3B active params, MTP n=2, `--fit`, ncmoe=12, text-only mmproj disabled |
 
-Follow-up testing showed prompt cache was not the root cause: with 16K and
+Historical testing on the previous crown GPU showed prompt cache was not the root cause: with 16K and
 `--cache-ram 0`, a larger prefill still crashed in
 `ggml_cuda_mul_mat_q`/`mmq.cu` and the host driver lost the GPU. Removing forced
 MMQ moved the failure to the generic CUDA matmul path, still around the 7K-token
 prefill range. Do not force MMQ on crown; keep context and prefill batching
-conservative, and disable CUDA fusion until the NVIDIA/llama.cpp Blackwell path
-is stable.
+conservative, and disable CUDA fusion until this NVIDIA/llama.cpp path is
+stable.
 
-Current TensorRT-LLM deployment on crown:
+Archived TensorRT-LLM deployment on the previous crown GPU:
 
-| Backend      | Model               | Quant | Context | Notes                                      |
-| ------------ | ------------------- | ----- | ------- | ------------------------------------------ |
-| TensorRT-LLM | nvidia/Qwen3-8B-FP8 | FP8   | 8K      | Live, OpenAI-compatible endpoint on `8080` |
+| Backend      | Model               | Quant | Context | Notes                                         |
+| ------------ | ------------------- | ----- | ------- | --------------------------------------------- |
+| TensorRT-LLM | nvidia/Qwen3-8B-FP8 | FP8   | 8K      | Archived OpenAI-compatible endpoint on `8080` |
 
-The TensorRT-LLM container uses NVIDIA's pinned NGC release image and serves
-OpenAI-compatible API traffic on port 8080 for Open WebUI. This avoids the
-current insecure `pkgs.vllm` package. Crown has only 16 GB VRAM.
+The old TensorRT-LLM container used NVIDIA's pinned NGC release image and served
+OpenAI-compatible API traffic on port 8080 for Open WebUI. It avoided the
+then-insecure `pkgs.vllm` package but required a fully GPU-resident model.
 `Qwen/Qwen3.6-35B-A3B-FP8` downloaded and reached model load, but OOMed before
-KV cache creation on the RTX 5060 Ti and destabilized CUDA.
+KV cache creation on the previous crown GPU and destabilized CUDA.
 `nvidia/Qwen3-14B-NVFP4` fit far enough to run TensorRT warmup, but failed in
 the NVFP4/CUTLASS path (`Failed to initialize cutlass FP4 gemm`, TMA descriptor 719) and again wedged the driver. Avoid FP4/NVFP4 on this card/driver/image for
-now. The active TensorRT deployment is a smaller FP8 Qwen3 checkpoint at 8K
+now. The archived TensorRT deployment used a smaller FP8 Qwen3 checkpoint at 8K
 context with conservative KV and batching limits. On Jun 29, 2026, it loaded
 successfully on driver 595.84 using the `nvcr.io/nvidia/tensorrt-llm/release:1.3.0rc19`
-image. Startup used about 12.3 GiB VRAM steady-state with about 3.5 GiB free,
+image. Startup used about 12.3 GiB VRAM steady-state on the previous 16 GB GPU;
 the `/v1/models` endpoint reported `nvidia/Qwen3-8B-FP8`, and a tiny
 OpenAI-compatible chat completion succeeded without wedging the GPU. Qwen3's
 upstream chat template emits `<think>` content by default, so crown serves a
@@ -359,45 +361,57 @@ per-request `chat_template_kwargs.enable_thinking = true` opt-in.
 
 Archived GGUF planning presets from the pre-TensorRT crown experiments:
 
-| Preset              | Architecture   | Active params | Quant / Size   | VRAM fit                                 | Notes                                   |
-| ------------------- | -------------- | ------------- | -------------- | ---------------------------------------- | --------------------------------------- |
-| `qwen3.6-35b-a3b`   | MoE hybrid GDN | ~3B / 35B     | Q4_K_M, ~20 GB | **NO** — too big for 16 GB               | —                                       |
-| `qwen3.5-122b-a10b` | MoE hybrid GDN | ~10B / 122B   | Q4_K_M, ~65 GB | **NO** — way too big                     | —                                       |
-| `qwen3-30b-a3b`     | MoE standard   | ~3B / 30B     | Q4_K_M, ~18 GB | **TIGHT** — barely fits at small context | Snappy multi-turn, standard transformer |
-| `qwen3.5-32b`       | dense hybrid   | 32B           | Q4_K_M, ~19 GB | **NO** — too big                         | —                                       |
-| `qwen3.6-30b-a3b`   | MoE standard   | ~3B / 30B     | Q4_K_M, ~18 GB | **TIGHT**                                | Same as 30B above                       |
-| `qwen3-30b-coder`   | MoE standard   | ~3B / 30B     | Q4_K_M         | ~18 GB                                   | Tight, coding-focused variant           |
-| `qwen3-4b`          | dense          | 4B            | Q4_K_M         | ~2.7 GB                                  | Comfortable, fast small-context work    |
-| `qwen3-8b`          | dense          | 8B            | Q4_K_M         | ~5.5 GB                                  | Comfortable medium-quality chat         |
-| `llama3.3-70b`      | dense          | 70B           | Q4_K_M         | ~38 GB                                   | **NO** — too big                        |
+| Preset              | Architecture   | Active params | Quant / Size   | VRAM fit                                       | Notes                                                    |
+| ------------------- | -------------- | ------------- | -------------- | ---------------------------------------------- | -------------------------------------------------------- |
+| `qwen3.6-35b-a3b`   | MoE hybrid GDN | ~3B / 35B     | Q4_K_M, ~20 GB | Fits via system RAM spill; active-class target | Best local coding/chat tradeoff if latency is acceptable |
+| `qwen3.5-122b-a10b` | MoE hybrid GDN | ~10B / 122B   | Q4_K_M, ~65 GB | **NO** — way too big                           | —                                                        |
+| `qwen3-30b-a3b`     | MoE standard   | ~3B / 30B     | Q4_K_M, ~18 GB | **TIGHT** — barely fits at small context       | Snappy multi-turn, standard transformer                  |
+| `qwen3.5-32b`       | dense hybrid   | 32B           | Q4_K_M, ~19 GB | **NO** — too big                               | —                                                        |
+| `qwen3.6-30b-a3b`   | MoE standard   | ~3B / 30B     | Q4_K_M, ~18 GB | **TIGHT**                                      | Same as 30B above                                        |
+| `qwen3-30b-coder`   | MoE standard   | ~3B / 30B     | Q4_K_M         | ~18 GB                                         | Tight, coding-focused variant                            |
+| `qwen3-4b`          | dense          | 4B            | Q4_K_M         | ~2.7 GB                                        | Comfortable, fast small-context work                     |
+| `qwen3-8b`          | dense          | 8B            | Q4_K_M         | ~5.5 GB                                        | Comfortable medium-quality chat                          |
+| `llama3.3-70b`      | dense          | 70B           | Q4_K_M         | ~38 GB                                         | **NO** — too big                                         |
 
-**Practical models for 16 GB VRAM:**
+**Practical models for RTX 4070 SUPER + system RAM:**
 
-The 16 GB limit is tight for 30B-class models. Realistic llama.cpp/GGUF-era
-planning options:
+For mid-2026 local serving, the best target is not the largest fully
+GPU-resident dense model. A MoE model with low active parameters and MTP is a
+better quality/speed compromise: keep dense/non-expert work and as many experts
+as practical on CUDA, tolerate some CPU-MoE expert work, and use `--fit` plus
+`--n-cpu-moe` to preserve enough context.
 
-| Model         | Quant  | Weights | Headroom for KV @ 32K                        | Notes                                                 |
-| ------------- | ------ | ------- | -------------------------------------------- | ----------------------------------------------------- |
-| Qwen3-8B      | Q4_K_M | ~5.5 GB | ~10 GB (4x larger KV than crown's 35B setup) | Comfortable, fast                                     |
-| Qwen3-14B     | Q4_K_M | ~9 GB   | ~6.5 GB                                      | Fits VRAM, but llama.cpp CUDA crashed on long prefill |
-| Qwen3-32B     | Q4_K_M | ~19 GB  | **NO** — won't fit                           | Need Q4_K_S or accept ~3K context                     |
-| Qwen3-30B-A3B | Q4_K_S | ~14 GB  | ~2 GB                                        | Tight but possible                                    |
-| Llama-3.1-8B  | Q4_K_M | ~5.2 GB | ~10 GB                                       | Standard transformer, fast                            |
+| Model               | Quant      | Weights | Fit                            | Notes                                                                      |
+| ------------------- | ---------- | ------- | ------------------------------ | -------------------------------------------------------------------------- |
+| Qwen3.6-35B-A3B-MTP | UD-Q4_K_XL | ~23 GB  | GPU + CPU-MoE expert residency | Active target: best quality/speed balance if CPU-MoE latency is acceptable |
+| Qwen3-8B            | Q4_K_M     | ~5.5 GB | Fully GPU-resident             | Fast fallback, much lower quality ceiling                                  |
+| Qwen3-14B           | Q4_K_M     | ~9 GB   | Tightly GPU-resident           | Conservative context/batching needed                                       |
+| Qwen3-30B-A3B       | Q4_K_S     | ~14 GB  | Spill plus tight KV/context    | Less attractive than 35B-A3B-MTP                                           |
+| Llama-3.1-8B        | Q4_K_M     | ~5.2 GB | Fully GPU-resident             | Standard-transformer fast fallback                                         |
 
-**Key difference from goldenball:** The 16 GB on the 5060 Ti is a hard limit
-(dedicated VRAM), not shared with CPU like goldenball's unified memory.
-You cannot run 70B-class models. But CUDA gives much higher tokens/sec per GB
-than AMD Vulkan.
+**Key difference from goldenball:** crown has 12 GB of fast dedicated VRAM plus
+slower CPU/system RAM over PCIe, while goldenball has a large unified memory
+pool. Crown can run models larger than 12 GB in llama.cpp, but performance falls
+off sharply when too much of the working set lives outside VRAM. CUDA still gives
+excellent tokens/sec for the GPU-resident part of the workload.
 
 ### Recommended approach for crown
 
 Since crown's GPU is CUDA, the setup path differs from goldenball:
 
-1. **Use TensorRT-LLM + CUDA** for the always-on OpenAI-compatible service
-2. **Use 14B-class Qwen3 first**; only revisit larger MoE/coder models after the TensorRT path is stable
-3. **Use TabbyAPI/Exllama only as a clean fallback** if TensorRT-LLM is too rough
-4. **Keep llama.cpp CUDA as a fallback only** after the repeated long-prefill crashes
-5. **Don't try ROCm/Vulkan** — CUDA is orders of magnitude better on NVIDIA
+1. **Use llama.cpp + CUDA** for the always-on OpenAI-compatible service
+2. **Use Qwen3.6-35B-A3B-MTP UD-Q4_K_XL** as the active mid-2026 4070 SUPER target
+3. **Use `--n-cpu-moe` rather than unmanaged CUDA memory oversubscription**; start at 12 and benchmark nearby values
+4. **Use MTP n-max=2 as the default for 12 GB Qwen3.6-35B-A3B-MTP**; forum reports on 4070 SUPER/12 GB and 5070-class 12 GB hardware show this as the safer working point
+5. **Keep 8B/14B Qwen3-class models as fast fallbacks** if CPU-MoE latency is too high
+6. **Use TabbyAPI/Exllama only as a clean fallback** if llama.cpp CUDA is too rough
+7. **Don't try ROCm/Vulkan** — CUDA is orders of magnitude better on NVIDIA
+
+The `--n-cpu-moe 12` value is a starting point, not a universal optimum. Upstream
+llama.cpp Qwen3-MoE benchmarks on RTX 50-class 12 GB hardware showed large
+throughput differences across `n-cpu-moe` values, with 12 best in one published
+Qwen3-30B-A3B sweep. Re-benchmark crown after changing model quant, context,
+batch sizes, or MTP settings.
 
 ---
 
@@ -406,7 +420,7 @@ Since crown's GPU is CUDA, the setup path differs from goldenball:
 ### Strix Halo 128 GB unified — VRAM budgeting
 
 GPU-visible memory: **~104 GB** (system/NPU reservation). Unlike crown's
-16 GB hard cap, this is shared with the CPU — the OS and desktop still need
+12 GB fast-VRAM tier plus PCIe system-RAM spill, this is shared with the CPU — the OS and desktop still need
 RAM, but you can push models far larger than any dedicated GPU.
 
 Active presets in `llm-config.nix` (ROCmFP4 deployed, Vulkan baseline available):
@@ -426,7 +440,7 @@ Active presets in `llm-config.nix` (ROCmFP4 deployed, Vulkan baseline available)
 
 The 128 GB unified RAM is the killer feature here — you can run models that
 require more VRAM than any single dedicated GPU offers. The tradeoff is
-bandwidth: ~256 GB/s vs the 5060 Ti's ~288 GB/s (roughly similar, but unified
+bandwidth: ~256 GB/s vs the 4070 SUPER's ~504 GB/s (faster VRAM, but unified
 memory has extra latency from the CPU-GPU path).
 
 ---
@@ -706,13 +720,14 @@ family and Qwen3.5 122B-A10B). It predicts N draft tokens per step, the main
 model verifies them in parallel, and accepts the ones that match — yielding
 1.5-1.9× decode speedup at ~75% acceptance rate with 3 draft tokens.
 
-### Status on crown (RTX 5060 Ti, CUDA)
+### Status on crown (RTX 4070 SUPER, CUDA)
 
-llama.cpp CUDA support for MTP on hybrid GDN models is **untested on this
-hardware** — no benchmarks exist. The RTX 5060 Ti is Blackwell (sm_120),
-which is newer than the cards MTP was validated on. CUDA path should be
-preferred if MTP works; the lack of hybrid GDN Vulkan support on Strix Halo
-makes CUDA even more valuable if available.
+llama.cpp CUDA support for MTP on hybrid GDN models is active on crown but still
+needs crown-specific benchmarking. The directly comparable July 2026 forum
+signal for 12 GB Qwen3.6-35B-A3B-MTP is `--spec-draft-n-max 2`. Larger draft
+settings such as `--spec-draft-n-max 16 --spec-draft-p-min 0.8` are promising
+for agentic code workloads, but the strongest reports are from larger/faster
+GPUs and should be benchmarked on crown before becoming the default.
 
 ### Status on goldenball (Strix Halo)
 
@@ -730,9 +745,13 @@ section for the full gap analysis.
 
 ### MTP on both platforms
 
-For interactive chat, MTP n=2 is the sweet spot: meaningful decode speedup
-without excessive prefill regression. MTP adds ~2.5 GB VRAM overhead for the
-draft head context.
+For general interactive chat and 12 GB Qwen3.6-35B-A3B-MTP, MTP n=2 remains the
+conservative sweet spot: meaningful decode speedup without excessive prefill or
+memory pressure. For coding and agentic edit workloads, n-max=16 with p-min=0.8
+has measured better throughput on July 2026 llama.cpp forum reports because
+repeated context spans can be accepted in longer bursts. Treat that as a crown
+benchmark candidate, not the default. MTP adds draft-head memory overhead, so
+benchmark on the target GPU before treating either setting as universal.
 
 On Strix Halo, n-max=3 with reasoning ON is the published fork optimum for
 sustained decode. n-max=2 is optimal for reasoning OFF. Goldenball runs
@@ -792,8 +811,8 @@ isn't cached, llama-server auto-fetches from HuggingFace on first start
 (`--hf-repo`, `--hf-file`). 20+ GB GGUF download over your home connection adds
 ~5-15 minutes.
 
-On crown, the active endpoint is TensorRT-LLM in the `llm` container, not
-llama.cpp. Switching crown's served model means editing `containers/llm.nix`,
+On crown, the active endpoint is llama.cpp CUDA in the `llm` container.
+Switching crown's served model means editing `containers/llm.nix`,
 rebuilding the `llm` image, and relaunching the container.
 
 **On goldenball:** ROCmFP4 35B-MTP is the active model, running as a
@@ -980,15 +999,15 @@ The fix has two parts:
    [#22288](https://github.com/ggml-org/llama.cpp/pull/22288) merged
    2026-04-24). Latest Lemonade ships b9253 ✓.
 
-### Crown (RTX 5060 Ti, CUDA)
+### Crown (RTX 4070 SUPER, CUDA)
 
-Predicted performance (no measured data yet):
+Expected performance shape for the active mid-2026 crown target:
 
-| Model               | Predicted decode tok/s | Notes                         |
-| ------------------- | ---------------------- | ----------------------------- |
-| Qwen3-8B            | ~80-120                | Near bandwidth ceiling for 8B |
-| Qwen3-14B           | ~50-70                 | —                             |
-| Qwen3-30B (if fits) | ~25-40                 | Tight on 16 GB VRAM           |
+| Model                          | Expected behavior                                          | Notes                                          |
+| ------------------------------ | ---------------------------------------------------------- | ---------------------------------------------- |
+| Qwen3.6-35B-A3B-MTP UD-Q4_K_XL | Best quality/speed tradeoff if spill latency is acceptable | Active crown model, ~3B active params, MTP n=2 |
+| Qwen3-8B                       | Fastest fallback                                           | Comfortable fully GPU-resident path            |
+| Qwen3-14B                      | Middle fallback                                            | More quality than 8B, tighter context/batching |
 
 CUDA should be 1.5-2× faster than Vulkan for equivalent models on this
 bandwidth class.
@@ -1045,12 +1064,13 @@ custom_params, web search setup, etc.). Key points for the LLM hosting side:
 
 See `modules/home/nixvim/default.nix` for the `opencode-llamacpp` home-manager
 module. Currently enabled on mountainball, points at `https://llm.r6t.io/v1`,
-and registers `nvidia/Qwen3-8B-FP8` with an 8K context / 1K output limit.
+and registers `Qwen3.6-35B-A3B-MTP-UD-Q4_K_XL` with a 131K context / 4K output
+limit.
 
 The integration registers the active model as a provider in
 `~/.config/opencode/opencode.json`. Per-model `variants` let you toggle
 thinking on/off without changing the active model on the server side. Crown's
-TensorRT server defaults Qwen3 thinking off for direct coding responses;
+llama.cpp server uses the Qwen3.6 chat template;
 OpenCode's `thinking` variant sends `chat_template_kwargs.enable_thinking = true`
 when you want explicit reasoning mode.
 

@@ -100,8 +100,8 @@
       default = 32768;
       description = ''
         Context window size in tokens passed as -c to llama-server.
-        With q8_0 KV cache quantization, 32K is a reliable default for 16 GiB
-        cards (e.g. RTX 5060 Ti) running 24B-class models at Q4. Increase for
+        With q8_0 KV cache quantization, 32K is a reasonable default for 16 GiB
+        NVIDIA cards running 24B-class models at Q4. Increase for
         smaller models that leave more VRAM headroom.
       '';
     };
@@ -186,8 +186,7 @@
       description = ''
         Flash attention mode (--flash-attn). "auto" enables FA when the backend
         supports it natively. Set to "off" on hardware where FA triggers CUDA
-        driver crashes (e.g. Blackwell sm_120 GSP firmware instability on
-        RTX 50 series). Disabling FA costs ~4–10% throughput.
+        driver crashes. Disabling FA costs ~4–10% throughput.
       '';
     };
 

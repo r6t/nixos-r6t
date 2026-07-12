@@ -100,21 +100,20 @@
         # It is only active when opencode is run from ~/git/appdaemons, via the
         # project-level opencode.json in that repo (not managed by this flake).
 
-        # opencode -> remote TensorRT-LLM on crown via caddy + Route53.
-        # Crown's TensorRT server defaults Qwen3 thinking off for direct
-        # responses. The `thinking` variant opts in per request through
-        # chat_template_kwargs.
+        # opencode -> remote llama.cpp on crown via caddy + Route53.
+        # Crown serves Qwen3.6 with the upstream chat template. The `thinking`
+        # variant opts in per request through chat_template_kwargs.
         opencode-llamacpp = {
           enable = true;
           baseURL = "https://llm.r6t.io/v1";
           models = {
-            # Model id MUST match the alias TensorRT-LLM reports at /v1/models.
+            # Model id MUST match the alias llama.cpp reports at /v1/models.
             # Verify with:
             #   curl -s https://llm.r6t.io/v1/models | jq '.data[].id'
-            "nvidia/Qwen3-8B-FP8" = {
-              name = "Qwen3 8B FP8 (crown TensorRT)";
-              context = 8192;
-              output = 1024;
+            "Qwen3.6-35B-A3B-MTP-UD-Q4_K_XL" = {
+              name = "Qwen3.6 35B-A3B MTP (crown)";
+              context = 131072;
+              output = 4096;
               variants = {
                 # Cycle variants in opencode with the variant_cycle keybind.
                 thinking.chat_template_kwargs = { enable_thinking = true; };
