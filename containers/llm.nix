@@ -27,9 +27,9 @@
     hfFile = "Qwen3.6-35B-A3B-UD-Q4_K_XL.gguf";
     modelsDir = "/var/lib/llama-cpp/models";
     alias = "Qwen3.6-35B-A3B-MTP-UD-Q4_K_XL";
-    contextSize = 131072;
+    contextSize = 65536;
     gpuLayers = "auto";
-    kvCacheQuant = "q8_0";
+    kvCacheQuant = "q4_0";
     batchSize = 1024;
     ubatchSize = 1024;
     cacheRamMiB = 0;
@@ -40,7 +40,8 @@
       "--fit-target"
       "1536"
       "--n-cpu-moe"
-      "12"
+      "24"
+      "--no-mmap"
       "--no-mmproj"
       "--spec-type"
       "draft-mtp"

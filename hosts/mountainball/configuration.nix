@@ -112,7 +112,7 @@
             #   curl -s https://llm.r6t.io/v1/models | jq '.data[].id'
             "Qwen3.6-35B-A3B-MTP-UD-Q4_K_XL" = {
               name = "Qwen3.6 35B-A3B MTP (crown)";
-              context = 131072;
+              context = 65536;
               output = 4096;
               variants = {
                 # Cycle variants in opencode with the variant_cycle keybind.

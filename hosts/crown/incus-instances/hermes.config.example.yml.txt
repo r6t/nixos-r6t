@@ -10,7 +10,7 @@ model:
   provider: custom
   default: Qwen3.6-35B-A3B-MTP-UD-Q4_K_XL
   base_url: http://127.0.0.1:8088/v1
-  context_length: 131072
+  context_length: 65536
 
   # Keep Hermes' native runtime by default. To use ChatGPT subscription auth
   # through Codex's own app-server runtime, install/login inside the nested
@@ -27,7 +27,7 @@ custom_providers:
     api_mode: chat_completions
     models:
       Qwen3.6-35B-A3B-MTP-UD-Q4_K_XL:
-        context_length: 131072
+        context_length: 65536
 
 model_aliases:
   crown-qwen:

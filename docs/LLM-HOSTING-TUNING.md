@@ -324,9 +324,10 @@ addressable model size.
 
 Current llama.cpp operating point on crown:
 
-| Model               | Quant      | Context | KV   | Prompt cache | Notes                                                                                                 |
-| ------------------- | ---------- | ------- | ---- | ------------ | ----------------------------------------------------------------------------------------------------- |
-| Qwen3.6-35B-A3B-MTP | UD-Q4_K_XL | 131K    | q8_0 | off          | Active crown model; MoE with ~3B active params, MTP n=2, `--fit`, ncmoe=12, text-only mmproj disabled |
+| Model               | Quant      | Context | KV   | Prompt cache | Notes                                                                                                |
+| ------------------- | ---------- | ------- | ---- | ------------ | ---------------------------------------------------------------------------------------------------- |
+| Qwen3.6-35B-A3B-MTP | UD-Q4_K_XL | 64K     | q4_0 | off          | Active crown model; MoE with ~3B active params, MTP n=2, `--n-cpu-moe 24`, text-only mmproj disabled |
+| Qwen3.6-35B-A3B-MTP | UD-Q4_K_XL | 131K    | q8_0 | off          | Safe fallback placement with all MoE experts on CPU; slower but preserves the larger context window  |
 
 Historical testing on the previous crown GPU showed prompt cache was not the root cause: with 16K and
 `--cache-ram 0`, a larger prefill still crashed in
@@ -378,8 +379,8 @@ Archived GGUF planning presets from the pre-TensorRT crown experiments:
 For mid-2026 local serving, the best target is not the largest fully
 GPU-resident dense model. A MoE model with low active parameters and MTP is a
 better quality/speed compromise: keep dense/non-expert work and as many experts
-as practical on CUDA, tolerate some CPU-MoE expert work, and use `--fit` plus
-`--n-cpu-moe` to preserve enough context.
+as practical on CUDA, tolerate some CPU-MoE expert work, and tune context/KV
+cache size together with `--n-cpu-moe`.
 
 | Model               | Quant      | Weights | Fit                            | Notes                                                                      |
 | ------------------- | ---------- | ------- | ------------------------------ | -------------------------------------------------------------------------- |
@@ -401,17 +402,25 @@ Since crown's GPU is CUDA, the setup path differs from goldenball:
 
 1. **Use llama.cpp + CUDA** for the always-on OpenAI-compatible service
 2. **Use Qwen3.6-35B-A3B-MTP UD-Q4_K_XL** as the active mid-2026 4070 SUPER target
-3. **Use `--n-cpu-moe` rather than unmanaged CUDA memory oversubscription**; start at 12 and benchmark nearby values
+3. **Use `--n-cpu-moe` rather than unmanaged CUDA memory oversubscription**; measured crown default is 24 at 64K/q4 KV
 4. **Use MTP n-max=2 as the default for 12 GB Qwen3.6-35B-A3B-MTP**; forum reports on 4070 SUPER/12 GB and 5070-class 12 GB hardware show this as the safer working point
 5. **Keep 8B/14B Qwen3-class models as fast fallbacks** if CPU-MoE latency is too high
 6. **Use TabbyAPI/Exllama only as a clean fallback** if llama.cpp CUDA is too rough
 7. **Don't try ROCm/Vulkan** — CUDA is orders of magnitude better on NVIDIA
 
-The `--n-cpu-moe 12` value is a starting point, not a universal optimum. Upstream
-llama.cpp Qwen3-MoE benchmarks on RTX 50-class 12 GB hardware showed large
-throughput differences across `n-cpu-moe` values, with 12 best in one published
-Qwen3-30B-A3B sweep. Re-benchmark crown after changing model quant, context,
-batch sizes, or MTP settings.
+Measured Jul 2026 on crown with RTX 4070 SUPER 12 GB, llama.cpp b9842, Qwen3.6
+UD-Q4_K_XL, batch/ubatch 1024, MTP n=2, and prompt cache disabled:
+
+| Placement                | Context | KV   | Load result | pp2048               | tg256                |
+| ------------------------ | ------- | ---- | ----------- | -------------------- | -------------------- |
+| `--n-cpu-moe 24`         | 64K     | q4_0 | OK          | 78.78 tok/s          | 40.86 tok/s          |
+| `--cpu-moe` / `ncmoe 40` | 131K    | q8_0 | OK          | 50.98 tok/s          | 29.60 tok/s          |
+| `--n-cpu-moe 24`         | 64K     | q8_0 | OOM         | not benchmarked      | not benchmarked      |
+| `--n-cpu-moe 24`         | 32K     | q8_0 | OK          | 44.07 tok/s at pp512 | 41.26 tok/s at tg128 |
+
+The selected Hermes/Open WebUI default is the 64K/q4 KV profile because it keeps
+the same model quality while improving interactivity. Use all-CPU-MoE at 131K
+only when the larger context window matters more than latency.
 
 ---
 
