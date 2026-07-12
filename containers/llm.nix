@@ -28,6 +28,7 @@
     modelsDir = "/var/lib/llama-cpp/models";
     alias = "Qwen3.6-35B-A3B-MTP-UD-Q4_K_XL";
     contextSize = 131072;
+    gpuLayers = "auto";
     kvCacheQuant = "q8_0";
     batchSize = 1024;
     ubatchSize = 1024;
