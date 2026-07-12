@@ -43,15 +43,15 @@ pipeline (build → quantize → deploy).
 
 Two distinct systems serve LLM inference, with very different capabilities:
 
-|                  | Crown                                          | Goldenball                                                                                |
-| ---------------- | ---------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| GPU              | NVIDIA GeForce RTX 4070 SUPER 12 GB            | AMD Radeon 8060S (iGPU, gfx1151)                                                          |
-| Architecture     | Ada Lovelace (sm_89)                           | RDNA 3.5                                                                                  |
-| GPU memory       | 12 GB GDDR6X                                   | ~104 GB visible unified (128 GB system RAM, shared with CPU)                              |
-| Memory bandwidth | ~504 GB/s                                      | ~256 GB/s (LPDDR5X, 1000 MHz)                                                             |
-| PCIe             | PCIe 4.0 x16                                   | PCIe 4.0 x16 (APU internal)                                                               |
-| Primary backend  | llama.cpp via CUDA                             | ROCmFP4 fork (HIP via custom build) with Vulkan fallback                                  |
-| Status           | **Live**: Qwen3.6-35B-A3B-MTP UD-Q4_K_XL, 131K | **Live**: Qwen3.6-35B-A3B-MTP ROCmFP4 STRIX_LEAN, ~50-71 tok/s decode (measured Jun 2026) |
+|                  | Crown                                                         | Goldenball                                                                                |
+| ---------------- | ------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| GPU              | NVIDIA GeForce RTX 4070 SUPER 12 GB                           | AMD Radeon 8060S (iGPU, gfx1151)                                                          |
+| Architecture     | Ada Lovelace (sm_89)                                          | RDNA 3.5                                                                                  |
+| GPU memory       | 12 GB GDDR6X                                                  | ~104 GB visible unified (128 GB system RAM, shared with CPU)                              |
+| Memory bandwidth | ~504 GB/s                                                     | ~256 GB/s (LPDDR5X, 1000 MHz)                                                             |
+| PCIe             | PCIe 4.0 x16                                                  | PCIe 4.0 x16 (APU internal)                                                               |
+| Primary backend  | llama.cpp via CUDA                                            | ROCmFP4 fork (HIP via custom build) with Vulkan fallback                                  |
+| Status           | **Live target**: Qwen3-Coder-30B-A3B-Instruct UD-Q4_K_XL, 64K | **Live**: Qwen3.6-35B-A3B-MTP ROCmFP4 STRIX_LEAN, ~50-71 tok/s decode (measured Jun 2026) |
 
 The RTX 4070 SUPER is a consumer Ada Lovelace card. The
 Strix Halo APU is an AMD desktop-class APU with ~25 TOPS NPU and an 8-CU
@@ -325,10 +325,11 @@ addressable model size.
 
 Current llama.cpp operating point on crown:
 
-| Model        | Quant  | Context | KV   | Prompt cache | Notes                                                                        |
-| ------------ | ------ | ------- | ---- | ------------ | ---------------------------------------------------------------------------- |
-| Hermes 4 14B | Q4_K_M | 40K     | q8_0 | 8 GiB        | Active crown model; dense Qwen3-14B derivative, fully GPU-resident on 12 GB  |
-| Qwen3.6 MoE  | UD-Q4  | 64K     | q4_0 | off          | Archived quality fallback; faster than 131K all-CPU-MoE but still RAM-spills |
+| Model               | Quant      | Context | KV   | Prompt cache | Notes                                                                                    |
+| ------------------- | ---------- | ------- | ---- | ------------ | ---------------------------------------------------------------------------------------- |
+| Qwen3-Coder 30B-A3B | UD-Q4_K_XL | 64K     | q4_0 | 8 GiB        | Active Hermes Agent target; 30.5B total / 3.3B active, native 262K, `--n-cpu-moe 24`     |
+| Hermes 4 14B        | Q4_K_M     | 40K     | q8_0 | 8 GiB        | Previous fast direct-chat default; rejected by Hermes Agent primary use due 40K limit    |
+| Qwen3.6 MoE         | UD-Q4      | 64K     | q4_0 | off          | Archived quality fallback; faster than 131K all-CPU-MoE but hybrid attention re-prefills |
 
 Historical testing on the previous crown GPU showed prompt cache was not the root cause: with 16K and
 `--cache-ram 0`, a larger prefill still crashed in
@@ -383,14 +384,14 @@ better quality/speed compromise: keep dense/non-expert work and as many experts
 as practical on CUDA, tolerate some CPU-MoE expert work, and tune context/KV
 cache size together with `--n-cpu-moe`.
 
-| Model               | Quant      | Weights | Fit                            | Notes                                                                 |
-| ------------------- | ---------- | ------- | ------------------------------ | --------------------------------------------------------------------- |
-| Qwen3.6-35B-A3B-MTP | UD-Q4_K_XL | ~23 GB  | GPU + CPU-MoE expert residency | MoE, hybrid attention, requires system RAM spill                      |
-| Qwen3-8B            | Q4_K_M     | ~5.5 GB | Fully GPU-resident             | Fast fallback, much lower quality ceiling                             |
-| Qwen3-14B           | Q4_K_M     | ~9 GB   | Tightly GPU-resident           | Conservative context/batching needed                                  |
-| Qwen3-30B-A3B       | Q4_K_S     | ~14 GB  | Spill plus tight KV/context    | Less attractive than 35B-A3B-MTP                                      |
-| Llama-3.1-8B        | Q4_K_M     | ~5.2 GB | Fully GPU-resident             | Standard-transformer fast fallback                                    |
-| Hermes 4 14B        | Q4_K_M     | ~9 GB   | Fully GPU-resident             | Dense, standard transformer, fits VRAM with room for context/batching |
+| Model               | Quant      | Weights  | Fit                            | Notes                                                                     |
+| ------------------- | ---------- | -------- | ------------------------------ | ------------------------------------------------------------------------- |
+| Qwen3-Coder-30B-A3B | UD-Q4_K_XL | ~17.7 GB | GPU + CPU-MoE expert residency | Best local Hermes Agent target: agentic coding, native 262K, standard MoE |
+| Qwen3.6-35B-A3B-MTP | UD-Q4_K_XL | ~23 GB   | GPU + CPU-MoE expert residency | Strong quality fallback, but hybrid attention forces full re-prefill      |
+| Qwen3-8B            | Q4_K_M     | ~5.5 GB  | Fully GPU-resident             | Fast fallback, much lower quality ceiling                                 |
+| Qwen3-14B           | Q4_K_M     | ~9 GB    | Tightly GPU-resident           | Conservative context/batching needed                                      |
+| Llama-3.1-8B        | Q4_K_M     | ~5.2 GB  | Fully GPU-resident             | Standard-transformer fast fallback                                        |
+| Hermes 4 14B        | Q4_K_M     | ~9 GB    | Fully GPU-resident             | Fast direct-chat fallback, but capped at 40K context                      |
 
 **Key difference from goldenball:** crown has 12 GB of fast dedicated VRAM plus
 slower CPU/system RAM over PCIe, while goldenball has a large unified memory
@@ -403,26 +404,25 @@ excellent tokens/sec for the GPU-resident part of the workload.
 Since crown's GPU is CUDA, the setup path differs from goldenball:
 
 1. **Use llama.cpp + CUDA** for the always-on OpenAI-compatible service
-2. **Use Hermes 4 14B Q4_K_M** as the active primary model (dense, fits entirely in VRAM — faster than MoE)
-   - Qwen3.6-35B-A3B-MTP UD-Q4_K_XL remains a quality fallback when context length matters more than speed
-3. **Keep Qwen3.6 MoE as an explicit fallback**, not the default, when the larger/more agentic model matters more than latency
-4. **If using Qwen3.6 MoE**, use `--n-cpu-moe` rather than unmanaged CUDA memory oversubscription; measured crown profile was 24 at 64K/q4 KV
-5. **Keep 8B Qwen/Hermes-class models as emergency fast fallbacks** if 14B latency is too high
-6. **Use TabbyAPI/Exllama only as a clean fallback** if llama.cpp CUDA is too rough
-7. **Don't try ROCm/Vulkan** — CUDA is orders of magnitude better on NVIDIA
+2. **Use Qwen3-Coder-30B-A3B-Instruct UD-Q4_K_XL** as the active Hermes Agent model: it satisfies 64K without YaRN, is explicitly trained for agentic coding/tool use, and has only ~3.3B active parameters per token
+3. **Use `--n-cpu-moe 24` and q4 KV** for the initial crown serving point; this follows the known successful 64K MoE spill profile on this 12 GB card
+4. **Keep Hermes 4 14B as a fast direct-chat/Open WebUI fallback**, not as Hermes Agent's primary brain, because it reports only 40K context
+5. **Keep Qwen3.6 MoE as an explicit quality/context fallback**, not the default, because its hybrid attention makes multi-turn agent loops re-prefill the full context
+6. **Keep 8B Qwen/Hermes-class models as emergency fast fallbacks** if 30B-A3B latency is too high
+7. **Use TabbyAPI/Exllama only as a clean fallback** if llama.cpp CUDA is too rough
+8. **Don't try ROCm/Vulkan** — CUDA is orders of magnitude better on NVIDIA
 
-Measured Jul 2026 on crown with RTX 4070 SUPER 12 GB, llama.cpp b9842, Hermes 4
-14B Q4_K_M, batch/ubatch 1024, and full CUDA offload:
+Previous fast baseline measured Jul 2026 on crown with RTX 4070 SUPER 12 GB,
+llama.cpp b9842, Hermes 4 14B Q4_K_M, batch/ubatch 1024, and full CUDA offload:
 
 | KV   | Context | VRAM used | Free VRAM | pp2048     | pp8192     | pp16384    | pp32768    | tg256       |
 | ---- | ------- | --------- | --------- | ---------- | ---------- | ---------- | ---------- | ----------- |
 | q4_0 | 40K     | 10.5 GB   | 1.3 GB    | 2629 tok/s | 2333 tok/s | 1961 tok/s | 1455 tok/s | 48.73 tok/s |
 | q8_0 | 40K     | 10.8 GB   | 1.1 GB    | 2615 tok/s | 2318 tok/s | 1947 tok/s | 1442 tok/s | 48.71 tok/s |
 
-Selected default: **q8_0 KV at 40K**. q8_0 has effectively identical throughput
-to q4_0 in the measured runs, leaves about 1 GiB VRAM free, and avoids the extra
-KV quantization loss. The model reports `n_ctx_train = 40960`; attempts to serve
-64K are capped by llama.cpp to 40K.
+Hermes 4 remains useful as a fast fallback. The model reports
+`n_ctx_train = 40960`; attempts to serve 64K are capped by llama.cpp to 40K, so
+it is not valid as Hermes Agent's primary model.
 
 Archived Qwen3.6 MoE measurements from the previous default:
 
@@ -438,28 +438,55 @@ latency.
 
 ### July 2026: Model selection research for 12 GB VRAM
 
-A July 2026 review of available Hermes models (NousResearch's fine-tune series)
-identified the optimal tradeoff between quality, speed, and VRAM fit for a
-4070 SUPER / 4070 Ti with 12 GB VRAM. The conclusion: **Hermes 4 14B at
-Q4_K_M** is the best primary model, displacing the MoE Qwen3.6-35B-A3B-MTP
-from that role.
+A July 2026 review originally selected **Hermes 4 14B at Q4_K_M** as the best
+speed/quality tradeoff for direct llama.cpp serving on a 4070 SUPER / 4070 Ti
+with 12 GB VRAM. Live Hermes Agent testing changed the requirement: Hermes
+Agent v0.18.2 rejects primary models below a 64K context window, and Hermes 4
+14B reports only `n_ctx_train = 40960`. The current Hermes Agent target is
+therefore **Qwen3-Coder-30B-A3B-Instruct UD-Q4_K_XL**, served at 65,536 context
+with q4 KV and managed CPU-MoE spill.
 
-#### Why not the MoE model?
+#### Why Qwen3-Coder 30B-A3B?
+
+Qwen3-Coder-30B-A3B-Instruct is a Qwen3MoE standard-attention coder model with
+30.5B total parameters and 3.3B active parameters per token. The upstream model
+card lists 48 layers, 32 Q heads / 4 KV heads, 128 experts / 8 active experts,
+native 262,144-token context, non-thinking output, and explicit agentic coding
+and tool-call training. The Unsloth GGUF `UD-Q4_K_XL` file is about 17.7 GB.
+
+This is not fully VRAM-resident on crown's 12 GB card, but it is a better Hermes
+Agent brain than small dense 14B-class models because it satisfies 64K natively
+and has a much higher coding/agentic ceiling. llama.cpp supports Qwen3MoE from
+b5092 onward, and current llama-server supports OpenAI-style function calling
+with Jinja templates. The initial crown serving point is conservative:
+
+- `contextSize = 65536`
+- `kvCacheQuant = "q4_0"`
+- `--n-cpu-moe 24`
+- `batchSize = 1024`, `ubatchSize = 1024`
+- prompt cache enabled (`cacheRamMiB = 8192`) because this is standard MoE, not
+  hybrid attention
+
+q4 KV is a practical memory tradeoff at 64K on 12 GB. llama.cpp's function
+calling docs warn that extreme KV quantization can hurt tool-call reliability,
+so the first post-deploy validation should be a real OpenAI-compatible tool-call
+request through Hermes before calling the configuration final.
+
+#### Why not the older MoE model?
 
 The Qwen3.6-35B-A3B-MTP is a 35B-parameter MoE model with ~3B active
 parameters per step. Despite the low active count, **the entire 35B parameter
 weight set must be loaded into memory** — only 3B fire per forward pass, but
 all 35B reside in VRAM/RAM. At Q4_K_M quant this is ~20-23 GB, requiring
-system RAM spill on a 12 GB card. The MoE advantage (fast inference from
-sparse activation) is negated by the memory bottleneck — on CUDA with system
-RAM offload, MoE models have additional overhead from switching between expert
-pathways.
+system RAM spill on a 12 GB card. More importantly, Qwen3.6 uses hybrid GDN
+attention, so llama.cpp cannot partially remove KV cache state and multi-turn
+agent loops re-prefill the entire conversation every turn.
 
-#### Hermes 4 14B at Q4_K_M — the dense alternative
+#### Hermes 4 14B at Q4_K_M — the fast fallback
 
 Hermes 4 14B is a **dense standard-transformer** model based on Qwen3-14B. At
 Q4_K_M quant (~9 GB weights) it fits **entirely in 12 GB VRAM** with room for
-context and compute buffers. This means:
+40K context and compute buffers. This means:
 
 - **Full GPU residency** — no system RAM spill, no PCIe round-trips
 - **Standard transformer attention** — KV cache reuse works between turns, so
@@ -478,17 +505,20 @@ context and compute buffers. This means:
 | **Total**      | **~10.8 GB at 40K/q8** |
 
 Fits within 12 GB VRAM with about 1.1 GB free. The model's trained context is
-40960 tokens, so serving above 40K is capped by llama.cpp.
+40960 tokens, so serving above 40K is capped by llama.cpp. Keep it for direct
+chat/Open WebUI if 30B-A3B latency is too high; do not use it as the Hermes
+Agent primary model.
 
 #### Other candidates considered
 
-| Model                   | Quant  | Weights  | VRAM fit                 | Notes                                                  |
-| ----------------------- | ------ | -------- | ------------------------ | ------------------------------------------------------ |
-| **Hermes 4 14B Q4_K_M** | Q4_K_M | ~9 GB    | Full VRAM                | **Recommended**: fastest, fits entirely in GPU         |
-| Hermes 4 14B Q4_K_L     | Q4_K_L | ~9.6 GB  | Tight VRAM               | Q8_0 embed/output; slightly better quality             |
-| Hermes 4 14B Q5_K_M     | Q5_K_M | ~10.5 GB | Edge of VRAM             | 15% larger, measurable quality improvement             |
-| Hermes 3 8B Q8_0        | Q8_0   | ~8.5 GB  | Full VRAM + context room | Fastest (60-100+ t/s), lower quality ceiling           |
-| Hermes 4.3 36B Q4_K_S   | Q4_K_S | ~21 GB   | Requires RAM spill       | SOTA quality (near 70B), but 15-25 t/s with system RAM |
+| Model                                  | Quant      | Weights   | VRAM fit           | Notes                                                                  |
+| -------------------------------------- | ---------- | --------- | ------------------ | ---------------------------------------------------------------------- |
+| **Qwen3-Coder 30B-A3B UD-Q4_K_XL**     | UD-Q4_K_XL | ~17.7 GB  | CPU-MoE spill      | **Recommended for Hermes Agent**: native 262K, agentic coding/tool use |
+| Hermes 4 14B Q4_K_M                    | Q4_K_M     | ~9 GB     | Full VRAM          | Fast direct-chat fallback, but only 40K context                        |
+| Qwen2.5-Coder 14B Q4_K_M               | Q4_K_M     | ~9 GB     | Full VRAM target   | Conservative 64K baseline via YaRN; not the best-quality target        |
+| DeepSeek-Coder-V2-Lite-Instruct Q4_K_M | Q4_K_M     | ~10.4 GB  | Tight VRAM         | Older 128K coder MoE; generic tool format, lower agentic ceiling       |
+| Devstral Small 24B                     | Q4-class   | ~14-15 GB | Requires RAM spill | Strong agent model, but dense spill is less attractive on 12 GB        |
+| Hermes 4.3 36B Q4_K_S                  | Q4_K_S     | ~21 GB    | Requires RAM spill | SOTA Hermes quality, but too slow/heavy for always-on crown primary    |
 
 #### Model architecture matters more than size
 
@@ -1004,8 +1034,17 @@ extraFlags = [
 extraFlags = [ "--jinja" ];
 # (standard transformer = KV cache reuse works, no --swa-full needed)
 
-# Qwen3-Coder — no special flags, defaults are fine
-extraFlags = [ "--jinja" ];
+# Qwen3-Coder 30B-A3B on crown — standard MoE, managed CPU expert spill
+extraFlags = [
+  "--jinja"
+  "--no-mmproj"
+  "--n-cpu-moe" "24"
+  "--temp" "0.7"
+  "--top-p" "0.8"
+  "--top-k" "20"
+  "--repeat-penalty" "1.05"
+  "--min-p" "0.0"
+];
 ```
 
 ### Flags to never use on crown (NVIDIA)
@@ -1107,11 +1146,12 @@ The fix has two parts:
 
 Expected performance shape for the active mid-2026 crown target:
 
-| Model                          | Expected behavior                                          | Notes                                          |
-| ------------------------------ | ---------------------------------------------------------- | ---------------------------------------------- |
-| Qwen3.6-35B-A3B-MTP UD-Q4_K_XL | Best quality/speed tradeoff if spill latency is acceptable | Active crown model, ~3B active params, MTP n=2 |
-| Qwen3-8B                       | Fastest fallback                                           | Comfortable fully GPU-resident path            |
-| Qwen3-14B                      | Middle fallback                                            | More quality than 8B, tighter context/batching |
+| Model                                   | Expected behavior                                       | Notes                                        |
+| --------------------------------------- | ------------------------------------------------------- | -------------------------------------------- |
+| Qwen3-Coder-30B-A3B-Instruct UD-Q4_K_XL | Active Hermes Agent target at 64K                       | Standard MoE, native 262K, CPU-MoE spill     |
+| Hermes 4 14B                            | Fast direct-chat fallback                               | Fully GPU-resident but capped at 40K         |
+| Qwen3.6-35B-A3B-MTP UD-Q4_K_XL          | Quality/context fallback if spill latency is acceptable | Hybrid attention; full re-prefill every turn |
+| Qwen3-8B                                | Fastest fallback                                        | Comfortable fully GPU-resident path          |
 
 CUDA should be 1.5-2× faster than Vulkan for equivalent models on this
 bandwidth class.
@@ -1168,7 +1208,8 @@ custom_params, web search setup, etc.). Key points for the LLM hosting side:
 
 See `modules/home/nixvim/default.nix` for the `opencode-llamacpp` home-manager
 module. Currently enabled on mountainball, points at `https://llm.r6t.io/v1`,
-and registers `Hermes-4-14B-Q4_K_M` with a 64K context / 4K output limit.
+and registers `Qwen3-Coder-30B-A3B-Instruct-UD-Q4_K_XL` with a 64K context /
+4K output limit.
 
 The integration registers the active model as a provider in
 `~/.config/opencode/opencode.json`. Per-model `variants` let you toggle

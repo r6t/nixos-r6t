@@ -23,25 +23,29 @@
     cuda = true;
     host = "0.0.0.0";
     port = 8080;
-    hfRepo = "bartowski/NousResearch_Hermes-4-14B-GGUF";
-    hfFile = "NousResearch_Hermes-4-14B-Q4_K_M.gguf";
+    hfRepo = "unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF";
+    hfFile = "Qwen3-Coder-30B-A3B-Instruct-UD-Q4_K_XL.gguf";
     modelsDir = "/var/lib/llama-cpp/models";
-    alias = "Hermes-4-14B-Q4_K_M";
-    contextSize = 40960;
+    alias = "Qwen3-Coder-30B-A3B-Instruct-UD-Q4_K_XL";
+    contextSize = 65536;
     gpuLayers = "auto";
-    kvCacheQuant = "q8_0";
+    kvCacheQuant = "q4_0";
     batchSize = 1024;
     ubatchSize = 1024;
     cacheRamMiB = 8192;
     extraFlags = [
       "--jinja"
       "--no-mmproj"
+      "--n-cpu-moe"
+      "24"
       "--temp"
-      "0.6"
+      "0.7"
       "--top-p"
-      "0.95"
+      "0.8"
       "--top-k"
       "20"
+      "--repeat-penalty"
+      "1.05"
       "--min-p"
       "0.0"
     ];

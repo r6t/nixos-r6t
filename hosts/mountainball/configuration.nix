@@ -101,7 +101,7 @@
         # project-level opencode.json in that repo (not managed by this flake).
 
         # opencode -> remote llama.cpp on crown via caddy + Route53.
-        # Crown serves Hermes 4 14B through llama.cpp.
+        # Crown serves Qwen3-Coder 30B-A3B through llama.cpp.
         opencode-llamacpp = {
           enable = true;
           baseURL = "https://llm.r6t.io/v1";
@@ -109,9 +109,9 @@
             # Model id MUST match the alias llama.cpp reports at /v1/models.
             # Verify with:
             #   curl -s https://llm.r6t.io/v1/models | jq '.data[].id'
-            "Hermes-4-14B-Q4_K_M" = {
-              name = "Hermes 4 14B Q4_K_M (crown)";
-              context = 40960;
+            "Qwen3-Coder-30B-A3B-Instruct-UD-Q4_K_XL" = {
+              name = "Qwen3-Coder 30B-A3B UD-Q4_K_XL (crown)";
+              context = 65536;
               output = 4096;
             };
           };

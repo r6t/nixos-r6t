@@ -5,12 +5,12 @@
 # flows and are not represented in this file.
 
 model:
-  # Default to crown's local GPU Hermes service so Hermes has a usable model even
-  # before cloud provider auth is completed.
+  # Default to crown's local GPU llama.cpp service so Hermes has a usable >=64K
+  # model even before cloud provider auth is completed.
   provider: custom
-  default: Hermes-4-14B-Q4_K_M
+  default: Qwen3-Coder-30B-A3B-Instruct-UD-Q4_K_XL
   base_url: http://127.0.0.1:8088/v1
-  context_length: 40960
+  context_length: 65536
 
   # Keep Hermes' native runtime by default. To use ChatGPT subscription auth
   # through Codex's own app-server runtime, install/login inside the nested
@@ -35,13 +35,13 @@ custom_providers:
     base_url: http://127.0.0.1:8088/v1
     api_mode: chat_completions
     models:
-      Hermes-4-14B-Q4_K_M:
-        context_length: 40960
+      Qwen3-Coder-30B-A3B-Instruct-UD-Q4_K_XL:
+        context_length: 65536
 
 model_aliases:
   crown-hermes:
     provider: custom
-    model: Hermes-4-14B-Q4_K_M
+    model: Qwen3-Coder-30B-A3B-Instruct-UD-Q4_K_XL
     base_url: http://127.0.0.1:8088/v1
   codex:
     provider: openai-codex
@@ -61,13 +61,13 @@ fallback_providers:
 auxiliary:
   title_generation:
     provider: custom
-    model: Hermes-4-14B-Q4_K_M
+    model: Qwen3-Coder-30B-A3B-Instruct-UD-Q4_K_XL
     base_url: http://127.0.0.1:8088/v1
   compression:
     provider: custom
-    model: Hermes-4-14B-Q4_K_M
+    model: Qwen3-Coder-30B-A3B-Instruct-UD-Q4_K_XL
     base_url: http://127.0.0.1:8088/v1
   goal_judge:
     provider: custom
-    model: Hermes-4-14B-Q4_K_M
+    model: Qwen3-Coder-30B-A3B-Instruct-UD-Q4_K_XL
     base_url: http://127.0.0.1:8088/v1
