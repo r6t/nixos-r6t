@@ -88,6 +88,9 @@ in
   boot = {
     kernelPackages = lib.mkDefault pkgs.linuxPackages_latest;
 
+    # Encrypted swap backing boot.resumeDevice and swapDevices in hardware-configuration.nix.
+    initrd.luks.devices."luks-4c181c40-b517-4477-b5b2-ddb63e56e552".device = "/dev/disk/by-uuid/4c181c40-b517-4477-b5b2-ddb63e56e552";
+
     kernelParams = [
       # AMD Strix Halo (DCN 3.5.1) display engine workarounds — see thorough notes
       # below. These prevent the page-flip timeout / system freeze that hits on
