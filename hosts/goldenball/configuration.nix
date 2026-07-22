@@ -91,6 +91,11 @@ in
     # Encrypted swap backing boot.resumeDevice and swapDevices in hardware-configuration.nix.
     initrd.luks.devices."luks-4c181c40-b517-4477-b5b2-ddb63e56e552".device = "/dev/disk/by-uuid/4c181c40-b517-4477-b5b2-ddb63e56e552";
 
+    # Bring KMS up in stage 1 so amdgpu owns the display engine before the
+    # Thunderbolt/USB4 DP tunnel is created. The dock-at-boot failure path is a
+    # DP resource allocation race; early KMS is the least invasive ordering test.
+    initrd.kernelModules = [ "amdgpu" ];
+
     kernelParams = [
       # AMD Strix Halo (DCN 3.5.1) display engine workarounds — see thorough notes
       # below. These prevent the page-flip timeout / system freeze that hits on
@@ -131,6 +136,11 @@ in
       # RAM via GTT for display surfaces; sg_display=1 (default) hits a class of
       # DMA-fence flip timeouts. th3cavalry's stable Z13 profile sets this to 0.
       "amdgpu.sg_display=0"
+
+      # Keep CWSR disabled even when amdgpu loads in the initrd for early KMS.
+      # boot.extraModprobeConfig below is retained as a stage-2/manual modprobe
+      # fallback, but initrd module parameters must be present on the kernel cmdline.
+      "amdgpu.cwsr_enable=0"
 
       # Soft-reset the display engine on timeout instead of hard-locking. Without
       # this the page-flip timeout cascades to a full system freeze; with it,
@@ -325,6 +335,10 @@ in
   networking = {
     enableIPv6 = false;
     hostName = "goldenball";
+    # MT7925 still has poor power-save behavior on Strix Halo in community
+    # reports. Keep scan MAC randomization, but do not let NetworkManager put
+    # the Wi-Fi device into powersave during active sessions.
+    networkmanager.wifi.powersave = false;
     firewall = {
       enable = true;
       checkReversePath = false;

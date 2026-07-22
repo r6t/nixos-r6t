@@ -19,8 +19,8 @@ let
       Profiles:
         native-16x10-1920x1200     GameMode + MangoHud, appends -resx/-resy
         native-16x9-1920x1080      GameMode + MangoHud, appends -resx/-resy
-        gamescope-16x10-1920x1200  Windowed Gamescope, game sees 1920x1200
-        gamescope-16x9-1920x1080   Windowed Gamescope, game sees 1920x1080
+        gamescope-16x10-1920x1200  Windowed Gamescope, game sees 1920x1200 @ 180 Hz
+        gamescope-16x9-1920x1080   Windowed Gamescope, game sees 1920x1080 @ 180 Hz
 
       Steam launch option example:
         goldenball-steam-profile native-16x10-1920x1200 -- %command%
@@ -38,6 +38,7 @@ let
       aspect=""
       game_width=""
       game_height=""
+      game_refresh=""
 
       case "$profile" in
         native-16x10-1920x1200)
@@ -57,12 +58,14 @@ let
           aspect="16:10"
           game_width=1920
           game_height=1200
+          game_refresh=180
           ;;
         gamescope-16x9-1920x1080)
           strategy="gamescope"
           aspect="16:9"
           game_width=1920
           game_height=1080
+          game_refresh=180
           ;;
         *)
           printf 'Unknown profile: %s\n' "$profile" >&2
@@ -92,6 +95,7 @@ let
           --output-height "$game_height"
           --nested-width "$game_width"
           --nested-height "$game_height"
+          --nested-refresh "$game_refresh"
           --scaler fit
           --mangoapp
           --force-windows-fullscreen
@@ -104,6 +108,9 @@ let
         printf 'strategy=%s\n' "$strategy"
         printf 'aspect=%s\n' "$aspect"
         printf 'resolution=%sx%s\n' "$game_width" "$game_height"
+        if [ -n "$game_refresh" ]; then
+          printf 'refresh=%sHz\n' "$game_refresh"
+        fi
         printf 'command:'
         printf ' %q' "''${launch_command[@]}"
         printf '\n'

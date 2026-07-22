@@ -61,23 +61,25 @@ kwin_wayland: Pageflip timed out! This is a bug in the amdgpu kernel driver
 | `VrrPolicy=1` (Automatic) does NOT fully prevent it                                                       | Still occurred with Automatic mode + external display connected                                                                                         |
 | Idle Plasma desktop startup (~100s after KWin start, no GPU load)                                         | Jun 4 2026: flip_done at 18:46:24, boot at 18:44:14, no llama-cpp/USB4/dock                                                                             |
 
-### Mitigations in place (as of Jun 2026)
+### Mitigations in place (as of Jul 22 2026)
 
-All in `hosts/goldenball/configuration.nix` kernel params:
+Display/boot settings in `hosts/goldenball/configuration.nix`:
 
-| Param                   | Value          | Purpose                                                                                          |
-| ----------------------- | -------------- | ------------------------------------------------------------------------------------------------ |
-| `amdgpu.dcdebugmask`    | `0x1613`       | Also disables pipe split and MPO, in addition to stutter, PSR, PSR-SU, and replay                |
-| `amdgpu.sg_display`     | `0`            | Disables scatter-gather display (DMA-fence flip timeouts on unified memory)                      |
-| `amdgpu.gpu_recovery`   | `1`            | Soft-resets display engine on timeout instead of hard-locking                                    |
-| `amdgpu.ppfeaturemask`  | `0xfff73fff`   | Disables GFXOFF, STUTTER_MODE, OVERDRIVE                                                         |
-| `amdgpu.freesync_video` | `0`            | Hard-disables VRR capability in the kernel                                                       |
-| `amdgpu.aspm`           | `0`            | Disables GPU PCIe ASPM only; does not affect the USB4 PCIe tree                                  |
-| `amdgpu.abmlevel`       | `0`            | Disables adaptive backlight management                                                           |
-| `amdgpu.cwsr_enable`    | `0` (modprobe) | Disables Compute Wavefront Save-Restore; prevents GPU hangs from register sync issues on gfx1151 |
+| Setting                     | Value        | Purpose                                                                                           |
+| --------------------------- | ------------ | ------------------------------------------------------------------------------------------------- |
+| `amdgpu.dcdebugmask`        | `0x1613`     | Also disables pipe split and MPO, in addition to stutter, PSR, PSR-SU, and replay                 |
+| `amdgpu.sg_display`         | `0`          | Disables scatter-gather display (DMA-fence flip timeouts on unified memory)                       |
+| `amdgpu.gpu_recovery`       | `1`          | Soft-resets display engine on timeout instead of hard-locking                                     |
+| `amdgpu.ppfeaturemask`      | `0xfff73fff` | Disables GFXOFF, STUTTER_MODE, OVERDRIVE                                                          |
+| `amdgpu.freesync_video`     | `0`          | Hard-disables VRR capability in the kernel                                                        |
+| `amdgpu.aspm`               | `0`          | Disables GPU PCIe ASPM only; does not affect the USB4 PCIe tree                                   |
+| `amdgpu.abmlevel`           | `0`          | Disables adaptive backlight management                                                            |
+| `amdgpu.cwsr_enable`        | `0`          | Disables Compute Wavefront Save-Restore; cmdline copy is required now that amdgpu loads in initrd |
+| `boot.initrd.kernelModules` | `amdgpu`     | Enables early KMS so amdgpu initializes before Thunderbolt/USB4 DP tunnel creation                |
 
 KWin: `VrrPolicy=0` (Never — VRR fully disabled, changed Jun 4 2026 after VrrPolicy=1 still triggered).
 KWin overlays: disabled with `KWIN_DRM_NO_OVERLAY=1`.
+Goldenball Steam gamescope launcher: nested gamescope profiles cap the game refresh to 180 Hz to preserve the tablet panel's native refresh while avoiding the observed 4K240 gamescope path.
 
 **These reduce frequency but do not eliminate the bug.**
 
@@ -176,7 +178,7 @@ as the proven root cause of the display-engine stall.
 1. ~~Try `VrrPolicy=0` (Never)~~ **Done Jun 4 2026** — VRR fully disabled; loses adaptive sync in games
 2. Check if any upstream kernel patch for DCN 3.5.1 flip_done has landed (search `drm/amd` commits)
 3. File upstream at https://gitlab.freedesktop.org/drm/amd/-/issues with `sudo dmesg` output
-4. Test whether Rocket League still freezes when the external output is capped below 240 Hz or launched without gamescope after a boot-time USB4 cascade
+4. ~~Test whether Rocket League still freezes when the external output is capped below 240 Hz or launched without gamescope after a boot-time USB4 cascade~~ **Config changed Jul 22 2026** — `goldenball-steam-profile gamescope-*` now uses `--nested-refresh 180`; observe whether the Rocket League/gamescope path still wedges after a USB4 boot cascade
 
 ---
 
@@ -266,9 +268,9 @@ pipeline starts from a fragile re-enumerated state.
    dock is not enumerated in stage 1.~~ **Failed Jun 28 2026** — caused loss of
    keyboard input at the LUKS prompt even with the native keyboard. Do not retry
    without a separate initrd input fix.
-2. If delaying Thunderbolt is not acceptable, test early amdgpu KMS instead by
+2. ~~If delaying Thunderbolt is not acceptable, test early amdgpu KMS instead by
    adding `amdgpu` to `boot.initrd.kernelModules`, so the display engine is up
-   before the Thunderbolt DP tunnel is created.
+   before the Thunderbolt DP tunnel is created.~~ **Config changed Jul 22 2026** — observe whether dock-at-boot DP allocation failures or later flip timeouts decrease.
 3. If neither helps, test a deliberate post-boot Thunderbolt reauthorization or
    controller power-cycle service, but only with user approval because it will
    briefly disconnect every device on the dock.
@@ -341,6 +343,8 @@ See `hosts/goldenball/llm-config.nix` for the authoritative config.
 **Problem:** MT7925 WiFi was using random MACs per-connection attempt. AP rejected reconnection attempts with `Reason: 9 = STA_REQ_ASSOC_WITHOUT_AUTH` (deauth loop).
 
 **Fix:** `networking.networkmanager.wifi.macAddress = "stable-ssid"` in `modules/nixos/networkmanager/default.nix`. Generates a stable hash per SSID — AP always sees the same client MAC for a given network. SSIDs are never stored in the flake (live in NM keyfiles outside the repo).
+
+**Additional goldenball stability setting (Jul 22 2026):** `networking.networkmanager.wifi.powersave = false` in `hosts/goldenball/configuration.nix`, matching Strix Halo community guidance to keep MT7925 out of NetworkManager powersave during active sessions.
 
 **Known issue (Jun 2026):** The global `[connection]` default in `NetworkManager.conf` only applies to new connections. Existing connections created before this setting was added may still use random MACs despite the global config being correct. Verified: <ssid> connection has `cloned-mac-address` empty (should fall back to global `stable-ssid`), but NM 1.56 still generates different MACs per attempt. Fix per-connection:
 
