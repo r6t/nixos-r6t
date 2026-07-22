@@ -86,7 +86,56 @@ in
   ];
 
   boot = {
-    kernelPackages = lib.mkDefault pkgs.linuxPackages_latest;
+    # linuxPackages_testing (7.2-rc2 at the current flake.lock pin) instead of
+    # linuxPackages_latest (7.1.x): the flip_done root-cause fix and several
+    # other Strix Halo display/USB4 fixes are only in 7.2-rc. The 7.2-rc tree
+    # already contains: the ISM dc_lock deadlock fix, "Restore periodic
+    # detection for DCN35" (HPD-bounce-then-IPS display loss, drm/amd#5318),
+    # the thunderbolt USB4 CM robustness series (router-ready verification,
+    # longer notification timeouts, DP tunnel retry), and the CRTC color
+    # management revert that KWin 6.7.1 also works around.
+    # Switch back to linuxPackages_latest once 7.2 final lands there.
+    kernelPackages = lib.mkDefault pkgs.linuxPackages_testing;
+
+    # Upstream fixes merged in 7.2-rc4 (all Cc: stable), vendored until the
+    # nixpkgs testing kernel catches up. Verified to apply cleanly on
+    # 7.2-rc2 and 7.2-rc3. When nixpkgs testing reaches 7.2-rc4+ these are
+    # already contained and the build will fail loudly with "previously
+    # applied" — delete this block and hosts/goldenball/patches/ then.
+    #   0001+0002: Leo Li's flip_done root-cause fix — DPG/GSL power gating
+    #     masks VSTARTUP/GRPH_PFLIP interrupts on self-refresh eDP at idle
+    #     transitions; events are never delivered and atomic commits time
+    #     out ("flip_done timed out"). Moves vblank/flip delivery onto the
+    #     never-masked VUPDATE_NO_LOCK interrupt. drm/amd#4141.
+    #   0003: revert of the 5s vblank offdelay workaround, superseded by
+    #     0001/0002 (same Cc: stable chain).
+    #   0004: device link making xHCI D0 depend on the APU display device —
+    #     fixes the boot/resume "xhci HC died" USB4 cascade (bugzilla
+    #     221073, validated on a GZ302EA BIOS 311).
+    #   0005: cursor-mode fix for atomic commits that disable a CRTC
+    #     (dock hotplug adds/removes crtc-1 here).
+    kernelPatches = [
+      {
+        name = "drm-amd-display-consolidate-dcn-vblank-flip-onto-vupdate-no-lock";
+        patch = ./patches/0001-drm-amd-display-consolidate-dcn-vblank-flip-onto-vupdate-no-lock.patch;
+      }
+      {
+        name = "drm-amd-display-check-grph-flip-status-before-sending-event";
+        patch = ./patches/0002-drm-amd-display-check-grph-flip-status-before-sending-event.patch;
+      }
+      {
+        name = "revert-drm-amd-display-restore-5s-vbl-offdelay-for-nv3x-dgpus";
+        patch = ./patches/0003-revert-drm-amd-display-restore-5s-vbl-offdelay-for-nv3x-dgpus.patch;
+      }
+      {
+        name = "drm-amd-create-device-link-between-apu-display-and-xhci";
+        patch = ./patches/0004-drm-amd-create-device-link-between-apu-display-and-xhci.patch;
+      }
+      {
+        name = "drm-amd-display-set-native-cursor-mode-for-disabled-crtcs";
+        patch = ./patches/0005-drm-amd-display-set-native-cursor-mode-for-disabled-crtcs.patch;
+      }
+    ];
 
     # Encrypted swap backing boot.resumeDevice and swapDevices in hardware-configuration.nix.
     initrd.luks.devices."luks-4c181c40-b517-4477-b5b2-ddb63e56e552".device = "/dev/disk/by-uuid/4c181c40-b517-4477-b5b2-ddb63e56e552";
@@ -106,7 +155,10 @@ in
       #   - Arch wiki §6.11 (recommends dcdebugmask=0x10|0x12 for flip_done timeout)
       #   - th3cavalry/strix-halo-linux-setup
       #   - r/FlowZ13 "pageflip timed out" thread
-      #   - drm/amd issues #4141, #4707
+      #   - drm/amd issue #4141 (the flip_done family; root-caused Jun 2026,
+      #     fixed by the vendored vupdate_no_lock patches above)
+      #   (#4707 was cited here previously but is a dGPU VRAM-clock/FreeSync
+      #   issue on RX 6600-class cards — irrelevant to Strix Halo.)
 
       # ppfeaturemask: default minus three bits.
       #   - GFXOFF      (0x8000)  — prevents microstutter on high-refresh externals
@@ -118,19 +170,29 @@ in
       # 0xffff7fff is the kernel default; mask off the three above to reach 0xfff73fff.
       "amdgpu.ppfeaturemask=0xfff73fff"
 
-      # dcdebugmask: disable PSR + PSR-SU + Panel Replay + Stutter + MPO + Pipe Split for DCN 3.5.1.
-      #   0x001 = DC_DISABLE_PIPE_SPLIT
-      #   0x002 = DC_DISABLE_STUTTER  (DRAM stutter low-power mode)
-      #   0x010 = DC_DISABLE_PSR      (Panel Self-Refresh)
-      #   0x200 = DC_DISABLE_PSR_SU   (PSR with Selective Update — distinct from full PSR;
-      #           VRR=Automatic causes the compositor to issue flips during PSR-SU transitions
-      #           which races the eDP vblank IRQ and triggers flip_done timed out on DCN 3.5.1.
-      #           Confirmed by th3cavalry/strix-halo-linux-setup and Arch BBS community reports.)
-      #   0x400 = DC_DISABLE_REPLAY   (Panel Replay — new in DCN 3.5+, broken on Z13)
-      #   0x1000 = DC_DISABLE_MPO     (Multi-Plane Overlay — critical for page-flip stability)
-      # Sum = 0x1613. Source: community reports (2025-2026) — no upstream kernel fix exists
-      # for DCN 3.5.1 flip_done timeouts as of kernel 7.0/7.1-rc; these are mitigations.
-      "amdgpu.dcdebugmask=0x1613"
+      # dcdebugmask: disable PSR + PSR-SU + Panel Replay + Stutter + MPO + Pipe Split
+      # + dynamic IPS for DCN 3.5.1. Bit values verified against the DC_DEBUG_MASK
+      # enum in drivers/gpu/drm/amd/include/amd_shared.h (identical in v7.1 and
+      # master as of Jul 2026):
+      #   0x001  = DC_DISABLE_PIPE_SPLIT
+      #   0x002  = DC_DISABLE_STUTTER     (DRAM stutter low-power mode)
+      #   0x010  = DC_DISABLE_PSR        (Panel Self-Refresh v1 and PSR-SU)
+      #   0x040  = DC_DISABLE_MPO        (Multi-Plane Overlay)
+      #   0x200  = DC_DISABLE_PSR_SU     (PSR Selective Update)
+      #   0x400  = DC_DISABLE_REPLAY     (Panel Replay — drm/amd#5519 confirms a
+      #            7.0/7.1 eDP wedge on DCN 3.5 fixed only by this bit; keep it
+      #            set on any 7.x kernel)
+      #   0x1000 = DC_DISABLE_IPS_DYNAMIC (all IPS off except during suspend.
+      #            NOT the MPO bit — an earlier comment here decoded 0x1000 as
+      #            DC_DISABLE_MPO, which is wrong; MPO is 0x40 and was never
+      #            actually disabled before Jul 22 2026. Kept over the stricter
+      #            0x800/DC_DISABLE_IPS because always-off IPS breaks s2idle on
+      #            GZ302 per th3cavalry/strix-halo-linux-setup PR #170.)
+      # Sum = 0x1653 (was 0x1613; +0x40 adds the kernel-level MPO disable that
+      # the config always intended — KWIN_DRM_NO_OVERLAY=1 only covers KWin).
+      # These are mitigations; the root-cause flip_done fix is the vendored
+      # vupdate_no_lock kernel patch pair above.
+      "amdgpu.dcdebugmask=0x1653"
 
       # Disable scatter-gather display on this APU. Strix Halo's iGPU shares system
       # RAM via GTT for display surfaces; sg_display=1 (default) hits a class of
@@ -327,8 +389,8 @@ in
   environment.sessionVariables = {
     # Disable KWin hardware overlays. MPO (Multi-Plane Overlays) on DCN 3.5.1
     # is a primary trigger for page-flip timeouts. This environment variable
-    # acts as a userspace complement to the amdgpu.dcdebugmask=0x1613 kernel
-    # param (which includes the 0x1000 MPO disable bit).
+    # acts as a userspace complement to the amdgpu.dcdebugmask=0x1653 kernel
+    # param (whose 0x40 bit is the real DC_DISABLE_MPO).
     KWIN_DRM_NO_OVERLAY = "1";
   };
 

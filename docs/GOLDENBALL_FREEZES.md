@@ -3,8 +3,8 @@
 **Device:** ASUS ROG Flow Z13 GZ302EA  
 **APU:** AMD Ryzen AI MAX+ 395 (Strix Halo, gfx1151 / RDNA 3.5 / DCN 3.5.1)  
 **RAM:** 128 GB LPDDR5X unified (CPU + GPU share the same physical pool)  
-**OS:** NixOS unstable, kernel 7.0.x, BIOS GZ302EA.311  
-**Display:** Internal eDP-1 (Tianma 2560×1600 OLED, 48–180 Hz); external via Plugable USB4-HUB3A TB4 dock → DP-4
+**OS:** NixOS unstable, kernel 7.2-rc (linuxPackages_testing + vendored patches, since Jul 22 2026), BIOS GZ302EA.311  
+**Display:** Internal eDP-1 (Tianma TL134ADXP03 2560×1600 IPS, 48–180 Hz — the *internal* panel was previously mislabeled OLED here and in th3cavalry docs; ASUS spec/Notebookcheck confirm IPS. It is PSR-capable, which is what matters for the freeze mechanism). External: 4K 240 Hz **OLED** desk display via Plugable USB4-HUB3A TB4 dock → DP-4. The flip_done bug has hit **both** displays: eDP-1/crtc-0 (most incidents) and the external OLED on DP-4/crtc-1 (Jun 23 2026)
 
 If a freeze happens again, start a new session and say **"it happened again"** — this doc provides the full context to continue troubleshooting efficiently.
 
@@ -46,7 +46,133 @@ kwin_wayland: Pageflip timed out! This is a bug in the amdgpu kernel driver
 
 **Originally eDP-1-only in collected logs, but no longer exclusively so.** External display on DP-4 (via Plugable TB4 dock) previously continued working during eDP-1 freezes; Jun 23 showed DP-4 itself can stall as `CRTC:428:crtc-1`.
 
-**This is a known upstream kernel bug with no fix as of kernel 7.1.0 (Jun 28 2026).** The DCN 3.5.x code has not been touched upstream since June 2024. Not a hardware defect.
+### Root cause found upstream (Jun–Jul 2026) — fix merged in 7.2-rc4
+
+AMD (Leo Li) root-caused this exact class in drm/amd#4141: on DCN hardware,
+the vblank (VSTARTUP) and pageflip-completion (GRPH_PFLIP) interrupts can be
+**masked by power-gating** — DPG (dynamic power gating, engages on
+self-refresh-capable eDP after enough static frames), GSL (global sync lock
+during commit programming), and MALL. When masked, the completion event is
+never delivered and the atomic commit times out — exactly `flip_done timed
+out`. This matches goldenball's trigger pattern perfectly: every observed
+freeze begins at a **transition to idle** (~2 min after llama-cpp finishes,
+~100 s after idle login, 5 s after Rocket League exits, shortly after dock
+HPD reconfiguration).
+
+The fix consolidates all vblank/flip event delivery onto `VUPDATE_NO_LOCK`,
+an interrupt source that is never masked:
+
+- `8382cd234981` "drm/amd/display: consolidate DCN vblank/flip handling onto vupdate_no_lock"
+- `48ab86360af1` "drm/amd/display: check GRPH_FLIP status before sending event"
+- `f39283eab44f` revert of the interim "5s vbl offdelay" workaround
+
+Merged to mainline 2026-07-17 (drm-fixes-2026-07-18-1, first tag v7.2-rc4),
+all Cc: stable, but **not in 7.1.4 or the stable queue as of Jul 22 2026** —
+Mario Limonciello said stable backports will be manual. Field reports on the
+final revision are positive (a Framework 13 tester went from >1 freeze/day to
+zero; another tester's flip timeouts disappeared on a patched 7.1-rc kernel).
+Earlier revisions of the series caused regressions (broken alt+tab, cursor
+corruption, DMCUB errors) — only the merged mainline pair should be used.
+
+Because the masking happens in hardware/firmware via DPG/GSL, **no
+`dcdebugmask` combination fully prevents it** — which is why freezes
+continued despite every mitigation below. This also explains why the bits
+only reduced frequency.
+
+**Since Jul 22 2026 goldenball runs `linuxPackages_testing` (7.2-rc) with the
+fix pair + two more Cc: stable patches vendored in
+`hosts/goldenball/patches/` (see `hosts/goldenball/configuration.nix
+boot.kernelPatches`).** The extra two: `75c8746b9d0a` (device link forcing
+xHCI to resume after the APU display — fixes the boot/resume "xhci HC died"
+USB4 cascade, bugzilla 221073, validated on a GZ302EA BIOS 311) and
+`cea54c52d82d` (cursor mode fix for atomic commits disabling a CRTC, relevant
+to dock hotplug adding/removing crtc-1). Both verified to apply on 7.2-rc2/rc3.
+
+Also relevant, already contained in 7.2-rc: "Restore periodic detection for
+DCN35" (`5cc0f35d83e2` — HPD bounce then IPS entry leaves display
+undiscoverable, drm/amd#5318, a Strix Halo report), the ISM dc_lock deadlock
+fix, the thunderbolt USB4 connection-manager robustness series (router-ready
+verification, 255 ms notification timeout, DP-tunnel retry on bandwidth
+change — targets the dock-at-boot "failed to allocate DP resource"
+signature), and the CRTC color-management revert (7.1 regression).
+
+Not a hardware defect. Same signature reported across vendors (HP ZBook Ultra
+G1a, Framework Desktop/13, GMKtec EVO-X2) and distros (Arch, CachyOS,
+Bazzite, Fedora) — switching distros would not have avoided it. The bug has
+hit both panel types on this machine — the internal IPS eDP and the external
+4K240 OLED behind the USB4/DP tunnel — consistent with a display-engine
+(interrupt delivery) bug rather than anything panel-specific.
+
+### Tracking the fix upstream / getting off linuxPackages_testing
+
+`linuxPackages_testing` + vendored patches is a **temporary** state. Track
+these five commits; all were merged to mainline 2026-07-17 via tag
+`drm-fixes-2026-07-18-1` (first release tag **v7.2-rc4**) and all carry
+`Cc: stable`:
+
+| Vendored patch | Upstream commit | First mainline tag |
+| -------------- | --------------- | ------------------ |
+| 0001 vupdate_no_lock consolidation | `8382cd234981` | v7.2-rc4 |
+| 0002 GRPH_FLIP status check        | `48ab86360af1` | v7.2-rc4 |
+| 0003 revert 5s vbl offdelay        | `f39283eab44f` | v7.2-rc4 |
+| 0004 xHCI/APU-display device link  | `75c8746b9d0a` | v7.2-rc4 |
+| 0005 cursor mode for disabled CRTCs | `cea54c52d82d` | v7.2-rc4 |
+
+**Step 1 — drop the vendored patches** once nixpkgs `linuxPackages_testing`
+reaches 7.2-rc4 or later. Check after each flake input bump:
+
+```fish
+nix eval .#nixosConfigurations.goldenball.config.boot.kernelPackages.kernel.version
+```
+
+The build itself is also a tripwire: `patch` fails loudly on already-applied
+hunks, so a testing bump to ≥ rc4 will break the build until the
+`boot.kernelPatches` block in `hosts/goldenball/configuration.nix` and the
+`hosts/goldenball/patches/` directory are deleted.
+
+**Step 2 — return to `linuxPackages_latest`** once 7.2 final is the stable
+kernel there (7.2 final expected ~Aug 2026; nixpkgs usually promotes it to
+`linuxPackages_latest` within days). Verify before switching:
+
+```fish
+# what latest would be, from the flake's pinned nixpkgs
+nix eval --raw --impure --expr '(import (builtins.getFlake "/home/r6t/git/nixos-r6t").inputs.nixpkgs { system = "x86_64-linux"; }).linuxPackages_latest.kernel.version'
+```
+
+If it reports `7.2` or higher: flip `kernelPackages` back to
+`pkgs.linuxPackages_latest` and remove the testing rationale comment.
+
+**Do NOT drop back to 7.1.y early.** Even when the flip_done pair reaches a
+7.1.y point release (watch the stable queue, below), 7.1.y will still lack
+the DCN35 periodic-detection fix, the ISM deadlock fix, the thunderbolt USB4
+CM series, and the color-management revert. 7.2 is the settling point.
+
+To check whether the stable backports have landed (informational only):
+
+```fish
+# any release's changelog — bump the version number as releases appear
+curl -s https://cdn.kernel.org/pub/linux/kernel/v7.x/ChangeLog-7.1.5 | grep -iE "vupdate_no_lock|GRPH_FLIP|device link between APU"
+# or the pending stable queue
+curl -s https://git.kernel.org/pub/scm/linux/kernel/git/stable/stable-queue.git/plain/queue-7.1/series | grep -iE "vupdate|grph|apu"
+```
+
+**Verification on the running system** (any kernel):
+
+```fish
+uname -r                                      # expect 7.2-rc2+ while on testing
+sudo cat /sys/kernel/debug/dri/*/amdgpu_dm_ips_status | grep "IPS config"   # expect 5 (DISABLE_DYNAMIC) with dcdebugmask 0x1653
+journalctl -b -k --no-pager | grep "DMUB hardware initialized"              # record DMUB fw version for regression tracking
+```
+
+**Success criteria for declaring the bug fixed on goldenball:** several weeks
+spanning the historical trigger set with zero `flip_done` events — llama-cpp
+runs followed by idle, Rocket League/gamescope sessions with the 4K240 OLED
+docked, dock hotplugs, dock-at-boot, and multi-day uptimes. Then start
+peeling back mitigations one at a time (candidates in rough order:
+`cwsr_enable=0` removal, narrowing `dcdebugmask` toward the community
+baseline `0x600`, re-enabling VRR via `freesync_video=1` + KWin
+`VrrPolicy=1`, `pcie_aspm=off` removal for battery life) — one change per
+reboot cycle, with a week of observation each.
 
 ### Confirmed triggers
 
@@ -67,7 +193,9 @@ Display/boot settings in `hosts/goldenball/configuration.nix`:
 
 | Setting                     | Value        | Purpose                                                                                           |
 | --------------------------- | ------------ | ------------------------------------------------------------------------------------------------- |
-| `amdgpu.dcdebugmask`        | `0x1613`     | Also disables pipe split and MPO, in addition to stutter, PSR, PSR-SU, and replay                 |
+| `boot.kernelPackages`       | `linuxPackages_testing` | 7.2-rc: carries the flip_done root-cause fix + USB4/thunderbolt fixes (see above)      |
+| `boot.kernelPatches`        | 5 vendored   | vupdate_no_lock pair + offdelay revert + xHCI device link + cursor fix (`hosts/goldenball/patches/`) |
+| `amdgpu.dcdebugmask`        | `0x1653`     | pipe split, stutter, PSR, **MPO (0x40)**, PSR-SU, replay, dynamic IPS (0x1000)                    |
 | `amdgpu.sg_display`         | `0`          | Disables scatter-gather display (DMA-fence flip timeouts on unified memory)                       |
 | `amdgpu.gpu_recovery`       | `1`          | Soft-resets display engine on timeout instead of hard-locking                                     |
 | `amdgpu.ppfeaturemask`      | `0xfff73fff` | Disables GFXOFF, STUTTER_MODE, OVERDRIVE                                                          |
@@ -76,6 +204,29 @@ Display/boot settings in `hosts/goldenball/configuration.nix`:
 | `amdgpu.abmlevel`           | `0`          | Disables adaptive backlight management                                                            |
 | `amdgpu.cwsr_enable`        | `0`          | Disables Compute Wavefront Save-Restore; cmdline copy is required now that amdgpu loads in initrd |
 | `boot.initrd.kernelModules` | `amdgpu`     | Enables early KMS so amdgpu initializes before Thunderbolt/USB4 DP tunnel creation                |
+
+**dcdebugmask decode correction (Jul 22 2026):** the config previously
+documented `0x1000` as `DC_DISABLE_MPO`. Verified against the `DC_DEBUG_MASK`
+enum in `drivers/gpu/drm/amd/include/amd_shared.h` (identical in v7.1 and
+master): `0x1000` is `DC_DISABLE_IPS_DYNAMIC` (IPS off except during
+suspend); MPO is `0x40` and was **never actually disabled** at the kernel
+level before Jul 22 (only KWin-level via `KWIN_DRM_NO_OVERLAY=1`). The mask
+was changed `0x1613 → 0x1653` to add the real MPO bit. The accidental
+`0x1000` was kept: dynamic-IPS-off is the right IPS mode here anyway — the
+stricter `0x800` (`DC_DISABLE_IPS`, always off, wins precedence per the enum
+docs) breaks s2idle on GZ302 per th3cavalry PR #170, and community data
+(th3cavalry issue #166) shows IPS-heavy masks like `0xe12` correlating with
+flip_done freezes on 7.x rather than preventing them. Note the community
+baseline for GZ302 is now the much narrower `0x600`; goldenball deliberately
+keeps the broader mask until the fixed kernel proves itself, then bits can be
+peeled back one at a time. IPS state is observable live at
+`/sys/kernel/debug/dri/0/amdgpu_dm_ips_status`.
+
+**cwsr_enable=0 caveat:** AMD's Mario Limonciello warned (Framework 16 LG/TB
+thread, Jan 2026) that disabling CWSR blocks GPU preemption and can itself
+cause issues; the gfx1151 CWSR bugs it worked around were fixed in kernel
+6.18.4. Candidate for removal once the 7.2-rc kernel is proven stable —
+change one variable at a time.
 
 KWin: `VrrPolicy=0` (Never — VRR fully disabled, changed Jun 4 2026 after VrrPolicy=1 still triggered).
 KWin overlays: disabled with `KWIN_DRM_NO_OVERLAY=1`.
@@ -176,9 +327,18 @@ as the proven root cause of the display-engine stall.
 ### Next steps if freezes continue
 
 1. ~~Try `VrrPolicy=0` (Never)~~ **Done Jun 4 2026** — VRR fully disabled; loses adaptive sync in games
-2. Check if any upstream kernel patch for DCN 3.5.1 flip_done has landed (search `drm/amd` commits)
-3. File upstream at https://gitlab.freedesktop.org/drm/amd/-/issues with `sudo dmesg` output
-4. ~~Test whether Rocket League still freezes when the external output is capped below 240 Hz or launched without gamescope after a boot-time USB4 cascade~~ **Config changed Jul 22 2026** — `goldenball-steam-profile gamescope-*` now uses `--nested-refresh 180`; observe whether the Rocket League/gamescope path still wedges after a USB4 boot cascade
+2. ~~Check if any upstream kernel patch for DCN 3.5.1 flip_done has landed~~ **Done Jul 22 2026** — root-cause fix found (drm/amd#4141, merged 7.2-rc4); goldenball moved to `linuxPackages_testing` + vendored patches. See "Root cause found upstream" above.
+3. ~~Test whether Rocket League still freezes when the external output is capped below 240 Hz or launched without gamescope after a boot-time USB4 cascade~~ **Config changed Jul 22 2026** — `goldenball-steam-profile gamescope-*` now uses `--nested-refresh 180`; observe whether the Rocket League/gamescope path still wedges after a USB4 boot cascade
+4. **If a freeze recurs on the patched 7.2-rc kernel:** capture and report upstream on drm/amd#4244 (active GZ302EA thread with a near-identical Jul 21 2026 report) referencing #4141. Capture over SSH while wedged:
+   - `dmesg` (full), plus `journalctl -b -k`
+   - `cat /sys/kernel/debug/dri/*/amdgpu_dm_dmub_tracebuffer` (Leo Li collects these)
+   - `cat /sys/kernel/debug/dri/*/amdgpu_firmware_info` (DMUB version line matters — it's a live variable in this bug family)
+   - `cat /sys/kernel/debug/dri/*/amdgpu_dm_ips_status`
+   - Watch for the secondary signature `dc_dmub_srv_log_diagnostic_data: DMCUB error` — one tester still hits it with the patches on 7.0.13.
+5. **Check historical/new boot logs for `optc35_disable_crtc` REG_WAIT timeouts** (`journalctl -k | grep -E "optc35|REG_WAIT"`). drm/amd#5138/#5155 document a "zombie CRTC" variant where a failed CRTC teardown at display-path reconfiguration deadlocks flip_done on the *other* CRTC minutes-to-hours later — the closest structural match for the dock-hotplug-then-freeze cases, and NOT fixed by the vupdate_no_lock series. If present, report on #5155.
+6. **DMUB firmware watch:** nixos-unstable's linux-firmware 20260622 ships DMUB 0.1.64.0 for DCN 3.5.1; 0.1.65.0–0.1.67.0 exist in linux-firmware git only (0.1.67.0, 2026-07-17: "Improve lock mechanism with HW lock mgr" — squarely in the flip/lock problem space, part of a year-long series of APU HW-lock fixes). If freezes persist on the fixed kernel, overriding linux-firmware to a git snapshot is the next lever. Counterpoint: one Z13 user *fixed* their freeze by *reverting* a DMUB update (linux-firmware c092c7487eb7), so record `dmesg | grep "DMUB hardware initialized"` before/after any firmware change.
+7. If the USB4-cascade preconditions persist (with the xHCI device-link patch they shouldn't): experiment with `thunderbolt.host_reset=0` (skips boot-time USB4 router reset, preserving firmware-created tunnels; suggested by AMD for AMD platforms) and `thunderbolt.bw_alloc_mode=0` (reduced disconnect frequency for a ZBook Ultra G1a reporter in drm/amd#4961). Also worth trying: dock on the *other* USB4-C port — the two ports have different PD controllers and drm/amd#5131 showed one port working while the other was wedged.
+8. Upstream issues to watch: #4141 (fix thread), #4244 (GZ302EA), #5155/#5138 (zombie CRTC), #4961 (spurious DMUB HPD tears down TB4 tunnel), #5131 (DPIA dead after transient PCIe link drop — "more like a platform issue" per AMD), #5011 (DP tunnel initially negotiates 2 lanes; staged modeset workaround), bugzilla 221073 (xHCI resume race; fixed by vendored patch 0004, but a rarer separate hard-hang remains open there).
 
 ---
 
@@ -271,7 +431,14 @@ pipeline starts from a fragile re-enumerated state.
 2. ~~If delaying Thunderbolt is not acceptable, test early amdgpu KMS instead by
    adding `amdgpu` to `boot.initrd.kernelModules`, so the display engine is up
    before the Thunderbolt DP tunnel is created.~~ **Config changed Jul 22 2026** — observe whether dock-at-boot DP allocation failures or later flip timeouts decrease.
-3. If neither helps, test a deliberate post-boot Thunderbolt reauthorization or
+3. **Partially addressed by the Jul 22 2026 kernel move:** 7.2-rc contains
+   `afe9021d63b4` "thunderbolt: Improve multi-display DisplayPort tunnel
+   allocation" — the driver now retries DP tunnels it previously dropped
+   ("not active, tearing down" → forgotten until replug), plus the USB4 CM
+   robustness series (router-ready check, 255 ms notification timeout).
+   Observe whether dock-at-boot display absence still occurs on 7.2-rc.
+4. If it persists: test `thunderbolt.host_reset=0` (see "Next steps" item 7).
+5. If neither helps, test a deliberate post-boot Thunderbolt reauthorization or
    controller power-cycle service, but only with user approval because it will
    briefly disconnect every device on the dock.
 
@@ -358,12 +525,21 @@ nmcli connection modify <SSID> 802-11-wireless.cloned-mac-address stable-ssid
 
 **All confirmed freeze modes are software/firmware bugs:**
 
-| Symptom                          | Root cause                                   | Hardware? |
-| -------------------------------- | -------------------------------------------- | --------- |
-| `flip_done timed out` → freeze   | DCN 3.5.1 kernel bug, no upstream fix        | No        |
-| USB4 PCIe link drops → xhci dies | Strix Halo USB4 power management instability | No        |
-| ENOMEM GPU command submission    | RADV memory pressure under MTP inference     | No        |
-| WiFi fails to join known network | NM MAC randomization breaking re-association | No        |
+| Symptom                          | Root cause                                                                | Hardware? |
+| -------------------------------- | -------------------------------------------------------------------------- | --------- |
+| `flip_done timed out` → freeze   | DCN interrupt masking by power gating; fixed upstream 7.2-rc4 (drm/amd#4141) | No        |
+| USB4 PCIe link drops → xhci dies | xHCI/amdgpu resume race; fixed upstream (bugzilla 221073, vendored patch) | No        |
+| ENOMEM GPU command submission    | RADV memory pressure under MTP inference                                  | No        |
+| WiFi fails to join known network | NM MAC randomization breaking re-association                              | No        |
+
+**NixOS vs other distros (assessed Jul 22 2026):** the same flip_done class is
+reported on Arch, CachyOS, Bazzite, and Fedora, and on other Strix Halo
+hardware (HP ZBook Ultra G1a, Framework Desktop, GMKtec EVO-X2). CachyOS/
+Bazzite carry no private fix for it — their advantage was only kernel/firmware
+cadence, which NixOS unstable matches (nixpkgs had 7.2-rc in
+`linuxPackages_testing` before most distros shipped it). Switching distro
+would not have avoided this bug; staying on NixOS with the vendored patches
+gets the fix earlier than any stable distro kernel.
 
 No evidence of hardware defect in any collected logs (no MCE, no hardware ECC errors, no thermal throttling, no NVMe errors on the installed Corsair P310).
 
@@ -387,6 +563,7 @@ No evidence of hardware defect in any collected logs (no MCE, no hardware ECC er
 | Jun 23 18:17 | External DP-4 hard-froze; `CRTC:428:crtc-1` flip_done after boot-time USB4 cascade.                                                           |
 | Jun 28 14:44 | Rocket League/gamescope on external 4K240; `CRTC:424:crtc-0` flip_done after USB4 boot cascade.                                               |
 | Jun 28 boot  | External display absent at boot; DP tunnel logged `not active` / `failed to allocate DP resource for port 7`; replug produced HPD and `DP-7`. |
+| Jul 22       | Config: moved to 7.2-rc (`linuxPackages_testing`) + 5 vendored upstream patches (flip_done root-cause fix, xHCI device link, cursor fix); dcdebugmask 0x1613→0x1653 (real MPO bit); early KMS; wifi powersave off; gamescope capped at 180 Hz. |
 
 ---
 
@@ -394,7 +571,8 @@ No evidence of hardware defect in any collected logs (no MCE, no hardware ECC er
 
 | File                                          | What's there                                                                |
 | --------------------------------------------- | --------------------------------------------------------------------------- |
-| `hosts/goldenball/configuration.nix`          | All kernel params, udev rules, VrrPolicy, auraConfigs, hid_asus udev rebind |
+| `hosts/goldenball/configuration.nix`          | All kernel params, kernelPackages/kernelPatches, udev rules, VrrPolicy, auraConfigs, hid_asus udev rebind |
+| `hosts/goldenball/patches/`                   | Vendored upstream kernel patches (flip_done fix pair, offdelay revert, xHCI device link, cursor fix) — delete once nixpkgs testing ≥ 7.2-rc4 |
 | `hosts/goldenball/hardware-configuration.nix` | Generated initrd module list; currently includes `thunderbolt`              |
 | `hosts/goldenball/llm-config.nix`             | LLM model presets, active model selection                                   |
 | `modules/nixos/llama-cpp/config.nix`          | llama-server service, `RADV_PERFTEST`, `MESA_SHADER_CACHE_DIR`              |
