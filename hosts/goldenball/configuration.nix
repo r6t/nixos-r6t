@@ -247,6 +247,12 @@ in
       # authorized devices can still fail to establish a downstream PCIe tree.
       "thunderbolt.clx=0"
 
+      # Steam's CHTTPClientThre can generate thousands of split-lock/bus-lock
+      # traps during Rocket League sessions. The bus locks are still userspace
+      # bugs, but kernel split-lock detection adds #DB/logging overhead that
+      # correlates with severe stutter before amdgpu's DCN page-flip timeout.
+      "split_lock_detect=off"
+
       # IOMMU passthrough: zero-cost translation for GPU compute while keeping
       # IOMMU active for USB4 PCIe tunneling and device isolation.
       "iommu=pt"

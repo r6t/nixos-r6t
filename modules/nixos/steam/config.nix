@@ -5,6 +5,7 @@ let
   goldenballSteamProfile = pkgs.writeShellApplication {
     name = "goldenball-steam-profile";
     runtimeInputs = with pkgs; [
+      coreutils
       gamemode
       gamescope
       mangohud
@@ -19,8 +20,11 @@ let
       Profiles:
         native-16x10-1920x1200     GameMode + MangoHud, appends -resx/-resy
         native-16x9-1920x1080      GameMode + MangoHud, appends -resx/-resy
-        gamescope-16x10-1920x1200  Windowed Gamescope, game sees 1920x1200 @ 180 Hz
-        gamescope-16x9-1920x1080   Windowed Gamescope, game sees 1920x1080 @ 180 Hz
+        gamescope-16x10-1920x1200  Windowed Gamescope, game sees 1920x1200 @ 180 Hz, LD_PRELOAD workaround, no GameMode
+        gamescope-16x9-1920x1080   Windowed Gamescope, game sees 1920x1080 @ 180 Hz, LD_PRELOAD workaround, no GameMode
+
+      Prefer native profiles for Rocket League on goldenball. Gamescope profiles
+      are for A/B testing or games that need resolution spoofing/upscaling.
 
       Steam launch option example:
         goldenball-steam-profile native-16x10-1920x1200 -- %command%
@@ -100,7 +104,10 @@ let
           --mangoapp
           --force-windows-fullscreen
         )
-        launch_command=(gamemoderun gamescope "''${gamescope_args[@]}" -- "$@")
+        # Avoid Steam's nested-gamescope lag bomb by preventing Steam's
+        # LD_PRELOAD hooks from loading into gamescope itself while preserving
+        # them for the actual game process when Steam set them.
+        launch_command=(env -u LD_PRELOAD gamescope "''${gamescope_args[@]}" -- env "LD_PRELOAD=''${LD_PRELOAD-}" "$@")
       fi
 
       if [ "$dry_run" -eq 1 ]; then
