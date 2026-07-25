@@ -16,6 +16,10 @@
     "changed.r6t.io" = { upstream = "http://localhost:5000"; };
   };
 
+  dawarich = {
+    "geo.r6t.io" = { upstream = "http://localhost:3033"; };
+  };
+
   immich = {
     "photos.r6t.io" = { upstream = "http://localhost:2283"; compress = false; };
   };

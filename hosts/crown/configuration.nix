@@ -8,6 +8,7 @@ let
   crownContainers = [
     "audiobookshelf"
     "changedetection"
+    "dawarich"
     "hermes"
     "immich"
     "it-tools"
