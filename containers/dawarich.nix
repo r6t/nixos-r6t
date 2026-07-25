@@ -9,6 +9,16 @@ in
     ./lib/mullvad-dns.nix
   ];
 
+  # Fixed upstream after the locked nixpkgs rev: gdalMinimal skips this test
+  # because it requires netCDF, which the minimal build intentionally disables.
+  nixpkgs.overlays = [
+    (_: prev: {
+      gdalMinimal = prev.gdalMinimal.overrideAttrs (old: {
+        disabledTests = (old.disabledTests or [ ]) ++ [ "test_zarr_read_simple_sharding" ];
+      });
+    })
+  ];
+
   networking = {
     hostName = "dawarich";
     firewall.allowedTCPPorts = [ 3000 ];
