@@ -24,6 +24,10 @@
     "photos.r6t.io" = { upstream = "http://localhost:2283"; compress = false; };
   };
 
+  it-tools = {
+    "tools.r6t.io" = { upstream = "http://localhost:8040"; };
+  };
+
   hermes = {
     "api.hermes.r6t.io" = { upstream = "http://localhost:8642"; compress = false; };
     "hermes.r6t.io" = { upstream = "http://localhost:9119"; };
@@ -69,10 +73,6 @@
   };
 
   # Docker-based containers (no containers/*.nix — use the docker image)
-  it-tools = {
-    "tools.r6t.io" = { upstream = "http://localhost:8040"; };
-  };
-
   paperless = {
     "paperless.r6t.io" = { upstream = "http://localhost:8000"; };
   };

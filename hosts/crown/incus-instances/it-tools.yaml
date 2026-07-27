@@ -5,11 +5,6 @@ config:
     datasource_list: [NoCloud, None]
 description: it-tools
 devices:
-  docker-compose:
-    path: /mnt/docker-compose/it-tools
-    shift: "true"
-    source: /mnt/crownstore/Sync/app-config/docker-compose/crown/it-tools
-    type: disk
   eth0:
     name: eth0
     nictype: bridged

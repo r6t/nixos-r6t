@@ -1,5 +1,4 @@
 {
-  "it-tools": "docker",
   "mv-oslo": "tailnet-exit",
   "mv-seattle": "tailnet-exit",
   "mv-vancouver": "tailnet-exit",
