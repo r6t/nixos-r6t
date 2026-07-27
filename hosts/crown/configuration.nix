@@ -21,6 +21,7 @@ let
     "pirate-ship"
     "searxng"
     "spire"
+    "stirlingpdf"
     "sts"
   ];
 

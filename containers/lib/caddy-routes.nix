@@ -64,6 +64,10 @@
     "ladder.r6t.io" = { upstream = "http://localhost:8082"; };
   };
 
+  stirlingpdf = {
+    "spdf.r6t.io" = { upstream = "http://localhost:89"; };
+  };
+
   # Docker-based containers (no containers/*.nix — use the docker image)
   it-tools = {
     "tools.r6t.io" = { upstream = "http://localhost:8040"; };
