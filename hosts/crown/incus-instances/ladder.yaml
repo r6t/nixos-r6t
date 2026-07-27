@@ -10,11 +10,6 @@ devices:
     nictype: bridged
     parent: br1
     type: nic
-  ladder-config:
-    path: /mnt/crownstore/config/ladder
-    shift: "true"
-    source: /mnt/crownstore/config/ladder
-    type: disk
   ladder-port:
     connect: tcp:127.0.0.1:8082
     listen: tcp:0.0.0.0:8082

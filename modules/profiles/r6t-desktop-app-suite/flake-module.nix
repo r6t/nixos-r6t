@@ -4,6 +4,7 @@
   flake.modules.nixos.r6t-desktop-app-suite = { ... }: {
     imports = [
       inputs.nix-flatpak.nixosModules.nix-flatpak
+      inputs.sops-nix.nixosModules.sops
       ../../flatpak/anki/options.nix
       ../../flatpak/anki/config.nix
       ../../flatpak/base/options.nix
@@ -54,6 +55,7 @@
       ../../nixos/direnv/config.nix
       ../../nixos/npm/options.nix
       ../../nixos/npm/config.nix
+      ../../nixos/sops/options.nix
       ../../nixos/zola/options.nix
       ../../nixos/zola/config.nix
     ];

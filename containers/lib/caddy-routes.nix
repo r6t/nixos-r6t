@@ -60,13 +60,13 @@
     "prometheus.r6t.io" = { upstream = "http://127.0.0.1:9001"; };
   };
 
+  ladder = {
+    "ladder.r6t.io" = { upstream = "http://localhost:8082"; };
+  };
+
   # Docker-based containers (no containers/*.nix — use the docker image)
   it-tools = {
     "tools.r6t.io" = { upstream = "http://localhost:8040"; };
-  };
-
-  ladder = {
-    "ladder.r6t.io" = { upstream = "http://localhost:8082"; };
   };
 
   paperless = {
