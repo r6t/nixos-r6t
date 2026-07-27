@@ -8,7 +8,7 @@
 
   networking = {
     # Keep the flake host name distinct while making the machine's local hostname generic.
-    hostName = "localhost";
+    hostName = "linux";
     firewall = {
       enable = true;
       checkReversePath = false;
