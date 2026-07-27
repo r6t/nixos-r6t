@@ -34,6 +34,15 @@ in
     nvidia-container-toolkit.enable = cfg.containerToolkit;
   };
 
+  systemd.services.nvidia-container-toolkit-cdi-generator = lib.mkIf cfg.containerToolkit {
+    serviceConfig = {
+      # Upstream defaults to an infinite start timeout; wedged NVIDIA ioctls can
+      # otherwise block NixOS activation forever.
+      TimeoutStartSec = lib.mkForce "2min";
+      TimeoutStopSec = "30s";
+    };
+  };
+
   nixpkgs.config = {
     allowUnfree = true;
     cudaSupport = true;

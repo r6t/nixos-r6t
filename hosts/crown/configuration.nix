@@ -60,9 +60,35 @@ in
     kernelParams = [
       "kvm-amd"
       "kvm"
+
+      # Keep the Thunderbolt eGPU PCIe tunnel from power-saving itself into link
+      # loss. The Razer Core X path logged Data Link Layer errors, retimer
+      # disconnects, then NVIDIA Xid 79 "GPU has fallen off the bus".
+      "pcie_port_pm=off"
+      "pcie_ports=native"
+      "pci=realloc"
+      "thunderbolt.clx=0"
+
       "reboot=efi"
     ];
   };
+
+  services.udev.extraRules = ''
+    # Razer Core X / RTX 4070 SUPER eGPU path. Keep the tunneled PCIe fabric in D0
+    # so the NVIDIA driver does not lose the GPU after Thunderbolt link flaps.
+    ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x1022", ATTR{device}=="0x14ef", ATTR{power/control}="on"
+    ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x1022", ATTR{device}=="0x14ef", ATTR{d3cold_allowed}="0"
+    ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x1022", ATTR{device}=="0x1668", ATTR{power/control}="on"
+    ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x1022", ATTR{device}=="0x1668", ATTR{d3cold_allowed}="0"
+    ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x1022", ATTR{device}=="0x1669", ATTR{power/control}="on"
+    ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x1022", ATTR{device}=="0x1669", ATTR{d3cold_allowed}="0"
+    ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x8086", ATTR{device}=="0x15d3", ATTR{power/control}="on"
+    ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x8086", ATTR{device}=="0x15d3", ATTR{d3cold_allowed}="0"
+    ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{device}=="0x2783", ATTR{power/control}="on"
+    ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{device}=="0x2783", ATTR{d3cold_allowed}="0"
+    ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{device}=="0x22bc", ATTR{power/control}="on"
+    ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{device}=="0x22bc", ATTR{d3cold_allowed}="0"
+  '';
 
   fileSystems."/mnt/thunderkey" = {
     device = "/dev/disk/by-label/thunderkey";
@@ -196,7 +222,10 @@ in
       thunderbayD = { device = "/dev/disk/by-uuid/5b66a482-036d-4a76-8cec-6ad15fe2360c"; keyFile = "/root/5b66a482.key"; mountPoint = "/mnt/thunderbay/8TB-D"; };
     };
 
-    nvidia-cuda.allowExternalGpu = true; # Connected via Thunderbolt eGPU
+    nvidia-cuda = {
+      allowExternalGpu = true; # Connected via Thunderbolt eGPU
+      gspFirmware = false; # Avoid GSP boot failures after Thunderbolt link flaps.
+    };
     nfs.exports.Pictures = {
       sourcePath = "/mnt/thunderbay/8TB-C/Pictures";
       includePaths = [
