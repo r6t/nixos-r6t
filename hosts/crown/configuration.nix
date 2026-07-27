@@ -224,7 +224,6 @@ in
 
     nvidia-cuda = {
       allowExternalGpu = true; # Connected via Thunderbolt eGPU
-      gspFirmware = false; # Avoid GSP boot failures after Thunderbolt link flaps.
     };
     nfs.exports.Pictures = {
       sourcePath = "/mnt/thunderbay/8TB-C/Pictures";
