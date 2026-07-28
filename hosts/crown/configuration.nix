@@ -64,6 +64,7 @@ in
       # Keep the Thunderbolt eGPU PCIe tunnel from power-saving itself into link
       # loss. The Razer Core X path logged Data Link Layer errors, retimer
       # disconnects, then NVIDIA Xid 79 "GPU has fallen off the bus".
+      "pcie_aspm=off"
       "pcie_port_pm=off"
       "pcie_ports=native"
       "pci=realloc"
@@ -84,6 +85,8 @@ in
     ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x1022", ATTR{device}=="0x1669", ATTR{d3cold_allowed}="0"
     ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x8086", ATTR{device}=="0x15d3", ATTR{power/control}="on"
     ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x8086", ATTR{device}=="0x15d3", ATTR{d3cold_allowed}="0"
+    ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x1b21", ATTR{device}=="0x1242", ATTR{power/control}="on"
+    ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x1b21", ATTR{device}=="0x1242", ATTR{d3cold_allowed}="0"
     ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{device}=="0x2783", ATTR{power/control}="on"
     ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{device}=="0x2783", ATTR{d3cold_allowed}="0"
     ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{device}=="0x22bc", ATTR{power/control}="on"
