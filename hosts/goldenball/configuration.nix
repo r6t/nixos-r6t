@@ -603,7 +603,7 @@ in
       goldenballGameLauncher.enable = true;
     };
     nfs.mounts.photos = {
-      device = "crown:/";
+      device = "crown:/mnt/thunderbay/8TB-C/Pictures";
       mountPoint = "/mnt/thunderbay/8TB-C/Pictures";
     };
   };

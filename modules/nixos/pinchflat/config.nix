@@ -4,7 +4,7 @@
   # 8945/tcp
   services.pinchflat = {
     enable = true;
-    mediaDir = "/home/r6t/Sync/pinchflat/media";
+    mediaDir = "/mnt/thunderbay/8TB-D/storage/plex/youtube";
     user = "r6t";
     group = "users";
     selfhosted = true;

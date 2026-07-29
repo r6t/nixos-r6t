@@ -228,20 +228,37 @@ in
     nvidia-cuda = {
       allowExternalGpu = true; # Connected via Thunderbolt eGPU
     };
-    nfs.exports.Pictures = {
-      sourcePath = "/mnt/thunderbay/8TB-C/Pictures";
-      includePaths = [
-        "cameras"
-        "meme"
-        "reference"
-        "Screenshots"
-        "wallpaper"
-        "wallpaper-vertical"
-      ];
-      fsid = 0;
-      mountPointGuard = "/mnt/thunderbay/8TB-C";
-      after = [ "mnt-thunderbay-8TB\\x2dC.mount" ];
-      requires = [ "mnt-thunderbay-8TB\\x2dC.mount" ];
+    nfs.exports = {
+      Root = {
+        path = "/srv/nfs";
+        fsid = 0;
+      };
+
+      Pictures = {
+        path = "/srv/nfs/mnt/thunderbay/8TB-C/Pictures";
+        sourcePath = "/mnt/thunderbay/8TB-C/Pictures";
+        includePaths = [
+          "cameras"
+          "meme"
+          "reference"
+          "Screenshots"
+          "wallpaper"
+          "wallpaper-vertical"
+        ];
+        fsid = 1;
+        mountPointGuard = "/mnt/thunderbay/8TB-C";
+        after = [ "mnt-thunderbay-8TB\\x2dC.mount" ];
+        requires = [ "mnt-thunderbay-8TB\\x2dC.mount" ];
+      };
+
+      YouTube = {
+        path = "/srv/nfs/mnt/thunderbay/8TB-D/storage/plex/youtube";
+        sourcePath = "/mnt/thunderbay/8TB-D/storage/plex/youtube";
+        fsid = 2;
+        mountPointGuard = "/mnt/thunderbay/8TB-D";
+        after = [ "mnt-thunderbay-8TB\\x2dD.mount" ];
+        requires = [ "mnt-thunderbay-8TB\\x2dD.mount" ];
+      };
     };
     wg-metrics = {
       instanceMapFile = "/home/r6t/git/nixos-r6t/hosts/crown/incus-instances/instance_map.json";

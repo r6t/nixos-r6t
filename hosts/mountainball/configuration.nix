@@ -118,9 +118,16 @@
         };
       };
     };
-    nfs.mounts.photos = {
-      device = "crown:/";
-      mountPoint = "/mnt/thunderbay/8TB-C/Pictures";
+    nfs.mounts = {
+      photos = {
+        device = "crown:/mnt/thunderbay/8TB-C/Pictures";
+        mountPoint = "/mnt/thunderbay/8TB-C/Pictures";
+      };
+
+      pinchflat-youtube = {
+        device = "crown:/mnt/thunderbay/8TB-D/storage/plex/youtube";
+        mountPoint = "/mnt/thunderbay/8TB-D/storage/plex/youtube";
+      };
     };
   };
 }

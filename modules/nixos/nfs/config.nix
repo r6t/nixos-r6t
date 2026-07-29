@@ -12,7 +12,7 @@ let
     "root_squash"
     "fsid=${toString export.fsid}"
   ]
-  ++ lib.optional (export.sourcePath != null && export.includePaths != [ ]) "crossmnt"
+  ++ lib.optional (export.fsid == 0 || (export.sourcePath != null && export.includePaths != [ ])) "crossmnt"
   ++ lib.optional (export.mountPointGuard != null) "mp=${export.mountPointGuard}";
 
   defaultMountOptions = [
