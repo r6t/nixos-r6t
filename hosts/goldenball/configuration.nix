@@ -421,6 +421,11 @@ in
   # ---------------------------------------------------------------------------
 
   mine = {
+    flatpak = {
+      inkscape.enable = true;
+      neothesia.enable = true;
+    };
+
     home = {
       kde-apps = {
         tablet = true;

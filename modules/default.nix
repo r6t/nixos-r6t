@@ -1,19 +1,7 @@
 _:
 
 let
-  flatpakModules = [
-    "anki"
-    "base"
-    "calibre"
-    "element"
-    "inkscape"
-    "kamoso"
-    "libreoffice"
-    "picard"
-    "proton-mail"
-    "remmina"
-    "zoom"
-  ];
+  flatpakModules = import ./flatpak/modules.nix;
 
   homeModules = [
     "alacritty"
