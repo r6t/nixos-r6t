@@ -1,18 +1,19 @@
-{ inputs, lib, pkgs, ... }:
+{ config, inputs, lib, pkgs, ... }:
 
 let
+  cfg = config.mine.user;
   inherit (inputs) ssh-keys;
 in
 {
   users.users = {
-    r6t = {
+    ${cfg.name} = {
       isNormalUser = true;
-      openssh.authorizedKeys.keyFiles = [ ssh-keys.outPath ];
-      extraGroups = [ "docker" "input" "incus" "networkmanager" "wheel" ];
+      openssh.authorizedKeys.keyFiles = lib.mkIf cfg.authorizedKeysFromGithub [ ssh-keys.outPath ];
+      inherit (cfg) extraGroups;
       shell = pkgs.fish;
     };
     root = {
-      openssh.authorizedKeys.keyFiles = lib.mkForce [ ssh-keys.outPath ];
+      openssh.authorizedKeys.keyFiles = lib.mkIf cfg.authorizeRootKeys (lib.mkForce [ ssh-keys.outPath ]);
     };
   };
 

@@ -1,7 +1,9 @@
+{ config, ... }:
+
 {
   networking.networkmanager = {
     enable = true;
-    wifi.macAddress = "stable-ssid";
+    wifi.macAddress = config.mine.networkmanager.wifiMacAddress;
     # stable-ssid: NM derives a consistent MAC per SSID using a stable hash.
     # The AP always sees the same client MAC for a given network (no Reason 9
     # deauth from MAC changing between association attempts), while the MAC

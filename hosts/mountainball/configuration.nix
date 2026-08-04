@@ -18,8 +18,6 @@
     ../../modules/nixos/docker/config.nix
     ../../modules/nixos/mullvad/options.nix
     ../../modules/nixos/mullvad/config.nix
-    ../../modules/nixos/pinchflat/options.nix
-    ../../modules/nixos/pinchflat/config.nix
     ../../modules/nixos/rdfind/options.nix
     ../../modules/nixos/rdfind/config.nix
   ];

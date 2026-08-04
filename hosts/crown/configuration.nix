@@ -18,6 +18,7 @@ let
     "miniflux"
     "ntfy"
     "paperless"
+    "pinchflat"
     "pirate-ship"
     "searxng"
     "spire"

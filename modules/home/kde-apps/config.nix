@@ -1,5 +1,6 @@
 { lib, config, pkgs, userConfig, ... }:
 let
+  cfg = config.mine.home.kde-apps;
   palette = import ../../lib/palette.nix;
 
   # Python interpreter with the dbus-python + GLib bindings needed by the SNI daemon.
@@ -56,7 +57,7 @@ in
           elisa = {
             enable = true;
             appearance = {
-              defaultFilesViewPath = "/home/r6t/music/sync";
+              defaultFilesViewPath = "${userConfig.homeDirectory}/music/sync";
               defaultView = "allAlbums";
             };
             indexer = {
@@ -141,13 +142,7 @@ in
                   }
                   {
                     iconTasks = {
-                      launchers = [
-                        "applications:org.kde.krusader.desktop" # 1
-                        "applications:Alacritty.desktop" # 2
-                        "applications:firefox.desktop" # 3
-                        "applications:obsidian.desktop" # 4
-                        "applications:me.proton.Mail.desktop" # 5
-                      ];
+                      launchers = cfg.taskLaunchers;
                     };
                   }
                   "org.kde.plasma.marginsseparator"
@@ -339,7 +334,7 @@ in
               "kwinrc"."Windows"."DelayFocusInterval" = 0;
               "kwinrc"."Windows"."FocusPolicy" = "FocusFollowsMouse";
               "kwinrc"."Windows"."RollOverDesktops" = true;
-              "kwinrc"."Xwayland"."Scale" = config.mine.home.kde-apps.xwaylandScale;
+              "kwinrc"."Xwayland"."Scale" = cfg.xwaylandScale;
               "plasma-localerc"."Formats"."LANG" = "en_US.UTF-8";
             };
             windows.allowWindowsToRememberPositions = true;
@@ -351,7 +346,7 @@ in
     # SNI tray daemon: systemd user service, enabled per-host via llamaCppLauncher.
     # Runs alongside the KDE session; registers with the StatusNotifierWatcher so
     # the tray icon appears next to wifi/bluetooth/volume.
-    (lib.mkIf config.mine.home.kde-apps.llamaCppLauncher {
+    (lib.mkIf cfg.llamaCppLauncher {
       home-manager.users.${userConfig.username} = {
         home.packages = [ llamaCppTrayScript ];
 

@@ -3,5 +3,5 @@
 {
   imports = [ ./options.nix ];
 
-  config = lib.mkIf config.mine.networkmanager.enable (import ./config.nix);
+  config = lib.mkIf config.mine.networkmanager.enable (import ./config.nix { inherit config; });
 }

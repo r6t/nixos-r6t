@@ -8,8 +8,8 @@ let
     (_: route: {
       extraConfig = lib.concatStringsSep "\n" (lib.filter (s: s != "") [
         (lib.optionalString route.compress "encode gzip zstd")
-        "reverse_proxy ${route.upstream}"
         route.extraConfig
+        "reverse_proxy ${route.upstream}"
       ]);
     })
     cfg.routes;

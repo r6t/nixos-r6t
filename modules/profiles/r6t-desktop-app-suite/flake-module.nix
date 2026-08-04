@@ -3,6 +3,7 @@
 {
   flake.modules.nixos.r6t-desktop-app-suite = { ... }: {
     imports = [
+      inputs.self.modules.nixos.desktop-home-core
       inputs.nix-flatpak.nixosModules.nix-flatpak
       inputs.sops-nix.nixosModules.sops
       ../../flatpak/anki/options.nix
@@ -25,20 +26,12 @@
       ../../flatpak/remmina/config.nix
       ../../flatpak/zoom/options.nix
       ../../flatpak/zoom/config.nix
-      ../../home/alacritty/options.nix
-      ../../home/alacritty/config.nix
       ../../home/bitwarden/options.nix
       ../../home/bitwarden/config.nix
-      ../../home/browsers/options.nix
-      ../../home/browsers/config.nix
       ../../home/darktable/options.nix
       ../../home/darktable/config.nix
       ../../home/drawio/options.nix
       ../../home/drawio/config.nix
-      ../../home/fontconfig/options.nix
-      ../../home/fontconfig/config.nix
-      ../../home/kde-apps/options.nix
-      ../../home/kde-apps/config.nix
       ../../home/mpv/options.nix
       ../../home/mpv/config.nix
       ../../home/obsidian/options.nix
@@ -55,7 +48,6 @@
       ../../nixos/direnv/config.nix
       ../../nixos/npm/options.nix
       ../../nixos/npm/config.nix
-      ../../nixos/sops/options.nix
       ../../nixos/zola/options.nix
       ../../nixos/zola/config.nix
     ];

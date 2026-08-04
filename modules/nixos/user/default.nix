@@ -3,5 +3,5 @@
 {
   imports = [ ./options.nix ];
 
-  config = lib.mkIf config.mine.user.enable (import ./config.nix { inherit inputs lib pkgs; });
+  config = lib.mkIf config.mine.user.enable (import ./config.nix { inherit config inputs lib pkgs; });
 }

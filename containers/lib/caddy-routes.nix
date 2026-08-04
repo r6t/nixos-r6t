@@ -77,6 +77,20 @@
     "paperless.r6t.io" = { upstream = "http://localhost:8000"; };
   };
 
+  pinchflat = {
+    "pinchflat.r6t.io" = {
+      upstream = "http://localhost:8945";
+      extraConfig = ''
+        @outside {
+          not {
+            remote_ip 127.0.0.0/8 ::1 100.64.0.0/10 fd7a:115c:a1e0::/48
+          }
+        }
+        respond @outside 403
+      '';
+    };
+  };
+
   pirate-ship = {
     "radarr.r6t.io" = { upstream = "http://localhost:7878"; };
     "sab.r6t.io" = { upstream = "http://localhost:8081"; };

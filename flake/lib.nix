@@ -1,4 +1,4 @@
-{ config, inputs, self, ... }:
+{ config, inputs, lib, self, ... }:
 
 let
   inherit (import ./common.nix) userConfig;
@@ -16,11 +16,20 @@ let
     };
 in
 {
-  flake.lib = {
-    inherit mkNixosHost;
+  config = {
+    flake.lib = {
+      inherit mkNixosHost;
 
-    mkRegisteredNixosHost = name: mkNixosHost {
-      modules = [ config.flake.modules.nixos.${name} ];
+      mkRegisteredNixosHost = name: mkNixosHost {
+        modules = [ config.flake.modules.nixos.${name} ];
+        specialArgs = defaultSpecialArgs // (config.nixosHostSpecialArgs.${name} or { });
+      };
     };
+  };
+
+  options.nixosHostSpecialArgs = lib.mkOption {
+    type = lib.types.attrsOf (lib.types.attrsOf lib.types.anything);
+    default = { };
+    description = "Per-host specialArgs merged over the flake defaults for nixosSystem.";
   };
 }

@@ -9,6 +9,17 @@
       default = 2;
       description = "Xwayland HiDPI scale factor (kwinrc Xwayland.Scale). Default 2 for 4K displays; set to 1.5 for 1600p displays.";
     };
+    taskLaunchers = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [
+        "applications:org.kde.krusader.desktop"
+        "applications:Alacritty.desktop"
+        "applications:firefox.desktop"
+        "applications:obsidian.desktop"
+        "applications:me.proton.Mail.desktop"
+      ];
+      description = "Application launchers pinned to the KDE icon task manager";
+    };
     llamaCppLauncher = lib.mkEnableOption ''
       Run a StatusNotifierItem (SNI) tray daemon for the llama-cpp systemd service.
       Appears in the KDE system tray alongside wifi/bluetooth/volume. Left-click
