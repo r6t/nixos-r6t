@@ -20,6 +20,10 @@
     "geo.r6t.io" = { upstream = "http://localhost:3033"; };
   };
 
+  gitea = {
+    "git.r6t.io" = { upstream = "http://localhost:3000"; };
+  };
+
   immich = {
     "photos.r6t.io" = { upstream = "http://localhost:2283"; compress = false; };
   };

@@ -9,6 +9,7 @@ let
     "audiobookshelf"
     "changedetection"
     "dawarich"
+    "gitea"
     "hermes"
     "immich"
     "it-tools"
