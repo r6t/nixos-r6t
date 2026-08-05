@@ -1,0 +1,14 @@
+[
+  "anki"
+  "base"
+  "calibre"
+  "element"
+  "inkscape"
+  "kamoso"
+  "libreoffice"
+  "neothesia"
+  "picard"
+  "proton-mail"
+  "remmina"
+  "zoom"
+]

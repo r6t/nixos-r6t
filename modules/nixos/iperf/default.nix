@@ -1,11 +1,7 @@
-{ lib, config, pkgs, ... }: {
+{ lib, config, pkgs, ... }:
 
-  options = {
-    mine.iperf.enable =
-      lib.mkEnableOption "enable iperf";
-  };
+{
+  imports = [ ./options.nix ];
 
-  config = lib.mkIf config.mine.iperf.enable {
-    environment.systemPackages = with pkgs; [ iperf ];
-  };
+  config = lib.mkIf config.mine.iperf.enable (import ./config.nix { inherit pkgs; });
 }

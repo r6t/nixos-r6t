@@ -5,18 +5,30 @@
 #
 # This replaces ~14-line boilerplate files that only declare a flatpak package.
 { name
-, appId
+, appId ? null
+, configModule ? null
+, optionsModule ? null
 , description ? "enable ${name} via flatpak"
 }:
 
-{ lib, config, ... }: {
+{ lib, config, ... }:
+let
+  moduleConfig =
+    if configModule != null then
+      configModule
+    else
+      {
+        services.flatpak.packages = [
+          { inherit appId; origin = "flathub"; }
+        ];
+      };
+in
+{
+  imports = lib.optionals (optionsModule != null) [ optionsModule ];
 
-  options.mine.flatpak.${name}.enable =
-    lib.mkEnableOption description;
-
-  config = lib.mkIf config.mine.flatpak.${name}.enable {
-    services.flatpak.packages = [
-      { inherit appId; origin = "flathub"; }
-    ];
+  options = lib.optionalAttrs (optionsModule == null) {
+    mine.flatpak.${name}.enable = lib.mkEnableOption description;
   };
+
+  config = lib.mkIf config.mine.flatpak.${name}.enable moduleConfig;
 }

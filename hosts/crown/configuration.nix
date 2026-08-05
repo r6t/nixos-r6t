@@ -1,4 +1,4 @@
-{ inputs, lib, pkgs, ... }:
+{ lib, pkgs, ... }:
 
 let
   allCaddyRoutes = import ../../containers/lib/caddy-routes.nix;
@@ -8,6 +8,8 @@ let
   crownContainers = [
     "audiobookshelf"
     "changedetection"
+    "dawarich"
+    "gitea"
     "hermes"
     "immich"
     "it-tools"
@@ -17,9 +19,11 @@ let
     "miniflux"
     "ntfy"
     "paperless"
+    "pinchflat"
     "pirate-ship"
     "searxng"
     "spire"
+    "stirlingpdf"
     "sts"
   ];
 
@@ -27,13 +31,19 @@ let
 in
 {
   imports = [
-    inputs.home-manager.nixosModules.home-manager
-    inputs.sops-nix.nixosModules.sops
-    inputs.nix-flatpak.nixosModules.nix-flatpak
     ./hardware-configuration.nix
-    ../../modules/default.nix
+    ../../modules/nixos/caddy/options.nix
+    ../../modules/nixos/caddy/config.nix
+    ../../modules/nixos/incus-log-collector/config.nix
+    ../../modules/nixos/incus-nightly-rebuild/options.nix
+    ../../modules/nixos/incus-nightly-rebuild/config.nix
+    ../../modules/nixos/mountLuksStore/options.nix
+    ../../modules/nixos/mountLuksStore/config.nix
+    ../../modules/nixos/rdfind/options.nix
+    ../../modules/nixos/rdfind/config.nix
+    ../../modules/nixos/wg-metrics/options.nix
+    ../../modules/nixos/wg-metrics/config.nix
   ];
-
 
   boot = {
     kernel.sysctl = {
@@ -52,12 +62,38 @@ in
     kernelParams = [
       "kvm-amd"
       "kvm"
+
+      # Keep the Thunderbolt eGPU PCIe tunnel from power-saving itself into link
+      # loss. The Razer Core X path logged Data Link Layer errors, retimer
+      # disconnects, then NVIDIA Xid 79 "GPU has fallen off the bus".
+      "pcie_aspm=off"
+      "pcie_port_pm=off"
+      "pcie_ports=native"
+      "pci=realloc"
+      "thunderbolt.clx=0"
+
       "reboot=efi"
     ];
-    supportedFilesystems = [ "zfs" ];
   };
 
-
+  services.udev.extraRules = ''
+    # Razer Core X / RTX 4070 SUPER eGPU path. Keep the tunneled PCIe fabric in D0
+    # so the NVIDIA driver does not lose the GPU after Thunderbolt link flaps.
+    ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x1022", ATTR{device}=="0x14ef", ATTR{power/control}="on"
+    ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x1022", ATTR{device}=="0x14ef", ATTR{d3cold_allowed}="0"
+    ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x1022", ATTR{device}=="0x1668", ATTR{power/control}="on"
+    ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x1022", ATTR{device}=="0x1668", ATTR{d3cold_allowed}="0"
+    ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x1022", ATTR{device}=="0x1669", ATTR{power/control}="on"
+    ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x1022", ATTR{device}=="0x1669", ATTR{d3cold_allowed}="0"
+    ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x8086", ATTR{device}=="0x15d3", ATTR{power/control}="on"
+    ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x8086", ATTR{device}=="0x15d3", ATTR{d3cold_allowed}="0"
+    ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x1b21", ATTR{device}=="0x1242", ATTR{power/control}="on"
+    ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x1b21", ATTR{device}=="0x1242", ATTR{d3cold_allowed}="0"
+    ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{device}=="0x2783", ATTR{power/control}="on"
+    ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{device}=="0x2783", ATTR{d3cold_allowed}="0"
+    ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{device}=="0x22bc", ATTR{power/control}="on"
+    ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{device}=="0x22bc", ATTR{d3cold_allowed}="0"
+  '';
 
   fileSystems."/mnt/thunderkey" = {
     device = "/dev/disk/by-label/thunderkey";
@@ -67,16 +103,14 @@ in
 
   networking = {
     hostId = "5f3e2c0a";
-    nftables.enable = true; # Incus requires nftables
     enableIPv6 = true;
-    useNetworkd = true;
     hostName = "crown";
     dhcpcd.enable = false;
+    nameservers = [ "192.168.6.1" ];
     defaultGateway = {
       address = "192.168.6.1";
       interface = "enp1s0d1";
     };
-    nameservers = [ "192.168.6.1" ];
 
     bridges = {
       br1 = { interfaces = [ "enp1s0" ]; };
@@ -103,27 +137,13 @@ in
     firewall = {
       enable = true;
       checkReversePath = false;
-      allowedTCPPorts = [ 22 443 8443 ];
-      trustedInterfaces = [ "tailscale0" ];
-    };
-  };
-
-  nix.settings.use-cgroups = true;
-
-  time.timeZone = "America/Los_Angeles";
-
-  services = {
-    journald.extraConfig = "SystemMaxUse=500M";
-    resolved = {
-      enable = true;
-      settings.Resolve.Domains = [ "~." ];
+      allowedTCPPorts = [ 443 8443 ];
     };
   };
 
   system.stateVersion = "23.11";
 
   systemd.services = {
-
     tailscale-udp-gro = {
       description = "Enable UDP GRO forwarding for Tailscale on Mellanox interfaces";
       after = [ "network.target" ];
@@ -183,49 +203,22 @@ in
           ExecStartPre = "${pkgs.coreutils}/bin/test -d /mnt/crownstore/incus";
         };
       };
-      systemd-networkd-wait-online.enable = lib.mkForce false;
-      nix-daemon.serviceConfig = {
-        # Limit CPU usage to 50% for 16 vCPU
-        # long GPU container builds impacted general service availability
-        CPUQuota = "800%";
-      };
     };
   };
 
   # modules/
   mine = {
     home = {
-      atuin.enable = true;
-      fish.enable = true;
-      git.enable = true;
       git.signingPubKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEpfN0UYA2Bbn+F9IMMVrtIAI2M0vTTLMHWz4qQ8L5P0 r6t@nixos";
-      home-manager.enable = true;
-      nixvim.enable = true;
-      ssh.enable = true;
     };
-
-    alloy.enable = true;
-    incus-log-collector.enable = true;
-    bolt.enable = true;
-    bootloader.enable = true;
     caddy = {
-      enable = true;
       environmentFile = "/mnt/crownstore/Sync/app-config/caddy/crown.caddy.env";
       routes = crownCaddyRoutes;
     };
-    nixos-r6t-baseline.enable = true;
-    fwupd.enable = true;
-    fzf.enable = true;
-    iperf.enable = true;
-    incus = {
-      enable = true;
-      profileDir = "/home/r6t/git/nixos-r6t/hosts/crown/incus-instances";
-    };
     incus-nightly-rebuild = {
-      enable = true;
       flakePath = "/home/r6t/git/nixos-r6t";
     };
-    localization.enable = true;
+    incus.profileDir = "/home/r6t/git/nixos-r6t/hosts/crown/incus-instances";
 
     mountLuksStore = {
       crownstore = { device = "/dev/disk/by-uuid/f6425279-658b-49bd-8c3a-1645b5936182"; keyFile = "/root/crownstore.key"; mountPoint = "/mnt/crownstore"; };
@@ -234,45 +227,42 @@ in
       thunderbayD = { device = "/dev/disk/by-uuid/5b66a482-036d-4a76-8cec-6ad15fe2360c"; keyFile = "/root/5b66a482.key"; mountPoint = "/mnt/thunderbay/8TB-D"; };
     };
 
-    nfs.exports.Pictures = {
-      sourcePath = "/mnt/thunderbay/8TB-C/Pictures";
-      includePaths = [
-        "cameras"
-        "meme"
-        "reference"
-        "Screenshots"
-        "wallpaper"
-        "wallpaper-vertical"
-      ];
-      fsid = 0;
-      mountPointGuard = "/mnt/thunderbay/8TB-C";
-      after = [
-        "mnt-thunderbay-8TB\\x2dC.mount"
-      ];
-      requires = [
-        "mnt-thunderbay-8TB\\x2dC.mount"
-      ];
-    };
-
-    nix.enable = true;
     nvidia-cuda = {
-      enable = true;
-      open = true; # Open-source driver is preferred for headless/server setups (crown)
       allowExternalGpu = true; # Connected via Thunderbolt eGPU
-      gspFirmware = true; # Required for RTX 50 series (RTX 5060 Ti)
-      containerToolkit = true; # Required for Incus container GPU passthrough
-      installCudaToolkit = false; # Workloads run in LXC, not host
     };
-    prometheus-node-exporter.enable = true;
-    rdfind.enable = true;
-    sops.enable = true;
-    ssh.enable = true;
-    sshfs.enable = true;
-    syncthing.enable = true;
-    tailscale.enable = true;
-    user.enable = true;
+    nfs.exports = {
+      Root = {
+        path = "/srv/nfs";
+        fsid = 0;
+      };
+
+      Pictures = {
+        path = "/srv/nfs/mnt/thunderbay/8TB-C/Pictures";
+        sourcePath = "/mnt/thunderbay/8TB-C/Pictures";
+        includePaths = [
+          "cameras"
+          "meme"
+          "reference"
+          "Screenshots"
+          "wallpaper"
+          "wallpaper-vertical"
+        ];
+        fsid = 1;
+        mountPointGuard = "/mnt/thunderbay/8TB-C";
+        after = [ "mnt-thunderbay-8TB\\x2dC.mount" ];
+        requires = [ "mnt-thunderbay-8TB\\x2dC.mount" ];
+      };
+
+      YouTube = {
+        path = "/srv/nfs/mnt/thunderbay/8TB-D/storage/plex/youtube";
+        sourcePath = "/mnt/thunderbay/8TB-D/storage/plex/youtube";
+        fsid = 2;
+        mountPointGuard = "/mnt/thunderbay/8TB-D";
+        after = [ "mnt-thunderbay-8TB\\x2dD.mount" ];
+        requires = [ "mnt-thunderbay-8TB\\x2dD.mount" ];
+      };
+    };
     wg-metrics = {
-      enable = true;
       instanceMapFile = "/home/r6t/git/nixos-r6t/hosts/crown/incus-instances/instance_map.json";
     };
 

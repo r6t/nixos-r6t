@@ -16,8 +16,20 @@
     "changed.r6t.io" = { upstream = "http://localhost:5000"; };
   };
 
+  dawarich = {
+    "geo.r6t.io" = { upstream = "http://localhost:3033"; };
+  };
+
+  gitea = {
+    "git.r6t.io" = { upstream = "http://localhost:3000"; };
+  };
+
   immich = {
     "photos.r6t.io" = { upstream = "http://localhost:2283"; compress = false; };
+  };
+
+  it-tools = {
+    "tools.r6t.io" = { upstream = "http://localhost:8040"; };
   };
 
   hermes = {
@@ -56,17 +68,31 @@
     "prometheus.r6t.io" = { upstream = "http://127.0.0.1:9001"; };
   };
 
-  # Docker-based containers (no containers/*.nix — use the docker image)
-  it-tools = {
-    "tools.r6t.io" = { upstream = "http://localhost:8040"; };
-  };
-
   ladder = {
     "ladder.r6t.io" = { upstream = "http://localhost:8082"; };
   };
 
+  stirlingpdf = {
+    "spdf.r6t.io" = { upstream = "http://localhost:89"; };
+  };
+
+  # Docker-based containers (no containers/*.nix — use the docker image)
   paperless = {
     "paperless.r6t.io" = { upstream = "http://localhost:8000"; };
+  };
+
+  pinchflat = {
+    "pinchflat.r6t.io" = {
+      upstream = "http://localhost:8945";
+      extraConfig = ''
+        @outside {
+          not {
+            remote_ip 127.0.0.0/8 ::1 100.64.0.0/10 fd7a:115c:a1e0::/48
+          }
+        }
+        respond @outside 403
+      '';
+    };
   };
 
   pirate-ship = {

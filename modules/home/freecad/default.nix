@@ -1,4 +1,4 @@
 import ../../lib/mkHomePackageModule.nix {
   name = "freecad";
-  packages = p: [ p.freecad ];
+  configModule = import ./config.nix;
 }

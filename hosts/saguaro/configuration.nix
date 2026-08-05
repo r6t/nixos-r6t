@@ -1,12 +1,15 @@
-{ inputs, lib, pkgs, ... }:
+{ lib, ... }:
+
+let
+  lanInterface = "enp100s0";
+  wanInterface = "enp101s0";
+in
 
 {
   imports = [
-    inputs.home-manager.nixosModules.home-manager
-    inputs.sops-nix.nixosModules.sops
-    inputs.nix-flatpak.nixosModules.nix-flatpak
     ./hardware-configuration.nix
-    ../../modules/default.nix
+    ../../modules/nixos/mountLuksStore/options.nix
+    ../../modules/nixos/mountLuksStore/config.nix
   ];
 
   boot = {
@@ -21,12 +24,9 @@
       192.168.6.10 loki.r6t.io
     '';
   };
-  nix.settings.use-cgroups = true;
-  time.timeZone = "America/Los_Angeles";
   system.stateVersion = "23.11";
 
   services = {
-    journald.extraConfig = "SystemMaxUse=500M";
     alloy.extraFlags = lib.mkForce [
       "--server.http.listen-addr=192.168.6.1:12346"
       "--disable-reporting"
@@ -43,85 +43,32 @@
   };
 
   systemd = {
-    tmpfiles.rules = [ ];
+    network.links = {
+      # Pin router port names by PCI path. Avoid MAC matches because this flake is public.
+      "10-saguaro-lan" = {
+        matchConfig.Path = "pci-0000:64:00.0";
+        linkConfig.Name = lanInterface;
+      };
+      "10-saguaro-wan" = {
+        matchConfig.Path = "pci-0000:65:00.0";
+        linkConfig.Name = wanInterface;
+      };
+    };
+
     services = {
       # Storage-dependent services - wait for LUKS mount
       incus = {
         after = [ "mnt-kingston240.mount" ];
         requires = [ "mnt-kingston240.mount" ];
       };
-
-      # System configuration
-      systemd-networkd-wait-online.enable = lib.mkForce false;
-      nix-daemon.serviceConfig = {
-        CPUQuota = "800%";
-      };
-
-      # Watchdog: restart haos VM if its USB NIC (enp0s13f0u3c2) disappears.
-      # The Zigbee stick and HA NIC are now on separate USB root hubs, so this should
-      # rarely trigger — it is a last-resort backstop for any future USB disruption.
-      haos-nic-watchdog = {
-        description = "Restart haos VM when USB NIC enp0s13f0u3c2 disappears";
-        after = [ "incus.service" "incus.socket" ];
-        wants = [ "incus.service" ];
-        wantedBy = [ "multi-user.target" ];
-        serviceConfig = {
-          Type = "simple";
-          Restart = "always";
-          RestartSec = "10s";
-        };
-        path = [ pkgs.incus pkgs.coreutils ];
-        script = ''
-          echo "haos-nic-watchdog: starting, monitoring /sys/class/net/enp0s13f0u3c2"
-          while true; do
-            if [ ! -e /sys/class/net/enp0s13f0u3c2 ]; then
-              echo "haos-nic-watchdog: enp0s13f0u3c2 absent — waiting 8s for USB re-enumeration"
-              sleep 8
-              # Check haos is actually running before restarting
-              state=$(incus list haos --format csv --columns s 2>/dev/null | head -1)
-              if [ "$state" = "RUNNING" ]; then
-                echo "haos-nic-watchdog: restarting haos VM to re-attach NIC"
-                incus restart haos
-                echo "haos-nic-watchdog: restart complete, sleeping 30s before resuming watch"
-                sleep 30
-              else
-                echo "haos-nic-watchdog: haos not running (state: $state), skipping restart"
-              fi
-            fi
-            sleep 60
-          done
-        '';
-      };
     };
   };
 
   # modules/
   mine = {
-    home = {
-      atuin.enable = true;
-      fish.enable = true;
-      git.enable = true;
-      home-manager.enable = true;
-      nixvim.enable = true;
-      ssh.enable = true;
-    };
-
-    alloy = {
-      enable = true;
-      lokiUrl = "https://loki.r6t.io/loki/api/v1/push";
-      syslogListen = true;
-    };
     home-router = {
-      enable = true;
-      cake.enable = true;
-      healthCheck.enable = true;
-      wanWatchdog.enable = true;
       lanAddress = "192.168.6.1/24";
-      lanInterface = "enp100s0";
-      wanInterface = "enp101s0";
-      extraInterfaces = [
-        "enp0s13f0u3c2" # USB NIC for Home Assistant VM
-      ];
+      inherit lanInterface wanInterface;
       dhcpServer = {
         poolOffset = 11;
         poolSize = 79; # 11-89
@@ -145,32 +92,17 @@
       };
     };
 
-    bolt.enable = true;
-    bootloader.enable = true;
-    nixos-r6t-baseline.enable = true;
-    fwupd.enable = true;
-    iperf.enable = true;
-    fzf.enable = true;
-    incus = {
-      enable = true;
-      profileDir = "/home/r6t/git/nixos-r6t/hosts/saguaro/incus-instances";
-    };
-    localization.enable = true;
+    incus.profileDir = "/home/r6t/git/nixos-r6t/hosts/saguaro/incus-instances";
+
     mountLuksStore.kingston240 = {
       device = "/dev/disk/by-uuid/d7c2abad-2a6d-47ef-8310-dd57fb1156b9";
       keyFile = "/root/kingston240key";
       mountPoint = "/mnt/kingston240";
     };
-    nix.enable = true;
 
     sops = {
-      enable = true;
       defaultSopsFile = "/mnt/kingston240/sops-ryan/secrets.yaml";
       ageKeyFile = "/mnt/kingston240/age/keys.txt";
     };
-
-    prometheus-node-exporter.enable = true;
-    ssh.enable = true;
-    user.enable = true;
   };
 }

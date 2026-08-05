@@ -56,9 +56,13 @@ def resolve_image_alias(name, instance_map):
 def run(cmd, check=True):
     """Run a command and return (stdout, stderr)."""
     result = subprocess.run(cmd, capture_output=True, text=True, check=False)
+    stdout = result.stdout.strip()
+    stderr = result.stderr.strip()
     if check and result.returncode != 0:
-        return None, result.stderr.strip()
-    return result.stdout.strip(), result.stderr.strip()
+        raise subprocess.CalledProcessError(
+            result.returncode, cmd, output=stdout, stderr=stderr
+        )
+    return stdout, stderr
 
 
 def get_running_lxc_containers():
@@ -102,8 +106,57 @@ def get_instance_base_image(name):
 
 def profile_exists(name):
     """Check if an incus profile exists."""
-    _, stderr = run(["incus", "profile", "show", name], check=False)
-    return "not found" not in (stderr or "")
+    try:
+        run(["incus", "profile", "show", name])
+    except subprocess.CalledProcessError:
+        return False
+    return True
+
+
+def error_message(exc):
+    """Return a useful subprocess error message."""
+    return (exc.stderr or "").strip() or str(exc)
+
+
+def stop_container(name):
+    """Stop a running container, forcing only after a graceful timeout."""
+    print("  Stopping...")
+    try:
+        run(["incus", "stop", name, "--timeout", "30"])
+    except subprocess.CalledProcessError as exc:
+        lower_stderr = (exc.stderr or "").lower()
+        if "deadline" not in lower_stderr and "timeout" not in lower_stderr:
+            print(f"  ERROR: Failed to stop: {error_message(exc)}")
+            return False
+        print("  Graceful stop timed out, forcing...")
+        try:
+            run(["incus", "stop", name, "--force"])
+        except subprocess.CalledProcessError as force_exc:
+            print(f"  ERROR: Failed to force stop: {error_message(force_exc)}")
+            return False
+    return True
+
+
+def delete_container(name):
+    """Delete a stopped container."""
+    print("  Deleting...")
+    try:
+        run(["incus", "delete", name])
+    except subprocess.CalledProcessError as exc:
+        print(f"  ERROR: Failed to delete: {error_message(exc)}")
+        return False
+    return True
+
+
+def launch_container(name, image_alias):
+    """Launch a container from an image alias and matching profile."""
+    print(f"  Launching from image '{image_alias}' with profile '{name}'...")
+    try:
+        run(["incus", "launch", image_alias, name, "--profile", name])
+    except subprocess.CalledProcessError as exc:
+        print(f"  ERROR: Failed to launch: {error_message(exc)}")
+        return False
+    return True
 
 
 def stop_delete_launch(name, image_alias):
@@ -120,27 +173,11 @@ def stop_delete_launch(name, image_alias):
         print(f"  ERROR: No profile '{name}' found, skipping (would lose config)")
         return "failed"
 
-    # Stop
-    print("  Stopping...")
-    _, stderr = run(["incus", "stop", name, "--timeout", "30"], check=False)
-    if stderr and "deadline" in stderr:
-        print("  Graceful stop timed out, forcing...")
-        run(["incus", "stop", name, "--force"], check=False)
-
-    # Delete
-    print("  Deleting...")
-    _, stderr = run(["incus", "delete", name], check=False)
-    if stderr:
-        print(f"  ERROR: Failed to delete: {stderr}")
-        return "failed"
-
-    # Launch
-    print(f"  Launching from image '{image_alias}' with profile '{name}'...")
-    _, stderr = run(
-        ["incus", "launch", image_alias, name, "--profile", name], check=False
-    )
-    if stderr and "error" in stderr.lower():
-        print(f"  ERROR: Failed to launch: {stderr}")
+    if not (
+        stop_container(name)
+        and delete_container(name)
+        and launch_container(name, image_alias)
+    ):
         return "failed"
 
     # Verify
@@ -262,4 +299,10 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except subprocess.CalledProcessError as exc:
+        print(f"ERROR: Command failed: {' '.join(exc.cmd)}")
+        if exc.stderr:
+            print(exc.stderr)
+        sys.exit(1)

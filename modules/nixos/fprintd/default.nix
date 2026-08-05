@@ -1,11 +1,6 @@
 { lib, config, ... }: {
 
-  options = {
-    mine.fprintd.enable =
-      lib.mkEnableOption "enable fprintd";
-  };
+  imports = [ ./options.nix ];
 
-  config = lib.mkIf config.mine.fprintd.enable {
-    services.fprintd.enable = true;
-  };
+  config = lib.mkIf config.mine.fprintd.enable (import ./config.nix);
 }

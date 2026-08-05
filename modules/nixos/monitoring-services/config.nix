@@ -1,0 +1,312 @@
+{ lib, config, pkgs, ... }:
+
+let
+  cfg = config.mine.monitoring-services;
+  alloyConfigFile = ./alloy/config.alloy;
+  grafanaDashboardsDir = ./grafana/dashboards;
+in
+{
+  environment = {
+    etc."alloy/config.alloy" = {
+      text = builtins.readFile alloyConfigFile;
+    };
+    systemPackages = [ pkgs.loki ];
+  };
+
+  services = {
+    alloy = {
+      enable = true;
+      extraFlags = [
+        "--server.http.listen-addr=${cfg.alloy.httpListenAddr}"
+        "--disable-reporting"
+      ];
+    };
+
+    grafana = {
+      enable = true;
+      dataDir = "${cfg.dataDir}/grafana";
+      settings = {
+        server = {
+          http_addr = "127.0.0.1";
+          http_port = cfg.grafana.httpPort;
+          inherit (cfg.grafana) domain;
+          root_url = "https://${cfg.grafana.domain}";
+          enforce_domain = true;
+        };
+        security = {
+          secret_key = "$__file{${cfg.dataDir}/grafana/secret_key}";
+        };
+        "auth.basic" = {
+          enabled = false;
+        };
+        "auth.generic_oauth" = {
+          enabled = true;
+          name = "Pocket ID";
+          allow_sign_up = true;
+          auto_login = true;
+          signout_redirect_url = cfg.grafana.oidc.signoutRedirectUrl;
+          client_id = "$__file{${cfg.dataDir}/grafana/oidc_client_id}";
+          client_secret = "$__file{${cfg.dataDir}/grafana/oidc_client_secret}";
+          scopes = "openid profile email";
+          auth_url = cfg.grafana.oidc.authUrl;
+          token_url = cfg.grafana.oidc.tokenUrl;
+          api_url = cfg.grafana.oidc.apiUrl;
+          use_pkce = true;
+          use_refresh_token = true;
+          role_attribute_path = "contains(groups[*], 'admins') && 'GrafanaAdmin' || 'Viewer'";
+          allow_assign_grafana_admin = true;
+        };
+      };
+      provision = {
+        datasources.settings.datasources = [
+          {
+            name = "Prometheus";
+            type = "prometheus";
+            url = "http://localhost:${toString cfg.prometheus.httpPort}";
+            isDefault = true;
+          }
+          {
+            name = "Loki";
+            type = "loki";
+            url = "http://localhost:${toString cfg.loki.httpListenPort}";
+            jsonData.httpHeaderName1 = "X-Scope-OrgID";
+            jsonData.httpHeaderValue1 = "fake";
+          }
+        ];
+
+        dashboards.settings.providers = [{
+          name = "r6 Managed Dashboards (v2)";
+          options.path = "${grafanaDashboardsDir}";
+          disableDeletion = false;
+          updateIntervalSeconds = 30;
+        }];
+      };
+    };
+
+    loki = {
+      enable = true;
+      dataDir = "${cfg.dataDir}/loki";
+      configuration = {
+        auth_enabled = false;
+        server = {
+          http_listen_port = cfg.loki.httpListenPort;
+          http_listen_address = "127.0.0.1";
+        };
+
+        common = {
+          path_prefix = "${cfg.dataDir}/loki";
+          storage = {
+            filesystem = {
+              chunks_directory = "${cfg.dataDir}/loki/chunks";
+              rules_directory = "${cfg.dataDir}/loki/rules";
+            };
+          };
+          replication_factor = 1;
+        };
+
+        schema_config = {
+          configs = [{
+            from = "2025-02-18";
+            store = "tsdb";
+            object_store = "filesystem";
+            schema = "v13";
+            index = {
+              prefix = "index_";
+              period = "24h";
+            };
+          }];
+        };
+
+        storage_config = {
+          filesystem = {
+            directory = "${cfg.dataDir}/loki/chunks";
+          };
+          tsdb_shipper = {
+            active_index_directory = "${cfg.dataDir}/loki/tsdb-active";
+            cache_location = "${cfg.dataDir}/loki/tsdb-cache";
+            cache_ttl = "${toString (cfg.loki.retentionDays * 24)}h";
+          };
+        };
+
+        ingester = {
+          lifecycler = {
+            ring = {
+              kvstore.store = "memberlist";
+              replication_factor = 1;
+            };
+          };
+          chunk_idle_period = "30m";
+          chunk_target_size = 1572864;
+        };
+
+        limits_config = {
+          reject_old_samples = true;
+          reject_old_samples_max_age = "${toString (cfg.loki.retentionDays * 24)}h";
+          retention_period = "${toString (cfg.loki.retentionDays * 24)}h";
+        };
+
+        compactor = {
+          working_directory = "${cfg.dataDir}/loki/compactor";
+          compaction_interval = "15m";
+        };
+      };
+    };
+
+    prometheus = {
+      enable = true;
+      port = cfg.prometheus.httpPort;
+      stateDir = "monitoring/prometheus";
+      inherit (cfg.prometheus) retentionTime;
+      scrapeConfigs =
+        lib.optionals (cfg.prometheus.scrapeTargets != [ ]) [
+          {
+            job_name = "r6-nix-systems";
+            honor_labels = true;
+            static_configs = [{
+              targets = cfg.prometheus.scrapeTargets;
+            }];
+            relabel_configs = [
+              {
+                source_labels = [ "__address__" ];
+                # Extract hostname from address, handles IPs too.
+                regex = "([^:.]+).*";
+                replacement = "$1";
+                target_label = "nodename";
+              }
+              {
+                source_labels = [ "nodename" ];
+                regex = "192\\.168\\.6\\.1";
+                replacement = "saguaro";
+                target_label = "nodename";
+              }
+            ];
+            metric_relabel_configs = [
+              {
+                source_labels = [ "instance" ];
+                regex = "([^:.]+).*";
+                replacement = "$1";
+                target_label = "nodename";
+              }
+              {
+                source_labels = [ "instance" ];
+                regex = "192\\.168\\.6\\.1:.*";
+                replacement = "saguaro";
+                target_label = "nodename";
+              }
+            ];
+          }
+        ]
+        ++ lib.optionals (cfg.prometheus.containerScrapeTargets != [ ]) [
+          {
+            job_name = "r6-nix-containers";
+            honor_labels = true;
+            static_configs = [{
+              targets = cfg.prometheus.containerScrapeTargets;
+              labels = { is_lxc = "true"; };
+            }];
+            relabel_configs = [
+              {
+                source_labels = [ "__address__" ];
+                # For containers, extract the name and set it as nodename.
+                regex = "([^:]+):.*";
+                replacement = "$1 (LXC)";
+                target_label = "nodename";
+              }
+            ];
+            metric_relabel_configs = [
+              {
+                source_labels = [ "instance" ];
+                regex = "([^:]+):.*";
+                replacement = "$1 (LXC)";
+                target_label = "nodename";
+              }
+            ];
+          }
+        ]
+        ++ lib.optionals (cfg.prometheus.incusMetricsTargets != [ ]) [
+          {
+            job_name = "incus";
+            metrics_path = "/1.0/metrics";
+            scheme = "https";
+            tls_config = {
+              insecure_skip_verify = true;
+            };
+            static_configs = [{
+              targets = cfg.prometheus.incusMetricsTargets;
+            }];
+            relabel_configs = [
+              {
+                source_labels = [ "__address__" ];
+                regex = "([^:.]+).*";
+                replacement = "$1";
+                target_label = "nodename";
+              }
+              {
+                source_labels = [ "nodename" ];
+                regex = "192\\.168\\.6\\.1";
+                replacement = "saguaro";
+                target_label = "nodename";
+              }
+            ];
+          }
+        ];
+      ruleFiles = [
+        (pkgs.writeText "alert.rules" ''
+          groups:
+          - name: node_alerts
+            rules:
+            - alert: HighMemoryUsage
+              expr: (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) * 100 < 10
+              for: 5m
+        '')
+      ];
+    };
+  };
+
+  systemd = {
+    services =
+      let
+        mountUnit = (lib.strings.replaceStrings [ "/" ] [ "-" ] (lib.strings.removePrefix "/" cfg.dataDir)) + ".mount";
+        needsMountDependency = !(lib.hasPrefix "/var/lib" cfg.dataDir);
+        mountDependency = lib.optionalAttrs needsMountDependency {
+          after = [ mountUnit ];
+          requires = [ mountUnit ];
+        };
+      in
+      {
+        alloy = mountDependency // {
+          serviceConfig = {
+            User = "root";
+            Group = "root";
+            DynamicUser = lib.mkForce false;
+          };
+        };
+
+        grafana = mountDependency // {
+          serviceConfig.StateDirectory = lib.mkForce "monitoring/grafana";
+        };
+
+        loki = mountDependency // {
+          serviceConfig.StateDirectory = lib.mkForce "monitoring/loki";
+        };
+
+        prometheus = mountDependency // {
+          serviceConfig.StateDirectory = lib.mkForce "monitoring/prometheus";
+        };
+      };
+
+    tmpfiles.rules = [
+      "L+ /var/lib/monitoring - - - - ${cfg.dataDir}"
+      "d ${cfg.dataDir}/loki 0755 loki loki - -"
+      "d ${cfg.dataDir}/loki/tsdb-active 0755 loki loki - -"
+      "d ${cfg.dataDir}/loki/tsdb-active/uploader 0755 loki loki - -"
+      "d ${cfg.dataDir}/loki/tsdb-cache 0755 loki loki - -"
+      "d ${cfg.dataDir}/loki/compactor 0755 loki loki - -"
+      "d ${cfg.dataDir}/loki/chunks 0755 loki loki - -"
+      "d ${cfg.dataDir}/loki/rules 0755 loki loki - -"
+      "d ${cfg.dataDir}/loki/delete_requests 0755 loki loki - -"
+      "d ${cfg.dataDir}/grafana 0755 grafana grafana - -"
+      "d ${cfg.dataDir}/prometheus 0755 prometheus prometheus - -"
+    ];
+  };
+}

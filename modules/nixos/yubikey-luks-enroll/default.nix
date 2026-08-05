@@ -124,10 +124,7 @@ let
   };
 in
 {
-  options = {
-    mine.yubikey-luks-enroll.enable =
-      lib.mkEnableOption "enable YubiKey HMAC-SHA1 LUKS enrollment tool";
-  };
+  imports = [ ./options.nix ];
 
   config = lib.mkIf cfg.enable {
     environment.systemPackages = [

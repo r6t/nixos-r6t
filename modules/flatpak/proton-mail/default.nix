@@ -1,4 +1,5 @@
 import ../../lib/mkFlatpakModule.nix {
   name = "proton-mail";
-  appId = "me.proton.Mail";
+  optionsModule = ./options.nix;
+  configModule = import ./config.nix;
 }

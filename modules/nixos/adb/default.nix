@@ -1,11 +1,6 @@
 { lib, config, ... }: {
 
-  options = {
-    mine.adb.enable =
-      lib.mkEnableOption "enable adb";
-  };
+  imports = [ ./options.nix ];
 
-  config = lib.mkIf config.mine.adb.enable {
-    programs.adb.enable = true;
-  };
+  config = lib.mkIf config.mine.adb.enable (import ./config.nix);
 }

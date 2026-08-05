@@ -32,7 +32,6 @@ set -l instances \
     ntfy:106-br1-ntfy \
     paperless:106-br1-paperless \
     pirate-ship:162-br1-pirate-ship \
-    pocket-id:133-br1-pocket-id \
     searxng:101-br1-searxng \
     sts:194-br1-sts
 

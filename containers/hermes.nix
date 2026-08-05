@@ -36,6 +36,12 @@ in
 
   mine.docker.enable = true;
 
+  mine.tailscale = {
+    enable = true;
+    ephemeral = true;
+    authKeyFile = "/etc/tailscale/auth-key";
+  };
+
   # Docker bridge networks and some containerized services expect this.
   boot.kernel.sysctl."vm.overcommit_memory" = "1";
 
@@ -58,6 +64,7 @@ in
       image = "nousresearch/hermes-agent:latest";
       pull = "always";
       cmd = [ "gateway" "run" ];
+      environmentFiles = [ "/var/lib/hermes/.env" ];
       volumes = [
         "/var/lib/hermes:/opt/data"
         "/mnt/git:/mnt/git"
@@ -66,6 +73,8 @@ in
         HERMES_UID = "10000";
         HERMES_GID = "10000";
         HERMES_DASHBOARD = "1";
+        HERMES_DASHBOARD_HOST = "0.0.0.0";
+        HERMES_DASHBOARD_PORT = "9119";
         HERMES_DASHBOARD_PUBLIC_URL = "https://hermes.r6t.io";
         API_SERVER_ENABLED = "true";
         API_SERVER_HOST = "0.0.0.0";

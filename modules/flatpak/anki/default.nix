@@ -1,4 +1,5 @@
 import ../../lib/mkFlatpakModule.nix {
   name = "anki";
-  appId = "net.ankiweb.Anki";
+  optionsModule = ./options.nix;
+  configModule = import ./config.nix;
 }

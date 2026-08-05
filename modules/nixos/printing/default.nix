@@ -1,22 +1,7 @@
-{ lib, config, pkgs, ... }: {
+{ lib, config, pkgs, ... }:
 
-  options = {
-    mine.printing.enable =
-      lib.mkEnableOption "enable printing with brlaser + discovery";
-  };
+{
+  imports = [ ./options.nix ];
 
-  config = lib.mkIf config.mine.printing.enable {
-    environment.systemPackages = with pkgs; [ cups-filters ];
-    services = {
-      avahi = {
-        enable = true;
-        # AirPrint support
-        nssmdns4 = true;
-      };
-      printing = {
-        drivers = [ pkgs.brlaser ];
-        enable = true;
-      };
-    };
-  };
+  config = lib.mkIf config.mine.printing.enable (import ./config.nix { inherit pkgs; });
 }

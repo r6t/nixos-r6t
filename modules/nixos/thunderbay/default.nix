@@ -1,8 +1,6 @@
 { lib, config, pkgs, ... }: {
-  options = {
-    mine.thunderbay.enable =
-      lib.mkEnableOption "Unlock and mount drives in thunderbay box";
-  };
+  imports = [ ./options.nix ];
+
   config = lib.mkIf config.mine.thunderbay.enable {
     fileSystems."/mnt/thunderkey" = {
       device = "/dev/disk/by-label/thunderkey";

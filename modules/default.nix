@@ -1,24 +1,104 @@
-# Auto-discover all modules under flatpak/, home/, and nixos/.
-# Any subdirectory containing a default.nix is imported as a module.
-# The lib/ directory is excluded (it contains helpers, not modules).
 _:
 
 let
-  discoverModules = dir:
-    let
-      entries = builtins.readDir (./. + "/${dir}");
-      subdirs = builtins.filter
-        (name: entries.${name} == "directory")
-        (builtins.attrNames entries);
-      hasDefault = name:
-        builtins.pathExists (./. + "/${dir}/${name}/default.nix");
-    in
-    map (name: ./. + "/${dir}/${name}/default.nix")
-      (builtins.filter hasDefault subdirs);
+  flatpakModules = import ./flatpak/modules.nix;
+
+  homeModules = [
+    "alacritty"
+    "atuin"
+    "bitwarden"
+    "browsers"
+    "certbot"
+    "darktable"
+    "drawio"
+    "fish"
+    "fontconfig"
+    "freecad"
+    "git"
+    "home-manager"
+    "k2pdfopt"
+    "kde-apps"
+    "makemkv"
+    "mpv"
+    "nixvim"
+    "obsidian"
+    "obs-studio"
+    "orca-slicer"
+    "protonmail-desktop"
+    "signal-desktop"
+    "ssh"
+    "teams-for-linux"
+    "virt-viewer"
+    "webcord"
+    "yt-dlp"
+    "zellij"
+  ];
+
+  nixosModules = [
+    "adb"
+    "alloy"
+    "apache"
+    "asusctl"
+    "bluetooth"
+    "bolt"
+    "bootloader"
+    "caddy"
+    "czkawka"
+    "ddc-i2c"
+    "direnv"
+    "docker"
+    "exit-node-routing"
+    "fonts"
+    "fprintd"
+    "fwupd"
+    "fzf"
+    "home-router"
+    "immich"
+    "incus"
+    "incus-log-collector"
+    "incus-nightly-rebuild"
+    "iperf"
+    "jellyfin"
+    "kde"
+    "llama-cpp"
+    "localization"
+    "monitoring-services"
+    "mountLuksStore"
+    "mullvad"
+    "networkmanager"
+    "nfs"
+    "nix"
+    "nixos-r6t-baseline"
+    "npm"
+    "nvidia-cuda"
+    "open-webui"
+    "pinchflat"
+    "pocket-id"
+    "printing"
+    "prometheus-node-exporter"
+    "rdfind"
+    "sops"
+    "sound"
+    "ssh"
+    "sshfs"
+    "stable-diffusion-cpp"
+    "steam"
+    "syncthing"
+    "tailscale"
+    "thunderbay"
+    "tpm"
+    "usb4-sfp"
+    "user"
+    "v4l-utils"
+    "wg-metrics"
+    "yubikey-luks-enroll"
+    "zfs-pool"
+    "zola"
+  ];
 in
 {
   imports =
-    discoverModules "flatpak"
-    ++ discoverModules "home"
-    ++ discoverModules "nixos";
+    (map (name: ./flatpak/${name}/default.nix) flatpakModules)
+    ++ (map (name: ./home/${name}/default.nix) homeModules)
+    ++ (map (name: ./nixos/${name}/default.nix) nixosModules);
 }

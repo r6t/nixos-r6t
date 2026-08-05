@@ -1,4 +1,4 @@
-# Packages shared between bare-metal hosts (nixos-r6t-baseline) and LXC containers (base.nix).
+# Packages shared between bare-metal hosts (r6t-base) and LXC containers (base.nix).
 # Each consumer adds their own extras on top.
 pkgs: with pkgs; [
   curl

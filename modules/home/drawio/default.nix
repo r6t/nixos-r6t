@@ -1,4 +1,5 @@
 import ../../lib/mkHomePackageModule.nix {
   name = "drawio";
-  packages = p: [ p.drawio ];
+  optionsModule = ./options.nix;
+  configModule = import ./config.nix;
 }

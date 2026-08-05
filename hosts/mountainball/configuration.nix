@@ -2,16 +2,27 @@
 
 {
   imports = [
-    inputs.home-manager.nixosModules.home-manager
     inputs.hardware.nixosModules.framework-13-7040-amd
-    inputs.sops-nix.nixosModules.sops
-    inputs.nix-flatpak.nixosModules.nix-flatpak
     ./hardware-configuration.nix
-    ../../modules/default.nix
+    ../../modules/home/makemkv/options.nix
+    ../../modules/home/makemkv/config.nix
+    ../../modules/home/obs-studio/options.nix
+    ../../modules/home/obs-studio/config.nix
+    ../../modules/home/orca-slicer/options.nix
+    ../../modules/home/orca-slicer/config.nix
+    ../../modules/home/virt-viewer/options.nix
+    ../../modules/home/virt-viewer/config.nix
+    ../../modules/nixos/ddc-i2c/options.nix
+    ../../modules/nixos/ddc-i2c/config.nix
+    ../../modules/nixos/docker/options.nix
+    ../../modules/nixos/docker/config.nix
+    ../../modules/nixos/mullvad/options.nix
+    ../../modules/nixos/mullvad/config.nix
+    ../../modules/nixos/rdfind/options.nix
+    ../../modules/nixos/rdfind/config.nix
   ];
 
   boot = {
-    loader.systemd-boot.configurationLimit = 3;
     resumeDevice = "/dev/mapper/luks-swap";
     kernelParams = [
       "resume=UUID=dea57a9c-895b-407d-b45f-f4cea665864f"
@@ -23,24 +34,18 @@
     firewall = {
       enable = true;
       checkReversePath = false;
-      allowedTCPPorts = [ 22 ];
     };
   };
-
 
   systemd = {
     services = {
       nix-daemon.serviceConfig = {
-        # Limit CPU usage to 50% for 16 vCPU and bound RAM use, so long
-        # builds don't impact general desktop responsiveness.
-        CPUQuota = "800%";
+        # Bound RAM use so long builds don't impact general desktop responsiveness.
         MemoryMax = "80%";
         MemoryHigh = "70%";
       };
     };
   };
-
-  services.fprintd.enable = false;
 
   # Touchpad: PIXA3854:00 093A:0274 (Framework 13 AMD built-in trackpad)
   home-manager.users.${userConfig.username} = {
@@ -76,8 +81,6 @@
 
   system.stateVersion = "23.11";
 
-  time.timeZone = "America/Los_Angeles";
-
   # Mountainball is iGPU-only (Radeon 780M / gfx1103, RDNA 3). It used to host an
   # R9700 eGPU via Thunderbolt and ran local LLM inference docked at a desk; the
   # R9700 has since moved to crown for headless inference. The previous eGPU
@@ -87,118 +90,42 @@
 
   # modules
   mine = {
-    flatpak = {
-      base.enable = true;
-      anki.enable = true;
-      calibre.enable = true;
-      element.enable = true;
-      inkscape.enable = true;
-      libreoffice.enable = true;
-      picard.enable = true;
-      proton-mail.enable = true;
-      remmina.enable = true;
-      zoom.enable = true;
-    };
-
     home = {
-      alacritty.enable = true;
-      atuin.enable = true;
-      bitwarden.enable = true;
-      browsers.enable = true;
-      darktable.enable = true;
-      drawio.enable = true;
-      fish.enable = true;
-      fontconfig.enable = true;
-      freecad.enable = false; # 20260118 builds failing on pagmo
-      git.enable = true;
       git.signingPubKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINFSoABOk+KRUGtbxpS5PjcIHy4cYh7GOWxC7rNzv3Ua r6t@mountainball";
-      home-manager.enable = true;
-      hyprland.enable = false;
-      gnome-apps.enable = false;
-      kde-apps.enable = true;
-      makemkv.enable = true;
-      mako.enable = false;
-      mpv.enable = true;
       nixvim = {
-        enable = true;
         enableSopsSecrets = true;
         # HA MCP is intentionally NOT enabled globally here.
         # It is only active when opencode is run from ~/git/appdaemons, via the
         # project-level opencode.json in that repo (not managed by this flake).
 
-        # opencode -> remote TensorRT-LLM on crown via caddy + Route53.
-        # Crown's TensorRT server defaults Qwen3 thinking off for direct
-        # responses. The `thinking` variant opts in per request through
-        # chat_template_kwargs.
+        # opencode -> remote llama.cpp on crown via caddy + Route53.
+        # Crown serves Qwen3-Coder 30B-A3B through llama.cpp.
         opencode-llamacpp = {
           enable = true;
           baseURL = "https://llm.r6t.io/v1";
           models = {
-            # Model id MUST match the alias TensorRT-LLM reports at /v1/models.
+            # Model id MUST match the alias llama.cpp reports at /v1/models.
             # Verify with:
             #   curl -s https://llm.r6t.io/v1/models | jq '.data[].id'
-            "nvidia/Qwen3-8B-FP8" = {
-              name = "Qwen3 8B FP8 (crown TensorRT)";
-              context = 8192;
-              output = 1024;
-              variants = {
-                # Cycle variants in opencode with the variant_cycle keybind.
-                thinking.chat_template_kwargs = { enable_thinking = true; };
-              };
+            "Qwen3-Coder-30B-A3B-Instruct-UD-Q4_K_XL" = {
+              name = "Qwen3-Coder 30B-A3B UD-Q4_K_XL (crown)";
+              context = 65536;
+              output = 4096;
             };
           };
         };
       };
-      obs-studio.enable = true;
-      obsidian.enable = true;
-      orca-slicer.enable = true;
-      signal-desktop.enable = true;
-      ssh.enable = true;
-      teams-for-linux.enable = true;
-      virt-viewer.enable = true;
-      webcord.enable = true;
-      zellij.enable = true;
     };
+    nfs.mounts = {
+      photos = {
+        device = "crown:/mnt/thunderbay/8TB-C/Pictures";
+        mountPoint = "/mnt/thunderbay/8TB-C/Pictures";
+      };
 
-    alloy.enable = true;
-    bluetooth.enable = true;
-    bolt.enable = true;
-    bootloader.enable = true;
-    czkawka.enable = true;
-    direnv.enable = true;
-    ddc-i2c.enable = true;
-    docker.enable = true;
-    nixos-r6t-baseline.enable = true;
-    fonts.enable = true;
-    fwupd.enable = true;
-    fzf.enable = true;
-    hypr.enable = false;
-    iperf.enable = true;
-    gnome.enable = false;
-    kde.enable = true;
-    localization.enable = true;
-    mullvad.enable = true;
-    networkmanager.enable = true;
-    nix.enable = true;
-    nfs.mounts.photos = {
-      mountPoint = "/mnt/thunderbay/8TB-C/Pictures";
-      device = "crown:/";
+      pinchflat-youtube = {
+        device = "crown:/mnt/thunderbay/8TB-D/storage/plex/youtube";
+        mountPoint = "/mnt/thunderbay/8TB-D/storage/plex/youtube";
+      };
     };
-    npm.enable = true;
-    printing.enable = true;
-    pinchflat.enable = true;
-    prometheus-node-exporter.enable = true;
-    rdfind.enable = true;
-    sops.enable = true;
-    sound.enable = true;
-    ssh.enable = true;
-    sshfs.enable = true;
-    steam.enable = true;
-    syncthing.enable = true;
-    tailscale.enable = true;
-    usb4-sfp.enable = true;
-    user.enable = true;
-    v4l-utils.enable = true;
-    zola.enable = true;
   };
 }

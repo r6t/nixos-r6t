@@ -1,4 +1,5 @@
 import ../../lib/mkFlatpakModule.nix {
   name = "zoom";
-  appId = "us.zoom.Zoom";
+  optionsModule = ./options.nix;
+  configModule = import ./config.nix;
 }

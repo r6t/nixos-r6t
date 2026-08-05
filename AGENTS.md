@@ -37,6 +37,7 @@
 
 - Repeated configurations are stored in modules, with host-specific details defined in hosts/
 - Use options in modules where it makes sense, hardcoding general config values in modules is ok if I'm unlikely to use other options across my workstations and servers.
+- Prefer preserving absolute paths for mounts and remote storage clients when possible, especially NFS paths. Matching local and remote paths makes service config easier to reason about and avoids host-specific path translation mistakes.
 
 ## HA API access
 

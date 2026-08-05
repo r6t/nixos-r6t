@@ -58,15 +58,17 @@ let
   ];
 
   # Spec-decoding flags for ROCmFP4 + MTP per fork's published recipe.
-  # Reasoning-on, n-max=3, q4 draft KV — the published 80.1 sustained / 104.3
-  # burst tok/s configuration on Qwen3.6-35B-A3B-MTP at 262K context.
+  # Reasoning is off by default so OpenAI-compatible clients get visible
+  # content without spending short completions entirely in reasoning_content.
+  # Clients can opt in per request with chat_template_kwargs.enable_thinking=true.
+  # n-max=2 is the fork's recommended setting for reasoning-off decode.
   rocmfp4MtpFlags = [
     "--reasoning"
-    "on"
+    "off"
     "--spec-type"
     "draft-mtp"
     "--spec-draft-n-max"
-    "3"
+    "2"
     "--spec-draft-n-min"
     "0"
     "--spec-draft-p-min"

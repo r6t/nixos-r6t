@@ -30,9 +30,19 @@ devices:
     shift: "true"
     source: /mnt/crownstore/app-storage/hermes
     type: disk
+  llm-api-port:
+    bind: container
+    connect: tcp:127.0.0.1:8088
+    listen: tcp:127.0.0.1:8088
+    type: proxy
   root:
     path: /
     pool: default
+    type: disk
+  tailscale-auth:
+    path: /etc/tailscale/auth-key
+    shift: "true"
+    source: /mnt/crownstore/Sync/app-config/tailscale/exit-node-auth-key
     type: disk
   seed-meta-data:
     path: /var/lib/cloud/seed/nocloud/meta-data

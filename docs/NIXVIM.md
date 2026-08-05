@@ -1,92 +1,68 @@
 # Neovim (nixvim)
 
-Source of truth: `modules/home/nixvim/default.nix`. Uses
-[nixvim](https://github.com/nix-community/nixvim) as the framework — plugins
-and settings are declared as Nix attrs, no `init.lua` to edit.
+`modules/home/nixvim/default.nix` is the source of truth. Options live in
+`modules/home/nixvim/options.nix`. The config uses nixvim Nix options plus small
+Lua snippets in `extraConfigLua`; there is no separate `init.lua`.
 
-## Working with this config
+## Contract
 
-- **Add a plugin**: find the right grouped block in `default.nix` (plugins are
-  loosely clustered by domain — git, lsp, ui, completion, etc.). Add
-  `<plugin>.enable = true;` and any settings underneath it. Rebuild with `nrs`
-  on the workstation. nixvim's option names usually match the upstream plugin
-  name with `-` instead of `.` (e.g. `git-conflict-nvim` → `git-conflict`).
-- **Remove a plugin**: prefer `.enable = false;` over deleting the line. Intent
-  stays visible, easier to revert, and leaves a trail when someone wonders why
-  a plugin isn't loading.
-- **Per-host vs shared**: nixvim is a home-manager module enabled per host via
-  `mine.home.nixvim.enable`. Host-specific tweaks (e.g. enabling
-  `opencode-llamacpp` only on mountainball) live in the host's configuration,
-  not this module.
-- **opencode integration**: provider config and per-model variants are built
-  in this same file — search for `opencode-llamacpp` / `opencode-ollama`.
-  Enabled per host via `mine.home.nixvim.opencode-llamacpp` (see
-  `docs/LLM-HOSTING-TUNING.md` for the surrounding context).
+- Enable with `mine.home.nixvim.enable`.
+- Keep shared editor behavior in `modules/home/nixvim/default.nix`.
+- Keep host-specific model endpoints, secrets, and OpenCode options in host
+  configs under `mine.home.nixvim.*`.
+- Preserve standalone Home Manager compatibility. The module receives
+  `isNixOS`; SOPS-backed secrets are NixOS-only.
+- Use nixvim plugin options when available. Use `extraPlugins` only when nixvim
+  does not expose a plugin yet or a local plugin needs custom handling.
 
-## Licensing pitfalls
+## Main Options
 
-Nixpkgs' vim-plugin auto-generator defaults `meta.license = lib.licenses.unfree`
-for any plugin whose upstream license can't be detected. This is correct
-conservative behavior — not a nixpkgs bug. Most often it means the upstream
-repo has no `LICENSE` file at all.
+- `mine.home.nixvim.enableSopsSecrets`: provisions editor/AI secrets on NixOS and
+  loads them into fish session env.
+- `mine.home.nixvim.enableHaMcp`: adds the Home Assistant MCP server to generated
+  OpenCode config.
+- `mine.home.nixvim.opencode-llamacpp.enable`: writes an OpenAI-compatible
+  OpenCode provider for llama-server.
+- `mine.home.nixvim.opencode-llamacpp.baseURL`: llama-server `/v1` endpoint.
+- `mine.home.nixvim.opencode-llamacpp.models`: model aliases, picker names,
+  optional limits, and per-model variants.
 
-- **Don't work around with `allowUnfreePredicate`**: if upstream has no
-  LICENSE file, the code is legally all-rights-reserved by the author.
-  Allowlisting it via `allowUnfreePredicate` lets it build but doesn't change
-  the legal status. Find a properly-licensed alternative instead.
-- **If upstream genuinely has a license** that nixpkgs failed to detect, the
-  right fix is a PR to nixpkgs adding
-  `meta.license = lib.licenses.<x>;` to the plugin's block in
-  `pkgs/applications/editors/vim/plugins/overrides.nix`.
+Model keys must match the server-reported alias or model id. Variant attrs are
+sent in the OpenCode request body; use them for per-request llama-server options
+such as Qwen thinking mode.
 
-## Currently disabled: `git-conflict.nvim`
+## Current Shape
 
-Provides inline merge-conflict resolution UI (`co`/`ct`/`cb`/`c0` keybinds to
-pick ours/theirs/both/none on a `<<<<<<<` block). Upstream
-`akinsho/git-conflict.nvim` has no LICENSE file, so nixpkgs (correctly) marks
-it unfree and the build refuses to evaluate it without explicit
-`allowUnfreePredicate` allowlisting, which we don't want to do.
+- Theme: oxocarbon for Neovim and generated OpenCode TUI config.
+- Packages: formatters, linters, media preview tools, `opencode`, and
+  `tree-sitter`.
+- Extra plugins: `direnv-vim`, `opencode-nvim`, `oxocarbon-nvim`, `snacks-nvim`,
+  and `nvim-lspconfig`.
+- Keymaps include zellij-aware `<C-h/j/k/l>` navigation, OpenCode actions,
+  diagnostics, LSP, telescope/snacks, and editing helpers.
+- Treesitter grammar packages are taken from the configured treesitter package to
+  avoid mixed-package warnings.
 
-What we use today instead:
+## Editing Rules
 
-- `gitsigns.nvim` (MIT) — left-gutter change indicators, hunk staging
-- `vim-fugitive` (Vim license) — `:Git mergetool`, `:Gdiffsplit!`, status
-- Native `<<<<<<<` / `=======` / `>>>>>>>` markers for direct edits
+- Add plugins in the existing grouped blocks in `default.nix`.
+- Prefer explicit `.enable = false;` for intentionally disabled plugins.
+- Do not allowlist unlicensed plugins with `allowUnfreePredicate`.
+- If a plugin has a real upstream license but nixpkgs misses it, fix nixpkgs'
+  generated plugin metadata instead.
+- Run `./format.fish` after changes. Do not run builds or activations as an
+  agent.
 
-### TODO: evaluate a replacement
+## Disabled Plugins
 
-When convenient, try one of these properly-licensed alternatives:
+- `git-conflict.nvim`: disabled because upstream has no `LICENSE`; nixpkgs marks
+  it unfree. Current replacements are `gitsigns.nvim`, `vim-fugitive`, and manual
+  conflict-marker edits. Properly licensed candidates: `diffview-nvim`,
+  `conflict-marker-vim`, or `mini.diff`.
+- `zellij-nvim`: removed because upstream has no `LICENSE` and is archived. If a
+  unified pane-navigation plugin is wanted later, prefer `smart-splits.nvim`.
 
-- `diffview-nvim` (GPL-3.0) — `:DiffviewOpen` gives a 3-way merge view; the
-  closest UX equivalent to git-conflict.nvim
-- `conflict-marker-vim` (MIT) — simpler; the plugin git-conflict.nvim was
-  originally inspired by
-- `mini.diff` (MIT) — part of the `mini.nvim` family if you want broader
-  mini.\* adoption
+## Related Docs
 
-Process: flip the chosen plugin's `.enable = true;`, `nrs`, test on a real
-conflict, decide before committing.
-
-## Removed: `zellij-nvim`
-
-Provided unified `<C-h/j/k/l>` navigation between vim windows and zellij
-panes. Upstream `Lilja/zellij.nvim` has no LICENSE file AND the repository
-is archived (no longer maintained), so it's not getting a license added
-retroactively. Removed from `extraPlugins` in the nixvim block.
-
-Day-to-day impact: vim's built-in `<C-w>h/j/k/l` still moves between vim
-windows; zellij's own keybinds still move between zellij panes; you just
-have to use the right one for the right boundary instead of a single
-unified keystroke.
-
-### TODO: evaluate a replacement
-
-`smart-splits.nvim` (MIT) is the maintained successor that most former
-`zellij.nvim` users moved to. It also handles tmux, wezterm, and kitty
-seamlessly. Add as `smart-splits.enable = true;` (or via `extraPlugins`)
-when convenient.
-
-## Related docs
-
-- `docs/LLM-HOSTING-TUNING.md` — opencode + local llama-server integration
-- `docs/THEMING.md` — colorscheme (oxocarbon)
+- `docs/LLM-HOSTING-TUNING.md`: OpenCode and llama-server model context.
+- `docs/THEMING.md`: shared palette and oxocarbon styling.
