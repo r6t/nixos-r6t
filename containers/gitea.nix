@@ -25,7 +25,7 @@
         START_SSH_SERVER = true;
         SSH_LISTEN_HOST = "0.0.0.0";
         SSH_LISTEN_PORT = 2222;
-        SSH_DOMAIN = "ssh.git.r6t.io";
+        SSH_DOMAIN = "git.r6t.io";
         SSH_PORT = 2222;
         BUILTIN_SSH_SERVER_USER = "git";
         SSH_USER = "git";
