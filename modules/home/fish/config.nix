@@ -1,7 +1,7 @@
-{ lib, pkgs, userConfig, isNixOS ? true, ... }:
+{ lib, config, pkgs, userConfig, isNixOS ? true, ... }:
 
 let
-  homeDir = userConfig.homeDirectory;
+  cfg = config.mine.home.fish;
   wrapHome = import ../../lib/mkPortableHomeConfig.nix { inherit isNixOS userConfig; };
 in
 wrapHome {
@@ -69,9 +69,9 @@ wrapHome {
 
     functions = {
       nd = {
-        description = "Enter a named nixos-r6t devshell (aws, media, etc). Default devshell auto-activates via direnv in ~/git/nixos-r6t.";
+        description = "Enter a named devshell from the configured flake path (aws, media, etc).";
         body = ''
-          set -l flake_path "${homeDir}/git/nixos-r6t"
+          set -l flake_path "${cfg.flakePath}"
           
           if not test -d "$flake_path"
             echo "Error: No flake found at $flake_path"
@@ -189,7 +189,7 @@ wrapHome {
       nrs = {
         description = "Run nixos-rebuild switch --flake for the current host.";
         body = ''
-          set flake_path "${homeDir}/git/nixos-r6t"
+          set flake_path "${cfg.flakePath}"
           set current_hostname (hostname)
           echo "nixos-rebuild for: $current_hostname"
           echo "sudo nixos-rebuild switch --flake '$flake_path#$current_hostname'"

@@ -3,5 +3,5 @@
 {
   imports = [ ./options.nix ];
 
-  config = lib.mkIf config.mine.home.fish.enable (import ./config.nix { inherit lib pkgs userConfig isNixOS; });
+  config = lib.mkIf config.mine.home.fish.enable (import ./config.nix { inherit lib config pkgs userConfig isNixOS; });
 }
