@@ -4,6 +4,22 @@ let
   cfg = config.mine.monitoring-services;
   alloyConfigFile = ./alloy/config.alloy;
   grafanaDashboardsDir = ./grafana/dashboards;
+  addressLabelRelabelConfigs = lib.mapAttrsToList
+    (address: label: {
+      source_labels = [ "__address__" ];
+      regex = "${lib.escapeRegex address}(:.*)?";
+      replacement = label;
+      target_label = "nodename";
+    })
+    cfg.prometheus.addressLabelMap;
+  instanceLabelRelabelConfigs = lib.mapAttrsToList
+    (address: label: {
+      source_labels = [ "instance" ];
+      regex = "${lib.escapeRegex address}:.*";
+      replacement = label;
+      target_label = "nodename";
+    })
+    cfg.prometheus.addressLabelMap;
 in
 {
   environment = {
@@ -173,13 +189,7 @@ in
                 replacement = "$1";
                 target_label = "nodename";
               }
-              {
-                source_labels = [ "nodename" ];
-                regex = "192\\.168\\.6\\.1";
-                replacement = "saguaro";
-                target_label = "nodename";
-              }
-            ];
+            ] ++ addressLabelRelabelConfigs;
             metric_relabel_configs = [
               {
                 source_labels = [ "instance" ];
@@ -187,13 +197,7 @@ in
                 replacement = "$1";
                 target_label = "nodename";
               }
-              {
-                source_labels = [ "instance" ];
-                regex = "192\\.168\\.6\\.1:.*";
-                replacement = "saguaro";
-                target_label = "nodename";
-              }
-            ];
+            ] ++ instanceLabelRelabelConfigs;
           }
         ]
         ++ lib.optionals (cfg.prometheus.containerScrapeTargets != [ ]) [
@@ -241,13 +245,7 @@ in
                 replacement = "$1";
                 target_label = "nodename";
               }
-              {
-                source_labels = [ "nodename" ];
-                regex = "192\\.168\\.6\\.1";
-                replacement = "saguaro";
-                target_label = "nodename";
-              }
-            ];
+            ] ++ addressLabelRelabelConfigs;
           }
         ];
       ruleFiles = [

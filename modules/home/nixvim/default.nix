@@ -1,4 +1,4 @@
-{ lib, config, pkgs, userConfig, isNixOS ? true, ... }:
+{ lib, config, options, pkgs, userConfig, isNixOS ? true, ... }:
 
 let
   cfg = config.mine.home.nixvim;
@@ -18,7 +18,7 @@ let
           mcp = {
             homeassistant = {
               type = "remote";
-              url = "https://homeassistant.r6t.io/api/mcp";
+              url = cfg.haMcpUrl;
               enabled = true;
               oauth = false;
               headers = {
@@ -921,7 +921,7 @@ in
         nixvimConfig
       ];
     in
-    wrapHome hmConfig // lib.optionalAttrs isNixOS {
+    wrapHome hmConfig // lib.optionalAttrs (isNixOS && options ? sops) {
       # sops.secrets only works in NixOS context
       sops.secrets = lib.mkIf cfg.enableSopsSecrets {
         "BEDROCK_KEYS" = { owner = userConfig.username; };

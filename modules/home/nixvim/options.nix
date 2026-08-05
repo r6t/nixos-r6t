@@ -12,6 +12,12 @@
 
     enableHaMcp = lib.mkEnableOption "Home Assistant MCP server for OpenCode (requires HA_MCP_TOKEN sops secret)";
 
+    haMcpUrl = lib.mkOption {
+      type = lib.types.str;
+      default = "http://homeassistant.local:8123/api/mcp";
+      description = "Home Assistant MCP endpoint used when enableHaMcp is true.";
+    };
+
     opencode-llamacpp = {
       enable = lib.mkEnableOption "connect OpenCode to a local llama-server (llama.cpp) instance";
 

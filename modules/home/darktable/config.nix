@@ -1,15 +1,10 @@
 { lib, config, pkgs, userConfig, ... }:
 
-{
-  # Deployment pattern:
-  # - mountainball imports camera-card files into ~/Pictures/... for now.
-  # - Syncthing duplicates ~/Pictures to crown's backing storage.
-  # - crown exports that storage over NFS at /mnt/thunderbay/8TB-C/Pictures.
-  # - mountainball and goldenball both use that identical NFS path in darktable.
-  # - darktable databases stay local per host; shared edit state is via sidecar XMP files.
-  # version controlling darktable config prevents automatic changes with app updates
-  # stopped using versioned app config Oct 2025
+let
+  cfg = config.mine.home.darktable;
+in
 
+{
   config = lib.mkMerge [
     {
       home-manager.users.${userConfig.username} = {
@@ -21,7 +16,7 @@
       };
     }
 
-    (lib.mkIf (config.networking.hostName == "mountainball") {
+    (lib.mkIf cfg.enableRusticl {
       hardware.graphics = {
         enable = true;
         extraPackages = with pkgs; [

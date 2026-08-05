@@ -2,12 +2,12 @@
 
 {
   # Thin wrapper - encodes only flake-specific opinions:
-  # * uid 1000, gid 100 (users) matches the bind-mounted data ownership on crownstore
+  # * uid 1000, gid 100 (users) matches bind-mounted data ownership expectations
   # * openFirewall (LAN access on 8096/8920, 1900/7359)
   # * pins the ffmpeg + web packages into systemPackages for ad-hoc debugging
   #
   # Everything else (paths, transcoding, hardwareAcceleration, forceEncodingConfig)
-  # is set directly via services.jellyfin.* in containers/jellyfin.nix.
+  # is set directly via services.jellyfin.* in the consuming host/container config.
   # Upstream defaults for paths are already correct:
   #   dataDir   = /var/lib/jellyfin
   #   configDir = /var/lib/jellyfin/config

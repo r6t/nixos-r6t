@@ -1,240 +1,231 @@
-{ lib, config, pkgs, userConfig, ... }:
+{ lib, config, options, pkgs, userConfig, ... }:
 
 let
   cfg = config.mine.home.browsers;
 in
 {
-  config = {
-
-    # set secrets
-    sops.secrets."firefox_sync" = lib.mkIf (cfg.firefoxSync.enable && config.mine.sops.available) {
-      owner = config.users.users.${userConfig.username}.name;
-    };
-
-    home-manager.users.${userConfig.username} = {
-      home.packages = with pkgs; [
-        brave
-        ungoogled-chromium
-      ];
-      programs.firefox = {
-        enable = true;
-        configPath = ".config/mozilla/firefox";
-        profiles."default" = {
-          id = 0;
-          search = {
-            default = "Searxng";
-            force = true;
-            engines = {
-              "Searxng" = {
-                urls = [{
-                  template = "https://searxng.r6t.io/search";
-                  params = [
-                    { name = "q"; value = "{searchTerms}"; }
-                  ];
-                }];
-                icon = "https://searxng.r6t.io/favicon.ico";
-                updateInterval = 24 * 60 * 60 * 1000; # Daily
-                definedAliases = [ "@s" ];
+  config = lib.mkMerge [
+    (lib.optionalAttrs (options ? sops) {
+      # set secrets
+      sops.secrets."firefox_sync" = lib.mkIf (cfg.firefoxSync.enable && config.mine.sops.available) {
+        owner = config.users.users.${userConfig.username}.name;
+      };
+    })
+    {
+      home-manager.users.${userConfig.username} = {
+        home.packages = with pkgs; [
+          brave
+          ungoogled-chromium
+        ];
+        programs.firefox = {
+          enable = true;
+          configPath = ".config/mozilla/firefox";
+          profiles."default" = {
+            id = 0;
+            search = {
+              default = "ddg";
+              force = true;
+              engines = {
+                "Nix Options" = {
+                  urls = [{
+                    template = "https://search.nixos.org/options?channel=unstable";
+                    params = [
+                      { name = "query"; value = "{searchTerms}"; }
+                    ];
+                  }];
+                  icon = "https://searh.nixos.org/favicon.png";
+                  updateInterval = 24 * 60 * 60 * 1000; # Daily
+                  definedAliases = [ "@no" ];
+                };
+                "Nix Packages" = {
+                  urls = [{
+                    template = "https://search.nixos.org/packages?channel=unstable";
+                    params = [
+                      { name = "query"; value = "{searchTerms}"; }
+                    ];
+                  }];
+                  icon = "https://searh.nixos.org/favicon.png";
+                  updateInterval = 24 * 60 * 60 * 1000; # Daily
+                  definedAliases = [ "@np" ];
+                };
+                "ddg".metaData.hidden = false;
+                "google".metaData.hidden = true;
+                "amazondotcom-us".metaData.hidden = false;
+                "bing".metaData.hidden = true;
+                "ebay".metaData.hidden = false;
               };
-              "Nix Options" = {
-                urls = [{
-                  template = "https://search.nixos.org/options?channel=unstable";
-                  params = [
-                    { name = "query"; value = "{searchTerms}"; }
-                  ];
-                }];
-                icon = "https://searh.nixos.org/favicon.png";
-                updateInterval = 24 * 60 * 60 * 1000; # Daily
-                definedAliases = [ "@no" ];
-              };
-              "Nix Packages" = {
-                urls = [{
-                  template = "https://search.nixos.org/packages?channel=unstable";
-                  params = [
-                    { name = "query"; value = "{searchTerms}"; }
-                  ];
-                }];
-                icon = "https://searh.nixos.org/favicon.png";
-                updateInterval = 24 * 60 * 60 * 1000; # Daily
-                definedAliases = [ "@np" ];
-              };
-              "ddg".metaData.hidden = false;
-              "google".metaData.hidden = true;
-              "amazondotcom-us".metaData.hidden = false;
-              "bing".metaData.hidden = true;
-              "ebay".metaData.hidden = false;
             };
-          };
-          settings = lib.mkMerge [
-            {
-              # App settings
-              app = {
-                shield.optoutstudies.enabled = false;
-                normandy = {
-                  api_url = "";
-                  enabled = false;
-                };
-              };
-
-              # Browser settings
-              browser = {
-                crashReports.enabled = false;
-                discovery.enabled = false;
-                download = {
-                  dir = "$HOME/Downloads";
-                  folderList = 2;
-                };
-                newtab.url = "https://uptime.r6t.io/status/core";
-                newtabpage = {
-                  enabled = false;
-                  activity-stream = {
-                    showSponsoredTopSites = false;
-                    feeds.section.topstories = false;
-                    feeds.discoverystreamfeed = false;
-                    showSponsored = false;
+            settings = lib.mkMerge [
+              {
+                # App settings
+                app = {
+                  shield.optoutstudies.enabled = false;
+                  normandy = {
+                    api_url = "";
+                    enabled = false;
                   };
                 };
-                preferences.defaultPerformanceSettings.enabled = false;
-                search = {
-                  defaultenginename = "Searxng";
-                  suggest.enabled = false;
-                  showOneOffButtons = false;
+
+                # Browser settings
+                browser = {
+                  crashReports.enabled = false;
+                  discovery.enabled = false;
+                  download = {
+                    dir = "$HOME/Downloads";
+                    folderList = 2;
+                  };
+                  newtab.url = "about:blank";
+                  newtabpage = {
+                    enabled = false;
+                    activity-stream = {
+                      showSponsoredTopSites = false;
+                      feeds.section.topstories = false;
+                      feeds.discoverystreamfeed = false;
+                      showSponsored = false;
+                    };
+                  };
+                  preferences.defaultPerformanceSettings.enabled = false;
+                  search = {
+                    defaultenginename = "ddg";
+                    suggest.enabled = false;
+                    showOneOffButtons = false;
+                  };
+                  startup = {
+                    homepage = "about:blank";
+                    page = 0;
+                  };
+                  urlbar = {
+                    placeholderName = "DuckDuckGo";
+                    suggest = {
+                      searches = false;
+                      history = false;
+                      bookmark = false;
+                      openpage = false;
+                      topsites = false;
+                    };
+                  };
+                  formfill.enable = false;
+                  ping-centre.telemetry = false;
+                  tabs.crashReporting.sendReport = false;
                 };
-                startup = {
-                  homepage = "https://uptime.r6t.io/status/core";
-                  page = 0;
+
+                # Data reporting settings
+                datareporting = {
+                  healthreport.uploadEnabled = false;
+                  policy.dataSubmissionEnabled = false;
                 };
-                urlbar = {
-                  placeholderName = "Searxng";
-                  suggest = {
-                    searches = false;
+
+                # DOM settings
+                dom.security.https_only_mode = true;
+
+                # Extensions settings
+                extensions = {
+                  getAddons.showPane = false;
+                  noNewNetPrefsMigrate = true;
+                  pocket.enabled = false;
+                  formautofill = {
+                    addresses.enabled = false;
+                    creditCards.enabled = false;
+                  };
+                };
+
+                # General settings
+                general.smoothScroll = true;
+
+                # Layers settings
+                layers.acceleration.disabled = true;
+
+                # Media settings
+                media.peerconnection.enabled = false;
+
+                # Network settings
+                network = {
+                  cookie = {
+                    cookieBehavior = 1;
+                    cookiePrefetch = 0;
+                    lifetimePolicy = 2;
+                  };
+                  dns.disablePrefetch = true;
+                  prefetch-next = false;
+                  predictor = {
+                    enabled = false;
+                    enable-prefetch = false;
+                  };
+                };
+
+                # Privacy settings
+                privacy = {
+                  clearOnShutdown = {
+                    cache = true;
+                    cookies = true;
+                    formData = false;
                     history = false;
-                    bookmark = false;
-                    openpage = false;
-                    topsites = false;
+                  };
+                  cpd = {
+                    enabled = true;
+                    excludedDomains = "";
+                  };
+                  donottrackheader.enabled = true;
+                  restrict3rdpartycookies = true;
+                  trackingprotection = {
+                    cryptomining.enabled = true;
+                    enabled = true;
+                    socialmedia.enabled = true;
+                    fingerprinting.enabled = true;
+                  };
+                  firstparty.isolate = true;
+                  resistFingerprinting = true;
+                  partition.network_state = true;
+                };
+
+                # Sign-on settings
+                signon.rememberSignons = false;
+
+                # Toolkit settings
+                toolkit.telemetry = {
+                  enabled = false;
+                  archive.enabled = false;
+                  bhrPing.enabled = false;
+                  firstShutdownPing.enabled = false;
+                  newProfilePing.enabled = false;
+                  reportingpolicy.firstRun = false;
+                  shutdownPingSender.enabled = false;
+                  unified = false;
+                  updatePing.enabled = false;
+                };
+
+                # UI settings
+                ui.systemUsesDarkTheme = 1;
+
+                # Geo settings
+                geo.enabled = false;
+
+                # Breakpad settings
+                breakpad.reportURL = "";
+              }
+              (lib.mkIf cfg.firefoxSync.enable {
+                # Identity settings
+                identity.sync = {
+                  enabled = true;
+                  username = "$(cat /run/secrets/firefox_sync)";
+                  engine = {
+                    addons = true;
+                    addresses = true;
+                    creditcards = true;
+                    extensions = true;
+                    forms = true;
+                    history = true;
+                    passwords = true;
+                    payments = true;
+                    prefs = true;
+                    tabs = true;
                   };
                 };
-                formfill.enable = false;
-                ping-centre.telemetry = false;
-                tabs.crashReporting.sendReport = false;
-              };
-
-              # Data reporting settings
-              datareporting = {
-                healthreport.uploadEnabled = false;
-                policy.dataSubmissionEnabled = false;
-              };
-
-              # DOM settings
-              dom.security.https_only_mode = true;
-
-              # Extensions settings
-              extensions = {
-                getAddons.showPane = false;
-                noNewNetPrefsMigrate = true;
-                pocket.enabled = false;
-                formautofill = {
-                  addresses.enabled = false;
-                  creditCards.enabled = false;
-                };
-              };
-
-              # General settings
-              general.smoothScroll = true;
-
-              # Layers settings
-              layers.acceleration.disabled = true;
-
-              # Media settings
-              media.peerconnection.enabled = false;
-
-              # Network settings
-              network = {
-                cookie = {
-                  cookieBehavior = 1;
-                  cookiePrefetch = 0;
-                  lifetimePolicy = 2;
-                };
-                dns.disablePrefetch = true;
-                prefetch-next = false;
-                predictor = {
-                  enabled = false;
-                  enable-prefetch = false;
-                };
-              };
-
-              # Privacy settings
-              privacy = {
-                clearOnShutdown = {
-                  cache = true;
-                  cookies = true;
-                  formData = false;
-                  history = false;
-                };
-                cpd = {
-                  enabled = true;
-                  excludedDomains = "";
-                };
-                donottrackheader.enabled = true;
-                restrict3rdpartycookies = true;
-                trackingprotection = {
-                  cryptomining.enabled = true;
-                  enabled = true;
-                  socialmedia.enabled = true;
-                  fingerprinting.enabled = true;
-                };
-                firstparty.isolate = true;
-                resistFingerprinting = true;
-                partition.network_state = true;
-              };
-
-              # Sign-on settings
-              signon.rememberSignons = false;
-
-              # Toolkit settings
-              toolkit.telemetry = {
-                enabled = false;
-                archive.enabled = false;
-                bhrPing.enabled = false;
-                firstShutdownPing.enabled = false;
-                newProfilePing.enabled = false;
-                reportingpolicy.firstRun = false;
-                shutdownPingSender.enabled = false;
-                unified = false;
-                updatePing.enabled = false;
-              };
-
-              # UI settings
-              ui.systemUsesDarkTheme = 1;
-
-              # Geo settings
-              geo.enabled = false;
-
-              # Breakpad settings
-              breakpad.reportURL = "";
-            }
-            (lib.mkIf cfg.firefoxSync.enable {
-              # Identity settings
-              identity.sync = {
-                enabled = true;
-                username = "$(cat /run/secrets/firefox_sync)";
-                engine = {
-                  addons = true;
-                  addresses = true;
-                  creditcards = true;
-                  extensions = true;
-                  forms = true;
-                  history = true;
-                  passwords = true;
-                  payments = true;
-                  prefs = true;
-                  tabs = true;
-                };
-              };
-            })
-          ];
+              })
+            ];
+          };
         };
       };
-    };
-  };
+    }
+  ];
 }

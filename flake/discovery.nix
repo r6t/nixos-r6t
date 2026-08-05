@@ -1,7 +1,7 @@
 let
   childDirsWithFile = fileName: dir:
     let
-      entries = builtins.readDir dir;
+      entries = if builtins.pathExists dir then builtins.readDir dir else { };
     in
     builtins.filter
       (name: entries.${name} == "directory" && builtins.pathExists (dir + "/${name}/${fileName}"))

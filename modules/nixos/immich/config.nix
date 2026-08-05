@@ -1,6 +1,7 @@
-{ pkgs, ... }:
+{ lib, config, pkgs, ... }:
 
 let
+  cfg = config.mine.immich;
   immichPort = 2283;
 in
 {
@@ -26,11 +27,12 @@ in
       MACHINE_LEARNING_ACCELERATION = "cpu";
       MACHINE_LEARNING_CACHE_FOLDER = "/var/cache/immich";
       MACHINE_LEARNING_MODEL_TTL = "300";
+      AUTHENTICATION_PASSWORD_ENABLED = if cfg.oidcIssuerUrl == null then "true" else "false";
+    } // lib.optionalAttrs (cfg.oidcIssuerUrl != null) {
       AUTHENTICATION_OIDC_ENABLED = "true";
-      AUTHENTICATION_OIDC_ISSUER_URL = "https://pid.r6t.io";
+      AUTHENTICATION_OIDC_ISSUER_URL = cfg.oidcIssuerUrl;
       AUTHENTICATION_OIDC_AUTO_REGISTER = "true";
       AUTHENTICATION_OIDC_BUTTON_TEXT = "Login with Pocket ID";
-      AUTHENTICATION_PASSWORD_ENABLED = "false";
     };
     machine-learning = {
       # environment.LD_LIBRARY_PATH = "${pkgs.python312Packages.onnxruntime}/lib    /python3.12/site-packages/onnxruntime/capi";

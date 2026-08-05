@@ -17,7 +17,7 @@
 
     defaultSopsFile = lib.mkOption {
       type = lib.types.str;
-      default = "/home/${userConfig.username}/git/sops-ryan/secrets.yaml";
+      default = "/home/${userConfig.username}/.config/sops/secrets.yaml";
       description = "Path to the default SOPS file";
     };
 

@@ -5,8 +5,9 @@ description: Use for llama.cpp, llama-server, local model hosting, ROCm or Vulka
 
 # LLM Hosting
 
-Read the relevant section of `docs/LLM-HOSTING-TUNING.md`; search its headings first instead of loading unrelated sections.
+If a private checkout provides LLM hosting notes, read the relevant section;
+search headings first instead of loading unrelated sections.
 
-For OpenCode and nixvim integration, also read `docs/NIXVIM.md` and inspect `modules/home/nixvim/default.nix`. For NixOS service behavior, inspect `modules/nixos/llama-cpp/default.nix`.
+For OpenCode and nixvim integration, also read `docs/NIXVIM.md` and inspect `modules/home/nixvim/default.nix`. Host-specific llama.cpp service tuning is private; inspect the private module if present.
 
 Preserve measured hardware-specific values unless the task provides new evidence. After edits, run `./format.fish`; never run a Nix build or activation command.

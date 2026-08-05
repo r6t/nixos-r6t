@@ -39,7 +39,7 @@
 
     appUrl = lib.mkOption {
       type = lib.types.str;
-      default = "https://pid.r6t.io";
+      default = "http://localhost:1411";
       description = "Externally reachable Pocket ID URL.";
     };
 

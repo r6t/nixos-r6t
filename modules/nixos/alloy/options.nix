@@ -6,9 +6,9 @@
 
     lokiUrl = lib.mkOption {
       type = lib.types.str;
-      default = "https://loki.r6t.io/loki/api/v1/push";
+      default = "http://localhost:3100/loki/api/v1/push";
       description = "Loki push API URL. Override for hosts that reach Loki over LAN instead of tailnet.";
-      example = "https://192.168.6.3/loki/api/v1/push";
+      example = "https://loki.example.com/loki/api/v1/push";
     };
 
     lokiInsecureTls = lib.mkOption {

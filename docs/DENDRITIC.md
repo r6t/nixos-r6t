@@ -1,49 +1,55 @@
 # Dendritic Flake Structure
 
-This flake uses small, colocated `flake-module.nix` entrypoints to register host,
-profile, Home Manager, package, and container outputs. Regular implementation
-files stay private until a directory explicitly opts in with `flake-module.nix`.
+This flake uses small, colocated `flake-module.nix` entrypoints to register
+profile, Home Manager, and package outputs. Real host and container inventory
+lives in a private wrapper flake.
 
 ## Public Contract
 
 Stable external outputs:
 
-- `nixosConfigurations.{barrel,crown,goldenball,mountainball,saguaro}`
+- `modules.nixos.*`: primary dendritic NixOS module/profile API
 - `homeManagerModules.{default,alacritty,atuin,fish,git,nixvim,zellij}`
-- `nixosModules.default`
-- `packages.x86_64-linux.*`
+- `nixosModules.default`: conventional compatibility wrapper
 - `checks.x86_64-linux.pre-commit-check`
-- `lib.{mkNixosHost,mkRegisteredNixosHost}`
+- `lib.mkNixosHost`
 
-Repo-owned rebuilds use `nixosConfigurations.<host>`. Downstream Home Manager
-users should import only the portable `homeManagerModules.*` they need, then
-enable features through `mine.home.*` options.
+Concrete `nixosConfigurations` are intentionally private. Downstream Home
+and work flakes should compose host systems from `modules.nixos.*`, then add
+their own private host facts. Downstream standalone Home Manager users should
+import only the portable `homeManagerModules.*` they need, then enable features
+through `mine.home.*` options.
+
+`modules.nixos.*` is the supported dendritic API for this repo. It includes both
+leaf modules and profile modules registered by colocated `flake-module.nix`
+files. Prefer it for flakes that already consume `nixos-r6t` as a flake input.
 
 `nixosModules.default` is compatibility-only. It imports `modules/default.nix`,
 which exposes the legacy `mine.*` option surface for downstream NixOS users. It
-does not enable repo features by itself, and repo-owned hosts do not import it.
+does not enable repo features by itself. Private and work flakes should prefer
+`modules.nixos.*` unless they specifically need the legacy wrapper.
 
 ## Registration
 
 `flake/modules.nix` discovers immediate child directories with a
 `flake-module.nix` under:
 
-- `hosts/`
 - `modules/home/`
 - `modules/profiles/`
 
-`flake/packages.nix` imports the container package module and discovers immediate
-`pkgs/*/flake-module.nix` package modules.
+`flake/packages.nix` discovers immediate `pkgs/*/flake-module.nix` package
+modules.
 
 This is intentional auto-discovery: adding a plain directory does nothing;
 adding `flake-module.nix` opts that directory into flake outputs.
 
-## Host Composition
+## Private Host Composition
 
-Each `hosts/<host>/flake-module.nix` defines `modules.nixos.<host>` and imports:
+Private hosts import public profiles from `nixos-r6t.modules.nixos.*` and then
+add private host files:
 
-- reusable profiles from `inputs.self.modules.nixos.*`
-- `hosts/<host>/configuration.nix`
+- reusable profiles from `nixos-r6t.modules.nixos.*`
+- `hosts/<host>/configuration.nix` in the private flake
 
 Keep host facts in host configs:
 
@@ -76,8 +82,8 @@ Current profile roles:
   supporting desktop tools.
 - `kde-workstation`: `kde-desktop` plus `r6t-desktop-app-suite`.
 - `gaming-host`: `desktop-basics` plus Steam.
-- `laptop-workstation`: laptop defaults shared by mountainball and goldenball.
-- `office-desk`: Thunderbolt plus USB4 SFP+ dock support.
+- `laptop-workstation`: laptop defaults shared by mobile workstations.
+- `office-desk`: Thunderbolt/Bolt support.
 - `infra-host`: headless infra defaults: cgrouped Nix builds, journald/networkd
   tuning, and Nix daemon CPU throttling.
 - `static-lan-host`: networkd and resolved defaults for static LAN servers.
@@ -103,8 +109,8 @@ Migrated leaves use this shape:
 - `config.nix`: active implementation, with no legacy `mine.<leaf>.enable` gate.
 - `default.nix`: compatibility wrapper that preserves old `mine.*.enable` usage.
 
-Profiles and repo hosts direct-import `options.nix` and `config.nix`. They should
-not import a leaf `default.nix` just to turn on an enable option.
+Profiles and private hosts direct-import `options.nix` and `config.nix`. They
+should not import a leaf `default.nix` just to turn on an enable option.
 
 Once a feature is direct-imported, `mine.<leaf>.enable = false` no longer
 disables it. Remove stale false-hook tombstones instead of keeping misleading
@@ -113,34 +119,24 @@ preferences.
 `modules/default.nix` deliberately lists legacy flatpak, Home Manager, and NixOS
 leaf wrappers. Keep entries there while they preserve downstream compatibility.
 
-## Containers And Packages
+## Private Containers And Packages
 
-Every `.nix` file directly under `containers/` is a public LXC image package:
+Incus image definitions and runtime profiles are private because they encode
+service inventory, bind mounts, domains, LAN layout, and passthrough devices.
 
-- `packages.x86_64-linux.<container>`
-- `packages.x86_64-linux.<container>-metadata`
-
-`containers/lib/` is shared implementation, not image output surface.
-
-Runtime Incus profiles, seeds, and instance maps stay under
-`hosts/<host>/incus-instances/`. Do not move them into package generation. The
-live profile sync intentionally applies checkout-path YAML while using a store
-copy only as a restart trigger.
-
-Custom packages use `pkgs/<name>/flake-module.nix`; currently this includes
-`packages.x86_64-linux.rocmfp4-llama`.
+Custom public packages can use `pkgs/<name>/flake-module.nix`. Hardware- or
+host-specific packages belong in the private wrapper flake.
 
 ## Compatibility Rules
 
 - Preserve the public outputs listed above unless a migration is documented first.
-- Keep `nixosConfigurations.<host>` as the operational rebuild entrypoint.
+- Keep concrete `nixosConfigurations.<host>` in the private wrapper flake.
 - Keep `homeManagerModules.*` stable for downstream flakes.
-- Keep Incus image attr names and direct `containers/*.nix` build targets stable.
 - Keep host-specific facts out of reusable profiles.
 - Avoid new `mine.*.enable` activation hooks for repo-owned composition.
 - Delete empty/no-op modules instead of preserving inert option surface.
-- Do not genericize measured GPU/LLM tuning; keep crown llama.cpp CUDA and
-  goldenball ROCmFP4 llama.cpp values host/container-local.
+- Do not genericize measured GPU/LLM tuning when it belongs in private
+  host/container-local configuration.
 
 ## Validation
 
@@ -152,11 +148,6 @@ git diff --check
 nix eval --json .#nixosConfigurations --apply builtins.attrNames
 nix eval --json .#modules.nixos --apply builtins.attrNames
 nix eval --json .#homeManagerModules --apply builtins.attrNames
-nix eval --json .#packages.x86_64-linux --apply builtins.attrNames
-for host in barrel crown goldenball mountainball saguaro
-    nix eval --raw ".#nixosConfigurations.$host.config.system.build.toplevel.drvPath"
-end
 ```
 
-Agents must not build or activate systems, run `containers/build.py`, or run
-`containers/relaunch.py`.
+Agents must not build or activate systems.

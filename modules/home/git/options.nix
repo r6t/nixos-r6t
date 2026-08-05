@@ -7,13 +7,13 @@
     userName = lib.mkOption {
       type = lib.types.str;
       description = "Git user.name value";
-      default = "r6t";
+      default = "User";
     };
 
     userEmail = lib.mkOption {
       type = lib.types.str;
       description = "Git user.email value";
-      default = "git@r6t.io";
+      default = "user@example.com";
     };
 
     signingKey = lib.mkOption {

@@ -25,14 +25,14 @@ lib.mkMerge [
 
     networking = {
       defaultGateway = {
-        address = "192.168.6.1";
-        interface = "eth0";
+        address = cfg.defaultGatewayAddress;
+        interface = cfg.lanInterface;
       };
       nameservers = [ "127.0.0.1" ];
 
-      interfaces.eth0.useDHCP = false;
+      interfaces.${cfg.lanInterface}.useDHCP = false;
 
-      wg-quick.interfaces.wg0 = {
+      wg-quick.interfaces.${cfg.wgInterface} = {
         configFile = cfg.wgConfigFile;
         autostart = true;
       };
@@ -46,30 +46,30 @@ lib.mkMerge [
         # Default-deny forwarding keeps this acting only as an explicit
         # LAN/tailnet -> Mullvad router, with a kill-switch if wg0 is down.
         extraCommands = ''
-          iptables -D FORWARD -o eth0 ! -d 192.168.6.0/24 -m comment --comment exit-node-killswitch -j DROP 2>/dev/null || true
+          iptables -D FORWARD -o ${cfg.lanInterface} ! -d ${cfg.lanCidr} -m comment --comment exit-node-killswitch -j DROP 2>/dev/null || true
           iptables -D FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -m comment --comment exit-node-established -j ACCEPT 2>/dev/null || true
-          iptables -D FORWARD -i eth0 -s 192.168.6.0/24 -o wg0 -m comment --comment exit-node-lan-to-mullvad -j ACCEPT 2>/dev/null || true
-          iptables -D FORWARD -i tailscale0 -o wg0 -m comment --comment exit-node-tailnet-to-mullvad -j ACCEPT 2>/dev/null || true
+          iptables -D FORWARD -i ${cfg.lanInterface} -s ${cfg.lanCidr} -o ${cfg.wgInterface} -m comment --comment exit-node-lan-to-mullvad -j ACCEPT 2>/dev/null || true
+          iptables -D FORWARD -i ${cfg.tailscaleInterface} -o ${cfg.wgInterface} -m comment --comment exit-node-tailnet-to-mullvad -j ACCEPT 2>/dev/null || true
           iptables -D FORWARD -m comment --comment exit-node-default-deny -j DROP 2>/dev/null || true
-          iptables -I FORWARD -o eth0 ! -d 192.168.6.0/24 -m comment --comment exit-node-killswitch -j DROP
+          iptables -I FORWARD -o ${cfg.lanInterface} ! -d ${cfg.lanCidr} -m comment --comment exit-node-killswitch -j DROP
           iptables -A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -m comment --comment exit-node-established -j ACCEPT
-          iptables -A FORWARD -i eth0 -s 192.168.6.0/24 -o wg0 -m comment --comment exit-node-lan-to-mullvad -j ACCEPT
-          iptables -A FORWARD -i tailscale0 -o wg0 -m comment --comment exit-node-tailnet-to-mullvad -j ACCEPT
+          iptables -A FORWARD -i ${cfg.lanInterface} -s ${cfg.lanCidr} -o ${cfg.wgInterface} -m comment --comment exit-node-lan-to-mullvad -j ACCEPT
+          iptables -A FORWARD -i ${cfg.tailscaleInterface} -o ${cfg.wgInterface} -m comment --comment exit-node-tailnet-to-mullvad -j ACCEPT
           iptables -A FORWARD -m comment --comment exit-node-default-deny -j DROP
         '';
         extraStopCommands = ''
-          iptables -D FORWARD -o eth0 ! -d 192.168.6.0/24 -m comment --comment exit-node-killswitch -j DROP 2>/dev/null || true
+          iptables -D FORWARD -o ${cfg.lanInterface} ! -d ${cfg.lanCidr} -m comment --comment exit-node-killswitch -j DROP 2>/dev/null || true
           iptables -D FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -m comment --comment exit-node-established -j ACCEPT 2>/dev/null || true
-          iptables -D FORWARD -i eth0 -s 192.168.6.0/24 -o wg0 -m comment --comment exit-node-lan-to-mullvad -j ACCEPT 2>/dev/null || true
-          iptables -D FORWARD -i tailscale0 -o wg0 -m comment --comment exit-node-tailnet-to-mullvad -j ACCEPT 2>/dev/null || true
+          iptables -D FORWARD -i ${cfg.lanInterface} -s ${cfg.lanCidr} -o ${cfg.wgInterface} -m comment --comment exit-node-lan-to-mullvad -j ACCEPT 2>/dev/null || true
+          iptables -D FORWARD -i ${cfg.tailscaleInterface} -o ${cfg.wgInterface} -m comment --comment exit-node-tailnet-to-mullvad -j ACCEPT 2>/dev/null || true
           iptables -D FORWARD -m comment --comment exit-node-default-deny -j DROP 2>/dev/null || true
         '';
       };
 
       nat = {
         enable = true;
-        externalInterface = "wg0";
-        internalInterfaces = [ "eth0" ];
+        externalInterface = cfg.wgInterface;
+        internalInterfaces = [ cfg.lanInterface ];
       };
     };
   }
@@ -88,7 +88,7 @@ lib.mkMerge [
       useRoutingFeatures = lib.mkForce "server";
     };
 
-    networking.nat.internalInterfaces = [ "tailscale0" ];
+    networking.nat.internalInterfaces = [ cfg.tailscaleInterface ];
 
     systemd.services = {
       tailscale-tailnet-routes = {
@@ -99,15 +99,15 @@ lib.mkMerge [
         path = [ pkgs.iproute2 pkgs.coreutils ];
         script = ''
           for _ in $(seq 1 30); do
-            if ip link show tailscale0 >/dev/null 2>&1; then
-              ip route replace 100.64.0.0/10 dev tailscale0
-              ip -6 route replace fd7a:115c:a1e0::/48 dev tailscale0
+            if ip link show ${cfg.tailscaleInterface} >/dev/null 2>&1; then
+              ip route replace ${cfg.tailnetIpv4Cidr} dev ${cfg.tailscaleInterface}
+              ${lib.optionalString (cfg.tailnetIpv6Cidr != null) "ip -6 route replace ${cfg.tailnetIpv6Cidr} dev ${cfg.tailscaleInterface}"}
               exit 0
             fi
             sleep 1
           done
 
-          echo "tailscale0 not present; skipping tailnet route pinning"
+          echo "${cfg.tailscaleInterface} not present; skipping tailnet route pinning"
         '';
         serviceConfig = {
           Type = "oneshot";
@@ -123,7 +123,7 @@ lib.mkMerge [
         wantedBy = [ "multi-user.target" ];
         path = [ pkgs.iproute2 pkgs.ethtool ];
         script = ''
-          ethtool -K eth0 rx-udp-gro-forwarding on rx-gro-list off || true
+          ethtool -K ${cfg.lanInterface} rx-udp-gro-forwarding on rx-gro-list off || true
         '';
         serviceConfig = {
           Type = "oneshot";

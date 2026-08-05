@@ -1,11 +1,5 @@
-{ config, ... }:
-
-let
-  discovery = import ./discovery.nix;
-  hostNames = discovery.flakeModuleDirs ../hosts;
-  mkNixosHost = config.flake.lib.mkRegisteredNixosHost;
-in
 {
-  flake.nixosConfigurations = builtins.listToAttrs
-    (map (name: { inherit name; value = mkNixosHost name; }) hostNames);
+  # Real host configurations live in the private wrapper flake. The public flake
+  # intentionally exports no concrete nixosConfigurations.
+  flake.nixosConfigurations = { };
 }

@@ -3,8 +3,7 @@ let
 in
 {
   imports =
-    (discovery.flakeModuleImports ../hosts)
-    ++ [ ../modules/flake-module.nix ]
+    [ ../modules/flake-module.nix ]
     ++ (discovery.flakeModuleImports ../modules/home)
     ++ (discovery.flakeModuleImports ../modules/profiles);
 }

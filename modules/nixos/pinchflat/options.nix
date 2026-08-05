@@ -6,7 +6,7 @@
 
     mediaDir = lib.mkOption {
       type = lib.types.str;
-      default = "/mnt/thunderbay/8TB-D/storage/plex/youtube";
+      default = "/var/lib/pinchflat/media";
       description = "Directory where Pinchflat downloads media.";
     };
 
@@ -18,13 +18,13 @@
 
     user = lib.mkOption {
       type = lib.types.str;
-      default = "r6t";
+      default = "pinchflat";
       description = "User account that runs Pinchflat.";
     };
 
     group = lib.mkOption {
       type = lib.types.str;
-      default = "users";
+      default = "pinchflat";
       description = "Group that runs Pinchflat.";
     };
 

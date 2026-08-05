@@ -1,7 +1,7 @@
 #!/usr/bin/env fish
 
 # Format Nix files
-find . -name "*.nix" -exec nixpkgs-fmt {} +
+nixpkgs-fmt (git ls-files '*.nix')
 
 # Run pre-commit on all files (if available)
 if type -q pre-commit
@@ -13,17 +13,14 @@ else
     if type -q statix
         echo "Running statix..."
         statix check . -i \
-            'hosts/crown/hardware-configuration.nix' \
-            'hosts/mountainball/hardware-configuration.nix' \
-            'hosts/saguaro/configuration.nix'
+            '*hardware-configuration.nix'
     else
         echo "  statix not found, skipping"
     end
     
     if type -q deadnix
         echo "Running deadnix..."
-        # Find all .nix files except hardware-configuration.nix
-        find . -name "*.nix" ! -name "hardware-configuration.nix" -exec deadnix --fail {} +
+        deadnix --fail (git ls-files '*.nix' | string match -v '*hardware-configuration.nix')
     else
         echo "  deadnix not found, skipping"
     end
@@ -60,7 +57,7 @@ else
     
     if type -q pylint
         echo "Running pylint..."
-        find . -name "*.py" -exec pylint {} +
+        pylint (git ls-files '*.py')
     else
         echo "  pylint not found, skipping"
     end

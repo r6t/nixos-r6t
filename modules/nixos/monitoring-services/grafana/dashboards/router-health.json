@@ -222,7 +222,7 @@
       "gridPos": { "x": 0, "y": 13, "w": 8, "h": 8 },
       "targets": [
         {
-          "expr": "sum by (domain) (count_over_time({unit=\"dnsmasq.service\", host=\"saguaro\"} | regexp \"query\\\\[(?P<type>.*)\\\\] (?P<domain>.*) from\" [$__interval]))",
+          "expr": "sum by (domain) (count_over_time({unit=\"dnsmasq.service\", host=\"router\"} | regexp \"query\\\\[(?P<type>.*)\\\\] (?P<domain>.*) from\" [$__interval]))",
           "legendFormat": "{{domain}}",
           "refId": "A"
         }
@@ -246,7 +246,7 @@
       "gridPos": { "x": 8, "y": 13, "w": 8, "h": 8 },
       "targets": [
         {
-          "expr": "sum by (client) (count_over_time({unit=\"dnsmasq.service\", host=\"saguaro\"} | regexp \"from (?P<client>[0-9.]+)\" [$__interval]))",
+          "expr": "sum by (client) (count_over_time({unit=\"dnsmasq.service\", host=\"router\"} | regexp \"from (?P<client>[0-9.]+)\" [$__interval]))",
           "legendFormat": "{{client}}",
           "refId": "A"
         }
@@ -270,7 +270,7 @@
       "gridPos": { "x": 16, "y": 13, "w": 8, "h": 8 },
       "targets": [
         {
-          "expr": "sum by (type) (count_over_time({unit=\"dnsmasq.service\", host=\"saguaro\"} | regexp \"query\\\\[(?P<type>.*)\\\\] (?P<domain>.*) from\" [$__interval]))",
+          "expr": "sum by (type) (count_over_time({unit=\"dnsmasq.service\", host=\"router\"} | regexp \"query\\\\[(?P<type>.*)\\\\] (?P<domain>.*) from\" [$__interval]))",
           "legendFormat": "{{type}}",
           "refId": "A"
         }
@@ -335,7 +335,7 @@
       "gridPos": { "x": 0, "y": 30, "w": 24, "h": 7 },
       "targets": [
         {
-          "expr": "{host=\"saguaro\", unit=\"nftables\"} |~ \"WAN-INPUT-DROP|INVALID-PKT\"",
+          "expr": "{host=\"router\", unit=\"nftables\"} |~ \"WAN-INPUT-DROP|INVALID-PKT\"",
           "refId": "A"
         }
       ],

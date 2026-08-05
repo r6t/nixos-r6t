@@ -56,7 +56,7 @@
         options = {
           device = lib.mkOption {
             type = lib.types.str;
-            description = "NFS server and export path, for example crown:/";
+            description = "NFS server and export path, for example nfs-host:/";
           };
 
           mountPoint = lib.mkOption {

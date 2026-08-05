@@ -2,8 +2,8 @@
 
 let
   cfg = config.mine.steam;
-  goldenballSteamProfile = pkgs.writeShellApplication {
-    name = "goldenball-steam-profile";
+  steamProfileLauncher = pkgs.writeShellApplication {
+    name = "steam-profile-launcher";
     runtimeInputs = with pkgs; [
       coreutils
       gamemode
@@ -15,7 +15,7 @@ let
 
       usage() {
         cat <<'EOF'
-      Usage: goldenball-steam-profile [--dry-run] <profile> -- <steam command...>
+      Usage: steam-profile-launcher [--dry-run] <profile> -- <steam command...>
 
       Profiles:
         native-16x10-1920x1200     GameMode + MangoHud, appends -resx/-resy
@@ -23,11 +23,11 @@ let
         gamescope-16x10-1920x1200  Windowed Gamescope, game sees 1920x1200 @ 180 Hz, LD_PRELOAD workaround, no GameMode
         gamescope-16x9-1920x1080   Windowed Gamescope, game sees 1920x1080 @ 180 Hz, LD_PRELOAD workaround, no GameMode
 
-      Prefer native profiles for Rocket League on goldenball. Gamescope profiles
-      are for A/B testing or games that need resolution spoofing/upscaling.
+      Prefer native profiles first. Gamescope profiles are for A/B testing or
+      games that need resolution spoofing/upscaling.
 
       Steam launch option example:
-        goldenball-steam-profile native-16x10-1920x1200 -- %command%
+        steam-profile-launcher native-16x10-1920x1200 -- %command%
       EOF
       }
 
@@ -134,7 +134,7 @@ in
       steam-devices-udev-rules
       steam-run # Run non-Steam games/tools with Steam runtime
       moonlight-qt # Sunshine/Moonlight streaming client
-    ]) ++ lib.optional cfg.goldenballGameLauncher.enable goldenballSteamProfile;
+    ]) ++ lib.optional cfg.profileLauncher.enable steamProfileLauncher;
 
     # Enable Gamemode (System-level optimization)
     programs.gamemode.enable = true;
@@ -148,7 +148,7 @@ in
         mangohud
         gamemode
         gamescope
-      ]) ++ lib.optional cfg.goldenballGameLauncher.enable goldenballSteamProfile;
+      ]) ++ lib.optional cfg.profileLauncher.enable steamProfileLauncher;
 
       # Bubblewrap sandbox hardening
       # The NixOS steam wrapper auto-mounts every top-level directory (except

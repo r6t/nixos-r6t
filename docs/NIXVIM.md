@@ -64,5 +64,5 @@ such as Qwen thinking mode.
 
 ## Related Docs
 
-- `docs/LLM-HOSTING-TUNING.md`: OpenCode and llama-server model context.
+- Private LLM hosting notes: OpenCode and llama-server model context.
 - `docs/THEMING.md`: shared palette and oxocarbon styling.

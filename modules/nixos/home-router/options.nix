@@ -10,13 +10,13 @@ in
     # Network interfaces
     wanInterface = lib.mkOption {
       type = lib.types.str;
-      default = "enp101s0";
+      default = "wan0";
       description = "WAN interface name (connected to ISP)";
     };
 
     lanInterface = lib.mkOption {
       type = lib.types.str;
-      default = "enp100s0";
+      default = "lan0";
       description = "LAN interface name (internal network)";
     };
 
@@ -30,7 +30,7 @@ in
     # LAN network configuration
     lanAddress = lib.mkOption {
       type = lib.types.str;
-      default = "192.168.6.1/24";
+      default = "192.168.1.1/24";
       description = "LAN IP address with CIDR notation";
     };
 
@@ -70,7 +70,7 @@ in
         });
         default = [ ];
         example = [
-          { MACAddress = "aa:bb:cc:dd:ee:ff"; Address = "192.168.6.9"; }
+          { MACAddress = "aa:bb:cc:dd:ee:ff"; Address = "192.168.1.9"; }
         ];
         description = "Static DHCP leases (MAC to IP reservations)";
       };
@@ -82,8 +82,8 @@ in
         type = lib.types.listOf lib.types.str;
         default = [ ];
         example = [
-          "/hostname/192.168.6.10"
-          "/example.com/192.168.6.20"
+          "/hostname/192.168.1.10"
+          "/example.com/192.168.1.20"
         ];
         description = "DNS address overrides for dnsmasq";
       };
@@ -123,7 +123,7 @@ in
           options = {
             source = lib.mkOption {
               type = lib.types.str;
-              example = "192.168.6.3";
+              example = "192.168.1.3";
               description = "Literal LAN source IP or CIDR to allow. Do not use DNS names here.";
             };
             ports = lib.mkOption {
@@ -135,7 +135,7 @@ in
         });
         default = [ ];
         example = [
-          { source = "192.168.6.3"; ports = [ 9000 9101 12346 ]; }
+          { source = "192.168.1.3"; ports = [ 9000 9101 12346 ]; }
         ];
         description = "Source-restricted TCP ports to allow from LAN only.";
       };

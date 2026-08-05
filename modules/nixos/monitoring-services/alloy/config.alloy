@@ -29,6 +29,6 @@ loki.source.journal "all" {
 
 loki.write "grafana_loki" {
   endpoint {
-    url = "https://loki.r6t.io/loki/api/v1/push"
+    url = "http://127.0.0.1:3030/loki/api/v1/push"
   }
 }

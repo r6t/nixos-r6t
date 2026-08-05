@@ -26,7 +26,7 @@
       default = { };
       description = "Caddy reverse proxy routes (domain -> upstream)";
       example = {
-        "app.r6t.io" = { upstream = "http://localhost:8080"; };
+        "app.example.com" = { upstream = "http://localhost:8080"; };
       };
     };
 

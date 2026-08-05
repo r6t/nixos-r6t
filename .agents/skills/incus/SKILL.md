@@ -5,8 +5,7 @@ description: Use for creating, modifying, reviewing, or debugging Incus/LXC cont
 
 # Incus
 
-Read `docs/INCUS.md` before making changes.
-
-Follow the container pipeline and ownership boundaries documented there. Container definitions live in `containers/`; host-specific profiles and seed files live under `hosts/<host>/incus-instances/`.
+Incus image definitions and runtime profiles are private. If a private checkout
+provides an Incus runbook, read it before making changes.
 
 Never run `containers/build.py`, `containers/relaunch.py`, or any Nix build or activation command. Use static checks and `./format.fish` only.

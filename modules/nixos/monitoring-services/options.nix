@@ -8,7 +8,7 @@
       type = lib.types.path;
       default = "/var/lib/monitoring";
       description = "Root directory for all monitoring service data storage";
-      example = "/mnt/kingston240";
+      example = "/srv/monitoring";
     };
 
     grafana = {
@@ -90,7 +90,7 @@
         type = lib.types.listOf lib.types.str;
         default = [ ];
         description = "List of physical node-exporter scrape targets (host:port format)";
-        example = [ "crown:9000" "mountainball:9000" "saguaro:9000" ];
+        example = [ "host-a:9000" "host-b:9000" "192.168.1.1:9000" ];
       };
 
       containerScrapeTargets = lib.mkOption {
@@ -104,7 +104,14 @@
         type = lib.types.listOf lib.types.str;
         default = [ ];
         description = "List of incus metrics endpoints (host:port format). Requires core.metrics_address and core.metrics_authentication=false set on the incus host.";
-        example = [ "crown:9101" ];
+        example = [ "incus-host:9101" ];
+      };
+
+      addressLabelMap = lib.mkOption {
+        type = lib.types.attrsOf lib.types.str;
+        default = { };
+        description = "Map address-only scrape targets to display labels, for example router IP to hostname.";
+        example = { "192.168.1.1" = "router"; };
       };
     };
   };

@@ -70,7 +70,7 @@ in
       };
     }
 
-    # Default to manual/on-demand starts, preserving the old mountainball behavior.
+    # Default to manual/on-demand starts.
     (lib.mkIf (!cfg.startAtBoot) {
       wantedBy = lib.mkForce [ ];
     })

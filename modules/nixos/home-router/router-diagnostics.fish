@@ -8,7 +8,7 @@ set -l LAN_ADDR "$argv[3]"
 
 if test -z "$WAN_IFACE" -o -z "$LAN_IFACE" -o -z "$LAN_ADDR"
     echo "Usage: router-diagnostics.fish <wan_iface> <lan_iface> <lan_addr>"
-    echo "Example: router-diagnostics.fish enp101s0 enp100s0 192.168.6.1/24"
+    echo "Example: router-diagnostics.fish wan0 lan0 192.168.1.1/24"
     exit 1
 end
 

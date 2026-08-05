@@ -14,4 +14,22 @@ README.html
 .crush/
 NETWORK-MAP.md
 NETWORK_MAP.md
-hosts/saguaro/ip-reservations.nix
+
+# Private wrapper-flake inventory retained locally during the repo split.
+AGENTS.md
+CLAUDE.md
+containers/
+hosts/
+scripts/
+docs/DNS_ARCHITECTURE.md
+docs/GAMING.md
+docs/GITEA-OPS.md
+docs/GOLDENBALL_FREEZES.md
+docs/INCUS.md
+docs/LLM-HOSTING-TUNING.md
+docs/PINCHFLAT-LXC.md
+modules/nixos/incus-nightly-rebuild/
+modules/nixos/llama-cpp/
+modules/nixos/thunderbay/
+modules/nixos/usb4-sfp/
+pkgs/rocmfp4-llama/
