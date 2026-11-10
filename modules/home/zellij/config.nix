@@ -1,4 +1,4 @@
-{ userConfig, hostSlug ? "", isNixOS ? true, ... }:
+{ lib, userConfig, hostSlug ? "", sshzAddKeys ? [ ], isNixOS ? true, ... }:
 
 let
   wrapHome = import ../../lib/mkPortableHomeConfig.nix { inherit isNixOS userConfig; };
@@ -8,6 +8,16 @@ let
   # fish-main-ml) so `zellij ls` and the session manager stay readable when
   # sessions are open on several machines at once; see options.nix hostSlug.
   sessionName = "fish-main" + (if hostSlug == "" then "" else "-${hostSlug}");
+
+  # Expand a leading ~ here: the generated `ssh-add` arguments are shell-quoted
+  # (paths may contain spaces), and quoting suppresses fish's own tilde
+  # expansion, so a literal "~/..." would not resolve.
+  addKeyPaths = map
+    (k:
+      if lib.hasPrefix "~/" k
+      then "${userConfig.homeDirectory}/${lib.removePrefix "~/" k}"
+      else k)
+    sshzAddKeys;
 
   # Oxocarbon theme — colors from modules/lib/palette.nix
   oxocarbonTheme = ''
@@ -248,8 +258,18 @@ wrapHome {
           return 2
       end
 
+      # An empty agent forwards nothing, so git on the remote host cannot push
+      # or sign. Load the configured keys (sshzAddKeys) rather than leaving it
+      # to a manual ssh-add: with a passphrase-free key this is silent, and the
+      # agent entry expires on its own (with the certificate, where one is
+      # issued). Deliberately NOT done with AddKeysToAgent in ~/.ssh/config --
+      # on work hosts that file is owned and rewritten by a corporate tool.
       if not ssh-add -l >/dev/null 2>&1
-          echo "sshz: local ssh-agent holds no keys; git on the remote host cannot push or sign." >&2
+          ${if addKeyPaths == [ ] then "true" else
+            "ssh-add ${lib.escapeShellArgs addKeyPaths} >/dev/null 2>&1"}
+          if not ssh-add -l >/dev/null 2>&1
+              echo "sshz: local ssh-agent holds no keys; git on $argv[1] cannot push or sign." >&2
+          end
       end
 
       # The agent link gives panes a stable $SSH_AUTH_SOCK. A zellij server

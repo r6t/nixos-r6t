@@ -14,6 +14,19 @@ in
   options.mine.home.zellij = {
     enable = lib.mkEnableOption "enable zellij in home-manager";
 
+    sshzAddKeys = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [ ];
+      example = [ "~/.ssh/id_ecdsa" ];
+      description = ''
+        Key files `sshz` loads with `ssh-add` when the local agent holds no
+        identities, so the agent it forwards is usable for git on the remote
+        host. Empty means only warn. Keys listed here are offered to every
+        host `sshz` connects to, so list only keys meant for those hosts. A
+        passphrase-protected key will prompt.
+      '';
+    };
+
     hostSlug = lib.mkOption {
       type = lib.types.str;
       # NixOS hosts derive it: `hostname` there returns networking.hostName.
