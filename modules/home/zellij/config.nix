@@ -260,17 +260,38 @@ wrapHome {
 
       # An empty agent forwards nothing, so git on the remote host cannot push
       # or sign. Load the configured keys (sshzAddKeys) rather than leaving it
-      # to a manual ssh-add: with a passphrase-free key this is silent, and the
-      # agent entry expires on its own (with the certificate, where one is
-      # issued). Deliberately NOT done with AddKeysToAgent in ~/.ssh/config --
-      # on work hosts that file is owned and rewritten by a corporate tool.
-      if not ssh-add -l >/dev/null 2>&1
-          ${if addKeyPaths == [ ] then "true" else
-            "ssh-add ${lib.escapeShellArgs addKeyPaths} >/dev/null 2>&1"}
-          if not ssh-add -l >/dev/null 2>&1
-              echo "sshz: local ssh-agent holds no keys; git on $argv[1] cannot push or sign." >&2
-          end
-      end
+      # to a manual ssh-add: with a passphrase-free key this is silent.
+      # Deliberately NOT done with AddKeysToAgent in ~/.ssh/config -- on work
+      # hosts that file is owned and rewritten by a corporate tool.
+      #
+      # Re-add when the agent holds no identities, AND ALSO when a key has a
+      # sibling *-cert.pub that the agent is not currently carrying. That
+      # second case is the one that bites: a short-lived certificate (Midway
+      # reissues daily) expires out of the agent while the plain key stays, so
+      # an "is the agent empty" test passes and the stale agent silently loses
+      # access to anything that authenticates the CERTIFICATE rather than the
+      # key -- code.aws.dev GitLab does exactly that. Hosts whose keys have no
+      # cert file never take this branch, so nothing re-prompts there.
+      ${if addKeyPaths == [ ] then "true" else ''
+        set -l __sshz_keys ${lib.escapeShellArgs addKeyPaths}
+        set -l __sshz_need 0
+        if not ssh-add -l >/dev/null 2>&1
+            set __sshz_need 1
+        else
+            for __sshz_k in $__sshz_keys
+                if test -r "$__sshz_k-cert.pub"; and not ssh-add -L 2>/dev/null | string match -qr -- '-cert-v01@openssh\.com'
+                    set __sshz_need 1
+                end
+            end
+        end
+
+        if test $__sshz_need -eq 1
+            ssh-add $__sshz_keys >/dev/null 2>&1
+            if not ssh-add -l >/dev/null 2>&1
+                echo "sshz: local ssh-agent holds no keys; git on $argv[1] cannot push or sign." >&2
+            end
+        end
+      ''}
 
       # The agent link gives panes a stable $SSH_AUTH_SOCK. A zellij server
       # keeps the environment of the connection that started it, and that
