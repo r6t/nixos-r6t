@@ -319,6 +319,25 @@ wrapHome {
       ssh -t -A $argv "$remote"
       set -l rc $status
 
+      # Restore this terminal's input modes. zellij turns on the kitty
+      # progressive keyboard protocol, mouse reporting and bracketed paste on
+      # the REMOTE side, and normally turns them off as it exits -- but when the
+      # connection dies first (wssh's node proxy throwing EPIPE on teardown is
+      # one way) that cleanup never reaches the terminal. The terminal then
+      # keeps CSI-u encoding every keypress, so modifier keys appear to spam
+      # symbols into the local shell until Alacritty is restarted. kitty's own
+      # protocol docs describe exactly this and tell the user to run `reset`.
+      #
+      # Emitted LOCALLY, so a dead remote connection cannot skip it. Pop one
+      # keyboard-stack entry, then clear the flags outright in case the stack
+      # depth is not what we think; fish re-enables bracketed paste on its next
+      # prompt, so turning it off here costs nothing.
+      if isatty stdout
+          printf '\e[<u\e[=0;1u'                          # kitty keyboard: pop, then clear
+          printf '\e[?1000l\e[?1002l\e[?1003l\e[?1006l'   # mouse reporting off
+          printf '\e[?2004l'                              # bracketed paste off
+      end
+
       switch $rc
           case 255 # ssh's own failure code, not zellij's
               echo "sshz: ssh failed to reach $argv[1]." >&2
